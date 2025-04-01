@@ -1,0 +1,214 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: auto;    /* ✅ Ensures scrollability */
+}
+
+.productFamilyContainer {
+    min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
+
+    display: flex;
+    flex-direction: column;
+    overflow: auto;            /* ✅ Scrollbar appears if content overflows */
+    justify-content: flex-start;
+}
+
+
+
+.productFamilyInput {
+    flex-direction: column;
+    background-color: floralwhite;
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 95%;
+    margin-top: 20px;
+    margin-left: 40px;
+    padding: 20px;
+    display: flex;                    
+    justify-content: space-between;    /* Space evenly */
+    gap: 30px;
+    flex-wrap: wrap                         /* Space between rows */
+}
+.prodcutFamilyName {
+    font-size: 30px;
+    color: rgb(34, 92, 208);
+    margin: 0;
+    padding-left:-10px;
+    padding-top: 10px;
+    align-self: flex-start;  /* Align to the left */
+}
+/* Ensure 4 fields in a row */
+.ProductTexfiled {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); /* Responsive fields */
+    gap: 20px;
+    width: 100%;
+}
+
+.productButton9 {
+    display: flex;
+    justify-content: flex-end;       /* Align buttons to the right */
+    gap: 15px;                       /* Space between buttons */
+    margin-top: -30px;                /* Gap between button rows */
+    width: 100%;
+}
+
+.productButton9 button {
+    color: white;
+    background-color: #20c9c6;          
+    height: 40px;
+    width: 70px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;  
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-top: 0px;                /* Gap between button rows */
+
+}
+
+.productButton9 button:hover {
+    background-color: #0d9a95;         
+    transform: scale(1.05);             
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+}
+
+.productButton9 button:active {
+    /* transform: scale(0.98);     */
+    transform: scale(1.30);    
+
+}
+.productUpload{
+    display: flex;
+    justify-content: flex-start;       /* Align buttons to the right */
+    gap: 15px;                       /* Space between buttons */
+    margin-top: -30px;                /* Gap between button rows */
+    width: 100%;
+    margin-left: 0px;
+
+}
+.productUpload button {
+    color: white;
+    background-color: #20c9c6;          
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    
+}
+
+.productUpload button:hover {
+    background-color: #0d9a95;         
+    transform: scale(1.05);             
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+}
+
+.productUpload button:active {
+     transform: scale(0.98);    
+}
+
+.productFamilyTable {
+    display: flex;
+    flex-direction: column;              /* Stack table vertically */
+    height: auto;                        /* Adjust height automatically */
+    width: 95%;
+    margin-left: 40px;
+    margin-top: 50px;
+    justify-content: flex-start;   
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+   
+    /* overflow: auto;                      Prevent overflow */
+}
+
+
+.prodcutTableName {
+    font-size: 15px;
+    /* color: rgb(34, 182, 208); */
+    color: rgb(34, 92, 208);
+    position:relative;
+    left: 10px;
+    top: -7px;
+}
+
+
+
+
+ /* *********************************************************************************************** */
+/* Large screens (1440px and above) */
+@media screen and (min-width: 1440px) {
+   
+  }
+
+/* Laptops and smaller desktops (1024px to 1439px) */
+  @media screen and (max-width: 1439px) {
+
+    .ProductTexfiled {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 2fr)); /* Responsive fields */
+        gap: 30px;
+        width: 100%;
+    }
+  
+.productFamilyInput {
+    flex-direction: column;
+    background-color: floralwhite;
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 95%;
+    margin-top: 20px;
+    margin-left: 30px;
+    padding: 20px;
+    display: flex;   
+    max-width: 1200px;
+    align-items: center;                 
+    justify-content: space-between;    /* Space evenly */
+    gap: 30px;
+    flex-wrap: wrap                         /* Space between rows */
+}
+
+
+
+.productFamilyTable {
+    display: flex;
+    flex-direction: column;              /* Stack table vertically */
+    height: auto;                        /* Adjust height automatically */
+    width: 95%;
+    margin-left: 30px;
+    margin-top: 50px;
+    justify-content: flex-start;   
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    /* overflow: auto;                      Prevent overflow */
+}
+
+    
+  }
+
+
+  /* Tablets (768px to 1023px) */
+@media screen and (max-width: 1023px) {
+    
+  }
+
+
+  /* Extra-large screens (TVs, 4K) */
+@media screen and (min-width: 2560px) {
+   
+  }
+
+  
