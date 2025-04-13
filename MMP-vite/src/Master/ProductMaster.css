@@ -33,11 +33,12 @@ html, body {
 }
 .prodcutFamilyName {
     font-size: 30px;
-    color: rgb(34, 92, 208);
+    color: rgb(6, 132, 154);
     margin: 0;
     padding-left:-10px;
-    padding-top: 10px;
+    padding-top: 0px;
     align-self: flex-start;  /* Align to the left */
+    
 }
 /* Ensure 4 fields in a row */
 .ProductTexfiled {
@@ -87,7 +88,7 @@ html, body {
     display: flex;
     justify-content: flex-start;       /* Align buttons to the right */
     gap: 15px;                       /* Space between buttons */
-    margin-top: -30px;                /* Gap between button rows */
+    margin-top: -10px;                /* Gap between button rows */
     width: 100%;
     margin-left: 0px;
 
@@ -96,6 +97,7 @@ html, body {
     color: white;
     background-color: #20c9c6;          
     height: 30px;
+    font-size: smaller;
     border-radius: 4px;
     cursor: pointer;
     border: none;
@@ -122,24 +124,22 @@ html, body {
     height: auto;                        /* Adjust height automatically */
     width: 95%;
     margin-left: 40px;
-    margin-top: 50px;
+    margin-top: 30px;
     justify-content: flex-start;   
     border: 2px solid #edd9d9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    padding: 10px;
+    padding: 20px;
    
     /* overflow: auto;                      Prevent overflow */
 }
 
 
 .prodcutTableName {
-    font-size: 15px;
-    /* color: rgb(34, 182, 208); */
-    color: rgb(34, 92, 208);
+    font-size: 18px;
+    color: rgb(6, 132, 154);
+    /* color: rgb(34, 92, 208); */
     position:relative;
-    left: 10px;
-    top: -7px;
 }
 
 

@@ -4,7 +4,7 @@ const HomeComponenet = () => {
 
 
   return (
-<div style={{}}>rtyrtyrtyrty</div>
+<div style={{}}>Welcome to MMP</div>
   ); 
 }
 
