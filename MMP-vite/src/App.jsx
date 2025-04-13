@@ -7,6 +7,8 @@ import Login from './userAuth/Login'
 import HeaderComponents from './components/HeaderComponents';
 import HomeComponenet from './components/HomeComponenet';
 import ProductFamilyMaster from './Master/ProductFamilyMaster';
+import CreateAccount from './userAuth/CreateAccount';
+import RcMainStore from './Master/RcMainStore';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -28,7 +30,7 @@ function App() {
   });
 
   const currentPath = location.pathname.replace(/\/$/, "");
-  const hideHeader = location.pathname === '/' || location.pathname === '/login' || location.pathname === '/createaccount' || location.pathname === '/ChangePassword';
+  const hideHeader = location.pathname === '/' || location.pathname === '/login' || location.pathname === '/createAccount' || location.pathname === '/ChangePassword';
 
   return (
     <ThemeProvider theme={theme}>
@@ -36,8 +38,11 @@ function App() {
       {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />} 
     <Routes>
         <Route path="/" element ={<Login />}   />
+        <Route path="/createAccount" element ={<CreateAccount />}   />
         <Route path="/home" element ={<HomeComponenet />}   />
         <Route path="/product" element ={<ProductFamilyMaster />}   />
+        <Route path="/rcMainStore" element ={<RcMainStore />}   />
+
 
     </Routes>
     </div>

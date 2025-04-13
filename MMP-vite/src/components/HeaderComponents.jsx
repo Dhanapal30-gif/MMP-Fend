@@ -91,7 +91,7 @@ const HeaderComponents = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/ProjectDashBoard" className="dropdown-item">
+                  <Link to="/rcMainStore" className="dropdown-item" onClick={closeServicesDropdown}>
                   RC main store
                   </Link>
                 </li>
@@ -236,10 +236,11 @@ const HeaderComponents = () => {
           <div className="user-info">
             <Avatar
               className="avatar"
-              sx={{ width: 40, height: 40, bgcolor: "#1976D2", cursor: "pointer" }}
+              sx={{ width: 40, height: 40, bgcolor: "#1976D2",cursor: "pointer" }}
               onClick={handleSignOut} // Clicking the Avatar logs out
             />
-            <span className="emp-name">{empName}</span>
+            
+            <span className="emp-name" style={{color:'white'}}>{empName}</span>
           </div>
         ) : (
           <Link to="/" className="signup-btn">LogOut</Link>
