@@ -151,7 +151,7 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
     });
   };
 
-  //FetchAllproductName
+  //FetchAllproduct
   const fetchProduct = (page = 1, size = 10,search= "") => {
     getProductMasterData(page - 1, size,search) // Pass as separate arguments
       .then((response) => {
@@ -937,7 +937,7 @@ const handleRowSelect = (rowKey) => {
             }}
             highlightOnHover
             fixedHeader
-            fixedHeaderScrollHeight="500px"
+            fixedHeaderScrollHeight="400px"
             className="react-datatable"
             conditionalRowStyles={rowHighlightStyle}
             customStyles={{
