@@ -1,0 +1,11 @@
+.Child table{
+    border: 1px solid rgb(71, 177, 68) ;
+    width: 300px;
+    margin-left: 500px;
+    margin-top: 90px;
+
+}
+.Child td,
+.Child th{
+text-align: left;
+}

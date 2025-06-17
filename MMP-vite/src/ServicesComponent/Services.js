@@ -101,3 +101,49 @@ export const getPartcode = () => axios.get(Get_RcPartcode);
 
 const Get_Product = `${url}/Bom/getProduct`;
 export const getProduct = () => axios.get(Get_Product);
+
+const save_Bom = `${url}/Bom/SaveBom`
+export const saveBomMaster = (formData) => axios.post(save_Bom, formData);
+
+const save_BomUpload = `${url}/Bom/bulck_upload`
+export const saveBomMasterUpload = (formData) => axios.post(save_BomUpload, formData);
+
+// const get_BomMaste=`${url}/BOM/fetchBom`
+// export const getBoMaster=()=>axios.get(get_BomMaste);
+
+
+// const get_BomMaste = `${url}/BOM/fetchBom`;
+// export const getBoMaster = (page = 0, size = 10)=>{
+//   return axios.get(Get_RCStoreFind, { params: { page, size}, })};
+
+  const get_BomMaste = `${url}/Bom/fetchBomMaster`;
+export const getBoMaster = (page = 0, size = 10)=>{
+  return axios.get(get_BomMaste, { params: { page, size }, });
+} 
+
+const update_Bom = `${url}/Bom/updateBom`;
+export const updateBomMaster = (intsysid, formData) =>
+  axios.put(`${update_Bom}/${intsysid}`, formData);
+
+const Delete_Bom = `${url}/Bom/deleteBom`;  // Base URL without the id
+export const deleteBom = (ids) => {
+  const query = ids.map(intsysid => `intsysid=${intsysid}`).join('&');
+  return axios.delete(`${Delete_Bom}?${query}`);
+};
+
+const Get_BomSearch = `${url}/Bom/fetchFindData`;
+export const getBomMasterFind = (page = 0, size = 10, search = "")=>{
+  return axios.get(Get_BomSearch, { params: { page, size,search: search || undefined, }, });
+} 
+
+const Get_DownloadBom = `${url}/Bom/download-excel`;
+export const downloadBom = () => 
+  axios.get(Get_DownloadBom, {
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+  const Get_DownloadSearchBom = `${url}/Bom/download-excelSearch`;
+export const downloadSearchBom = (search) => 
+  axios.get(Get_DownloadSearchBom, {params:{search:search || undefined},
+    responseType: "blob", // 👈 essential for binary Excel files
+  });

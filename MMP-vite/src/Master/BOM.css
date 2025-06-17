@@ -5,12 +5,13 @@ overflow: auto;            /* ✅ Scrollbar appears if content overflows */
 justify-content: flex-start;
 flex-direction: column;
 min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
+    background-color: white;
 
 }
 
 .BomMasterInput{
     flex-direction: column;
-    background-color: floralwhite;
+    /* background-color: floralwhite; */
     border: 2px solid #edd9d9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 8px;

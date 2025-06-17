@@ -9,6 +9,7 @@ import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, B
 import { saveVendorMaster, saveExcelVendorUpload, getVenodtMaster ,updateVendor, deleteVendor } from '../ServicesComponent/Services';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import CustomDialog from "../COM_Component/CustomDialog";
 const VeendorMaster = () => {
     const [excelUploadData, setExcelUploadData] = useState([]);
     const [duplicateProducts, setDuplicateProducts] = useState([]);
@@ -23,7 +24,7 @@ const VeendorMaster = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [vendorMaster, setVendorMaster] = useState([]);
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage, setPerPage] = useState(20);
     const [loading, setLoading] = useState(false);
     const [totalRows, setTotalRows] = useState(0);
     const [uploadTotalRows, setUploadTotalRows] = useState(0);
@@ -33,10 +34,7 @@ const VeendorMaster = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef(null);
-
-   // const podate ='25-04-2025'
-
-
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const [formData, setFormData] = useState({
         vendorCode: '',
         vendorName: '',
@@ -100,46 +98,70 @@ const VeendorMaster = () => {
         // Create an Excel file and trigger download
         XLSX.writeFile(workbook, "vendorMaster.xlsx");
     };
-
+  const exceluploadClear = () => {
+        setShowVendorTable(true);
+        setShowUploadTable(false);
+        setHandleUploadButton(false);
+        setHandleSubmitButton(true);
+    }
     const handleUpload = (event) => {
-        setExcelUploadData([]); // Clear previous data
-        setDuplicateProducts([]); // or any other error-related state
+          setExcelUploadData([]);
+          setShowVendorTable(false);
+          setHandleUpdateButton(false);
+          setFormData({vendorCode:"",vendorName:"",country:""});
 
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.readAsBinaryString(file);
-
-        reader.onload = (e) => {
+    setSelectedRows([]);
+          setDeletButton(false);
+      
+          const file = event.target.files[0];
+          if (!file) return;
+      
+          if (!file.name.startsWith("vendorMaster")) {
+ setErrorMessage("Invalid file. Please upload Product_Data.xlsx");
+      setShowErrorPopup(true);            event.target.value = null;
+            exceluploadClear();
+      
+            return;
+          }
+      
+          const reader = new FileReader();
+          reader.readAsBinaryString(file);
+      
+          reader.onload = (e) => {
             const data = e.target.result;
             const workbook = XLSX.read(data, { type: "binary" });
-
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-            if (!jsonData || jsonData.length === 0) {
-                alert("No data found in the uploaded file.");
-                return;
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+            // Validate column headers first
+            const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
+      
+            const expectedColumns =  ["vendorCode", "vendorName", "country"];
+      
+            const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+            // Prepare data ignoring the first row (since it's the header row).
+            const parsedData = XLSX.utils.sheet_to_json(worksheet);
+      
+            if (!parsedData || parsedData.length === 0) {
+setErrorMessage("No data found in the uploaded file");
+        setShowErrorPopup(true);
+                      event.target.value = null;
+              exceluploadClear();
+              return
             }
-
-            // // ✅ Set data after reading
-            setExcelUploadData(jsonData);
-            setUploadTotalRows(jsonData.length);
+            setExcelUploadData(parsedData);
+            setTotalRows(parsedData.length);
             setHandleUploadButton(true);
             setHandleSubmitButton(false);
-            setShowUploadTable(true);
             setShowVendorTable(false);
-
-            // ✅ Clear file input after processing
-            event.target.value = null;
-        };
-
-        reader.onerror = (error) => {
+            setShowUploadTable(true);
+          };
+      
+          reader.onerror = (error) => {
             console.error("File read error:", error);
+          };
         };
-    };
 
     const formClear = () => {
         setExcelUploadData([]);
@@ -148,11 +170,17 @@ const VeendorMaster = () => {
         setHandleUpdateButton(false)
         setShowVendorTable(true);
         setShowUploadTable(false);
+        setDeletButton(false);
+    setSelectedRows([]);
         setFormData({
             vendorCode: '',
             vendorName: '',
             country: ''
         })
+
+        if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
 
     }
 
@@ -201,17 +229,17 @@ const VeendorMaster = () => {
                     vendorName: "",
                     country: ""
                 })
+                fetchVendotMaster();
 
             })
             .catch((error) => {
                 if (error.response) {
                     if (error.response.status === 409) {
-                        // alert("Product already exists");
                         setShowErrorPopup(true)
                         setErrorMessage("Vendor already exists")
                     } else {
-                        alert("Something went wrong");
-                    }
+setErrorMessage("Something went wrong");
+            setShowErrorPopup(true);                    }
                 }
             })
 
@@ -222,6 +250,9 @@ const VeendorMaster = () => {
             setSelectedRows(vendorMaster.map((row) => row.id)); // ✅ Ensure unique selection key
             setDeletButton(true);
             setHandleSubmitButton(false);
+                  setHandleUpdateButton(false);
+                        setFormData({vendorCode:"",vendorName:"",country:""});
+
         } else {
             setSelectedRows([]);
             setDeletButton(false);
@@ -235,6 +266,8 @@ const VeendorMaster = () => {
     }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
+                setFormData({vendorCode:"",vendorName:"",country:""});
+            setHandleUpdateButton(false);
         setSelectedRows((prevSelectedRows) => {
             const isRowSelected = prevSelectedRows.includes(rowKey);
 
@@ -247,6 +280,8 @@ const VeendorMaster = () => {
             if (updatedRows.length === 0) {
                 setDeletButton(false); // Disable delete button if no rows are selected
                 setHandleSubmitButton(true); // Enable submit button
+                        setHandleUpdateButton(false);
+
             } else {
                 setDeletButton(true); // Enable delete button if rows are selected
                 setHandleSubmitButton(false); // Disable submit button
@@ -427,6 +462,8 @@ const VeendorMaster = () => {
         setHandleSubmitButton(false);
         setHandleUpdateButton(true);
         setHandleUploadButton(false);
+         setDeletButton(false);
+    setSelectedRows([]);
       }
       const handleUpdate =(e,id) =>{
         e.preventDefault();
@@ -440,10 +477,7 @@ const VeendorMaster = () => {
             id,
             modifiedby
         }
-    //     if (!id) {
-    //   alert("Error: Product ID is missing!");
-    //   return;
-    // }
+
      updateVendor(id,updateFormData)
      .then((response)=>{
         setSuccessMessage("Updated sucessfully");
@@ -476,7 +510,14 @@ const VeendorMaster = () => {
         setIsLoading(false);
      });
       }
+ const onDeleteClick = () => {
+        setConfirmDelete(true);
+    };
 
+    const handleCancel = () => {
+        setSelectedRows([]);
+        setConfirmDelete(false);
+    };
       const handleDelete =  async () => {
         try{
             await deleteVendor(selectedRows);
@@ -515,6 +556,12 @@ const VeendorMaster = () => {
                         helperText={formErrors.vendorCode}
                         //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
                         size="small"
+                        sx={{
+                                    "& label.MuiInputLabel-shrink": {
+                                        color: "green", // label color when floated
+                                        fontWeight: 'bold'
+                                    }
+                                }}
                     />
                     <TextField
                         id="outlined-basic"
@@ -526,6 +573,12 @@ const VeendorMaster = () => {
                         error={Boolean(formErrors.vendorName)}
                         helperText={formErrors.vendorName}
                         size="small"
+                        sx={{
+                                    "& label.MuiInputLabel-shrink": {
+                                        color: "green", // label color when floated
+                                        fontWeight: 'bold'
+                                    }
+                                }}
                     />
                     <Autocomplete
                         options={countryList}
@@ -542,10 +595,17 @@ const VeendorMaster = () => {
                                 size="small"
                                 error={Boolean(formErrors.country)}
                                 helperText={formErrors.country}
+
+                                sx={{
+                                    "& label.MuiInputLabel-shrink": {
+                                        color: "green", // label color when floated
+                                        fontWeight: 'bold'
+                                    }
+                                }}
                             />
                         )}
                     />
-                     <LocalizationProvider dateAdapter={AdapterDateFns}>
+                     {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
         label="Select Date"
         value={value}
@@ -553,7 +613,7 @@ const VeendorMaster = () => {
         onAccept={handleAccept}  // Fires right after user selects date from calendar
         renderInput={(params) => <TextField {...params} size="small" />}
       />
-    </LocalizationProvider>
+    </LocalizationProvider> */}
                 </div>
                 <div className='productButton9'>
                     {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit} >Submit</button>}
@@ -568,7 +628,7 @@ const VeendorMaster = () => {
                             <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload} disabled={isLoading}>Upload </button>
                         )
                     )}
-                    {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={handleDelete}  >Delete</button>}
+                    {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}  >Delete</button>}
                     <button onClick={formClear}>Clear</button>
                 </div>
             </div>
@@ -579,6 +639,7 @@ const VeendorMaster = () => {
                 {showUploadTable && !showVendorTable && (
                     <h5 className='prodcutTableName'>Upload Vedor deatil</h5>
                 )}
+                {showVendorTable && !showUploadTable &&   (
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                     <button className="btn btn-success" style={{ fontSize: '13px', backgroundColor: 'green' }}>
                         <FaFileExcel /> Export
@@ -598,6 +659,7 @@ const VeendorMaster = () => {
                     </div>
 
                 </div>
+                )}
                 {/* Default table */}
                 {showVendorTable && !showUploadTable && (
 
@@ -612,13 +674,13 @@ const VeendorMaster = () => {
                         onChangePage={handlePageChange}
                         paginationPerPage={perPage}
                         paginationDefaultPage={page}  // 👈 This line is IMPORTANT
-                        paginationRowsPerPageOptions={[5, 10, 15, 20]}
+                        paginationRowsPerPageOptions={[10,20,30,50]}
                         paginationComponentOptions={{
                             rowsPerPageText: 'Rows per page:',
                             rangeSeparatorText: 'of',
                             noRowsPerPage: false,
-                            selectAllRowsItem: true,
-                            selectAllRowsItemText: 'All',
+                            //selectAllRowsItem: true,
+                            //selectAllRowsItemText: 'All',
                         }}
                         highlightOnHover
                         fixedHeader
@@ -757,33 +819,28 @@ const VeendorMaster = () => {
                     />
                 )}
             </div>
-            <Dialog open={showSuccessPopup} onClose={() => setShowSuccessPopup(false)}>
-                <DialogTitle>Success</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        {successMessage} {/* Dynamic success message */}
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setShowSuccessPopup(false)} color="primary" autoFocus>
-                        OK
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog open={showErrorPopup} onClose={() => setShowErrorPopup(false)}>
-                <DialogTitle>Error</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        {errorMessage} {/* Display the dynamic error message */}
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setShowErrorPopup(false)} color="secondary" autoFocus>
-                        OK
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <CustomDialog
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="Success"
+        message={successMessage}
+        color="primary"
+      />
+      <CustomDialog
+        open={showErrorPopup}
+        onClose={() => setShowErrorPopup(false)}
+        title="Error"
+        message={errorMessage}
+        color="secondary"
+      />
+      <CustomDialog
+        open={confirmDelete}
+        onClose={handleCancel}
+        onConfirm={handleDelete}
+        title="Confirm"
+        message="Are you sure you want to delete this?"
+        color="primary"
+      />  
         </div>
     )
 }

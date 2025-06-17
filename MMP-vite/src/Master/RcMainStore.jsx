@@ -7,7 +7,7 @@ import * as XLSX from "xlsx";
 import { FaFileExcel } from "react-icons/fa";
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import { FaEdit } from "react-icons/fa";
-
+import CustomDialog from "../COM_Component/CustomDialog";
 const RcMainStore = () => {
   const [formErrors, setFormErrors] = useState({});
   const [handleSubmitButton, setHandleSubmitButton] = useState(true);
@@ -19,7 +19,7 @@ const RcMainStore = () => {
   const [loading, setLoading] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [perPage, setPerPage] = useState(20);
   const [successMessage, setSuccessMessage] = useState('');
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -33,6 +33,8 @@ const RcMainStore = () => {
   const [deletButton, setDeletButton] = useState();
   const [duplicateProducts, setDuplicateProducts] = useState([]);
   const [size, setSize] = useState(10); // Your size control
+      const [confirmDelete, setConfirmDelete] = useState(false);
+  
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -130,9 +132,7 @@ const RcMainStore = () => {
 
     saveMainMaterial(updatedFormData)
       .then((response) => {
-        // alert("Account Created Successfully");
         fetchMainMaster(page, perPage);
-
         setShowSuccessPopup(true);
         setSuccessMessage("Masterdata Added Successfully")
         formClear(); // ✅ clear form only once
@@ -140,11 +140,11 @@ const RcMainStore = () => {
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 409) {
-            // alert("Product already exists");
             setShowErrorPopup(true)
             setErrorMessage("Product already exists")
           } else {
-            alert("Something went wrong");
+            setErrorMessage("Something went wrong");
+          setShowErrorPopup(true);
           }
         }
       });
@@ -177,50 +177,81 @@ const RcMainStore = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Product Data");
 
     // Create an Excel file and trigger download
-    XLSX.writeFile(workbook, "RcMaain.xlsx");
+    XLSX.writeFile(workbook, "RcMainMaster.xlsx");
   };
 
   const fileInputRef = useRef(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
+  const exceluploadClear = () => {
+        setShowRcTable(true);
+        setShowUploadTable(false);
+        setHandleUploadButton(false);
+        setHandleSubmitButton(true);
+    }
+
   const handleUpload = (event) => {
-    setExcelUploadData([]); // Clear previous data
-    setDuplicateProducts([]); // or any other error-related state
+      setExcelUploadData([]);
+      setShowRcTable(false);
+      setHandleUpdateButton(false);
+setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',msdstatus: '',technology: '',unitprice: '',createdby: '',
+      modifiedby: '', quantity: '',UOM: '',AFO: '',ComponentUsage: '',TYC: '',TLT: '',MOQ: '',TRQty: '',POSLT: '',BG: '',expdateapplicable: '',shelflife: 0
+    });      setSelectedRows([]);
+      setDeletButton(false);
+  
+      const file = event.target.files[0];
+      if (!file) return;
+  
+      if (!file.name.startsWith("RcMainMaster")) {
 
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.readAsBinaryString(file);
-
-    reader.onload = (e) => {
-      const data = e.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-      if (!jsonData || jsonData.length === 0) {
-        alert("No data found in the uploaded file.");
+        setErrorMessage("Invalid file. Please upload RcMainMaster.xlsx");
+          setShowErrorPopup(true);
+        event.target.value = null;
+        exceluploadClear();
+  
         return;
       }
-
-      // ✅ Set data after reading
-      setExcelUploadData(jsonData);
-      setHandleUploadButton(true);
-      setHandleSubmitButton(false);
-      setShowUploadTable(true);
-      setShowRcTable(false);
-
-      // ✅ Clear file input after processing
-      event.target.value = null;
+  
+      const reader = new FileReader();
+      reader.readAsBinaryString(file);
+  
+      reader.onload = (e) => {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  
+        // Validate column headers first
+        const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
+  
+        const expectedColumns =  ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
+        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"];
+  
+        const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+  
+        // Prepare data ignoring the first row (since it's the header row).
+        const parsedData = XLSX.utils.sheet_to_json(worksheet);
+  
+        if (!parsedData || parsedData.length === 0) {
+          setErrorMessage("NNo data found in the uploaded file");
+          setShowErrorPopup(true);
+          event.target.value = null;
+          exceluploadClear();
+          return
+        }
+        setExcelUploadData(parsedData);
+        setTotalRows(parsedData.length);
+        setHandleUploadButton(true);
+        setHandleSubmitButton(false);
+        setShowUploadTable(true);
+        setShowProductTable(false);
+      };
+  
+      reader.onerror = (error) => {
+        console.error("File read error:", error);
+      };
     };
-
-    reader.onerror = (error) => {
-      console.error("File read error:", error);
-    };
-  };
 
 
   const calculateColumnWidth = (data, key, charWrap = 19, charWidth = 8, minWidth = 150, maxWidth = 318) => {
@@ -321,6 +352,10 @@ const RcMainStore = () => {
       setSelectedRows(rcStoreData.map((row) => row.id)); // ✅ Ensure unique selection key
       setDeletButton(true);
       setHandleSubmitButton(false);
+      setHandleUpdateButton(false);
+      setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',msdstatus: '',technology: '',unitprice: '',createdby: '',
+      modifiedby: '', quantity: '',UOM: '',AFO: '',ComponentUsage: '',TYC: '',TLT: '',MOQ: '',TRQty: '',POSLT: '',BG: '',expdateapplicable: '',shelflife: 0
+    });
     } else {
       setSelectedRows([]);
       setDeletButton(false);
@@ -334,6 +369,12 @@ const RcMainStore = () => {
   }, [selectedRows]);
 
   const handleRowSelect = (rowKey) => {
+    setHandleUpdateButton(false);
+                setHandleUpdateButton(false);
+
+    setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',msdstatus: '',technology: '',unitprice: '',createdby: '',
+      modifiedby: '', quantity: '',UOM: '',AFO: '',ComponentUsage: '',TYC: '',TLT: '',MOQ: '',TRQty: '',POSLT: '',BG: '',expdateapplicable: '',shelflife: 0
+    });
     setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
 
@@ -346,6 +387,7 @@ const RcMainStore = () => {
       if (updatedRows.length === 0) {
         setDeletButton(false); // Disable delete button if no rows are selected
         setHandleSubmitButton(true); // Enable submit button
+        setHandleUpdateButton(false);
       } else {
         setDeletButton(true); // Enable delete button if rows are selected
         setHandleSubmitButton(false); // Disable submit button
@@ -355,7 +397,6 @@ const RcMainStore = () => {
     });
   };
 
-  //const uploadColumn = [
   const column = [
 
     {
@@ -502,7 +543,8 @@ const RcMainStore = () => {
     });
 
     if (errors.length > 0) {
-      alert("partcode is required");
+      setErrorMessage("partcode is required");
+          setShowErrorPopup(true);
       return;
     }
 
@@ -518,7 +560,6 @@ const RcMainStore = () => {
 
     saveBulkRcMain(updatedFormData)
       .then(() => {
-        // alert("Master data added Successfully");
         setSuccessMessage("Master data added successfully."); // Set dynamic message
         setShowSuccessPopup(true);  // Show popup
         setShowUploadTable(false);
@@ -532,7 +573,6 @@ const RcMainStore = () => {
 
             const duplicateName = errorMessage?.split(": ")[1];
             const duplicateMail = errorMessage?.split(": ")[1];
-            // alert(error.response.data?.error);
             setErrorMessage(errorMessage); // Set error message for dialog
             setShowErrorPopup(true); // Show error popup
             // ✅ Wrap in array
@@ -543,11 +583,12 @@ const RcMainStore = () => {
           }
 
           else {
-            alert("Something went wrong");
+            setErrorMessage("Something went wrong");
+          setShowErrorPopup(true);
           }
         } else {
-          alert("Network error, please try again");
-        }
+setErrorMessage("Network error, please try again");
+          setShowErrorPopup(true);        }
       });
 
   }
@@ -579,12 +620,7 @@ const RcMainStore = () => {
       TYC: "", TLT: "", MOQ: "", TRQty: "", POSLT: "", BG: "", expdateapplicable: "", shelflife: "",
 
     }];
-  // useEffect(() => {
-  //   fetchMainMaster(page, perPage, debouncedSearch);
-  //   // getUserMailId();
-  // }, [page, perPage, debouncedSearch]);
-
-
+ 
 
   const fetchMainMaster = (page = 1, size = 10) => {
     setLoading(true); // ✅ Start loading before fetch
@@ -605,27 +641,6 @@ const RcMainStore = () => {
       });
   };
 
-
-
-  // const fetchMainMaster = () => {
-  //   setLoading(true); // ✅ Start loading before fetch
-  //   getRcmainMaster()
-  //     .then((response) => {
-  //       const data = response?.data || {};
-  //       setRcStoreData(response.data || []);
-  //       const total=response.data.length();
-  //       setTotalRows(data.totalElements || 0);
-  //       console.log("data.totalElements",total)
-  //               console.log("data.content",response.data)
-
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching data:", error);
-  //     })
-  //     .finally(() => {
-  //       setLoading(false); // ✅ Always stop loading
-  //     });
-  // };
 
   const fetchFind = (page = 1, size = 10, search = "") => {
     setLoading(true); // ✅ Start loading before fetch
@@ -650,19 +665,28 @@ const RcMainStore = () => {
 
 
   useEffect(() => {
-    fetchData(page, size, debouncedSearch);
-  }, [page, size, debouncedSearch]);
+    fetchData(page, perPage, debouncedSearch);
+  }, [page, perPage, debouncedSearch]);
 
   const fetchData = (page = 1, size = 10, search = "") => {
     if (search && search.trim() !== "") {
       fetchFind(page, size, search);    // Call search API
     } else {
-      fetchMainMaster(page, size);      // Call default API
+      fetchMainMaster(page, perPage);      // Call default API
     }
   };
 
 
 
+  
+   const onDeleteClick = () => {
+        setConfirmDelete(true);
+    };
+
+    const handleCancel = () => {
+        setSelectedRows([]);
+        setConfirmDelete(false);
+    };
   const handleDelete = async () => {
     try {
       await deleteRc(selectedRows); // API call
@@ -698,13 +722,12 @@ const RcMainStore = () => {
       BG: row.BG || "", expdateapplicable: row.expdateapplicable || "",
       shelflife: row.shelflife || "",
 
-
-
-
     });
     setHandleSubmitButton(false);
     setHandleUpdateButton(true);
     setHandleUploadButton(false);
+    setDeletButton(false);
+    setSelectedRows([]);
   }
 
 
@@ -772,6 +795,12 @@ const RcMainStore = () => {
             helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -784,6 +813,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -796,6 +831,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -808,6 +849,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -820,6 +867,13 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -831,7 +885,12 @@ const RcMainStore = () => {
             //error={Boolean(formErrors.partcode)}
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
+            size="small"sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -844,6 +903,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -856,6 +921,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -868,6 +939,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -880,6 +957,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -892,6 +975,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -904,6 +993,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -915,7 +1010,12 @@ const RcMainStore = () => {
             //error={Boolean(formErrors.partcode)}
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
+            size="small"sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -927,7 +1027,12 @@ const RcMainStore = () => {
             //error={Boolean(formErrors.partcode)}
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
+            size="small"sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -940,6 +1045,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -952,6 +1063,12 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -964,6 +1081,13 @@ const RcMainStore = () => {
             //helperText={formErrors.partcode}
             //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"
+
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <Autocomplete
             options={["Yes", "No", "NotApplicable"]}
@@ -979,6 +1103,12 @@ const RcMainStore = () => {
                 // helperText={formErrors.recordstatus}
                 // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
                 size="small"  // <-- Reduce height
+                sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
               />
             )}
           />
@@ -994,6 +1124,12 @@ const RcMainStore = () => {
               defaultValue={0}
               variant="outlined"
               size="small"
+              sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
             />
           )}
         </div>
@@ -1001,7 +1137,7 @@ const RcMainStore = () => {
           {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
           {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
           {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={excelUpload}>Upload</button>}
-          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={handleDelete}  >Delete</button>}
+          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}  >Delete</button>}
           <button onClick={formClear}>Clear</button>
         </div>
       </div>
@@ -1045,7 +1181,7 @@ const RcMainStore = () => {
             onChangeRowsPerPage={handlePerRowsChange}
             onChangePage={handlePageChange}
             paginationPerPage={perPage}
-            paginationRowsPerPageOptions={[5, 10, 15, 20]}
+            paginationRowsPerPageOptions={[10, 20, 30, 50]}
             paginationComponentOptions={{
               rowsPerPageText: 'Rows per page:',
               rangeSeparatorText: 'of',
@@ -1195,33 +1331,28 @@ const RcMainStore = () => {
           />
         )}
       </div>
-      <Dialog open={showSuccessPopup} onClose={() => setShowSuccessPopup(false)}>
-        <DialogTitle>Success</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {successMessage} {/* Dynamic success message */}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowSuccessPopup(false)} color="primary" autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={showErrorPopup} onClose={() => setShowErrorPopup(false)}>
-        <DialogTitle>Error</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {errorMessage} {/* Display the dynamic error message */}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowErrorPopup(false)} color="secondary" autoFocus>
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CustomDialog
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="Success"
+        message={successMessage}
+        color="primary"
+      />
+      <CustomDialog
+        open={showErrorPopup}
+        onClose={() => setShowErrorPopup(false)}
+        title="Error"
+        message={errorMessage}
+        color="secondary"
+      />
+      <CustomDialog
+        open={confirmDelete}
+        onClose={handleCancel}
+        onConfirm={handleDelete}
+        title="Confirm"
+        message="Are you sure you want to delete this?"
+        color="primary"
+      />  
 
     </div>
   )
