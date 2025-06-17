@@ -1,11 +1,9 @@
+import React from 'react'
 
 const HomeComponenet = () => {
-  
-
-
   return (
-<div style={{}}>Welcome to MMP</div>
-  ); 
+    <div>HomeComponenet</div>
+  )
 }
 
 export default HomeComponenet

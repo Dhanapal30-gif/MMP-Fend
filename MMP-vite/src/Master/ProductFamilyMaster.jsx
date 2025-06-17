@@ -8,7 +8,7 @@ import { FaEdit } from "react-icons/fa";
 
 import './ProductMaster.css'
 import { deleteproduct, downloadProduct, getProductMasterData, getUserMailId, saveProductMaster, saveProductsBulk, updateProduct } from '../ServicesComponent/Services';
-//import './Approval.css'
+import CustomDialog from "../COM_Component/CustomDialog";
 
 const ProductFamilyMaster = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -19,7 +19,7 @@ const ProductFamilyMaster = () => {
   const [uploadTotalRows, setUploadTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [perPage, setPerPage] = useState(20);
   const [search, setSearch] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,10 +30,14 @@ const ProductFamilyMaster = () => {
   const [showUploadTable, setShowUploadTable] = useState(false);
   const [showProductTable, setShowProductTable] = useState(true);
   const [excelUploadData, setExcelUploadData] = useState([]);
-  const [deletButton,setDeletButton] =useState();
+  const [deletButton, setDeletButton] = useState();
   const filterProduct = productMaster.flatMap(row => row.productEngineer || [])
-  
-const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [formData, setFormData] = useState({
     productname: '',
@@ -79,9 +83,9 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
 
 
   useEffect(() => {
-    fetchProduct(page, perPage,debouncedSearch);
+    fetchProduct(page, perPage, debouncedSearch);
     // getUserMailId();
-  }, [page, perPage,debouncedSearch]);
+  }, [page, perPage, debouncedSearch]);
 
   useEffect(() => {
     getUserMail();
@@ -92,7 +96,7 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
     const delay = setTimeout(() => {
       setDebouncedSearch(searchText); // Wait 500ms after typing
     }, 500);
-  
+
     return () => clearTimeout(delay); // Cleanup on new key press
   }, [searchText]);
 
@@ -117,7 +121,8 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
 
     saveProductMaster(updatedFormData)
       .then((response) => {
-        alert("Product added Successfully");
+        setSuccessMessage("Product Updated Successfully");
+        setShowSuccessPopup(true);
         setFormData({
           productname: "",
           productgroup: "",
@@ -127,17 +132,21 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
           productEngineer: [],
         });
         fetchProduct(page, perPage);
+        setPage(1);
 
       })
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 409) {
-            alert("Product already exists");
+            setErrorMessage("Product already exists");
+            setShowErrorPopup(true);
           } else {
-            alert("Something went wrong");
+            setErrorMessage("Something went wrong");
+            setShowErrorPopup(true);
           }
         } else {
-          alert("Network error, please try again");
+          setErrorMessage("Network error, please try again");
+          setShowErrorPopup(true);
         }
       });
 
@@ -151,9 +160,9 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
     });
   };
 
-  //FetchAllproductName
-  const fetchProduct = (page = 1, size = 10,search= "") => {
-    getProductMasterData(page - 1, size,search) // Pass as separate arguments
+  //FetchAllproduct
+  const fetchProduct = (page = 1, size = 10, search = "") => {
+    getProductMasterData(page - 1, size, search) // Pass as separate arguments
       .then((response) => {
         setProductMaster(response.data.content || []);
         setTotalRows(response.data.totalElements || 0);
@@ -164,7 +173,6 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
 
   //Pagenation
   const handlePageChange = (newPage) => {
-    console.log("Page changed to:", newPage);
     setPage(newPage);
   };
 
@@ -173,17 +181,19 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
     page * perPage
   );
 
-  const handlePerRowsChange = (newPerPage) => {
+  const handlePerRowsChange = (newPerPage, newPage) => {
     setPerPage(newPerPage);
-    setPage(1);
+    setPage(newPage);
   };
 
-//DeleteAll
+  //DeleteAll
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       setSelectedRows(productMaster.map((row) => row.id)); // ✅ Ensure unique selection key
       setDeletButton(true);
       setHandleSubmitButton(false);
+      setHandleUpdateButton(false);
+      setFormData({ productname: "", productgroup: "", productfamily: "", lineLead: "", productEngineer: "" });
     } else {
       setSelectedRows([]);
       setDeletButton(false);
@@ -194,29 +204,32 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
   //console
   useEffect(() => {
     console.log("setSelectedRows:", selectedRows); // Logs the updated state
-}, [selectedRows]); 
+  }, [selectedRows]);
 
-const handleRowSelect = (rowKey) => {
-  setSelectedRows((prevSelectedRows) => {
+  const handleRowSelect = (rowKey) => {
+    setHandleUpdateButton(false);
+    setFormData({ productname: "", productgroup: "", productfamily: "", lineLead: "", productEngineer: "" });
+    setHandleSubmitButton(false);
+    setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
-      
+
       // Update selected rows
       const updatedRows = isRowSelected
-          ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect row
-          : [...prevSelectedRows, rowKey]; // Select row
+        ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect row
+        : [...prevSelectedRows, rowKey]; // Select row
 
       // Conditional button states based on updated rows
       if (updatedRows.length === 0) {
-          setDeletButton(false); // Disable delete button if no rows are selected
-          setHandleSubmitButton(true); // Enable submit button
+        setDeletButton(false); // Disable delete button if no rows are selected
+        setHandleSubmitButton(true); // Enable submit button
       } else {
-          setDeletButton(true); // Enable delete button if rows are selected
-          setHandleSubmitButton(false); // Disable submit button
+        setDeletButton(true); // Enable delete button if rows are selected
+        setHandleSubmitButton(false); // Disable submit button
       }
 
       return updatedRows;
-  });
-};
+    });
+  };
 
 
   const calculateColumnWidth = (data, key, minWidth = 190, maxWidth = 318) => {
@@ -321,29 +334,29 @@ const handleRowSelect = (rowKey) => {
     }];
 
 
-    const exportToExcel = () => {
-      setLoading(true);
-    
-      downloadProduct()
-        .then((response) => {
+  const exportToExcel = () => {
+    setLoading(true);
 
-          console.log("response",response)
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "products.xlsx");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        })
-        .catch((error) => {
-          console.error("Download failed:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    };
-    
+    downloadProduct()
+      .then((response) => {
+
+        console.log("response", response)
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "products.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        console.error("Download failed:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
 
   const formClear = () => {
     setFormData({ productname: '', productgroup: '', productfamily: '', createdBy: '', lineLead: '', productEngineer: '', status: '' });
@@ -407,13 +420,15 @@ const handleRowSelect = (rowKey) => {
 
 
     if (!id) {
-      alert("Error: Product ID is missing!");
+      setErrorMessage("Error: Product ID is missing!");
+      setShowErrorPopup(true);
       return;
     }
 
     updateProduct(id, updatedFormData)
       .then((response) => {
-        alert("Product Updated Successfully");
+        setSuccessMessage("Product Updated Successfully");
+        setShowSuccessPopup(true);
         setFormData({
           productname: "",
           productgroup: "",
@@ -430,12 +445,15 @@ const handleRowSelect = (rowKey) => {
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 409) {
-            alert("Product already exists");
+            setErrorMessage("Product already exists");
+            setShowErrorPopup(true);
           } else {
-            alert("Something went wrong");
+            setErrorMessage("Something went wrong");
+            setShowErrorPopup(true);
           }
         } else {
-          alert("Network error, please try again");
+          setErrorMessage("Network error, please try again");
+          setShowErrorPopup(true);
         }
       });
   };
@@ -461,35 +479,70 @@ const handleRowSelect = (rowKey) => {
   const fileInputRef = useRef(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
+  const exceluploadClear = () => {
+    setShowProductTable(true);
+    setShowUploadTable(false);
+    setHandleUploadButton(false);
+    setHandleSubmitButton(true);
+  }
   const handleUpload = (event) => {
-    setExcelUploadData([]); // Clear previous data
-    //setShowUploadTable(false); // Hide table until new data loads
-    setShowProductTable(false); // Hide product table
+    setExcelUploadData([]);
+    setShowProductTable(false);
+    setHandleUpdateButton(false);
+    setFormData({ productname: "", productgroup: "", productfamily: "", lineLead: "", productEngineer: "" });
+    setSelectedRow([]);
+    setDeletButton(false);
 
     const file = event.target.files[0];
     if (!file) return;
 
-    //setLoading(true);
+    if (!file.name.startsWith("Product_Data")) {
+      setErrorMessage("Invalid file. Please upload Product_Data.xlsx");
+      setShowErrorPopup(true);
+      event.target.value = null;
+      exceluploadClear();
+
+      return;
+    }
+
     const reader = new FileReader();
     reader.readAsBinaryString(file);
 
     reader.onload = (e) => {
       const data = e.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
-
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      if (!jsonData || jsonData.length === 0) {
-        alert("No data found in the uploaded file.");
-        setLoading(false);
-        setShowProductTable(true);
+      // Validate column headers first
+      const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
+
+      const expectedColumns = ["productname", "productgroup", "productfamily", "linelead", "productengineer", "recordstatus",];
+
+      const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+
+      if (!isValid) {
+        setErrorMessage("Invalid column format. Please upload a file with the correct columns");
+        setShowErrorPopup(true);
+        event.target.value = null;
+        exceluploadClear();
+
         return;
       }
 
-      setExcelUploadData(jsonData);
-      setUploadTotalRows(jsonData.length)
+      // Prepare data ignoring the first row (since it's the header row).
+      const parsedData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (!parsedData || parsedData.length === 0) {
+        setErrorMessage("No data found in the uploaded file");
+        setShowErrorPopup(true);
+        event.target.value = null;
+        exceluploadClear();
+        return
+      }
+      setExcelUploadData(parsedData);
+      setUploadTotalRows(parsedData.length);
       setHandleUploadButton(true);
       setHandleSubmitButton(false);
       setShowUploadTable(true);
@@ -498,72 +551,27 @@ const handleRowSelect = (rowKey) => {
 
     reader.onerror = (error) => {
       console.error("File read error:", error);
-      setLoading(false);
     };
   };
 
-  // const ko = async (e) => {
-  //   e.preventDefault();
 
-  //   if (!excelUploadData || excelUploadData.length === 0) {
-  //     alert("No data to upload. Please select a valid Excel file.");
-  //     return;
-  //   }
 
-  //   // ✅ Required Fields Validation
-  //   const requiredFields = ["productname", "productgroup"];
-  //   const invalidRows = excelUploadData.filter(row =>
-  //     requiredFields.some(field => !row[field] || row[field].trim() === "")
-  //   );
-
-  //   if (invalidRows.length > 0) {
-  //     alert("Some rows are missing mandatory fields (productname, productgroup). Please check your file.");
-  //     return;
-  //   }
-
-  //   // ✅ Add Created By & Modified By for All Rows
-  //   const createdBy = sessionStorage.getItem("userName") || "System";
-  //   const modifiedBy = sessionStorage.getItem("userName") || "System";
-
-  //   const processedData = excelUploadData.map(row => ({
-  //     ...row,
-  //     createdby: createdBy,
-  //     modifiedby: modifiedBy,
-  //   }));
-
-  //   console.log("Final Upload Data:", processedData);
-
-  //   try {
-  //     const response = await saveProductMaster(processedData);
-  //     alert("Excel Data Uploaded Successfully!");
-
-  //     setExcelUploadData([]); // Clear uploaded data
-  //     setShowUploadTable(false); // Hide upload table
-  //     setShowProductTable(true); // Show product table
-  //     fetchProduct(page, perPage); // Refresh product list
-
-  // } catch (error) {
-  //     console.error("Upload Error:", error);  // Log the actual error
-  //     alert("Something went wrong during upload. Please try again.");
-  // }
-
-  // };
   const [duplicateProducts, setDuplicateProducts] = useState([]);
 
   const handleExcelUpload = (e) => {
     e.preventDefault();
-   
-  const errors = [];
-  excelUploadData.slice(1).forEach((row) => {
-    if (!row.productname || row.productname.trim() === "") {
-      errors.push("Product Name is required");
+
+    const errors = [];
+    excelUploadData.slice(1).forEach((row) => {
+      if (!row.productname || row.productname.trim() === "") {
+        errors.push("Product Name is required");
+      }
+    });
+
+    if (errors.length > 0) {
+      alert("Product Name is required");
+      return;
     }
-  });
-  
-  if (errors.length > 0) {
-    alert("Product Name is required"); 
-    return;
-  }
 
     const createdby = sessionStorage.getItem("userName") || "System";
     const modifiedby = sessionStorage.getItem("userName") || "System";
@@ -572,71 +580,56 @@ const handleRowSelect = (rowKey) => {
       ...item,
       createdby,
       modifiedby,
-      
 
-    productEngineer: typeof item.productEngineer === "string"
-  ? item.productEngineer.split(',').map(s => s.trim())
-  : item.productEngineer,
 
-    lineLead: typeof item.lineLead === "string"
-    ? item.lineLead.split(',').map(s => s.trim())
-    : item.lineLead,
+      productEngineer: typeof item.productEngineer === "string"
+        ? item.productEngineer.split(',').map(s => s.trim())
+        : item.productEngineer,
+
+      lineLead: typeof item.lineLead === "string"
+        ? item.lineLead.split(',').map(s => s.trim())
+        : item.lineLead,
     }));
 
     console.log("Final Payload for Bulk Upload:", updatedFormData);
 
     saveProductsBulk(updatedFormData) // Call bulk API
       .then(() => {
-        alert("Products Uploaded Successfully");
+        setSuccessMessage("Products Uploaded Successfully");
+        setShowSuccessPopup(true);
         setHandleUploadButton(false);
         setHandleSubmitButton(true);
         setShowUploadTable(false);
         fetchProduct();
-                setShowProductTable(true);
+        setShowProductTable(true);
 
       })
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 409) {
             const errorMessage = error.response.data?.error;
-            console.log("errorMessage", errorMessage);
-          
-            const duplicateName = errorMessage?.split(": ")[1]; 
-            const duplicateMail = errorMessage?.split(": ")[1];         
-            alert(error.response.data?.error);
-            
+            //console.log("errorMessage", errorMessage);
+            setErrorMessage("errorMessage", errorMessage);
+            setShowErrorPopup(true);
+            const duplicateName = errorMessage?.split(": ")[1];
+            const duplicateMail = errorMessage?.split(": ")[1];
             // ✅ Wrap in array
             setDuplicateProducts([duplicateName]);
-          
             setShowUploadTable(true);
             setShowProductTable(false);
           }
-          
-           else {
-            alert("Something went wrong");
+
+          else {
+            setErrorMessage("Something went wrong");
+            setShowErrorPopup(true);
           }
         } else {
-          alert("Network error, please try again");
+          setErrorMessage("Network error, please try again");
+          setShowErrorPopup(true);
         }
       });
     setShowProductTable(true);
   };
-
-
-  // useEffect(() => {
-  //   fetchPro;
-  // }, []);
-  // const fetchPro = () => {
-  //   getAllproduct()
-  //     .then((response) => {
-  //       alert("Fetching successfully");
-  //       console.log("Fetching product", response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching product", error);
-  //       alert("Error fetching product");
-  //     });
-  // };
 
   const rowHighlightStyle = [
     {
@@ -653,22 +646,27 @@ const handleRowSelect = (rowKey) => {
     },
   ];
 
-  // console.log("Duplicates:", duplicateProducts);
-  // console.log("First row name:", paginatedData[0]?.productname);
+  const onDeleteClick = () => {
+    setConfirmDelete(true);
+  };
 
-  
+  const handleCancel = () => {
+    setSelectedRows([]);
+    setConfirmDelete(false);
+  };
 
- 
-  const deleteProduct = async () => {
+  const handleDelete = async () => {
     try {
       await deleteproduct(selectedRows); // selectedRows should be an array of IDs
-      alert("Products deleted successfully");
+      setSuccessMessage("Products deleted successfully")
+      setShowSuccessPopup(true);
       fetchProduct();
       setDeletButton(false);
       setHandleSubmitButton(true);
     } catch (error) {
-      console.error("Delete error:", error);
-      alert("Failed to delete products");
+      //console.error("Delete error:", error);
+      setErrorMessage("Failed to delete products");
+      setShowErrorPopup(true);
     }
   }
   return (
@@ -693,13 +691,16 @@ const handleRowSelect = (rowKey) => {
             name="productname"
             value={formData.productname}
             onChange={handleChange}
-            // onChange={(e) => setFormData({ ...formData, productname: e.target.value })}
 
             error={Boolean(formErrors.productname)}
             helperText={formErrors.productname}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"  // <-- Reduce height
-
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -711,9 +712,13 @@ const handleRowSelect = (rowKey) => {
             //  onChange={(e) => setFormData({ ...formData, productname: e.target.value })}
             error={Boolean(formErrors.outstandingAmount)}
             helperText={formErrors.outstandingAmount}
-            // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"  // <-- Reduce height
-
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
           <TextField
             id="outlined-basic"
@@ -722,12 +727,15 @@ const handleRowSelect = (rowKey) => {
             name="productfamily"
             value={formData.productfamily}
             onChange={handleChange}
-            //onChange={(e) => setFormData({ ...formData, productname: e.target.value })}
             error={Boolean(formErrors.outstandingAmount)}
             helperText={formErrors.outstandingAmount}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
             size="small"  // <-- Reduce height
-
+            sx={{
+              "& label.MuiInputLabel-shrink": {
+                color: "green", // label color when floated
+                fontWeight: 'bold'
+              }
+            }}
           />
 
           <Autocomplete
@@ -742,14 +750,16 @@ const handleRowSelect = (rowKey) => {
                 variant="outlined"
                 error={Boolean(formErrors.recordstatus)}
                 helperText={formErrors.recordstatus}
-                // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
                 size="small"  // <-- Reduce height
-
+                sx={{
+                  "& label.MuiInputLabel-shrink": {
+                    color: "green", // label color when floated
+                    fontWeight: 'bold'
+                  }
+                }}
               />
             )}
           />
-
-
 
           <Autocomplete
             multiple
@@ -757,8 +767,6 @@ const handleRowSelect = (rowKey) => {
             getOptionLabel={(option) => option}
             value={formData.lineLead || []}
             onChange={(event, newValue) => setFormData({ ...formData, lineLead: newValue || [] })}
-            // onChange={(e) => setFormData({...formData, lineLead: e.target.value.split(",")})}
-
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -766,9 +774,13 @@ const handleRowSelect = (rowKey) => {
                 variant="outlined"
                 error={Boolean(formErrors.lineLead)}
                 helperText={formErrors.lineLead}
-                // sx={{ "& .MuiInputBase-root": { height: 'auto' } }}
                 size="small"  // <-- Reduce height
-
+                sx={{
+                  "& label.MuiInputLabel-shrink": {
+                    color: "green", // label color when floated
+                    fontWeight: 'bold'
+                  }
+                }}
               />
             )}
           />
@@ -786,9 +798,13 @@ const handleRowSelect = (rowKey) => {
                 variant="outlined"
                 error={Boolean(formErrors.productEngineer)}
                 helperText={formErrors.productEngineer}
-                // sx={{ "& .MuiInputBase-root": { height: 'auto' } }}
                 size="small"  // <-- Reduce height
-
+                sx={{
+                  "& label.MuiInputLabel-shrink": {
+                    color: "green", // label color when floated
+                    fontWeight: 'bold'
+                  }
+                }}
               />
             )}
           />
@@ -799,7 +815,7 @@ const handleRowSelect = (rowKey) => {
           {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
           {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
           {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload}>Upload</button>}
-          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={deleteProduct} >Delete</button>}
+          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick} >Delete</button>}
           <button onClick={formClear}>Clear</button>
         </div>
       </div>
@@ -836,21 +852,21 @@ const handleRowSelect = (rowKey) => {
 
           <DataTable
             columns={columns}
-            data={filteredData}
+            data={productMaster}
             pagination
             paginationServer
             progressPending={loading}
             paginationTotalRows={totalRows}
             onChangeRowsPerPage={handlePerRowsChange}
             onChangePage={handlePageChange}
-            paginationPerPage={10}
-            paginationRowsPerPageOptions={[5, 10, 15, 20]}
+            paginationPerPage={perPage}
+            paginationRowsPerPageOptions={[10, 20, 30, 50]}
             paginationComponentOptions={{
               rowsPerPageText: 'Rows per page:',
               rangeSeparatorText: 'of',
               noRowsPerPage: false,
-              selectAllRowsItem: true,
-              selectAllRowsItemText: 'All',
+              //selectAllRowsItem: true,
+              //selectAllRowsItemText: 'All',
             }}
             highlightOnHover
             fixedHeader
@@ -927,17 +943,17 @@ const handleRowSelect = (rowKey) => {
             onChangeRowsPerPage={handlePerRowsChange}
             onChangePage={handlePageChange}
             paginationPerPage={10}
-            paginationRowsPerPageOptions={[5, 10, 15, 20]}
+            paginationRowsPerPageOptions={[10, 20, 50]}
             paginationComponentOptions={{
               rowsPerPageText: 'Rows per page:',
               rangeSeparatorText: 'of',
               noRowsPerPage: false,
-              selectAllRowsItem: true,
-              selectAllRowsItemText: 'All',
+              //selectAllRowsItem: true,
+              //selectAllRowsItemText: 'All',
             }}
             highlightOnHover
             fixedHeader
-            fixedHeaderScrollHeight="500px"
+            fixedHeaderScrollHeight="400px"
             className="react-datatable"
             conditionalRowStyles={rowHighlightStyle}
             customStyles={{
@@ -991,8 +1007,30 @@ const handleRowSelect = (rowKey) => {
           />
         )}
       </div>
-      <div className='container'></div>
-    </div>
+      <CustomDialog
+        open={showSuccessPopup}
+        onClose={() => setShowSuccessPopup(false)}
+        title="Success"
+        message={successMessage}
+        color="primary"
+      />
+      <CustomDialog
+        open={showErrorPopup}
+        onClose={() => setShowErrorPopup(false)}
+        title="Error"
+        message={errorMessage}
+        color="secondary"
+      />
+      <CustomDialog
+        open={confirmDelete}
+        onClose={handleCancel}
+        onConfirm={handleDelete}
+        title="Confirm"
+        message="Are you sure you want to delete this?"
+        color="primary"
+      />    
+      
+      </div>
   )
 }
 

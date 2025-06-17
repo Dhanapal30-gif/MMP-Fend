@@ -192,7 +192,58 @@ html, body {
     transform: rotate(180deg);
     /* Rotate the icon */
 }
-
+/* Mobile view: */
+.hamburger-menu {
+    display: none;
+    cursor: pointer;
+  }
+  
+  .navgation {
+    display: flex;
+    justify-content: flex-start;
+    list-style: none;
+  }
+  
+  .nav-links {
+    display: flex;
+    gap: 20px;
+  }
+  
+  @media (max-width: 798px) {
+    .hamburger-menu {
+      display: block; /* Show hamburger icon on mobile */
+    }
+  
+    .navgation {
+      display: none; /* Hide the menu by default on mobile */
+      width: 100%;
+      flex-direction: column;
+      gap: 10px;
+      background-color: #333;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      padding: 20px;
+    }
+  
+    .navgation.open {
+      display: flex; /* Show the menu when it's open */
+    }
+  
+    .nav-links {
+      flex-direction: column;
+    }
+  
+    .nav-links li {
+      margin-bottom: 15px;
+    }
+  
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+    }
+  }
+  
 /* 1. Extra Small Devices (Mobile Portrait, up to 480px) */
 @media screen and (max-width: 480px) {
     .header {

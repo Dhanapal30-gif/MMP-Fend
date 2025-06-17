@@ -1,22 +1,17 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: auto;    /* ✅ Ensures scrollability */
-}
 
-.RcContainer{
+.BomContainer{
 display: flex;
 overflow: auto;            /* ✅ Scrollbar appears if content overflows */
 justify-content: flex-start;
 flex-direction: column;
 min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
+    background-color: white;
 
 }
 
-.RcStoreInput{
+.BomMasterInput{
     flex-direction: column;
-    background-color: floralwhite;
+    /* background-color: floralwhite; */
     border: 2px solid #edd9d9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -30,7 +25,7 @@ min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
     flex-wrap: wrap  
 }
 
-.RcStoreFiledName {
+.BomMasterFiledName {
     font-size: 30px;
     color: rgb(34, 92, 208);
     margin: 0;
@@ -38,49 +33,14 @@ min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
     padding-top: 0px;
     align-self: flex-start;  /* Align to the left */
 }
-.RcStoreTexfiled {
+.BomMasterTexfiled {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); /* Responsive fields */
     gap: 20px;
     width: 100%;
 }
 
-
-
-@media screen and (min-width: 1440px) {
-   
-}
-
-/* Laptops and smaller desktops (1024px to 1439px) */
-@media screen and (max-width: 1439px) {
-
-  .RcStoreTexfiled {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 2fr)); /* Responsive fields */
-      gap: 30px;
-      width: 100%;
-  }
-
-.RcStoreInput {
-  flex-direction: column;
-  background-color: floralwhite;
-  border: 2px solid #edd9d9;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  margin-top: 20px;
-  margin-left: 30px;
-  padding: 20px;
-  display: flex;   
-  /* max-width: 1200px; */
-  /* align-items: center;                  */
-  justify-content: space-between;    /* Space evenly */
-  gap: 30px;
-  flex-wrap: wrap                         /* Space between rows */
-}
-
-
-
-.productFamilyTable {
+.bomMasterTable {
   
   display: flex;
   flex-direction: column;              /* Stack table vertically */
@@ -95,19 +55,3 @@ min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
   padding: 20px;
   /* overflow: auto;                      Prevent overflow */
 }
-
-  
-}
-
-
-/* Tablets (768px to 1023px) */
-@media screen and (max-width: 1023px) {
-  
-}
-
-
-/* Extra-large screens (TVs, 4K) */
-@media screen and (min-width: 2560px) {
- 
-}
-

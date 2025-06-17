@@ -162,21 +162,7 @@ html, body {
     }
   
 .productFamilyInput {
-    flex-direction: column;
-    background-color: floralwhite;
-    border: 2px solid #edd9d9;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    width: 95%;
-    margin-top: 20px;
     margin-left: 30px;
-    padding: 20px;
-    display: flex;   
-    max-width: 1200px;
-    align-items: center;                 
-    justify-content: space-between;    /* Space evenly */
-    gap: 30px;
-    flex-wrap: wrap                         /* Space between rows */
 }
 
 
@@ -198,16 +184,31 @@ html, body {
 
     
   }
-
+  @media screen and (min-width: 1440px) {
+   .productFamilyInput{
+    width: 95%;
+   }
+  }
 
   /* Tablets (768px to 1023px) */
 @media screen and (max-width: 1023px) {
-    
+    .productButton9{
+        margin-top: -10px;
+    }.productFamilyInput{
+        margin-left: 20px;
+    }
+    .productFamilyTable{
+        margin-left: 10px;
+
+    }
   }
 
-
   /* Extra-large screens (TVs, 4K) */
-@media screen and (min-width: 2560px) {
+@media screen and (max-width: 475px) {
+
+    .productFamilyInput{
+        margin-left: 30px;
+    }
    
   }
 

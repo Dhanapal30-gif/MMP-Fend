@@ -9,6 +9,10 @@ import HomeComponenet from './components/HomeComponenet';
 import ProductFamilyMaster from './Master/ProductFamilyMaster';
 import CreateAccount from './userAuth/CreateAccount';
 import RcMainStore from './Master/RcMainStore';
+import VeendorMaster from './Master/VeendorMaster';
+
+
+import BomMaster from './Master/BomMaster';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -42,7 +46,11 @@ function App() {
         <Route path="/home" element ={<HomeComponenet />}   />
         <Route path="/product" element ={<ProductFamilyMaster />}   />
         <Route path="/rcMainStore" element ={<RcMainStore />}   />
-
+        <Route path="/veendorMaster" element ={<VeendorMaster />}   />
+        {/* <Route path="/flexDemo" element ={<FlexDemo />}   /> */}
+        {/* <Route path='/headerComponent1' element={<HeaderComponent1/>} />  */}
+        {/* <Route path='/child' element={<Child name="dhanapal" age={789} gender="male"/> } /> */}
+        <Route path='/bomMaster' element={<BomMaster />} />
 
     </Routes>
     </div>
