@@ -43,6 +43,11 @@ export const deleteproduct = (ids) => {
   const query = ids.map(id => `id=${id}`).join('&');
   return axios.delete(`${Delete_product}?${query}`);
 };
+  const Get_DownloadSearchProduct = `${url}/download-excelSearch`;
+export const downloadSearchProduct = (search) => 
+  axios.get(Get_DownloadSearchProduct, {params:{search:search || undefined},
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
 
   //RcStore API
 const Save_RcMain = `${url}/RcMain/Save`;
@@ -76,6 +81,19 @@ export const deleteRc = (ids) => {
 // const Get_RCStore = `${url}/RcMain/getPageDatatyu`;
 // export const getRcmainMaster = () => axios.get(Get_RCStore);
 
+const Get_DownloadRcMain = `${url}/RcMain/download-excel`;
+export const downloadRc = () => 
+  axios.get(Get_DownloadRcMain, {
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+  const Get_DownloadSearchRc = `${url}/RcMain/download-excelSearch`;
+export const downloadSearchRc = (search) => 
+  axios.get(Get_DownloadSearchRc, {params:{search:search || undefined},
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+
 const save_Vendor = `${url}/vendorMaster/saveVendor`
 export const saveVendorMaster = (formData) => axios.post(save_Vendor, formData);
 
@@ -94,6 +112,18 @@ export const deleteVendor = (id) => {
   const query = id.map(id => `id=${id}`).join('&');
   return axios.delete(`${Delete_Vednor}?${query}`);
 };
+
+const Get_DownloadVendor = `${url}/vendorMaster/download-excel`;
+export const downloadVendor = () => 
+  axios.get(Get_DownloadVendor, {
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+  const Get_DownloadSearchVendor = `${url}/vendorMaster/download-excelSearch`;
+export const downloadSearchVendor = (search) => 
+  axios.get(Get_DownloadSearchVendor, {params:{search:search || undefined},
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
 
 
 const Get_RcPartcode = `${url}/Bom/getPartcode`;
@@ -147,3 +177,100 @@ export const downloadSearchBom = (search) =>
   axios.get(Get_DownloadSearchBom, {params:{search:search || undefined},
     responseType: "blob", // 👈 essential for binary Excel files
   });
+
+  //CurnecyMaster
+  const save_Curnecy = `${url}/Currency/SaveCurency`;
+export const saveCurencyMaster = (formData) => axios.post(save_Curnecy, formData);
+
+  const get_Curency = `${url}/Currency/fetchCurency`;
+export const fetchCurency = ()=>{
+  return axios.get(get_Curency);
+} 
+const update_Curency = `${url}/Currency/updateCurrency`;
+export const updateCurrency = (id, formData) =>
+  axios.put(`${update_Curency}/${id}`, formData);
+
+
+const Delete_Curency = `${url}/Currency/deleteRcStore`;  // Base URL without the id
+export const deleteCurency = (ids) => {
+  const query = ids.map(id => `id=${id}`).join('&');
+  return axios.delete(`${Delete_Curency}?${query}`);
+};
+
+const get_ProductDeatil =`${url}/Approval/getProductDetail`;
+export const fetchProdcutDetail = ()=>{
+  return axios.get(get_ProductDeatil);
+}
+
+
+const save_Approval = `${url}/Approval/saveApproval`
+export const saveApprovalMaster = (formData) => axios.post(save_Approval, formData);
+
+ const get_Approval = `${url}/Approval/fetchApprovalMaster`;
+export const fetchApproval = ()=>{ return axios.get(get_Approval); } 
+
+
+const save_uploadApproval = `${url}/Approval/upload`
+export const uploadApprovalMaster = (formData) => axios.post(save_uploadApproval, formData);
+
+
+const Delete_Appproval = `${url}/Approval/deleteApproval`;  // Base URL without the id
+export const deleteApproval = (ids) => {
+  const query = ids.map(id => `id=${id}`).join('&');
+  return axios.delete(`${Delete_Appproval}?${query}`);
+};
+
+const update_Approval = `${url}/Approval/updateApproval`;
+export const updateApproval = (id, formData) =>
+  axios.put(`${update_Approval}/${id}`, formData);
+
+
+  const save_PoDeatil = `${url}/Podeatil/savePo`;
+export const savePoDetail = (formData) => axios.post(save_PoDeatil, formData);
+
+//  const get_PoDeatil = `${url}/Podeatil/fetchPoDetail`;
+// export const fetchPoDeatil = ()=>{ return axios.get(get_PoDeatil); } 
+
+
+ const get_PoDeatil = `${url}/Podeatil/fetchPoDetail`;
+export const fetchPoDeatil = (page = 0, size = 10)=>{
+  return axios.get(get_PoDeatil, { params: { page, size }, });
+} 
+
+// const update_PoDetail = `${url}/Podeatil/updatePoDetail`;
+// export const updatePoDetaildata = (intsysid, formData) =>
+//   axios.put(`${update_PoDetail}/${intsysid}`, formData);
+
+const update_PoDeatil = `${url}/Podeatil/updatePoDetail`;
+export const updatePoDeatil = (id, formData) =>
+  axios.put(`${update_PoDeatil}/${id}`, formData);
+
+
+const Delete_PoDetail = `${url}/Podeatil/deletePoDetail`;  // Base URL without the id
+export const deletePoDetail = (ids) => {
+  const query = ids.map(id => `id=${id}`).join('&');
+  return axios.delete(`${Delete_PoDetail}?${query}`);
+};
+
+
+const Get_PoDetailSearch = `${url}/Podeatil/fetchFindData`;
+export const getPoDetailFind = (page = 0, size = 10, search = "")=>{
+  return axios.get(Get_PoDetailSearch, { params: { page, size,search: search || undefined, }, });
+} 
+
+
+
+const Get_DownloadPoDetail = `${url}/Podeatil/download-excel`;
+export const downloadPoDetail = () => 
+  axios.get(Get_DownloadPoDetail, {
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+    const Get_DownloadSearchPoDetail = `${url}/Podeatil/download-excelSearch`;
+export const downloadSearchPoDetail = (search) => 
+  axios.get(Get_DownloadSearchPoDetail, {params:{search:search || undefined},
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+
+  

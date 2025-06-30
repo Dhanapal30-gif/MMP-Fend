@@ -1,12 +1,14 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import './RcMainStore.css'
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, InputLabel } from '@mui/material';
-import { deleteRc, getRcmainMaster, getRcmainMasterFind, saveBulkRcMain, saveMainMaterial, updateRcSrore } from '../ServicesComponent/Services';
+import { deleteRc, downloadRc, downloadSearchRc, getRcmainMaster, getRcmainMasterFind, saveBulkRcMain, saveMainMaterial, updateRcSrore } from '../ServicesComponent/Services';
 import DataTable from "react-data-table-component";
 import * as XLSX from "xlsx";
 import { FaFileExcel } from "react-icons/fa";
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import { FaEdit } from "react-icons/fa";
+import { ThemeProvider } from '@mui/material/styles';
+import TextFiledTheme from '../COM_Component/TextFiledTheme'; // your custom theme path
 import CustomDialog from "../COM_Component/CustomDialog";
 const RcMainStore = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -33,8 +35,8 @@ const RcMainStore = () => {
   const [deletButton, setDeletButton] = useState();
   const [duplicateProducts, setDuplicateProducts] = useState([]);
   const [size, setSize] = useState(10); // Your size control
-      const [confirmDelete, setConfirmDelete] = useState(false);
-  
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -144,7 +146,7 @@ const RcMainStore = () => {
             setErrorMessage("Product already exists")
           } else {
             setErrorMessage("Something went wrong");
-          setShowErrorPopup(true);
+            setShowErrorPopup(true);
           }
         }
       });
@@ -184,74 +186,75 @@ const RcMainStore = () => {
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
   const exceluploadClear = () => {
-        setShowRcTable(true);
-        setShowUploadTable(false);
-        setHandleUploadButton(false);
-        setHandleSubmitButton(true);
-    }
+    setShowRcTable(true);
+    setShowUploadTable(false);
+    setHandleUploadButton(false);
+    setHandleSubmitButton(true);
+  }
 
   const handleUpload = (event) => {
-      setExcelUploadData([]);
-      setShowRcTable(false);
-      setHandleUpdateButton(false);
-setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',msdstatus: '',technology: '',unitprice: '',createdby: '',
-      modifiedby: '', quantity: '',UOM: '',AFO: '',ComponentUsage: '',TYC: '',TLT: '',MOQ: '',TRQty: '',POSLT: '',BG: '',expdateapplicable: '',shelflife: 0
-    });      setSelectedRows([]);
-      setDeletButton(false);
-  
-      const file = event.target.files[0];
-      if (!file) return;
-  
-      if (!file.name.startsWith("RcMainMaster")) {
+    setExcelUploadData([]);
+    setShowRcTable(false);
+    setHandleUpdateButton(false);
+    setFormData({
+      partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '', createdby: '',
+      modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '', TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
+    }); setSelectedRows([]);
+    setDeletButton(false);
 
-        setErrorMessage("Invalid file. Please upload RcMainMaster.xlsx");
-          setShowErrorPopup(true);
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.startsWith("RcMainMaster")) {
+
+      setErrorMessage("Invalid file. Please upload RcMainMaster.xlsx");
+      setShowErrorPopup(true);
+      event.target.value = null;
+      exceluploadClear();
+
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsBinaryString(file);
+
+    reader.onload = (e) => {
+      const data = e.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      // Validate column headers first
+      const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
+
+      const expectedColumns = ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
+        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"];
+
+      const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+
+      // Prepare data ignoring the first row (since it's the header row).
+      const parsedData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (!parsedData || parsedData.length === 0) {
+        setErrorMessage("NNo data found in the uploaded file");
+        setShowErrorPopup(true);
         event.target.value = null;
         exceluploadClear();
-  
-        return;
+        return
       }
-  
-      const reader = new FileReader();
-      reader.readAsBinaryString(file);
-  
-      reader.onload = (e) => {
-        const data = e.target.result;
-        const workbook = XLSX.read(data, { type: "binary" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
-        // Validate column headers first
-        const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
-  
-        const expectedColumns =  ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
-        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"];
-  
-        const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
-  
-        // Prepare data ignoring the first row (since it's the header row).
-        const parsedData = XLSX.utils.sheet_to_json(worksheet);
-  
-        if (!parsedData || parsedData.length === 0) {
-          setErrorMessage("NNo data found in the uploaded file");
-          setShowErrorPopup(true);
-          event.target.value = null;
-          exceluploadClear();
-          return
-        }
-        setExcelUploadData(parsedData);
-        setTotalRows(parsedData.length);
-        setHandleUploadButton(true);
-        setHandleSubmitButton(false);
-        setShowUploadTable(true);
-        setShowProductTable(false);
-      };
-  
-      reader.onerror = (error) => {
-        console.error("File read error:", error);
-      };
+      setExcelUploadData(parsedData);
+      setTotalRows(parsedData.length);
+      setHandleUploadButton(true);
+      setHandleSubmitButton(false);
+      setShowUploadTable(true);
+      setShowProductTable(false);
     };
+
+    reader.onerror = (error) => {
+      console.error("File read error:", error);
+    };
+  };
 
 
   const calculateColumnWidth = (data, key, charWrap = 19, charWidth = 8, minWidth = 150, maxWidth = 318) => {
@@ -353,9 +356,10 @@ setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',ms
       setDeletButton(true);
       setHandleSubmitButton(false);
       setHandleUpdateButton(false);
-      setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',msdstatus: '',technology: '',unitprice: '',createdby: '',
-      modifiedby: '', quantity: '',UOM: '',AFO: '',ComponentUsage: '',TYC: '',TLT: '',MOQ: '',TRQty: '',POSLT: '',BG: '',expdateapplicable: '',shelflife: 0
-    });
+      setFormData({
+        partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '', createdby: '',
+        modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '', TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
+      });
     } else {
       setSelectedRows([]);
       setDeletButton(false);
@@ -370,10 +374,11 @@ setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',ms
 
   const handleRowSelect = (rowKey) => {
     setHandleUpdateButton(false);
-                setHandleUpdateButton(false);
+    setHandleUpdateButton(false);
 
-    setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',msdstatus: '',technology: '',unitprice: '',createdby: '',
-      modifiedby: '', quantity: '',UOM: '',AFO: '',ComponentUsage: '',TYC: '',TLT: '',MOQ: '',TRQty: '',POSLT: '',BG: '',expdateapplicable: '',shelflife: 0
+    setFormData({
+      partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '', createdby: '',
+      modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '', TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
     });
     setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
@@ -398,22 +403,27 @@ setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',ms
   };
 
   const column = [
-
-    {
+{
       name: (
-        <div style={{ textAlign: "center" }}>
+        <div style={{textAlign: 'center', }}>
           <label>Delete All</label>
           <br />
-
-          <input type="checkbox" onChange={handleSelectAll} checked={selectedRows.length === rcStoreData.length && rcStoreData.length > 0} />
+          <input type="checkbox" onChange={handleSelectAll} 
+            checked={selectedRows.length === rcStoreData.length && rcStoreData.length > 0}
+          />
         </div>
       ),
       cell: (row) => (
-        <input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)} />
+        <div style={{ paddingLeft: '27px', width: '100%' }}>
+          <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
+          />
+        </div>
       ),
-      width: "130px",
-    },
-    { name: "Edit", selector: row => (<button className="btn btn-warning btn-sm" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
+      width: "97px",
+      center: true, // ✅ makes both header and cell content centered
+    }
+   ,
+    { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
     ,
     {
       name: "Partcode",
@@ -544,7 +554,7 @@ setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',ms
 
     if (errors.length > 0) {
       setErrorMessage("partcode is required");
-          setShowErrorPopup(true);
+      setShowErrorPopup(true);
       return;
     }
 
@@ -584,11 +594,12 @@ setFormData({partcode: '',partdescription: '',rohsstatus: '',racklocation: '',ms
 
           else {
             setErrorMessage("Something went wrong");
-          setShowErrorPopup(true);
+            setShowErrorPopup(true);
           }
         } else {
-setErrorMessage("Network error, please try again");
-          setShowErrorPopup(true);        }
+          setErrorMessage("Network error, please try again");
+          setShowErrorPopup(true);
+        }
       });
 
   }
@@ -620,7 +631,7 @@ setErrorMessage("Network error, please try again");
       TYC: "", TLT: "", MOQ: "", TRQty: "", POSLT: "", BG: "", expdateapplicable: "", shelflife: "",
 
     }];
- 
+
 
   const fetchMainMaster = (page = 1, size = 10) => {
     setLoading(true); // ✅ Start loading before fetch
@@ -678,15 +689,15 @@ setErrorMessage("Network error, please try again");
 
 
 
-  
-   const onDeleteClick = () => {
-        setConfirmDelete(true);
-    };
 
-    const handleCancel = () => {
-        setSelectedRows([]);
-        setConfirmDelete(false);
-    };
+  const onDeleteClick = () => {
+    setConfirmDelete(true);
+  };
+
+  const handleCancel = () => {
+    setSelectedRows([]);
+    setConfirmDelete(false);
+  };
   const handleDelete = async () => {
     try {
       await deleteRc(selectedRows); // API call
@@ -761,22 +772,64 @@ setErrorMessage("Network error, please try again");
             setErrorMessage("Something went wrong");
             setShowErrorPopup(true);
           }
-        } else {
-          setErrorMessage("Network error, please try again");
-          setShowErrorPopup(true);
         }
+
       }).finally(() => {
         setLoading(false);
       });
   }
 
+
+  const exportToExcel = (search = "") => {
+    console.log("searchTeaxt", search)
+    if (search && search.trim() !== "") {
+
+      setLoading(true);
+      downloadSearchRc(search) // <- pass search here
+        .then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "RcMain.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+
+    } else {
+      setLoading(true);
+      downloadRc()
+        .then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "RcMain.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  };
+
   return (
-    <div className='RcContainer'>
-      <div className='RcStoreInput'>
-        <div className='RcStoreFiledName'>
+    <div className='COMCssContainer'>
+      <div className='ComCssInput'>
+        <div className='ComCssFiledName'>
           <h5>MainMaterial Master </h5>
         </div>
-        <div className='productUpload'>
+        <div className='ComCssUpload'>
 
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
           < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
@@ -784,356 +837,277 @@ setErrorMessage("Network error, please try again");
           <button onClick={handleDownloadExcel}> Excel Download </button>
         </div>
         <div className='RcStoreTexfiled'>
-          <TextField
-            id="outlined-basic"
-            label="partcode"
-            variant="outlined"
-            name="partcode"
-            value={formData.partcode}
-            onChange={handleChange}
-            error={Boolean(formErrors.partcode)}
-            helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="part Description"
-            variant="outlined"
-            name="partdescription"
-            value={formData.partdescription}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="UOM"
-            variant="outlined"
-            name="UOM"
-            value={formData.UOM}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Active For Ordering"
-            variant="outlined"
-            name="AFO"
-            value={formData.AFO}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="ComponentUsage"
-            variant="outlined"
-            name="ComponentUsage"
-            value={formData.ComponentUsage}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
+          <ThemeProvider theme={TextFiledTheme}>
 
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Type Of Component"
-            variant="outlined"
-            name="TYC"
-            value={formData.TYC}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Total Lead Time"
-            variant="outlined"
-            name="TLT"
-            value={formData.TLT}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="MOQ"
-            variant="outlined"
-            name="MOQ"
-            value={formData.MOQ}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Threshold Request Qty"
-            variant="outlined"
-            name="TRQty"
-            value={formData.TRQty}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Planned Ordering Stock Lead Time"
-            variant="outlined"
-            name="POSLT"
-            value={formData.POSLT}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="BG"
-            variant="outlined"
-            name="BG"
-            value={formData.BG}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Rohs Status"
-            variant="outlined"
-            name="rohsstatus"
-            value={formData.rohsstatus}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Msd Status"
-            variant="outlined"
-            name="msdstatus"
-            value={formData.msdstatus}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Technology"
-            variant="outlined"
-            name="technology"
-            value={formData.technology}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Rack Location"
-            variant="outlined"
-            name="racklocation"
-            value={formData.racklocation}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Quantity"
-            variant="outlined"
-            name="quantity"
-            value={formData.quantity}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Unit Price"
-            variant="outlined"
-            name="unitprice"
-            value={formData.unitprice}
-            onChange={handleChange}
-            //error={Boolean(formErrors.partcode)}
-            //helperText={formErrors.partcode}
-            //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-            size="small"
-
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <Autocomplete
-            options={["Yes", "No", "NotApplicable"]}
-            getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
-            value={formData.expdateapplicable || []}
-            onChange={(event, newValue) => setFormData({ ...formData, expdateapplicable: newValue || [] })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Expdateapplicable"
-                variant="outlined"
-                //error={Boolean(formErrors.recordstatus)}
-                // helperText={formErrors.recordstatus}
-                // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
-                size="small"  // <-- Reduce height
-                sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-              />
-            )}
-          />
-          {formData.expdateapplicable === 'No' && (
             <TextField
-              id="shelfLife"
-              label="Shelf Life"
-              name="shelflife"
-              type="number"
-              value={formData.shelflife}
-              onChange={handleChange}
-              inputProps={{ min: 0 }}
-              defaultValue={0}
+              id="outlined-basic"
+              label="partcode"
               variant="outlined"
+              name="partcode"
+              value={formData.partcode}
+              onChange={handleChange}
+              className='ProductTexfiled-textfield '
+
+              error={Boolean(formErrors.partcode)}
+              helperText={formErrors.partcode}
               size="small"
-              sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
+
             />
-          )}
+            <TextField
+              id="outlined-basic"
+              label="part Description"
+              variant="outlined"
+              name="partdescription"
+              value={formData.partdescription}
+              onChange={handleChange}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="UOM"
+              variant="outlined"
+              name="UOM"
+              value={formData.UOM}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Active For Ordering"
+              variant="outlined"
+              name="AFO"
+              value={formData.AFO}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="ComponentUsage"
+              variant="outlined"
+              name="ComponentUsage"
+              value={formData.ComponentUsage}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Type Of Component"
+              variant="outlined"
+              name="TYC"
+              value={formData.TYC}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Total Lead Time"
+              variant="outlined"
+              name="TLT"
+              value={formData.TLT}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="MOQ"
+              variant="outlined"
+              name="MOQ"
+              value={formData.MOQ}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Threshold Request Qty"
+              variant="outlined"
+              name="TRQty"
+              value={formData.TRQty}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Planned Ordering Stock Lead Time"
+              variant="outlined"
+              name="POSLT"
+              value={formData.POSLT}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="BG"
+              variant="outlined"
+              name="BG"
+              value={formData.BG}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Rohs Status"
+              variant="outlined"
+              name="rohsstatus"
+              value={formData.rohsstatus}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Msd Status"
+              variant="outlined"
+              name="msdstatus"
+              value={formData.msdstatus}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Technology"
+              variant="outlined"
+              name="technology"
+              value={formData.technology}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Rack Location"
+              variant="outlined"
+              name="racklocation"
+              value={formData.racklocation}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Quantity"
+              variant="outlined"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              className='ProductTexfiled-textfield '
+
+            />
+            <TextField
+              id="outlined-basic"
+              label="Unit Price"
+              variant="outlined"
+              name="unitprice"
+              value={formData.unitprice}
+              onChange={handleChange}
+              //error={Boolean(formErrors.partcode)}
+              //helperText={formErrors.partcode}
+              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+              size="small"
+              className='ProductTexfiled-textfield '
+
+            />
+            <Autocomplete
+              options={["Yes", "No", "NotApplicable"]}
+              getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
+              value={formData.expdateapplicable || []}
+              onChange={(event, newValue) => setFormData({ ...formData, expdateapplicable: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Expdateapplicable"
+                  variant="outlined"
+                  //error={Boolean(formErrors.recordstatus)}
+                  // helperText={formErrors.recordstatus}
+                  // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+                  size="small"  // <-- Reduce height
+                  className='ProductTexfiled-textfield '
+
+                />
+              )}
+            />
+            {formData.expdateapplicable === 'No' && (
+              <TextField
+                id="shelfLife"
+                label="Shelf Life"
+                name="shelflife"
+                type="number"
+                value={formData.shelflife}
+                onChange={handleChange}
+                inputProps={{ min: 0 }}
+                defaultValue={0}
+                variant="outlined"
+                size="small"
+                className='ProductTexfiled-textfield '
+
+              />
+
+            )}
+          </ThemeProvider>
         </div>
-        <div className='productButton9'>
+        <div className='ComCssButton9'>
           {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
           {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
           {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={excelUpload}>Upload</button>}
@@ -1142,15 +1116,15 @@ setErrorMessage("Network error, please try again");
         </div>
       </div>
 
-      <div className='productFamilyTable'>
+      <div className='ComCssTable'>
         {showRcTable && !showUploadTable && (
-          <h5 className='prodcutTableName'>All Master deatil</h5>
+          <h5 className='ComCssTableName'>All Master deatil</h5>
         )}
         {showUploadTable && !showRcTable && (
-          <h5 className='prodcutTableName'>Upload Master deatil</h5>
+          <h5 className='ComCssTableName'>Upload Master deatil</h5>
         )}
         <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-          <button className="btn btn-success" style={{ fontSize: '13px', backgroundColor: 'green' }}>
+          <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
             <FaFileExcel /> Export
           </button>
 
@@ -1166,11 +1140,8 @@ setErrorMessage("Network error, please try again");
               </span>
             )}
           </div>
-
         </div>
         {showRcTable && !showUploadTable && (
-
-
           <DataTable
             columns={column}
             data={rcStoreData}
@@ -1194,60 +1165,7 @@ setErrorMessage("Network error, please try again");
             highlightOnHover
             className="react-datatable"
             conditionalRowStyles={rowHighlightStyle}
-            customStyles={{
-              headRow: {
-                style: {
-                  background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  textAlign: "center",
-                  minHeight: "50px",
-
-                },
-              },
-              rows: {
-                style: {
-                  fontSize: "14px",
-                  textAlign: "left",
-                  alignItems: "center", // Centers content vertically
-                  fontFamily: "Arial, Helvetica, sans-serif",
-                },
-              },
-              cells: {
-                style: {
-                  padding: "5px",  // Removed invalid negative padding
-                  //textAlign: "center",
-                  justifyContent: "center",  // Centers header text
-                  whiteSpace: 'pre-wrap', // wrap text
-                  wordBreak: 'break-word', // allow breaking words
-                },
-              },
-              headCells: {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",  // Centers header text
-                  alignItems: "left",
-                  textAlign: "left",
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                },
-              },
-              pagination: {
-                style: {
-                  border: "1px solid #ddd",
-                  backgroundColor: "#f9f9f9",
-                  color: "#333",
-                  minHeight: "35px",
-                  padding: "5px",
-                  fontSize: "12px",
-                  fontWeight: "bolder",
-                  display: "flex",
-                  justifyContent: "flex-end", // Corrected
-                  alignItems: "center", // Corrected
-                },
-              },
-            }}
+            
           />
         )}
 
@@ -1352,7 +1270,7 @@ setErrorMessage("Network error, please try again");
         title="Confirm"
         message="Are you sure you want to delete this?"
         color="primary"
-      />  
+      />
 
     </div>
   )
