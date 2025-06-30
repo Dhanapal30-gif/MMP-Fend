@@ -13,6 +13,10 @@ import VeendorMaster from './Master/VeendorMaster';
 
 
 import BomMaster from './Master/BomMaster';
+import CurencyMaster from './Master/CurencyMaster';
+import ApprovalMaster from './Master/ApprovalMaster';
+import Add_Po_Detail from './RcMainStore/Add_Po_Detail';
+import Receving from './RcMainStore/Receving';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -46,11 +50,12 @@ function App() {
         <Route path="/home" element ={<HomeComponenet />}   />
         <Route path="/product" element ={<ProductFamilyMaster />}   />
         <Route path="/rcMainStore" element ={<RcMainStore />}   />
-        <Route path="/veendorMaster" element ={<VeendorMaster />}   />
-        {/* <Route path="/flexDemo" element ={<FlexDemo />}   /> */}
-        {/* <Route path='/headerComponent1' element={<HeaderComponent1/>} />  */}
-        {/* <Route path='/child' element={<Child name="dhanapal" age={789} gender="male"/> } /> */}
+        <Route path="/veendorMaster" element ={<VeendorMaster />}   />        
         <Route path='/bomMaster' element={<BomMaster />} />
+        <Route path='/curencyMaster' element={<CurencyMaster />} />
+        <Route path='/approvalMaster' element={<ApprovalMaster />} />
+        <Route path='/add_Po_Detail' element={<Add_Po_Detail />} />
+        <Route path='/receving' element={<Receving />} />
 
     </Routes>
     </div>

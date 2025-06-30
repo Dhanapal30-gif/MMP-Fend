@@ -1,75 +1,33 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: auto;    /* ✅ Ensures scrollability */
+.VendorTexfiled {
+    display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(150px, 2fr)); 
+    gap: 50px;
+    width: 100%;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-.VendorContainer{
-    display: flex;
-    overflow: auto;            /* ✅ Scrollbar appears if content overflows */
-    justify-content: flex-start;
-    flex-direction: column;
-    min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
-    
-    }
 
-    .VendorInput{
-        flex-direction: column;
-        background-color: floralwhite;
-        border: 2px solid #edd9d9;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        width: 95%;
-        margin-top: 20px;
-        margin-left: 40px;
-        padding: 20px;
-        display: flex;                    
-        justify-content: space-between;    /* Space evenly */
-        gap: 30px;
-        flex-wrap: wrap  
-    }
-    .VendorFiledName {
-        font-size: 30px;
-        color: rgb(34, 92, 208);
-        margin: 0;
-        padding-left:-10px;
-        padding-top: 0px;
-        align-self: flex-start;  /* Align to the left */
-    }
+@media (min-width: 1024px) and (max-width: 1161.98px) {
     .VendorTexfiled {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); /* Responsive fields */
-        gap: 50px;
-        width: 70%;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 19px;
+        width: 100%;
+        font-size:small;   
     }
-
-    .vendorTable {
-        display: flex;
-        flex-direction: column;              /* Stack table vertically */
-        height: auto;                        /* Adjust height automatically */
-        width: 95%;
-        margin-left: 40px;
-        margin-top: 30px;
-        justify-content: flex-start;   
-        border: 2px solid #edd9d9;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        padding: 20px;
-        }
+     .VendorTexfiled-textfield input {
+    height: 15px;
+    font-size: 13px;
+  }
+ 
+}
+@media (min-width: 1163px) and (max-width: 1439.98px) {
+    .VendorTexfiled {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 19px;
+        width: 100%;
+        font-size:xx-small;
+    }
     
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid orange;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: auto;
-          }
-          
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          
+}

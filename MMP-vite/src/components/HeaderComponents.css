@@ -1,10 +1,25 @@
-
 html, body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #f9f9f9;
+    /* background-color: #e2e8b4; */
+    background-color: white;
+}
+.header7 {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to right, #701964, #179999);
+  display: flex;
+  align-items: center;           /* ✅ Vertically center all items */
+  justify-content: space-between; /* ✅ Push left and right sides apart */
+  padding: 0 30px;
+  box-shadow: 0px 10px 10px rgba(229, 12, 193, 0.1);
+  z-index: 1000;
+  height: 47px;
+  font-family: 'Trebuchet MS', sans-serif;
 }
 
 /* Header Styling */
@@ -13,47 +28,76 @@ html, body {
     position: sticky;
     top: 0;
     left: 0;
-    background: linear-gradient(to bottom, rgb(48, 59, 137), #159cab); 
+    background: linear-gradient(to bottom, rgb(5, 104, 134), #159cab); 
     /* background: linear-gradient(to right, #701964, #168686); */
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content:space-around;
     padding: 15px 30px;
     box-shadow: 0px 10px 10px rgba(229, 12, 193, 0.1);
     z-index: 1000;
-    height: 59px;
-    font-family: Tahoma;
-
+    height: 40px;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 
 /* Logo Section */
 .logo-section {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-left: -30px;
-
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-    display: flex;
-    justify-content: flex-start;
-    height: 50px;
+  height: 40px;
 }
+
+.logo-text {
+  color: white;
+  font-size: 20px;
+  margin-left: 10px;
+}
+.notification {
+  margin-left: auto; /* pushes it to the right */
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+/* Avatar area */
+.avatar-container {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .avatar {
-    width: 30px !important;
-    height: 30px !important;
-    /* background-color: #1abc66 !important; */
-    /* color: rgb(83, 130, 178) !important; */
-    font-size: 18px !important;
-  }
+  width: 30px !important;
+  height: 30px !important;
+  background-color: #076935;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.avatar-name {
+  color: white;
+  font-size: 13px;
+}
+
+
   
 .logo-text {
     font-size: 15px;
     color: white;
-    font-weight: bold;
-    margin-top: 29px;
+    font-weight: bolder;
+    /* margin-top: 29px; */
 }
 
 /* Navigation Links */
@@ -61,7 +105,7 @@ html, body {
     flex-grow: 1;
     display: flex;
     justify-content: flex-start;
-    margin-left: 30px;
+    margin-left: 87px;
 }
 
 .nav-links {
@@ -73,67 +117,38 @@ html, body {
 .nav-links li a {
     text-decoration: none;
     color: white;
-    padding: 8px 15px;
-    font-size: 16px;
+    /* font-size: 10px; */
     transition: color 0.3s ease;
 }
 
 .nav-links li a:hover {
-    color: #e2941f;
+    color: #3fe639;
 }
 
 /* Authentication Buttons */
-.auth-buttons {
+/* .auth-buttons {
     display: flex;
     align-items: center;
-}
+} */
 
-.signin-btn,
-.signup-btn {
-    text-decoration: none;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 16px;
-    margin-left: 10px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.signin-btn {
-    background-color: transparent;
-    color: #333;
-    border: 1px solid #333;
-}
-
-.signin-btn:hover {
-    background-color: #1abc66;
-    color: white;
-}
-
-.signup-btn {
-    background-color: #1abc66;
-    color: white;
-    border: none;
-}
-
-.signup-btn:hover {
-    background-color: #148c4b;
-}
 
 .nav-link {
     text-decoration: none;
     color: white;
-    font-size: 16px;
-    padding: 8px 15px;
+    font-size: 14px;
+    padding: 8px 5px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
-    padding: 0;
+    padding: 00px;
     margin: 0;
+    /* font-size: 10px; */
 }
 
 .dropdown-container {
@@ -151,7 +166,8 @@ html, body {
     list-style: none;
     padding: 10px 0;
     width: 200px;
-    font-size: 13px;
+font-size: 14px ;
+font-weight: bolder;
     z-index: 10;
     display: none;
     /* Initially hidden */
@@ -168,10 +184,12 @@ html, body {
 
 .dropdown-item {
     text-decoration: none;
+    /* font-size: 589px; */
     color: rgb(12, 6, 50) !important; /* Text color white */
     padding: 10px 20px;
     display: block;
     transition: background-color 0.3s ease, color 0.3s ease;
+    
 }
 
 .dropdown-item:hover {
@@ -209,291 +227,57 @@ html, body {
     gap: 20px;
   }
   
-  @media (max-width: 798px) {
-    .hamburger-menu {
-      display: block; /* Show hamburger icon on mobile */
-    }
-  
-    .navgation {
-      display: none; /* Hide the menu by default on mobile */
-      width: 100%;
-      flex-direction: column;
-      gap: 10px;
-      background-color: #333;
-      position: absolute;
-      top: 60px;
-      left: 0;
-      padding: 20px;
-    }
-  
-    .navgation.open {
-      display: flex; /* Show the menu when it's open */
-    }
-  
-    .nav-links {
-      flex-direction: column;
-    }
-  
-    .nav-links li {
-      margin-bottom: 15px;
-    }
-  
-    .nav-links a {
-      color: white;
-      text-decoration: none;
-    }
+@media (min-width: 1024px) and (max-width: 1239.98px) {
+ .header7 {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+    height: 47px;
   }
-  
-/* 1. Extra Small Devices (Mobile Portrait, up to 480px) */
-@media screen and (max-width: 480px) {
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px 20px;
-    }
 
-    .logo-section {
-        margin-bottom: 10px;
-    }
+  .logo-section {
+    margin-bottom: 8px;
+  }
 
-    .nav-links {
-        flex-direction: column;
-        gap: 10px;
-    }
+  .avatar-container {
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: -130px;
+  }
 
-    .auth-buttons {
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 10px;
-    }
-}
-
-/* 2. Small Devices (Mobile Landscape and Small Tablets, 481px to 768px) */
-@media screen and (min-width: 481px) and (max-width: 768px) {
-    .header {
-        flex-direction: column;
-        align-items: center;
-        padding: 15px 30px;
-    }
-
-    .nav-links {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .auth-buttons {
-        flex-direction: row;
-        gap: 10px;
-    }
-}
-
-/* 3. Medium Devices (Tablets and Small Laptops, 769px to 1024px) */
-@media screen and (min-width: 769px) and (max-width: 1024px) {
-
-    .header {
-        margin-left: -20px;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        padding: 15px 30px;
-        /* Adjusted padding for medium screens */
-        width: 100%;
-    }
-
-    .dropdown-menu {
-        font-size: 5px;
-    }
-
-    .logo-section {
-        display: flex;
-        align-items: center;
-    }
-
-    .logo {
-        height: 35px;
-        /* Slightly smaller logo for tablets */
-        margin-right: 10px;
-    }
-
-    .logo-text {
-        font-size: 18px;
-        /* Font size adjusted for medium devices */
-        font-weight: bold;
-        color: #333;
-    }
-
-    .nav-links {
-        flex-grow: 1;
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        gap: 0px;
-        /* Add spacing between links */
-        margin: 10px;
-    }
-
-    .nav-links li a {
-        text-decoration: none;
-        color: #333;
-        font-size: 14px;
-        /* Smaller font size for medium screens */
-        padding: 5px 10px;
-        transition: color 0.3s ease;
-    }
-
-    .nav-links li a:hover {
-        color: #1abc66;
-    }
-
-    .auth-buttons {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        /* Spacing between buttons */
-    }
-
-    .signin-btn,
-    .signup-btn {
-        font-size: 10px;
-        /* Adjusted font size */
-        padding: 5px 15px;
-        border-radius: 15px;
-    }
-
-    .signin-btn {
-        border: 1px solid #333;
-        color: #333;
-        background-color: transparent;
-    }
-
-    .signin-btn:hover {
-        background-color: #1abc66;
-        color: white;
-    }
-
-    .signup-btn {
-        background-color: #1abc66;
-        color: white;
-        border: none;
-    }
-
-    .signup-btn:hover {
-        background-color: #148c4b;
-    }
-}
-
-/* 4. Large Devices (Laptops, 1025px to 1366px) */
-@media screen and (min-width: 1025px) and (max-width: 1366px) {
-    .header {
-        margin-left: -20px;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        padding: 15px 30px;
-        /* Adjusted padding for medium screens */
-        width: 100%;
-    }
-
-    .dropdown-menu {
-        font-size: 5px;
-    }
-
-    .logo-section {
-        display: flex;
-        align-items: center;
-        margin-left: -28px;
-
-    }
-
-    .logo {
-        height: 50px;
-        /* Slightly smaller logo for tablets */
-        margin-right: 10px;
-    }
-
-    .logo-text {
-        font-size: 15px;
-        /* Font size adjusted for medium devices */
-        /* font-weight: bold; */
-        color: white;
-    }
-    .navgation {
-       
-        margin-left: 30px;
-    }
+  .avatar-name {
+    font-size: 10px;
     
-    .nav-links {
-        flex-grow: 1;
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        gap: 0px;
-        /* Add spacing between links */
-        margin: 10px;
-    }
+  }
+  .logo-text {
+    font-size: 15px;
+  }
 
-    .nav-links li a {
-        text-decoration: none;
-        color: white;
-        font-size: 14px;
-        /* Smaller font size for medium screens */
-        padding: 5px 10px;
-        transition: color 0.3s ease;
-    }
 
-    .nav-links li a:hover {
-        color: #1abc66;
-    }
-
-    .auth-buttons {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        /* Spacing between buttons */
-    }
-
-    .signin-btn,
-    .signup-btn {
-        font-size: 10px;
-        /* Adjusted font size */
-        padding: 5px 15px;
-        border-radius: 15px;
-    }
-
-    .signin-btn {
-        border: 1px solid #333;
-        color: #333;
-        background-color: transparent;
-    }
-
-    .signin-btn:hover {
-        background-color: #1abc66;
-        color: white;
-    }
-
-    .signup-btn {
-        background-color: #1abc66;
-        color: white;
-        border: none;
-    }
-
-    .signup-btn:hover {
-        background-color: #148c4b;
-    }
+.nav-link {
+    text-decoration: none;
+    color: white;
+    font-size: 12px;
+    padding: 3px 0px;
+    cursor: pointer;
+    font-weight: bold;
+    
+}
+.nav-links li a {
+    
+    font-size: 13px;
 }
 
-/* 5. Extra Large Devices (Desktops and Monitors, 1367px to 1920px) */
-@media screen and (min-width: 1367px) and (max-width: 1920px) {
-    .header {
-        padding: 20px 40px;
-    }
+.notification {
+  margin-left: 838px; /* pushes it to the right */
+  margin-right: 10px;
+  margin-top: -150px;
+  display: flex;
+  align-items: center;
+}
+}
 
-    .logo-text {
-        font-size: 15px;
-    }
+@media (min-width: 1239.98px) and (max-width: 1439.98px) {
 
-    .nav-links li a {
-        font-size: 16px;
-        padding: 12px 25px;
-    }
+
 }

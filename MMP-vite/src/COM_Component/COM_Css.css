@@ -1,0 +1,299 @@
+
+.COMCssContainer {
+    min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
+    display: flex;
+    flex-direction: column;
+    overflow: auto;            /* ✅ Scrollbar appears if content overflows */
+    justify-content: flex-start;
+}
+
+.ComCssInput {
+    flex-direction: column;
+    background-color: floralwhite;
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 95%;
+    margin-top: 20px;
+    margin-left: 40px;
+    padding: 20px;
+    display: flex;                    
+    justify-content: space-between;    /* Space evenly */
+    gap: 30px;
+    background-color: white;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+    flex-wrap: wrap                         /* Space between rows */
+}
+.ComCssFiledName {
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(6, 132, 154);
+    margin: 0;
+    padding-left:-10px;
+    padding-top: 0px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    align-self: flex-start; 
+}
+/* Ensure 4 fields in a row */
+.ComCssTexfiled {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 2fr)); /* Responsive fields */
+    gap: 20px;
+    width: 100%;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}
+
+.ComCssButton9 {
+    display: flex;
+    justify-content: flex-end;       /* Align buttons to the right */
+    gap: 15px;                       /* Space between buttons */
+    margin-top: -10px;                /* Gap between button rows */
+    width: 100%;
+}
+
+.ComCssButton9 button {
+    color: white;
+    background-color: #20c9c6;          
+    height: 30px;
+    width: 70px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;  
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-top: 10px;                
+
+}
+
+
+.ComCssButton9 button:hover {
+    background-color: #0d9a95;         
+    transform: scale(1.05);             
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+}
+
+.ComCssButton9 button:active {
+    /* transform: scale(0.98);     */
+    transform: scale(1.30);    
+
+}
+.ComCssSubmitButton9 {
+    display: flex;
+    justify-content:flex-end;       /* Align buttons to the right */
+ /* gap: 15px;                       Space between buttons */
+    /* margin-top: -7px; */
+    width: 100%;
+}
+.ComCssSubmitButton9 button {
+    color: white;
+    background-color: #20c9c6;          
+    height: 30px;
+    width: 70px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;  
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-top: 20px; 
+    margin-right: 87px;               /* Gap between button rows */
+    /* margin-bottom: -20px;                */
+
+}
+.ComCssSubmitButton9 button:hover {
+    background-color: #0d9a95;         
+    transform: scale(1.05);             
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+}
+
+.ComCssSubmitButton9 button:active {
+    /* transform: scale(0.98);     */
+    transform: scale(1.30);    
+
+}
+.ComCssUpload{
+    display: flex;
+    justify-content: flex-start;       /* Align buttons to the right */
+    gap: 15px;                       /* Space between buttons */
+    margin-top: -10px;                /* Gap between button rows */
+    width: 100%;
+    margin-left: 0px;
+
+}
+.ComCssUpload button {
+    color: white;
+    background-color: #20c9c6;          
+    height: 30px;
+    font-size: smaller;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    
+}
+
+.ComCssUpload button:hover {
+    background-color: #0d9a95;         
+    transform: scale(1.05);             
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+}
+
+.ComCssUpload button:active {
+     transform: scale(0.98);    
+}
+
+.ComCssTable {
+    display: flex;
+    flex-direction: column;              /* Stack table vertically */
+    height: auto;                        /* Adjust height automatically */
+    width: 95%;
+    margin-left: 40px;
+    margin-top: 30px;
+    justify-content: flex-start;   
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+           font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+    /* overflow: auto;                      Prevent overflow */
+}
+.ComCssTableName {
+    font-size: 15.9px;
+    font-weight: bold;
+    color: rgb(6, 132, 154);
+    /* color: rgb(34, 92, 208); */
+    position:relative;
+            /* font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+
+
+
+/* Head row */
+.react-datatable .rdt_TableHeadRow {
+  background: linear-gradient(to right, #701964, #179999);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: left;
+  min-height: 40px;
+}
+
+/* Head cells */
+.react-datatable .rdt_TableCol {
+  text-align: left;
+  /* margin-left: -5px; */
+  justify-content:flex-start;
+  font-weight: bold;
+}
+
+/* Data rows */
+.react-datatable .rdt_TableRow {
+  font-size: 13.5px;
+  font-weight: bold;
+  margin-left: 10px;
+  text-align: left;
+  align-items: flex-start;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+/* Data cells */
+.react-datatable .rdt_TableCell {
+  padding: 5px;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+/* Pagination */
+.react-datatable.rdt_Pagination {
+  border: 1px solid #a38a8a;
+  background-color: #f9f9f9;
+  color: #1d1515;
+  min-height: 35px;
+  padding: 5px;
+  font-size: 12px;
+  font-weight: bolder;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.edit-button {
+  background-color: green;
+  border: none;
+  padding: 5px 4px;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+.btn.btn-success{
+    font-size: 13px;
+    font-weight: bold;
+    height: 32px;   
+}
+
+
+
+ /* *********************************************************************************************** */
+
+@media (min-width: 1024px) and (max-width: 1439.98px) {
+    .ComCssTexfiled {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 19px;
+        width: 100%;
+        font-size:xx-small;
+    }
+    .ComCssUpload button {
+    height: 22px;
+    font-size: x-small;
+    font-weight: bold;
+    
+}
+.ComCssFiledName {
+    font-size: 15px;
+}
+.ComCssTableName{
+        font-size: 15px;
+
+}
+.ComCssExport{
+            font-size: 15px;
+}
+
+.ComCssInput {    
+    margin-left: 30px; 
+                   
+}
+.ComCssTable{
+        margin-left: 30px;                    
+}
+.btn.btn-success{
+    font-size: 12px;
+    font-weight: bold;
+    height: 27px;   
+}
+}
+
+
+  /* Extra-large screens (TVs, 4K) */
+@media (min-width: 1440px) and (max-width: 5560.98px) {
+ 
+   
+  }
+
+  

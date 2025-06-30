@@ -4,12 +4,13 @@ import DataTable from "react-data-table-component";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FaFileExcel } from "react-icons/fa";
+import "../COM_Component/COM_Css.css";
 import { FaEdit } from "react-icons/fa";
-
 import './ProductMaster.css'
-import { deleteproduct, downloadProduct, getProductMasterData, getUserMailId, saveProductMaster, saveProductsBulk, updateProduct } from '../ServicesComponent/Services';
+import { deleteproduct, downloadProduct, downloadSearchProduct, getProductMasterData, getUserMailId, saveProductMaster, saveProductsBulk, updateProduct } from '../ServicesComponent/Services';
 import CustomDialog from "../COM_Component/CustomDialog";
-
+import { ThemeProvider } from '@mui/material/styles';
+import TextFiledTheme from '../COM_Component/TextFiledTheme'; // your custom theme path
 const ProductFamilyMaster = () => {
   const [formErrors, setFormErrors] = useState({});
   const [searchText, setSearchText] = useState("");
@@ -60,7 +61,6 @@ const ProductFamilyMaster = () => {
     size: 10
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -74,23 +74,17 @@ const ProductFamilyMaster = () => {
       errors.productname = "Please Enter Product Name";
       isValid = false;
     }
-
     setFormErrors(errors);
     return isValid; // Now it correctly returns false if any field is empty
   };
 
-
-
-
   useEffect(() => {
     fetchProduct(page, perPage, debouncedSearch);
-    // getUserMailId();
   }, [page, perPage, debouncedSearch]);
 
   useEffect(() => {
     getUserMail();
   }, []);  // Runs only once
-
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -105,7 +99,6 @@ const ProductFamilyMaster = () => {
     e.preventDefault();
 
     if (!valiDate()) return; // Stop execution if validation fails
-
     const createdby = sessionStorage.getItem("userName") || "System";
     const modifiedby = sessionStorage.getItem("userName") || "System";
 
@@ -113,10 +106,6 @@ const ProductFamilyMaster = () => {
       ...formData,
       createdby,
       modifiedby,
-      //lineLead: [],
-      //productEngineer: [],
-
-
     };
 
     saveProductMaster(updatedFormData)
@@ -133,7 +122,6 @@ const ProductFamilyMaster = () => {
         });
         fetchProduct(page, perPage);
         setPage(1);
-
       })
       .catch((error) => {
         if (error.response) {
@@ -149,7 +137,6 @@ const ProductFamilyMaster = () => {
           setShowErrorPopup(true);
         }
       });
-
     setFormData({
       productname: "",
       productgroup: "",
@@ -212,13 +199,9 @@ const ProductFamilyMaster = () => {
     setHandleSubmitButton(false);
     setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
-
-      // Update selected rows
       const updatedRows = isRowSelected
         ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect row
         : [...prevSelectedRows, rowKey]; // Select row
-
-      // Conditional button states based on updated rows
       if (updatedRows.length === 0) {
         setDeletButton(false); // Disable delete button if no rows are selected
         setHandleSubmitButton(true); // Enable submit button
@@ -226,63 +209,70 @@ const ProductFamilyMaster = () => {
         setDeletButton(true); // Enable delete button if rows are selected
         setHandleSubmitButton(false); // Disable submit button
       }
-
       return updatedRows;
     });
   };
 
-
-  const calculateColumnWidth = (data, key, minWidth = 190, maxWidth = 318) => {
+  const calculateColumnWidth = (data, key, minWidth = 220, maxWidth = 220) => {
     if (!data || data.length === 0) return minWidth;
-
     const maxLength = Math.max(...data.map(row => (row[key] ? row[key].toString().length : 0)));
-    const width = maxLength * 8; // Adjust the multiplier as needed for better fit
-
+    const width = maxLength * 8;
     return Math.min(Math.max(width, minWidth), maxWidth);
   };
+
   const columns = [
-    //{ name: "Delete", selector: row => <input type="checkbox" />, width: "90px" },
     {
       name: (
-        <div style={{ textAlign: "center" }}>
+        <div style={{textAlign: 'center', }}>
           <label>Delete All</label>
           <br />
-          <input type="checkbox" onChange={handleSelectAll} checked={selectedRows.length === productMaster.length && productMaster.length > 0} />
+          <input type="checkbox" onChange={handleSelectAll} 
+            checked={selectedRows.length === productMaster.length && productMaster.length > 0}
+          />
         </div>
       ),
       cell: (row) => (
-        <input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)} />
+        <div style={{ paddingLeft: '27px', width: '100%' }}>
+          <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
+          />
+        </div>
       ),
-      width: "130px",
-    },
-    { name: "Edit", selector: row => (<button className="btn btn-warning btn-sm" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
+      width: "97px",
+      center: true, // ✅ makes both header and cell content centered
+    }
+    ,
     {
-      name: "Product Name", selector: row => row.productname, sortable: true, width: `${calculateColumnWidth(productMaster, 'productname')}px`
+      name: "Edit",
+      selector: row => (
+        <button className="edit-button" onClick={() => handleEdit(row)}> <FaEdit size={14} /></button>), width: "60px",
+    }
+    , { name: "Product Name", selector: row => row.productname, width: "149px",}
+    ,
+    {
+      name: "Product Group", selector: row => row.productgroup, width: "149px",
     },
     {
-      name: "Product Group", selector: row => row.productgroup, width: `${calculateColumnWidth(productMaster, 'productgroup')}px`
-    },
-    {
-      name: "Product Family", selector: row => row.productfamily, width: `${calculateColumnWidth(productMaster, 'productfamily')}px`
+      name: "Product Family", selector: row => row.productfamily, width: "159px", 
     },
     {
       name: "Line Lead",
       selector: row => row.lineLead
         ? row.lineLead.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}px`
+        : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
+      
     },
     {
       name: "Product Engineer",
       selector: row => row.productEngineer
         ? row.productEngineer.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}px`
+        : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
+     
     },
     {
-      name: "status", selector: row => row.recordstatus, width: `${calculateColumnWidth(productMaster, 'recordstatus')}px`
+      name: "status", selector: row => row.recordstatus, width: "199px", 
     },
-
+    
   ];
-
 
   const uploadColumn = [
     {
@@ -290,33 +280,35 @@ const ProductFamilyMaster = () => {
       selector: row => row.productname,
       sortable: true,
       width: `${calculateColumnWidth(productMaster, 'productname')}px`,
+      style: { paddingLeft: '20px' }
     },
     {
-      name: "Product Group", selector: row => row.productgroup, width: `${calculateColumnWidth(productMaster, 'productgroup')}px`
+      name: "Product Group",
+      selector: row => row.productgroup,
+      style: { paddingLeft: '20px' }
+    }
+    ,
+    {
+      name: "Product Family", selector: row => row.productfamily, width: `${calculateColumnWidth(productMaster, 'productfamily')}px`, style: { paddingLeft: '20px' }
     },
     {
-      name: "Product Family", selector: row => row.productfamily, width: `${calculateColumnWidth(productMaster, 'productfamily')}px`
-    },
-    {
-      name: "Status", selector: row => row.recordstatus, width: `${calculateColumnWidth(productMaster, 'recordstatus')}px`
+      name: "Status", selector: row => row.recordstatus, width: `${calculateColumnWidth(productMaster, 'recordstatus')}px`, style: { paddingLeft: '20px' }
     },
     {
       name: "Line Lead",
       selector: row => row.lineLead
         ? row.lineLead.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}px`
-
+        : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}px`,
+      style: { paddingLeft: '20px' }
     },
     {
       name: "Product Engineer",
       selector: row => row.productEngineer
         ? row.productEngineer.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}px`
-
-
+        : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}px`,
+      style: { paddingLeft: '20px' }
     }
   ]
-
   //filterdata fomr productname 
   const filteredData = productMaster.length > 0
     ? productMaster.filter(row =>
@@ -333,30 +325,46 @@ const ProductFamilyMaster = () => {
       recordstatus: ""
     }];
 
-
-  const exportToExcel = () => {
-    setLoading(true);
-
-    downloadProduct()
-      .then((response) => {
-
-        console.log("response", response)
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "products.xlsx");
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      })
-      .catch((error) => {
-        console.error("Download failed:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+  const exportToExcel = (search = "") => {
+    console.log("searchTeaxt", search)
+    if (search && search.trim() !== "") {
+      setLoading(true);
+      downloadSearchProduct(search) // <- pass search here
+        .then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "products.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(true);
+      downloadProduct()
+        .then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "products.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
-
 
   const formClear = () => {
     setFormData({ productname: '', productgroup: '', productfamily: '', createdBy: '', lineLead: '', productEngineer: '', status: '' });
@@ -369,7 +377,6 @@ const ProductFamilyMaster = () => {
     setFileInputKey(Date.now()); // Change key to force re-render
     setSelectedRows([]);
     setDeletButton(false);
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -380,12 +387,10 @@ const ProductFamilyMaster = () => {
       .then((response) => {
         setUserMailData(response.data || []);
       })
-
   }
 
   const handleEdit = (row) => {
     console.log("Editing Row Data:", row);  // Debugging
-
     setFormData({
       id: row.id || "",
       productname: row.productname || "",
@@ -395,29 +400,21 @@ const ProductFamilyMaster = () => {
       lineLead: row.lineLead ? (Array.isArray(row.lineLead) ? row.lineLead : row.lineLead.split(",")) : [],
       productEngineer: row.productEngineer ? (Array.isArray(row.productEngineer) ? row.productEngineer : row.productEngineer.split(",")) : [],
     });
-
     setIsModalOpen(true);
     setHandleSubmitButton(false);
     setHandleUploadButton(false);
     setHandleUpdateButton(true);
   };
 
-
-
-
   const handleUpdate = (e, id) => {
     e.preventDefault(); // Ensure 'e' is correctly passed
-
     if (!valiDate()) return; // Stop execution if validation fails
-
     const modifiedby = sessionStorage.getItem("userName") || "System";
-
     const updatedFormData = {
       ...formData,
       id,  // ✅ Ensure ID is passed
       modifiedby,
     };
-
 
     if (!id) {
       setErrorMessage("Error: Product ID is missing!");
@@ -459,19 +456,15 @@ const ProductFamilyMaster = () => {
   };
 
   const handleDownloadExcel = () => {
-    // Define the header and data format
     const worksheetData = [
       ["productname", "productgroup", "productfamily", "lineLead", "productEngineer", "recordstatus"], // Headers
-      //[formData.productname, formData.productgroup, formData.productfamily, formData.lineLead, formData.recordstatus, formData.productEngineer] // Data
     ];
 
     // Create a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-
     // Create a workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Product Data");
-
     // Create an Excel file and trigger download
     XLSX.writeFile(workbook, "Product_Data.xlsx");
   };
@@ -501,13 +494,11 @@ const ProductFamilyMaster = () => {
       setShowErrorPopup(true);
       event.target.value = null;
       exceluploadClear();
-
       return;
     }
 
     const reader = new FileReader();
     reader.readAsBinaryString(file);
-
     reader.onload = (e) => {
       const data = e.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
@@ -517,9 +508,7 @@ const ProductFamilyMaster = () => {
 
       // Validate column headers first
       const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
-
       const expectedColumns = ["productname", "productgroup", "productfamily", "linelead", "productengineer", "recordstatus",];
-
       const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
 
       if (!isValid) {
@@ -527,13 +516,11 @@ const ProductFamilyMaster = () => {
         setShowErrorPopup(true);
         event.target.value = null;
         exceluploadClear();
-
         return;
       }
 
       // Prepare data ignoring the first row (since it's the header row).
       const parsedData = XLSX.utils.sheet_to_json(worksheet);
-
       if (!parsedData || parsedData.length === 0) {
         setErrorMessage("No data found in the uploaded file");
         setShowErrorPopup(true);
@@ -548,19 +535,14 @@ const ProductFamilyMaster = () => {
       setShowUploadTable(true);
       setShowProductTable(false);
     };
-
     reader.onerror = (error) => {
       console.error("File read error:", error);
     };
   };
 
-
-
   const [duplicateProducts, setDuplicateProducts] = useState([]);
-
   const handleExcelUpload = (e) => {
     e.preventDefault();
-
     const errors = [];
     excelUploadData.slice(1).forEach((row) => {
       if (!row.productname || row.productname.trim() === "") {
@@ -575,24 +557,19 @@ const ProductFamilyMaster = () => {
 
     const createdby = sessionStorage.getItem("userName") || "System";
     const modifiedby = sessionStorage.getItem("userName") || "System";
-
     const updatedFormData = excelUploadData.map(item => ({
       ...item,
       createdby,
       modifiedby,
-
-
       productEngineer: typeof item.productEngineer === "string"
         ? item.productEngineer.split(',').map(s => s.trim())
         : item.productEngineer,
-
       lineLead: typeof item.lineLead === "string"
         ? item.lineLead.split(',').map(s => s.trim())
         : item.lineLead,
     }));
 
     console.log("Final Payload for Bulk Upload:", updatedFormData);
-
     saveProductsBulk(updatedFormData) // Call bulk API
       .then(() => {
         setSuccessMessage("Products Uploaded Successfully");
@@ -602,23 +579,19 @@ const ProductFamilyMaster = () => {
         setShowUploadTable(false);
         fetchProduct();
         setShowProductTable(true);
-
       })
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 409) {
             const errorMessage = error.response.data?.error;
-            //console.log("errorMessage", errorMessage);
             setErrorMessage("errorMessage", errorMessage);
             setShowErrorPopup(true);
             const duplicateName = errorMessage?.split(": ")[1];
             const duplicateMail = errorMessage?.split(": ")[1];
-            // ✅ Wrap in array
             setDuplicateProducts([duplicateName]);
             setShowUploadTable(true);
             setShowProductTable(false);
           }
-
           else {
             setErrorMessage("Something went wrong");
             setShowErrorPopup(true);
@@ -630,7 +603,6 @@ const ProductFamilyMaster = () => {
       });
     setShowProductTable(true);
   };
-
   const rowHighlightStyle = [
     {
       when: row =>
@@ -663,155 +635,124 @@ const ProductFamilyMaster = () => {
       fetchProduct();
       setDeletButton(false);
       setHandleSubmitButton(true);
+      setConfirmDelete(false);
     } catch (error) {
-      //console.error("Delete error:", error);
       setErrorMessage("Failed to delete products");
       setShowErrorPopup(true);
     }
   }
+
   return (
-    <div className='productFamilyContainer'>
-
-      <div className='productFamilyInput'>
-        <div className='prodcutFamilyName'>
-          <h5>Product Master</h5>
+    <div className='COMCssContainer'>
+      <div className='ComCssInput'>
+        <div >
+          <h5 className='ComCssFiledName' >Product Master</h5>
         </div>
-        <div className='productUpload'>
-
+        <div className='ComCssUpload'>
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
           < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
-
-          <button onClick={handleDownloadExcel}> Excel Download </button>
+          <button onClick={handleDownloadExcel}> Excel Format Download </button>
         </div>
         <div className='ProductTexfiled'>
-          <TextField
-            id="outlined-basic"
-            label="Product Name"
-            variant="outlined"
-            name="productname"
-            value={formData.productname}
-            onChange={handleChange}
+          <ThemeProvider theme={TextFiledTheme}>
 
-            error={Boolean(formErrors.productname)}
-            helperText={formErrors.productname}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Product Group"
-            variant="outlined"
-            name="productgroup"
-            value={formData.productgroup}
-            onChange={handleChange}
-            //  onChange={(e) => setFormData({ ...formData, productname: e.target.value })}
-            error={Boolean(formErrors.outstandingAmount)}
-            helperText={formErrors.outstandingAmount}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Product Family"
-            variant="outlined"
-            name="productfamily"
-            value={formData.productfamily}
-            onChange={handleChange}
-            error={Boolean(formErrors.outstandingAmount)}
-            helperText={formErrors.outstandingAmount}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
+            <TextField
+              id="outlined-basic"
+              label="Product Name"
+              variant="outlined"
+              name="productname"
+              value={formData.productname}
+              onChange={handleChange}
+              className='ProductTexfiled-textfield '
+              error={Boolean(formErrors.productname)}
+              helperText={formErrors.productname}
 
-          <Autocomplete
-            options={["Active", "Inactive"]}
-            getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
-            value={formData.recordstatus || []}
-            onChange={(event, newValue) => setFormData({ ...formData, recordstatus: newValue || [] })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Status"
-                variant="outlined"
-                error={Boolean(formErrors.recordstatus)}
-                helperText={formErrors.recordstatus}
-                size="small"  // <-- Reduce height
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green", // label color when floated
-                    fontWeight: 'bold'
-                  }
-                }}
-              />
-            )}
-          />
+            />
+            <TextField
+              id="outlined-basic"
+              label="Product Group"
+              variant="outlined"
+              name="productgroup"
+              value={formData.productgroup}
+              onChange={handleChange}
+              className='ProductTexfiled-textfield '
+              error={Boolean(formErrors.outstandingAmount)}
+              helperText={formErrors.outstandingAmount}
 
-          <Autocomplete
-            multiple
-            options={[...new Set(userMailData)]}  // ✅ Removes duplicates
-            getOptionLabel={(option) => option}
-            value={formData.lineLead || []}
-            onChange={(event, newValue) => setFormData({ ...formData, lineLead: newValue || [] })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Line Lead"
-                variant="outlined"
-                error={Boolean(formErrors.lineLead)}
-                helperText={formErrors.lineLead}
-                size="small"  // <-- Reduce height
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green", // label color when floated
-                    fontWeight: 'bold'
-                  }
-                }}
-              />
-            )}
-          />
+            />
+            <TextField
+              id="outlined-basic"
+              label="Product Family"
+              variant="outlined"
+              name="productfamily"
+              value={formData.productfamily}
+              onChange={handleChange}
+              className='ProductTexfiled-textfield '
 
-          <Autocomplete
-            multiple
-            options={[...new Set(userMailData)]}  // ✅ Removes duplicates
-            getOptionLabel={(option) => option}
-            value={formData.productEngineer || []}
-            onChange={(event, newValue) => setFormData({ ...formData, productEngineer: newValue || [] })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Product Engineer"
-                variant="outlined"
-                error={Boolean(formErrors.productEngineer)}
-                helperText={formErrors.productEngineer}
-                size="small"  // <-- Reduce height
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green", // label color when floated
-                    fontWeight: 'bold'
-                  }
-                }}
-              />
-            )}
-          />
+              error={Boolean(formErrors.outstandingAmount)}
+              helperText={formErrors.outstandingAmount}
+
+            />
+            <Autocomplete
+              options={["Active", "Inactive"]}
+              className='ProductTexfiled-textfield '
+
+              getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
+              value={formData.recordstatus || []}
+              onChange={(event, newValue) => setFormData({ ...formData, recordstatus: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Status"
+                  variant="outlined"
+                  error={Boolean(formErrors.recordstatus)}
+                  helperText={formErrors.recordstatus}
+
+                />
+              )}
+            />
+            <Autocomplete
+              multiple
+              options={[...new Set(userMailData)]}  // ✅ Removes duplicates
+              getOptionLabel={(option) => option}
+              value={formData.lineLead || []}
+              className='ProductTexfiled-textfield '
+
+              onChange={(event, newValue) => setFormData({ ...formData, lineLead: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Line Lead"
+                  variant="outlined"
+                  error={Boolean(formErrors.lineLead)}
+                  helperText={formErrors.lineLead}
+
+                />
+              )}
+            />
+            <Autocomplete
+              multiple
+              options={[...new Set(userMailData)]}  // ✅ Removes duplicates
+              getOptionLabel={(option) => option}
+              value={formData.productEngineer || []}
+              className='ProductTexfiled-textfield '
+
+              onChange={(event, newValue) => setFormData({ ...formData, productEngineer: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Product Engineer"
+                  variant="outlined"
+                  error={Boolean(formErrors.productEngineer)}
+                  helperText={formErrors.productEngineer}
+
+                />
+              )}
+            />
+          </ThemeProvider>
 
         </div>
-
-        <div className='productButton9'>
+        <div className='ComCssButton9'>
           {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
           {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
           {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload}>Upload</button>}
@@ -820,18 +761,17 @@ const ProductFamilyMaster = () => {
         </div>
       </div>
 
-      <div className='productFamilyTable'>
+      <div className='ComCssTable'>
         {showProductTable && !showUploadTable && (
-          <h5 className='prodcutTableName'>All product deatil</h5>
+          <h5 className='ComCssTableName'>Product Detail</h5>
         )}
         {showUploadTable && !showProductTable && (
-          <h5 className='prodcutTableName'>Upload product deatil</h5>
+          <h5 className='ComCssTableName'>Upload product deatil</h5>
         )}
         <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-          <button className="btn btn-success" onClick={exportToExcel} style={{ fontSize: '13px', backgroundColor: 'green' }}>
+          <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
             <FaFileExcel /> Export
           </button>
-
           <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
             <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -844,12 +784,9 @@ const ProductFamilyMaster = () => {
               </span>
             )}
           </div>
-
         </div>
 
-        {/* Default table */}
         {showProductTable && !showUploadTable && (
-
           <DataTable
             columns={columns}
             data={productMaster}
@@ -872,66 +809,10 @@ const ProductFamilyMaster = () => {
             fixedHeader
             fixedHeaderScrollHeight="500px"
             className="react-datatable"
-            customStyles={{
-              headRow: {
-                style: {
-                  //background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                  background: "linear-gradient(to bottom, rgb(48, 59, 137), #159cab)",
-
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  textAlign: "center",
-                  minHeight: "50px",
-                },
-              },
-              rows: {
-                style: {
-                  fontSize: "14px",
-                  textAlign: "center",
-                  alignItems: "center", // Centers content vertically
-
-                  fontFamily: "Arial, Helvetica, sans-serif",
-                },
-              },
-              cells: {
-                style: {
-                  padding: "5px",  // Removed invalid negative padding
-                  //textAlign: "center",
-                  justifyContent: "center",  // Centers header text
-
-
-                },
-              },
-              headCells: {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",  // Centers header text
-                  alignItems: "left",
-                  textAlign: "left",
-                },
-              },
-              pagination: {
-                style: {
-                  border: "1px solid #ddd",
-                  backgroundColor: "#f9f9f9",
-                  color: "#333",
-                  minHeight: "35px",
-                  padding: "5px",
-                  fontSize: "12px",
-                  fontWeight: "bolder",
-                  display: "flex",
-                  justifyContent: "flex-end", // Corrected
-                  alignItems: "center", // Corrected
-                },
-              },
-            }}
 
           />
-
         )}
 
-        {/* Excel upload  */}
         {showUploadTable && !showProductTable && (
           <DataTable
             columns={uploadColumn}
@@ -959,34 +840,37 @@ const ProductFamilyMaster = () => {
             customStyles={{
               headRow: {
                 style: {
-                  background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                  // background: "linear-gradient(to bottom, rgb(159, 13, 162),rgb(82, 179, 187))",
+                  background: "linear-gradient(to right, #701964, #179999)",
+
                   color: "white",
                   fontWeight: "bold",
                   fontSize: "14px",
-                  textAlign: "center",
+                  textAlign: "left",
                   minHeight: "50px",
+                },
+              },
+              headCells: {
+                style: {
+                  textAlign: "left",
+                  justifyContent: "flex-start",
+                  fontWeight: "bold",
                 },
               },
               rows: {
                 style: {
                   fontSize: "14px",
-                  textAlign: "center",
-                  alignItems: "center",
-                  fontFamily: "Arial, Helvetica, sans-serif",
+                  textAlign: "left",               // ✅ Make row data left aligned
+                  alignItems: "flex-start",        // ✅ Top alignment for multi-line
+                  //  fontFamily: "Arial, Helvetica, sans-serif",
+                  fontFamily: `'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif`,
                 },
               },
               cells: {
                 style: {
                   padding: "5px",
-                  justifyContent: "center",
-                },
-              },
-              headCells: {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "left",
-                  textAlign: "left",
+                  textAlign: "left",               // ✅ Force all cells left
+                  justifyContent: "flex-start",
                 },
               },
               pagination: {
@@ -1028,10 +912,8 @@ const ProductFamilyMaster = () => {
         title="Confirm"
         message="Are you sure you want to delete this?"
         color="primary"
-      />    
-      
-      </div>
+      />
+    </div>
   )
 }
-
 export default ProductFamilyMaster

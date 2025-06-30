@@ -1,14 +1,18 @@
 import React, { useState, useEffect , useRef } from 'react'
 import './VendorMaster.css'
+//import * as XLSX from "xlsx";
 import * as XLSX from "xlsx";
+
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, InputLabel } from '@mui/material';
 import { FaFileExcel } from "react-icons/fa";
 import DataTable from "react-data-table-component";
 import { FaEdit } from "react-icons/fa";
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
-import { saveVendorMaster, saveExcelVendorUpload, getVenodtMaster ,updateVendor, deleteVendor } from '../ServicesComponent/Services';
+import { saveVendorMaster, saveExcelVendorUpload, getVenodtMaster ,updateVendor, deleteVendor, downloadSearchVendor, downloadVendor } from '../ServicesComponent/Services';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ThemeProvider } from '@mui/material/styles';
+import TextFiledTheme from '../COM_Component/TextFiledTheme'; // your custom theme path
 import CustomDialog from "../COM_Component/CustomDialog";
 const VeendorMaster = () => {
     const [excelUploadData, setExcelUploadData] = useState([]);
@@ -35,6 +39,14 @@ const VeendorMaster = () => {
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef(null);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    //const [filteredVendors, setFilteredVendors] = useState(vendorMaster);
+const filteredVendors = vendorMaster.filter(v =>
+    v.vendorCode?.toLowerCase().includes(searchText.toLowerCase()) ||
+    v.vendorName?.toLowerCase().includes(searchText.toLowerCase()) ||
+        v.country?.toLowerCase().includes(searchText.toLowerCase()) ||
+    v.modifiedby?.toLowerCase().includes(searchText.toLowerCase()) 
+
+);
     const [formData, setFormData] = useState({
         vendorCode: '',
         vendorName: '',
@@ -302,21 +314,27 @@ setErrorMessage("Something went wrong");
     };
 
     const columns = [
-        //{ name: "Delete", selector: row => <input type="checkbox" />, width: "90px" },
         {
-            name: (
-                <div style={{ textAlign: "center" }}>
-                    <label>Delete All</label>
-                    <br />
-                    <input type="checkbox" onChange={handleSelectAll} checked={selectedRows.length === vendorMaster.length && vendorMaster.length > 0} />
-                </div>
-            ),
-            cell: (row) => (
-                <input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)} />
-            ),
-            width: "130px",
-        },
-        { name: "Edit", selector: row => (<button className="btn btn-warning btn-sm" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
+      name: (
+        <div style={{textAlign: 'center', }}>
+          <label>Delete All</label>
+          <br />
+          <input type="checkbox" onChange={handleSelectAll} 
+            checked={selectedRows.length === vendorMaster.length && vendorMaster.length > 0}
+          />
+        </div>
+      ),
+      cell: (row) => (
+        <div style={{ paddingLeft: '27px', width: '100%' }}>
+          <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
+          />
+        </div>
+      ),
+      width: "97px",
+      center: true, // ✅ makes both header and cell content centered
+    } 
+    ,
+        { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
         {
             name: "vendorcode", selector: row => row.vendorCode, sortable: true, width: `${calculateColumnWidth(vendorMaster, 'vendorcode')}px`
         },
@@ -532,18 +550,47 @@ setErrorMessage("Something went wrong");
             setShowErrorPopup(true);
         }
       }
+
+     const exportToExcel = (searchText ="") => {
+
+        if (searchText && searchText.trim() !== "") {
+    if (!Array.isArray(vendorMaster) || filteredVendors.length === 0) {
+      console.warn("No data to export.");
+      return;
+    }
+    const sheet = XLSX.utils.json_to_sheet(filteredVendors);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+
+    XLSX.writeFile(workbook, "VendorMaster.xlsx");
+
+}else{
+    if (!Array.isArray(vendorMaster) || vendorMaster.length === 0) {
+      console.warn("No data to export.");
+      return;
+    }
+    const sheet = XLSX.utils.json_to_sheet(vendorMaster);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+
+    XLSX.writeFile(workbook, "VendorMaster.xlsx");
+}
+    
+  };
     return (
-        <div className='VendorContainer'>
-            <div className='VendorInput'>
-                <div className='VendorFiledName'>
+        <div className='COMCssContainer'>
+            <div className='ComCssInput'>
+                <div className='ComCssFiledName'>
                     <h5>Vendor Master</h5>
                 </div>
-                <div className='productUpload'>
+                <div className='ComCssUpload'>
                     <input type="file" accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
                     < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
                     <button onClick={handleDownloadExcel}> Excel Download </button>
                 </div>
                 <div className='VendorTexfiled'>
+                              <ThemeProvider theme={TextFiledTheme}>
+                    
                     <TextField
                         id="outlined-basic"
                         label="vendorCode"
@@ -556,12 +603,8 @@ setErrorMessage("Something went wrong");
                         helperText={formErrors.vendorCode}
                         //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
                         size="small"
-                        sx={{
-                                    "& label.MuiInputLabel-shrink": {
-                                        color: "green", // label color when floated
-                                        fontWeight: 'bold'
-                                    }
-                                }}
+                                    className='VendorTexfiled-textfield '
+
                     />
                     <TextField
                         id="outlined-basic"
@@ -572,13 +615,9 @@ setErrorMessage("Something went wrong");
                         onChange={handleChange}
                         error={Boolean(formErrors.vendorName)}
                         helperText={formErrors.vendorName}
+                                      className='VendorTexfiled-textfield '
                         size="small"
-                        sx={{
-                                    "& label.MuiInputLabel-shrink": {
-                                        color: "green", // label color when floated
-                                        fontWeight: 'bold'
-                                    }
-                                }}
+                        
                     />
                     <Autocomplete
                         options={countryList}
@@ -595,16 +634,11 @@ setErrorMessage("Something went wrong");
                                 size="small"
                                 error={Boolean(formErrors.country)}
                                 helperText={formErrors.country}
-
-                                sx={{
-                                    "& label.MuiInputLabel-shrink": {
-                                        color: "green", // label color when floated
-                                        fontWeight: 'bold'
-                                    }
-                                }}
+              className='VendorTexfiled-textfield '
                             />
                         )}
                     />
+                    </ThemeProvider>
                      {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DatePicker
         label="Select Date"
@@ -615,7 +649,7 @@ setErrorMessage("Something went wrong");
       />
     </LocalizationProvider> */}
                 </div>
-                <div className='productButton9'>
+                <div className='ComCssButton9'>
                     {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit} >Submit</button>}
                     {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
                     {handleUploadButton && (
@@ -632,16 +666,16 @@ setErrorMessage("Something went wrong");
                     <button onClick={formClear}>Clear</button>
                 </div>
             </div>
-            <div className='vendorTable'>
+            <div className='ComCssTable'>
                 {showVendorTable && !showUploadTable && (
-                    <h5 className='prodcutTableName'>All Vendor deatil</h5>
+                    <h5 className='ComCssTableName'>Vendor Detail</h5>
                 )}
                 {showUploadTable && !showVendorTable && (
-                    <h5 className='prodcutTableName'>Upload Vedor deatil</h5>
+                    <h5 className='ComCssTableName'>Upload Vedor deatil</h5>
                 )}
                 {showVendorTable && !showUploadTable &&   (
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" style={{ fontSize: '13px', backgroundColor: 'green' }}>
+                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)}  >
                         <FaFileExcel /> Export
                     </button>
 
@@ -656,7 +690,13 @@ setErrorMessage("Something went wrong");
                                 ✖
                             </span>
                         )}
+                      
                     </div>
+                       {/* {filteredVendors.map(vendor => (
+            <div key={vendor.id}>
+                {vendor.vendorName}
+            </div>
+        ))} */}
 
                 </div>
                 )}
@@ -686,60 +726,7 @@ setErrorMessage("Something went wrong");
                         fixedHeader
                         fixedHeaderScrollHeight="500px"
                         className="react-datatable"
-                        customStyles={{
-                            headRow: {
-                                style: {
-                                    //background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                                    background: "linear-gradient(to bottom, rgb(48, 59, 137), #159cab)",
-
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    minHeight: "50px",
-                                },
-                            },
-                            rows: {
-                                style: {
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    alignItems: "center", // Centers content vertically
-
-                                    fontFamily: "Arial, Helvetica, sans-serif",
-                                },
-                            },
-                            cells: {
-                                style: {
-                                    padding: "5px",  // Removed invalid negative padding
-                                    //textAlign: "center",
-                                    justifyContent: "center",  // Centers header text
-
-
-                                },
-                            },
-                            headCells: {
-                                style: {
-                                    display: "flex",
-                                    justifyContent: "center",  // Centers header text
-                                    alignItems: "left",
-                                    textAlign: "left",
-                                },
-                            },
-                            pagination: {
-                                style: {
-                                    border: "1px solid #ddd",
-                                    backgroundColor: "#f9f9f9",
-                                    color: "#333",
-                                    minHeight: "35px",
-                                    padding: "5px",
-                                    fontSize: "12px",
-                                    fontWeight: "bolder",
-                                    display: "flex",
-                                    justifyContent: "flex-end", // Corrected
-                                    alignItems: "center", // Corrected
-                                },
-                            },
-                        }}
+                        
 
                     />
 

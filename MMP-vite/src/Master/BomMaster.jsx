@@ -7,7 +7,13 @@ import { FaFileExcel } from "react-icons/fa";
 import { deleteBom, downloadBom, downloadSearchBom, getBoMaster, getBomMasterFind, getPartcode, getProduct, saveBomMaster, saveBomMasterUpload, updateBomMaster } from '../ServicesComponent/Services';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import { FaEdit } from "react-icons/fa";
+import "../COM_Component/COM_Css.css";
 import CustomDialog from "../COM_Component/CustomDialog";
+import { FixedSizeList } from 'react-window';
+import TextFiledTheme from '../COM_Component/TextFiledTheme'; // your custom theme path
+import DropdownCom from '../COM_Component/DropdownCom'
+import Popper from '@mui/material/Popper';
+import { ThemeProvider } from '@mui/material/styles';
 
 const BomMaster = () => {
     const [formErrors, setFormErrors] = useState({});
@@ -45,6 +51,51 @@ const BomMaster = () => {
         productfamily: ""
 
     })
+    const CustomPopper = (props) => (
+        <Popper
+            {...props}
+            style={{
+                ...props.style,
+                width: '900px' // ✅ Your desired dropdown width
+            }}
+            placement="bottom-start"
+        />
+    );
+    const LISTBOX_PADDING = 8;
+    const renderRow = ({ data, index, style }) => {
+        const option = data[index];
+        return (
+            <li {...option.props} style={{ ...option.props.style, ...style }}>
+                {option.props.children}
+            </li>
+        );
+    };
+    const ListboxComponent = React.forwardRef(function ListboxComponent(props, ref) {
+        const { children, ...other } = props;
+        const itemData = [];
+
+        React.Children.forEach(children, (child) => {
+            itemData.push(child);
+        });
+
+        const itemCount = itemData.length;
+        const itemSize = 36;
+
+        return (
+            <div ref={ref} {...other}>
+                <FixedSizeList
+                    height={300}
+                    width="100%"
+                    itemSize={itemSize}
+                    itemCount={itemCount}
+                    itemData={itemData}
+                    overscanCount={5}
+                >
+                    {renderRow}
+                </FixedSizeList>
+            </div>
+        );
+    });
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
         useEffect(() => {
@@ -229,7 +280,7 @@ const BomMaster = () => {
             })
     }
 
-    const calculateColumnWidth = (data, key, charWrap = 19, charWidth = 8, minWidth = 190, maxWidth = 318) => {
+    const calculateColumnWidth = (data, key, charWrap = 28, charWidth = 8, minWidth = 190, maxWidth = 318) => {
         if (!Array.isArray(data) || data.length === 0) return minWidth;
 
         const maxLines = Math.max(
@@ -360,19 +411,25 @@ const BomMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: "center" }}>
+                <div style={{ textAlign: 'center', }}>
                     <label>Delete All</label>
                     <br />
-
-                    <input type="checkbox" onChange={handleSelectAll} checked={selectedRows.length === bomMaster.length && bomMaster.length > 0} />
+                    <input type="checkbox" onChange={handleSelectAll}
+                        checked={selectedRows.length === bomMaster.length && bomMaster.length > 0}
+                    />
                 </div>
             ),
             cell: (row) => (
-                <input type="checkbox" checked={selectedRows.includes(row.intsysid)} onChange={() => handleRowSelect(row.intsysid)} />
+                <div style={{ paddingLeft: '27px', width: '100%' }}>
+                    <input type="checkbox" checked={selectedRows.includes(row.intsysid)} onChange={() => handleRowSelect(row.intsysid)}
+                    />
+                </div>
             ),
-            width: "130px",
+            width: "97px",
+            center: true, // ✅ makes both header and cell content centered
         },
-        { name: "Edit", selector: row => (<button className="btn btn-warning btn-sm" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
+
+        { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "60px" },
         ,
         {
             name: "Partcode",
@@ -401,7 +458,6 @@ const BomMaster = () => {
             selector: row => row.productfamily,
             width: `${calculateColumnWidth(bomMaster, 'productfamily')}px`
         }
-
     ]
 
     useEffect(() => {
@@ -619,12 +675,12 @@ const BomMaster = () => {
         }
     };
     return (
-        <div className='BomContainer'>
-            <div className='BomMasterInput'>
-                <div className='BomMasterFiledName'>
+        <div className='COMCssContainer'>
+            <div className='ComCssInput'>
+                <div className='ComCssFiledName'>
                     <h5>BOM Master </h5>
                 </div>
-                <div className='productUpload'>
+                <div className='ComCssUpload'>
                     <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
                     < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
 
@@ -632,149 +688,171 @@ const BomMaster = () => {
                 </div>
 
                 <div className='BomMasterTexfiled'>
-                    <Autocomplete
-                        options={storeRc}
-                        getOptionLabel={(option) => option.partcode}
-                        isOptionEqualToValue={(option, value) => option.partcode === value.partcode}
-                        getOptionKey={(option) => option.partcode} // Optional but safe for custom rendering
-                        value={storeRc.find(item => item.partcode === formData.partcode) || null}
-                        onChange={(event, newValue) => {
-                            if (newValue) {
-                                setFormData({
-                                    ...formData,
-                                    partcode: newValue.partcode,
-                                    partdescription: newValue.partdescription
-                                });
-                            } else {
-                                setFormData({ ...formData, partcode: "", partdescription: "" });
-                            }
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Partcode"
-                                variant="outlined"
-                                error={Boolean(formErrors.partcode)}
-                                helperText={formErrors.partcode}
-                                size="small"
-                                sx={{
-                                    "& label.MuiInputLabel-shrink": {
-                                        color: "green", // label color when floated
-                                        fontWeight: 'bold'
-                                    }
-                                }}
-                            />
-                        )}
-                        renderOption={(props, option) => (
-                            <li {...props} key={option.partcode}>
-                                {option.partcode}
-                            </li>
-                        )}
-                    />
-                    <Autocomplete
-                        options={storeRc}
-                        getOptionLabel={(option) => option.partdescription}
-                        isOptionEqualToValue={(option, value) => option.partdescription === value.partdescription}
-                        getOptionKey={(option) => option.partdescription} // Optional but safe for custom rendering
-                        value={storeRc.find(item => item.partdescription === formData.partdescription) || null}
-                        onChange={(event, newValue) => {
-                            if (newValue) {
-                                setFormData({
-                                    ...formData,
-                                    partcode: newValue.partcode,
-                                    partdescription: newValue.partdescription
-                                });
-                            } else {
-                                setFormData({ ...formData, partcode: "", partdescription: "" });
-                            }
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="partdescription"
-                                variant="outlined"
+                    <ThemeProvider theme={TextFiledTheme}>
 
-                                size="small"
-                                sx={{
-                                    "& label.MuiInputLabel-shrink": {
-                                        color: "green", // label color when floated
-                                        fontWeight: 'bold'
-                                    }
-                                }}
-                            />
-                        )}
-                        renderOption={(props, option) => (
-                            <li {...props} key={option.partdescription}>
-                                {option.partdescription}
-                            </li>
-                        )}
-                    />
-                    <Autocomplete
-                        options={storeProduct}
-                        getOptionLabel={(option) => option.productName}
-                        value={storeProduct.find(item => item.productName === formData.productname) || null}
-                        onChange={(event, newValue) => {
-                            if (newValue) {
-                                setFormData({
-                                    ...formData,
-                                    productname: newValue.productName,
-                                    productgroup: newValue.productGroup,
-                                    productfamily: newValue.productFamily,
+                        <Autocomplete
+                            disableListWrap
+                            ListboxComponent={DropdownCom} // ✅ enable virtualization
+                            options={storeRc}
+                            getOptionLabel={(option) => option.partcode}
+                            isOptionEqualToValue={(option, value) => option.partcode === value.partcode}
+                            value={storeRc.find(item => item.partcode === formData.partcode) || null}
 
-                                });
-                            } else {
-                                setFormData({ ...formData, productname: "", productgroup: "", productfamily: "" });
-                            }
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="productname"
-                                variant="outlined"
-                                error={Boolean(formErrors.productname)}
-                                helperText={formErrors.productname}
-                                size="small"
-                                sx={{
-                                    "& label.MuiInputLabel-shrink": {
-                                        color: "green", // label color when floated
-                                        fontWeight: 'bold'
-                                    }
-                                }}
-                            />
-                        )}
-                    />
-                    <TextField
-                        id="outlined-basic"
-                        label="productGroup"
-                        variant="outlined"
-                        name="productgroup"
-                        value={formData.productgroup}
-                        onChange={handleChange}
-                        size="small"
-                        sx={{
-                            "& label.MuiInputLabel-shrink": {
-                                color: "green", // label color when floated
-                                fontWeight: 'bold'
-                            }
-                        }}
-                    />
-                    <TextField
-                        id="outlined-basic"
-                        label="productFamily"
-                        variant="outlined"
-                        name="productfamily"
-                        value={formData.productfamily}
-                        onChange={handleChange}
-                        size="small"
-                        sx={{
-                            "& label.MuiInputLabel-shrink": {
-                                color: "green", // label color when floated
-                                fontWeight: 'bold'
-                            }
-                        }}
-                    />
+                            className='ProductTexfiled-textfield '
+
+                            onChange={(event, newValue) => {
+                                if (newValue) {
+                                    setFormData({
+                                        ...formData,
+                                        partcode: newValue.partcode,
+                                        partdescription: newValue.partdescription
+                                    });
+                                } else {
+                                    setFormData({ ...formData, partcode: "", partdescription: "" });
+                                }
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Partcode"
+                                    variant="outlined"
+                                    error={Boolean(formErrors.partcode)}
+                                    className='ProductTexfiled-textfield '
+
+                                    helperText={formErrors.partcode}
+                                    size="small"
+                                    sx={{
+                                        "& label.MuiInputLabel-shrink": {
+                                            color: "green",
+                                            fontWeight: 'bold'
+                                        }
+                                    }}
+                                />
+                            )}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.partcode}>
+                                    {option.partcode}
+                                </li>
+                            )}
+                        />
+
+                        <Autocomplete
+                            options={storeRc}
+                            // disableListWrap
+                            ListboxComponent={DropdownCom} // ✅ enable virtualization
+                            PopperComponent={CustomPopper} // ✅ Set dropdown width
+                            className='ProductTexfiled-textfield '
+                            getOptionLabel={(option) => option.partdescription}
+                            isOptionEqualToValue={(option, value) => option.partdescription === value.partdescription}
+                            getOptionKey={(option) => option.partdescription} // Optional but safe for custom rendering
+                            value={storeRc.find(item => item.partdescription === formData.partdescription) || null}
+                            onChange={(event, newValue) => {
+                                if (newValue) {
+                                    setFormData({
+                                        ...formData,
+                                        partcode: newValue.partcode,
+                                        partdescription: newValue.partdescription
+                                    });
+                                } else {
+                                    setFormData({ ...formData, partcode: "", partdescription: "" });
+                                }
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="partdescription"
+                                    variant="outlined"
+
+                                    size="small"
+                                    sx={{
+                                        "& label.MuiInputLabel-shrink": {
+                                            color: "green", // label color when floated
+                                            fontWeight: 'bold',
+                                            width: "500px"
+
+
+                                        }
+                                    }}
+                                />
+                            )}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.partdescription}>
+                                    {option.partdescription}
+                                </li>
+                            )}
+                        />
+                        <Autocomplete
+                            options={storeProduct}
+                            getOptionLabel={(option) => option.productName}
+                            value={storeProduct.find(item => item.productName === formData.productname) || null}
+                            onChange={(event, newValue) => {
+                                if (newValue) {
+                                    setFormData({
+                                        ...formData,
+                                        productname: newValue.productName,
+                                        productgroup: newValue.productGroup,
+                                        productfamily: newValue.productFamily,
+
+                                    });
+                                } else {
+                                    setFormData({ ...formData, productname: "", productgroup: "", productfamily: "" });
+                                }
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="productname"
+                                    variant="outlined"
+                                    error={Boolean(formErrors.productname)}
+                                    helperText={formErrors.productname}
+                                    className='ProductTexfiled-textfield '
+
+                                    size="small"
+                                    sx={{
+                                        "& label.MuiInputLabel-shrink": {
+                                            color: "green", // label color when floated
+                                            fontWeight: 'bold'
+                                        }
+                                    }}
+                                />
+                            )}
+                        />
+                        <TextField
+                            id="outlined-basic"
+                            label="productGroup"
+                            variant="outlined"
+                            name="productgroup"
+                            value={formData.productgroup}
+                            className='ProductTexfiled-textfield '
+
+                            onChange={handleChange}
+                            size="small"
+                            sx={{
+                                "& label.MuiInputLabel-shrink": {
+                                    color: "green", // label color when floated
+                                    fontWeight: 'bold'
+                                }
+                            }}
+                        />
+                        <TextField
+                            id="outlined-basic"
+                            label="productFamily"
+                            variant="outlined"
+                            name="productfamily"
+                            value={formData.productfamily}
+                            className='ProductTexfiled-textfield '
+                            onChange={handleChange}
+                            size="small"
+                            sx={{
+                                "& label.MuiInputLabel-shrink": {
+                                    color: "green", // label color when floated
+                                    fontWeight: 'bold'
+                                }
+                            }}
+                        />
+                    </ThemeProvider>
                 </div>
-                <div className='productButton9'>
+                <div className='ComCssButton9'>
                     {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
                     {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.intsysid)}>Update</button>}
                     {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload}>Upload</button>}
@@ -782,18 +860,18 @@ const BomMaster = () => {
                     <button onClick={formClear}>Clear</button>
                 </div>
             </div>
-            <div className='bomMasterTable'>
+            <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (
-                    <h5 className='prodcutTableName'>All Master deatil</h5>
+                    <h5 className='ComCssTableName'>BOM Master Detail</h5>
                 )}
 
                 {showUploadTable && !showBomTable && (
-                    <h5 className='prodcutTableName'>Upload Master deatil</h5>
+                    <h5 className='ComCssTableName'>Upload Master deatil</h5>
                 )}
 
                 {showBomTable && !showUploadTable && (
                     <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                        <button className="btn btn-success" onClick={() => exportToExcel(searchText)} style={{ fontSize: '13px', backgroundColor: 'green' }}>
+                        <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
                             <FaFileExcel /> Export
                         </button>
 
@@ -834,61 +912,8 @@ const BomMaster = () => {
                         fixedHeaderScrollHeight="400px"
                         highlightOnHover
                         className="react-datatable"
-                        //conditionalRowStyles={rowHighlightStyle}
-                        customStyles={{
-                            headRow: {
-                                style: {
-                                    background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    minHeight: "50px",
+                    // conditionalRowStyles={rowHighlightStyle}
 
-                                },
-                            },
-                            rows: {
-                                style: {
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    alignItems: "center", // Centers content vertically
-                                    fontFamily: "Arial, Helvetica, sans-serif",
-                                },
-                            },
-                            cells: {
-                                style: {
-                                    padding: "5px",  // Removed invalid negative padding
-                                    //textAlign: "center",
-                                    justifyContent: "center",  // Centers header text
-                                    whiteSpace: 'pre-wrap', // wrap text
-                                    wordBreak: 'break-word', // allow breaking words
-                                },
-                            },
-                            headCells: {
-                                style: {
-                                    display: "flex",
-                                    justifyContent: "center",  // Centers header text
-                                    alignItems: "left",
-                                    textAlign: "left",
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                },
-                            },
-                            pagination: {
-                                style: {
-                                    border: "1px solid #ddd",
-                                    backgroundColor: "#f9f9f9",
-                                    color: "#333",
-                                    minHeight: "35px",
-                                    padding: "5px",
-                                    fontSize: "12px",
-                                    fontWeight: "bolder",
-                                    display: "flex",
-                                    justifyContent: "flex-end", // Corrected
-                                    alignItems: "center", // Corrected
-                                },
-                            },
-                        }}
                     />
                 )}
 
