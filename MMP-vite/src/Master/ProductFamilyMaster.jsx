@@ -188,10 +188,10 @@ const ProductFamilyMaster = () => {
     }
   };
 
-  //console
-  useEffect(() => {
-    console.log("setSelectedRows:", selectedRows); // Logs the updated state
-  }, [selectedRows]);
+  // //console
+  // useEffect(() => {
+  //   console.log("setSelectedRows:", selectedRows); // Logs the updated state
+  // }, [selectedRows]);
 
   const handleRowSelect = (rowKey) => {
     setHandleUpdateButton(false);
@@ -232,13 +232,13 @@ const ProductFamilyMaster = () => {
         </div>
       ),
       cell: (row) => (
-        <div style={{ paddingLeft: '27px', width: '100%' }}>
+        <div style={{ paddingLeft: '23px', width: '100%' }}>
           <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
           />
         </div>
       ),
       width: "97px",
-      center: true, // ✅ makes both header and cell content centered
+      // center: true, // ✅ makes both header and cell content centered
     }
     ,
     {
@@ -373,6 +373,7 @@ const ProductFamilyMaster = () => {
     setHandleUpdateButton(false);
     setHandleUploadButton(false);
     setShowUploadTable(false);  // Hide upload table
+    setFormErrors({}); 
     setShowProductTable(true);  // Show product table
     setFileInputKey(Date.now()); // Change key to force re-render
     setSelectedRows([]);
@@ -438,19 +439,18 @@ const ProductFamilyMaster = () => {
         setHandleUploadButton(false);
         setHandleUpdateButton(false);
         fetchProduct(page, perPage);
+         setPage(1);          // Set page to 1
+  fetchData(1); 
       })
       .catch((error) => {
         if (error.response) {
           if (error.response.status === 409) {
-            setErrorMessage("Product already exists");
+            setErrorMessage(error.response.data.message);
             setShowErrorPopup(true);
           } else {
             setErrorMessage("Something went wrong");
             setShowErrorPopup(true);
           }
-        } else {
-          setErrorMessage("Network error, please try again");
-          setShowErrorPopup(true);
         }
       });
   };
@@ -645,8 +645,8 @@ const ProductFamilyMaster = () => {
   return (
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
-        <div >
-          <h5 className='ComCssFiledName' >Product Master</h5>
+        <div className='ComCssFiledName' >
+          <h5 >Product Master</h5>
         </div>
         <div className='ComCssUpload'>
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
@@ -896,6 +896,7 @@ const ProductFamilyMaster = () => {
         onClose={() => setShowSuccessPopup(false)}
         title="Success"
         message={successMessage}
+          severity="success" 
         color="primary"
       />
       <CustomDialog
@@ -903,6 +904,7 @@ const ProductFamilyMaster = () => {
         onClose={() => setShowErrorPopup(false)}
         title="Error"
         message={errorMessage}
+         severity="error" 
         color="secondary"
       />
       <CustomDialog

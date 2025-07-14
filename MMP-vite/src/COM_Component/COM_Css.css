@@ -7,12 +7,13 @@
     justify-content: flex-start;
 }
 
-.ComCssInput {
+
+.ComCssInputHide {
     flex-direction: column;
-    background-color: floralwhite;
+    /* background-color: floralwhite; */
     border: 2px solid #edd9d9;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    border-radius: 15px;
     width: 95%;
     margin-top: 20px;
     margin-left: 40px;
@@ -22,18 +23,85 @@
     gap: 30px;
     background-color: white;
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-
+ position: relative;
+  overflow: hidden;
+  z-index: 1;
     flex-wrap: wrap                         /* Space between rows */
 }
+
+.ComCssInput {
+    flex-direction: column;
+    /* background-color: floralwhite; */
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    width: 95%;
+    margin-top: 20px;
+    margin-left: 40px;
+    padding: 20px;
+    display: flex;                    
+    justify-content: space-between;    /* Space evenly */
+    gap: 30px;
+    background-color: white;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+ position: relative;
+  overflow: hidden;
+  z-index: 1;
+    flex-wrap: wrap                         /* Space between rows */
+}
+
+
+
+/* 🔥 Glowing animated border inside */
+.ComCssInput::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: conic-gradient(
+    from 0deg,
+    #4bd52c,
+    #d7c247,
+    #cd3eb1
+  );
+  border-radius: 10px;
+  z-index: -1;
+  animation: spin 4s linear infinite;
+  filter: blur(8px);
+}
+
+/* Inner white layer */
+.ComCssInput::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  background: white;
+  border-radius: 8px;
+  z-index: -1;
+}
+
+/* 🌀 Animation */
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 .ComCssFiledName {
     font-size: 18px;
-    font-weight: bold;
-    color: rgb(6, 132, 154);
+    font-weight: 500;
+    color: #0070b4;
     margin: 0;
     padding-left:-10px;
     padding-top: 0px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     align-self: flex-start; 
+    /* font-family: Prometo; */
 }
 /* Ensure 4 fields in a row */
 .ComCssTexfiled {
@@ -188,24 +256,26 @@
   background: linear-gradient(to right, #701964, #179999);
   color: white;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
   text-align: left;
   min-height: 40px;
+  margin-left: -10px;
 }
 
 /* Head cells */
 .react-datatable .rdt_TableCol {
   text-align: left;
-  /* margin-left: -5px; */
+  /* margin-left:-3px; */
   justify-content:flex-start;
   font-weight: bold;
 }
 
 /* Data rows */
 .react-datatable .rdt_TableRow {
-  font-size: 13.5px;
-  font-weight: bold;
-  margin-left: 10px;
+  display: flex;
+  font-size: 12px;
+  font-weight:700;
+   /* margin-left: 10px; */
   text-align: left;
   align-items: flex-start;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;

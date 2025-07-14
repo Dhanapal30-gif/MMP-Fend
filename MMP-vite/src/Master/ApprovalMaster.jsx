@@ -307,7 +307,7 @@ const ApprovalMaster = () => {
         </div>
       ),
       cell: (row) => (
-        <div style={{ paddingLeft: '27px', width: '100%' }}>
+        <div style={{ paddingLeft: '23px', width: '100%' }}>
           <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
           />
         </div>

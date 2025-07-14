@@ -6,22 +6,26 @@ html, body {
     overflow: auto;    /* ✅ Ensures scrollability */
 }
 /* Background Image */
+
+
 .cretaeBackgroundimgae {
-    background-image: url('../assets/PTL.jpg'); 
+    background-image: url('../assets/image.png'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     width: 100vw;  
     height: 100vh; 
     display: flex;
+      overflow: hidden;
+  position: relative;
     justify-content: center;
-    align-items: center; /* Centers the form */
-    padding: 20px; /* Prevents content from touching edges */
+    align-items: center; 
+    
 }
 
 /* Logo */
 .cretaeimgae {
-    background-image: url('../assets/Nokia-Logo.png'); 
+    background-image: url('../assets/Nokia_9-removebg-preview.png'); 
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;

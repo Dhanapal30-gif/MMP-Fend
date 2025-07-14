@@ -420,7 +420,7 @@ const BomMaster = () => {
                 </div>
             ),
             cell: (row) => (
-                <div style={{ paddingLeft: '27px', width: '100%' }}>
+                <div style={{ paddingLeft: '23px', width: '100%' }}>
                     <input type="checkbox" checked={selectedRows.includes(row.intsysid)} onChange={() => handleRowSelect(row.intsysid)}
                     />
                 </div>
@@ -441,12 +441,14 @@ const BomMaster = () => {
             name: "Partdescription",
             selector: row => row.partdescription,
             wrap: true,
-            width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
+            // width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
+            width:"250px"
         },
         {
             name: "productname",
             selector: row => row.productname,
             width: `${calculateColumnWidth(bomMaster, 'productname')}px`
+            
         },
         {
             name: "productGroup",
@@ -1004,6 +1006,7 @@ const BomMaster = () => {
                 onClose={() => setShowSuccessPopup(false)}
                 title="Success"
                 message={successMessage}
+                 severity="success"
                 color="primary"
             />
             <CustomDialog
@@ -1011,6 +1014,7 @@ const BomMaster = () => {
                 onClose={() => setShowErrorPopup(false)}
                 title="Error"
                 message={errorMessage}
+                severity="error"
                 color="secondary"
             />
             <CustomDialog
