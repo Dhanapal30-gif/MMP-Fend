@@ -22,7 +22,7 @@ function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation(); // Get current route
-  console.log(location.pathname);
+  // console.log(location.pathname);
   useEffect(() => {
     const role = sessionStorage.getItem('userRole');
     setIsLoggedIn(!!role); // Set login status based on session

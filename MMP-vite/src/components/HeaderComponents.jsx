@@ -7,6 +7,12 @@ import Imagee from "../assets/Nokia_9-removebg-preview.png";
 import './HeaderComponents.css';
 import { Badge, IconButton } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { FaHome, FaCog, FaCubes, FaStore, FaWarehouse, FaChartPie, FaFileAlt } from "react-icons/fa";
+import { AiFillHome } from "react-icons/ai";
+import { IoSettingsSharp } from "react-icons/io5";
+import { GiCube } from "react-icons/gi";
+import { HiChartBar } from "react-icons/hi";
+
 const HeaderComponents = () => {
   const [empName, setEmpName] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -19,7 +25,7 @@ const HeaderComponents = () => {
     const sessionName = sessionStorage.getItem("userName") || "";
     const role = sessionStorage.getItem("userRole") || "";
     const loginStatus = sessionStorage.getItem("isLoggedIn") === "true";
-    console.log("empName", sessionName)
+    // console.log("empName", sessionName)
 
     setEmpName(sessionName);
     setUserRole(role);
@@ -47,32 +53,40 @@ const HeaderComponents = () => {
   return (
     <header >
       <div className="header7">
-  <div className="logo-section">
-    <img src={Imagee} alt="Logo" className="logo" />
-    <span className="logo-text">Mat Man Pro</span>
-  </div>
-<div className="notification">
-  <IconButton sx={{ color: 'white' }} >
-  <Badge badgeContent={4} color="error">
-    <NotificationsIcon />
-  </Badge>
-</IconButton>
-</div>
-  <div className="avatar-container">
-    {isLoggedIn ? (
-      <div className="avatar-wrapper">
-        <Avatar
-          className="avatar"
-          sx={{ bgcolor: "#076935" }}
-          onClick={handleSignOut}
-        />
-        <h5 className="avatar-name">{"Mat man pro "}</h5>
+        <div class="header-logo-box"></div>
+        <div className="logo-section">
+          <img src={Imagee} alt="Logo" className="logo" />
+          {/* <span className="logo-text">Mat Man Pro</span> */}
+          {/* <div class="logo-text">
+  <div class="logo-text">OrkaTrack • OrkaTrack • OrkaTrack •</div>
+</div> */}
+          <div class="scroll-box">
+            <div class="scroll-text">Mat Man Pro</div>
+          </div>
+
+        </div>
+        <div className="notification">
+          <IconButton sx={{ color: 'white' }} >
+            <Badge badgeContent={4} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+        </div>
+        <div className="avatar-container">
+          {isLoggedIn ? (
+            <div className="avatar-wrapper">
+              <Avatar
+                className="avatar"
+                sx={{ bgcolor: "#076935" }}
+                onClick={handleSignOut}
+              />
+              <h5 className="avatar-name">{empName}</h5>
+            </div>
+          ) : (
+            <Link to="/" className="signup-btn">{empName}</Link>
+          )}
+        </div>
       </div>
-    ) : (
-      <Link to="/" className="signup-btn">{empName}</Link>
-    )}
-  </div>
-</div>
 
 
 
@@ -85,12 +99,18 @@ const HeaderComponents = () => {
         <nav className={`navgation ${isMenuOpen ? "open" : ""}`}>
           <ul className="nav-links">
             <li className="dropdown-container" >
-              <li><Link to="/home">Home</Link></li>
+              {/* <ul><Link to="/home">Home</Link></ul> */}
+              <span className="nav-link">
+                <AiFillHome className="nav-icon" /> Home
+              </span>
             </li>
             {/* Settings Dropdown */}
             <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
-              <span className="nav-link">
+              {/* <span className="nav-link">
                 Settings <FaChevronDown className="dropdown-icon" />
+              </span> */}
+              <span className="nav-link">
+                <IoSettingsSharp className="nav-icon" /> Settings <FaChevronDown className="dropdown-icon" />
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
@@ -103,8 +123,11 @@ const HeaderComponents = () => {
 
             {/* Masters Dropdown */}
             <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
-              <span className="nav-link">
+              {/* <span className="nav-link">
                 Masters <FaChevronDown className="dropdown-icon" />
+              </span> */}
+              <span className="nav-link">
+                <GiCube className="nav-icon" /> Masters <FaChevronDown className="dropdown-icon" />
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
@@ -123,8 +146,11 @@ const HeaderComponents = () => {
 
             {/* Local PTL Store Dropdown */}
             <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
-              <span className="nav-link">
+              {/* <span className="nav-link">
                 Local PTL Store <FaChevronDown className="dropdown-icon" />
+              </span> */}
+              <span className="nav-link">
+                <FaStore className="nav-icon" /> Local PTL Store <FaChevronDown className="dropdown-icon" />
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
@@ -137,8 +163,11 @@ const HeaderComponents = () => {
 
             {/* Rc Main Store Dropdown */}
             <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
-              <span className="nav-link">
+              {/* <span className="nav-link">
                 Rc Main Store <FaChevronDown className="dropdown-icon" />
+              </span> */}
+              <span className="nav-link">
+                <FaWarehouse className="nav-icon" /> Rc Main Store <FaChevronDown className="dropdown-icon" />
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
@@ -152,8 +181,11 @@ const HeaderComponents = () => {
 
             {/* Dashboard Dropdown */}
             <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
-              <span className="nav-link">
+              {/* <span className="nav-link">
                 Dashboard <FaChevronDown className="dropdown-icon" />
+              </span> */}
+              <span className="nav-link">
+                <FaChartPie className="nav-icon" /> Dashboard <FaChevronDown className="dropdown-icon" />
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
@@ -166,8 +198,11 @@ const HeaderComponents = () => {
 
             {/* Report Dropdown */}
             <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
-              <span className="nav-link">
+              {/* <span className="nav-link">
                 Report <FaChevronDown className="dropdown-icon" />
+              </span> */}
+              <span className="nav-link">
+                <FaFileAlt className="nav-icon" /> Report <FaChevronDown className="dropdown-icon" />
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">

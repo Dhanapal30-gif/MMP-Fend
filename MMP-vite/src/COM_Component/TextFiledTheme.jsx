@@ -40,9 +40,10 @@ const TextFiledTheme = {
     MuiInputLabel: {
    styleOverrides: {
     root: {
-      fontSize: '14px',
+      fontSize: '13px',
+      fontWeight: 'bold',
       "&.MuiInputLabel-shrink": {
-        color: 'green',         // ✅ Floating label color
+        color: 'hsl(226, 55.60%, 53.10%)',         // ✅ Floating label color
         fontWeight: 'bold',     // ✅ Floating label weight
         fontSize: '17px',       // (optional) floating label size
       },

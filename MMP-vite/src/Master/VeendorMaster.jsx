@@ -325,7 +325,7 @@ setErrorMessage("Something went wrong");
         </div>
       ),
       cell: (row) => (
-        <div style={{ paddingLeft: '27px', width: '100%' }}>
+        <div style={{ paddingLeft: '23px', width: '100%' }}>
           <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
           />
         </div>
@@ -603,7 +603,7 @@ setErrorMessage("Something went wrong");
                         helperText={formErrors.vendorCode}
                         //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
                         size="small"
-                                    className='VendorTexfiled-textfield '
+                        className='VendorTexfiled-textfield '
 
                     />
                     <TextField
@@ -811,6 +811,7 @@ setErrorMessage("Something went wrong");
         onClose={() => setShowSuccessPopup(false)}
         title="Success"
         message={successMessage}
+          severity="success" 
         color="primary"
       />
       <CustomDialog
@@ -818,6 +819,7 @@ setErrorMessage("Something went wrong");
         onClose={() => setShowErrorPopup(false)}
         title="Error"
         message={errorMessage}
+        severity="error"
         color="secondary"
       />
       <CustomDialog

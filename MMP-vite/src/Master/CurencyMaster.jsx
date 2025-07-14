@@ -537,6 +537,7 @@ const CurencyMaster = () => {
                 onClose={() => setShowSuccessPopup(false)}
                 title="Success"
                 message={successMessage}
+                 severity="success"
                 color="primary"
             />
             <CustomDialog
@@ -544,6 +545,7 @@ const CurencyMaster = () => {
                 onClose={() => setShowErrorPopup(false)}
                 title="Error"
                 message={errorMessage}
+                severity="error"
                 color="secondary"
             />
             <CustomDialog

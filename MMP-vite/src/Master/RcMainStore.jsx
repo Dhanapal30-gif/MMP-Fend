@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import './RcMainStore.css'
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, InputLabel } from '@mui/material';
-import { deleteRc, downloadRc, downloadSearchRc, getRcmainMaster, getRcmainMasterFind, saveBulkRcMain, saveMainMaterial, updateRcSrore } from '../ServicesComponent/Services';
+import { deleteRc, downloadRc, downloadSearchRc, fetchRc, getRcmainMaster, getRcmainMasterFind, saveBulkRcMain, saveMainMaterial, updateRcSrore } from '../ServicesComponent/Services';
 import DataTable from "react-data-table-component";
 import * as XLSX from "xlsx";
 import { FaFileExcel } from "react-icons/fa";
@@ -28,7 +28,7 @@ const RcMainStore = () => {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [rcStoreData, setRcStoreData] = useState([]);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rcStore, setRcStore] = useState([]);
   const [filteredDataRc, setFilteredDataRc] = useState([]);
   //const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
@@ -130,7 +130,7 @@ const RcMainStore = () => {
       modifiedby,
     };
 
-    console.log("updatedFormData", updatedFormData);
+    // console.log("updatedFormData", updatedFormData);
 
     saveMainMaterial(updatedFormData)
       .then((response) => {
@@ -275,7 +275,7 @@ const RcMainStore = () => {
 
   //const uploadColumn = [
   const uploadColumn = useMemo(() => {
-    console.log("Recalculating column widths...");
+    // console.log("Recalculating column widths...");
     return [
 
       {
@@ -369,7 +369,7 @@ const RcMainStore = () => {
 
   //console
   useEffect(() => {
-    console.log("setSelectedRows:", selectedRows); // Logs the updated state
+    // console.log("setSelectedRows:", selectedRows); // Logs the updated state
   }, [selectedRows]);
 
   const handleRowSelect = (rowKey) => {
@@ -402,7 +402,7 @@ const RcMainStore = () => {
     });
   };
 
-  const column = [
+  const column =useMemo(() => [
 {
       name: (
         <div style={{textAlign: 'center', }}>
@@ -414,7 +414,7 @@ const RcMainStore = () => {
         </div>
       ),
       cell: (row) => (
-        <div style={{ paddingLeft: '27px', width: '100%' }}>
+        <div style={{ paddingLeft: '23px', width: '100%' }}>
           <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
           />
         </div>
@@ -526,20 +526,27 @@ const RcMainStore = () => {
       width: `${calculateColumnWidth(rcStoreData, 'shelflife')}px`
     }
 
-  ]
+  ],[]);
 
 
-  const handlePerRowsChange = (newPerPage, newPage) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-  }
+  // const handlePerRowsChange = (newPerPage, newPage) => {
+  //   setPerPage(newPerPage);
+  //   setPage(newPage);
+  // }
 
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
+  // const handlePerRowsChange = useCallback((newPerPage,newPage)=>setPerPage(newPerPage),setPage(newPage),[]);
+  // const handlePageChange = (newPage) => {
+  //   setPage(newPage);
+  // };
+
+  const handlePerRowsChange = useCallback((newPerPage, newPage) => {
+  setPerPage(newPerPage);
+  setPage(newPage);
+}, []);
 
 
+const handlePageChange =useCallback((newPage)=>setPage(page),[]);
 
 
   const excelUpload = (e) => {
@@ -566,7 +573,7 @@ const RcMainStore = () => {
       createdby,
       modifiedby,
     }))
-    console.log("Final Payload for Bulk Upload:", updatedFormData);
+    // console.log("Final Payload for Bulk Upload:", updatedFormData);
 
     saveBulkRcMain(updatedFormData)
       .then(() => {
@@ -579,7 +586,7 @@ const RcMainStore = () => {
         if (error.response) {
           if (error.response.status === 409) {
             const errorMessage = error.response.data?.error;
-            console.log("errorMessage", errorMessage);
+            // console.log("errorMessage", errorMessage);
 
             const duplicateName = errorMessage?.split(": ")[1];
             const duplicateMail = errorMessage?.split(": ")[1];
@@ -640,8 +647,8 @@ const RcMainStore = () => {
         const data = response?.data || {};
         setRcStoreData(data.content || []);
         setTotalRows(data.totalElements || 0);
-        console.log("data.totalElements", data.totalElements)
-        console.log("data.content", data.content)
+        // console.log("data.totalElements", data.totalElements)
+        // console.log("data.content", data.content)
 
       })
       .catch((error) => {
@@ -660,8 +667,8 @@ const RcMainStore = () => {
         const data = response?.data || {};
         setRcStoreData(data.content || []);
         setTotalRows(data.totalElements || 0);
-        console.log("findFetch", data.totalElements)
-        console.log("data.content", data.content)
+        // console.log("findFetch", data.totalElements)
+      // console.log("data.content", data.content)
 
       })
       .catch((error) => {
@@ -677,6 +684,7 @@ const RcMainStore = () => {
 
   useEffect(() => {
     fetchData(page, perPage, debouncedSearch);
+fetchRcStore();
   }, [page, perPage, debouncedSearch]);
 
   const fetchData = (page = 1, size = 10, search = "") => {
@@ -686,6 +694,17 @@ const RcMainStore = () => {
       fetchMainMaster(page, perPage);      // Call default API
     }
   };
+
+  const fetchRcStore=()=>{
+fetchRc()
+    .then((response)=>{
+      setRcStore(response.data || []);
+
+    })
+
+  }
+
+  // console.log("gutuihiyg67i",rcStore);
 
 
 
@@ -781,7 +800,7 @@ const RcMainStore = () => {
 
 
   const exportToExcel = (search = "") => {
-    console.log("searchTeaxt", search)
+    // console.log("searchTeaxt", search)
     if (search && search.trim() !== "") {
 
       setLoading(true);
@@ -827,7 +846,7 @@ const RcMainStore = () => {
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
         <div className='ComCssFiledName'>
-          <h5>MainMaterial Master </h5>
+          <h5>RC Store</h5>
         </div>
         <div className='ComCssUpload'>
 
@@ -1254,6 +1273,7 @@ const RcMainStore = () => {
         onClose={() => setShowSuccessPopup(false)}
         title="Success"
         message={successMessage}
+          severity="success" 
         color="primary"
       />
       <CustomDialog
@@ -1261,6 +1281,7 @@ const RcMainStore = () => {
         onClose={() => setShowErrorPopup(false)}
         title="Error"
         message={errorMessage}
+         severity="error" 
         color="secondary"
       />
       <CustomDialog

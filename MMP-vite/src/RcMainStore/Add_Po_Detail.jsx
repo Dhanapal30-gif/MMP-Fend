@@ -10,7 +10,7 @@ import DropdownCom from '../COM_Component/DropdownCom'
 import Popper from '@mui/material/Popper';
 import Add_Po_DetailUI from './Add_Po_DetailUI';
 import { ThemeProvider } from '@mui/material/styles';
-import TextFiledTheme from '../COM_Component/TextFiledTheme'; 
+import TextFiledTheme from '../COM_Component/TextFiledTheme';
 import { deletePoDetail, downloadPoDetail, downloadSearchPoDetail, fetchCurency, fetchPoDeatil, getPartcode, getPoDetailFind, getVenodtMaster, savePoDetail, updatePoDeatil } from '../ServicesComponent/Services';
 import dayjs from "dayjs"; // or use native JS date
 import { FaTimesCircle } from "react-icons/fa"; // ❌ Stylish icon
@@ -76,8 +76,8 @@ const Add_Po_Detail = () => {
     const errors = {};
     let isValid = true;
 
-    if (!formData.orderType) {
-      errors.ordeType = "please select orderType";
+    if (!formData.ordertype) {
+      errors.ordertype = "please select orderType";
       isValid = false;
     }
     if (!formData.potool) {
@@ -104,10 +104,7 @@ const Add_Po_Detail = () => {
       errors.partcode = "please select partcode";
       isValid = false;
     }
-    if (!formData.currency) {
-      errors.currency = "please select currency";
-      isValid = false;
-    }
+    
     if (!formData.orderqty) {
       errors.orderqty = "please select orderqty";
       isValid = false;
@@ -230,8 +227,13 @@ const Add_Po_Detail = () => {
   }, [formData.totalvalue, formData.ccf]);
 
   const formClear = () => {
+        setHandleAdd(true); // Enable submit button
+
     setIsFrozen(false);
     setShowTable(false);
+    setHandleUpdateButton(false);
+    setDeletButton(false);
+    // isvalid(false);
     setFormData({
       orderType: "", potool: "", ponumber: "", podate: "",
       currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
@@ -356,63 +358,66 @@ const Add_Po_Detail = () => {
   ]
 
 
-   const handleSelectAll = (e) => {
-          if (e.target.checked) {
-              setSelectedRows(poDetail.map((row) => row.id)); // ✅ Ensure unique selection key
-              setDeletButton(true);
-              setHandleSubmitButton(false);
-              setHandleUpdateButton(false);
-              //setFormData({ productname: '', partcode: '', createdBy: '', updatedby: '', productgroup: '', productfamily: '' });
-  
-          } else {
-              setSelectedRows([]);
-              setDeletButton(false);
-              setHandleSubmitButton(true);
-          }
-      };
-  
-      useEffect(() => {
-          console.log("selectedRows", selectedRows);
-      }, [selectedRows]);
-  
-  
-      const handleRowSelect = (rowKey) => {
-          setHandleUpdateButton(false);
-          //setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
-          setSelectedRows((prevSelectedRows) => {
-              const isRowSelected = prevSelectedRows.includes(rowKey);
-  
-              // Update selected rows
-              const updatedRows = isRowSelected
-                  ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect
-                  : [...prevSelectedRows, rowKey]; // Select row
-  
-              // Conditional button states based on updated rows
-              if (updatedRows.length === 0) {
-                  setDeletButton(false); // Disable delete button if no rows are selected
-                  setHandleSubmitButton(true); // Enable submit button
-                  setHandleUpdateButton(false);
-              } else {
-                  setDeletButton(true); // Enable delete button if rows are selected
-                  setHandleSubmitButton(false); // Disable submit button
-              }
-              return updatedRows;
-          });
-      };
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedRows(poDetail.map((row) => row.id)); // ✅ Ensure unique selection key
+      setDeletButton(true);
+      setHandleSubmitButton(false);
+      setHandleUpdateButton(false);
+      setHandleAdd(false)
+      //setFormData({ productname: '', partcode: '', createdBy: '', updatedby: '', productgroup: '', productfamily: '' });
+
+    } else {
+      setSelectedRows([]);
+      setDeletButton(false);
+      setHandleSubmitButton(true);
+    }
+  };
+
+  useEffect(() => {
+    console.log("selectedRows", selectedRows);
+  }, [selectedRows]);
+
+
+  const handleRowSelect = (rowKey) => {
+    setHandleUpdateButton(false);
+    setHandleAdd(false);
+    setHandleUpdateButton(false);
+    //setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
+    setSelectedRows((prevSelectedRows) => {
+      const isRowSelected = prevSelectedRows.includes(rowKey);
+
+      // Update selected rows
+      const updatedRows = isRowSelected
+        ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect
+        : [...prevSelectedRows, rowKey]; // Select row
+
+      // Conditional button states based on updated rows
+      if (updatedRows.length === 0) {
+        setDeletButton(false); // Disable delete button if no rows are selected
+        setHandleSubmitButton(true); // Enable submit button
+        setHandleUpdateButton(false);
+      } else {
+        setDeletButton(true); // Enable delete button if rows are selected
+        setHandleSubmitButton(false); // Disable submit button
+      }
+      return updatedRows;
+    });
+  };
   const Defaultcolumn = [
-     {
+    {
       name: (
-        <div style={{textAlign: 'center', }}>
+        <div style={{ textAlign: 'center', }}>
           <label>Delete All</label>
           <br />
-          <input type="checkbox" onChange={handleSelectAll} 
+          <input type="checkbox" onChange={handleSelectAll}
             checked={selectedRows.length === poDetail.length && poDetail.length > 0}
           />
         </div>
       ),
       cell: (row) => (
-        <div style={{ paddingLeft: '27px', width: '100%' }}>
-          <input type="checkbox"  checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
+        <div style={{ paddingLeft: '23px', width: '100%' }}>
+          <input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
           />
         </div>
       ),
@@ -426,19 +431,21 @@ const Add_Po_Detail = () => {
       name: "orderType",
       selector: row => row.ordertype,
       sortable: true,
-      // width: '130px'
-      width: `${calculateColumnWidth('ordertype')}px`
+      width: '130px'
+      // width: `${calculateColumnWidth('ordertype')}px`
     },
     {
       name: "Potool",
       selector: row => row.potool,
       wrap: true,
-      width: '150px'
+      width: '130px'
     },
     {
       name: "Ponumber",
       selector: row => row.ponumber,
+      wrap: true,
       width: `${calculateColumnWidth('ponumber')}px`
+        // width: '130px'
     },
     {
       name: "Podate",
@@ -493,7 +500,7 @@ const Add_Po_Detail = () => {
       name: "Totalvalue",
       selector: row => row.totalvalue,
       width: '130px'
-      
+
       // width: `${calculateColumnWidth( 'totalvalue')}px`
     },
     {
@@ -511,9 +518,9 @@ const Add_Po_Detail = () => {
   ]
   const handleRemoveRow = (indexToRemove) => {
     const newData = tableData.filter((_, index) => index !== indexToRemove);
-        setTableData(newData);
+    setTableData(newData);
 
-    if(newData.length===0){
+    if (newData.length === 0) {
       setShowTable(false);
     }
   };
@@ -536,10 +543,11 @@ const Add_Po_Detail = () => {
     return `${day}/${month}/${year}`;
   };
   const handleAddClick = () => {
-   if (!valiDate()) return;
+    if (!valiDate()) return;
     setShowTable(true);
     setTableData(prev => [...prev, formData]); // add row
     setIsFrozen(true); // 🧊 freeze some fields
+    
 
     // Clear only the editable ones
     setFormData(prev => ({
@@ -579,7 +587,7 @@ const Add_Po_Detail = () => {
       .then((response) => {
         setSuccessMessage(response.data.message);
         setShowSuccessPopup(true);
-        fetchPoDetail(page,perPage);
+        fetchPoDetail(page, perPage);
         // fetchProduct(page, perPage);
         //setPage(1);
       })
@@ -653,7 +661,7 @@ const Add_Po_Detail = () => {
         setHandleAdd(true);
         setHandleSubmitButton(true);
         setHandleUpdateButton(false);
-        fetchPoDetail(page,perPage);
+        fetchPoDetail(page, perPage);
       }).catch((error) => {
         setLoading(false);
         if (error.response) {
@@ -671,88 +679,91 @@ const Add_Po_Detail = () => {
   }
 
   const onDeleteClick = () => {
-          setConfirmDelete(true);
-      };
-  
-      const handleCancel = () => {
-          setSelectedRows([]);
-          setConfirmDelete(false);
-      };
-      const handleDelete = async () => {
-          setConfirmDelete(false);
-  
-          try {
-              await deletePoDetail(selectedRows);
-              setSuccessMessage("Data successfullly deleted");
-              setShowSuccessPopup(true);
-              setSelectedRows([]);
-              setHandleSubmitButton(true);
-              setDeletButton(false);
-        fetchPoDetail(page,perPage);
-          } catch (error) {
-              setErrorMessage("delete error", error);
-              setShowErrorPopup(true);
-  
-          }
-      }
+    setConfirmDelete(true);
+    
+  };
 
-      const fetchfind = (page = 1, size = 10, search = "") => {
-              setLoading(true);
-              getPoDetailFind(page - 1, size, search)
-                  .then((response) => {
-                      const data = response.data || {};
-                      setPoDetail(data.content);
-                      setTotalRows(data.totalElements);
-                      console.log("search", data.content);
-                  }).catch((error) => {
-                      setErrorMessage("data not availbe", error);
-                      setShowErrorPopup(true);
-                  }).finally(() => {
-                      setLoading(false);
-                  })
-          }
-      const exportToExcel = (search = "") => {
-              console.log("searchTeaxt", search)
-              if (search && search.trim() !== "") {
-      
-                  setLoading(true);
-                  downloadSearchPoDetail(search) // <- pass search here
-                      .then((response) => {
-                          const url = window.URL.createObjectURL(new Blob([response.data]));
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.setAttribute("download", "PoDetail.xlsx");
-                          document.body.appendChild(link);
-                          link.click();
-                          link.remove();
-                      })
-                      .catch((error) => {
-                          console.error("Download failed:", error);
-                      })
-                      .finally(() => {
-                          setLoading(false);
-                      });
-      
-              } else {
-                  setLoading(true);
-                  downloadPoDetail()
-                      .then((response) => {
-                          const url = window.URL.createObjectURL(new Blob([response.data]));
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.setAttribute("download", "PoDetail.xlsx");
-                          document.body.appendChild(link);
-                          link.click();
-                          link.remove();
-                      })
-                      .catch((error) => {
-                          console.error("Download failed:", error);
-                      })
-                      .finally(() => {
-                          setLoading(false);
-                      });
-              }
-          };
+  const handleCancel = () => {
+    setSelectedRows([]);
+    setConfirmDelete(false);
+  };
+  const handleDelete = async () => {
+    setConfirmDelete(false);
+  
+    
+
+    try {
+      await deletePoDetail(selectedRows);
+      setSuccessMessage("Data successfullly deleted");
+      setShowSuccessPopup(true);
+      setSelectedRows([]);
+      setHandleSubmitButton(true);
+      setDeletButton(false);
+      fetchPoDetail(page, perPage);
+    } catch (error) {
+      setErrorMessage("delete error", error);
+      setShowErrorPopup(true);
+
+    }
+  }
+
+  const fetchfind = (page = 1, size = 10, search = "") => {
+    setLoading(true);
+    getPoDetailFind(page - 1, size, search)
+      .then((response) => {
+        const data = response.data || {};
+        setPoDetail(data.content);
+        setTotalRows(data.totalElements);
+        console.log("search", data.content);
+      }).catch((error) => {
+        setErrorMessage("data not availbe", error);
+        setShowErrorPopup(true);
+      }).finally(() => {
+        setLoading(false);
+      })
+  }
+  const exportToExcel = (search = "") => {
+    console.log("searchTeaxt", search)
+    if (search && search.trim() !== "") {
+
+      setLoading(true);
+      downloadSearchPoDetail(search) // <- pass search here
+        .then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "PoDetail.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+
+    } else {
+      setLoading(true);
+      downloadPoDetail()
+        .then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "PoDetail.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch((error) => {
+          console.error("Download failed:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  };
   return (
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
@@ -760,352 +771,279 @@ const Add_Po_Detail = () => {
           <h5>ADD PO</h5>
         </div>
         <div className='ProductTexfiled'>
-                    <ThemeProvider theme={TextFiledTheme}>
+          <ThemeProvider theme={TextFiledTheme}>
+
+            <Autocomplete
+              disabled={isFrozen} // ✅ freeze if either is true
+              options={["Project", "Repair"]}
+              getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
+              value={formData.ordertype || []}
+              onChange={(event, newValue) => setFormData({ ...formData, ordertype: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Order Type"
+                  variant="outlined"
+                  error={Boolean(formErrors.ordertype)}
+                  helperText={formErrors.ordertype}
+                  size="small"  // <-- Reduce height
+                 
+                />
+              )}
+            />
+            <Autocomplete
+              disabled={isFrozen} // ✅ freeze after Add
+
+              options={["I-BUY", "P20", "SRM", "Nokia Internal Transfer", "RC Internal Transfer"]}
+              getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
+              value={formData.potool || []}
+              onChange={(event, newValue) => setFormData({ ...formData, potool: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Potoll"
+                  variant="outlined"
+                  error={Boolean(formErrors.potool)}
+                  helperText={formErrors.potool}
+                  size="small"  // <-- Reduce height
+                 
+                />
+              )}
+            />
+            <TextField
+              id="outlined-basic"
+              label="PoNumber"
+              variant="outlined"
+              disabled={hidePonumber || isFrozen} // ✅ freeze if either is true
+
+              name="ponumber"
+              value={formData.ponumber}
+              onChange={handleChange}
+              error={Boolean(formErrors.ponumber)}
+              helperText={formErrors.ponumber}
+              size="small"  // <-- Reduce height
+              
+            />
+            <TextField
+              id="outlined-basic"
+              label="Po Date"
+              InputLabelProps={{ shrink: true }}
+              disabled={isFrozen} // ✅ freeze after Add
+              variant="outlined"
+              name="podate"
+              value={formData.podate?.split(" ")[0] || ""}
+              type="Date"
+              onChange={handleChange}
+              error={Boolean(formErrors.podate)}
+              helperText={formErrors.podate}
+              size="small"  // <-- Reduce height
+              
+            />
+            <Autocomplete
+              disabled={isFrozen} // ✅ freeze after Add
+
+              options={filteredCurrencyOptions}
+              getOptionLabel={(option) => option.currencyname || ""}
+              value={
+                filteredCurrencyOptions.find(
+                  (item) => item.currencyname === formData.currency
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                setFormData({
+                  ...formData,
+                  currency: newValue?.currencyname || "",
+                  ccf: newValue?.currencyvalue || "",
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Currency"
+                  error={Boolean(formErrors.currency)}
+                  helperText={formErrors.currency}
+                  variant="outlined"
+                  size="small"
+                  
+                />
+              )}
+            />
+
+
+            <Autocomplete
+              disabled={isFrozen} // ✅ freeze after Add
+              options={vendorMaster}
+              getOptionLabel={(option) => option.vendorName || ""} // ensure it's a string
+              value={vendorMaster.find(item => item.vendorName === formData.vendorname) || null}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setFormData({
+                    ...formData,
+                    vendorname: newValue.vendorName,
+                    vendorcode: newValue.vendorCode,
+                  });
+                } else {
+                  setFormData({
+                    ...formData,
+                    vendorname: "",
+                    vendorcode: "",
+                  });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Vendorname"
+                  variant="outlined"
+                  error={Boolean(formErrors.vendorname)}
+                  helperText={formErrors.vendorname}
+                  size="small"
+               
+                />
+              )}
+            />
+
+
+            <TextField
+              disabled={isFrozen} // ✅ freeze after Add
+
+              label="Vendorcode"
+              InputProps={{ readOnly: true }}
+
+              variant="outlined"
+              name="Vendorcode"
+              value={formData.vendorcode}
+              onChange={handleChange}
+              //  InputLabelProps={{ shrink: false }}
+
+              // error={Boolean(formErrors.vendorcode)}
+              // helperText={formErrors.vendorcode}
+              size="small"  // <-- Reduce height
+             
+            />
+            <Autocomplete
+              options={rcMainStore}
+              getOptionLabel={(option) => option?.partcode || ""}
+              isOptionEqualToValue={(option, value) => option.partcode === value.partcode}
+              value={rcMainStore.find(item => item.partcode === formData.partcode) || null}
+              ListboxComponent={DropdownCom}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setFormData({
+                    ...formData,
+                    partcode: newValue.partcode,
+                    partdescription: newValue.partdescription  // ✅ spelling fix
+                  });
+                } else {
+                  setFormData({ ...formData, partcode: "", partdescription: "" });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Partcode"
+                  variant="outlined"
+                  error={Boolean(formErrors.partcode)}
+                  helperText={formErrors.partcode}
+                  size="small"
+               
+                />
+              )}
+            />
+            <Autocomplete
+              options={rcMainStore}
+              ListboxComponent={DropdownCom}
+              PopperComponent={CustomPopper}
+              getOptionLabel={(option) => option?.partdescription || ""}  // ✅ fix here
+              isOptionEqualToValue={(option, value) => option.partdescription === value.partdescription}
+              value={rcMainStore.find(item => item.partdescription === formData.partdescription) || null}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setFormData({
+                    ...formData,
+                    partcode: newValue.partcode,
+                    partdescription: newValue.partdescription
+
+                  });
+                } else {
+                  setFormData({ ...formData, partcode: "", partdescription: "" });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Partdescription"
+                  variant="outlined"
+                  error={Boolean(formErrors.partdescription)}
+                  helperText={formErrors.partdescription}
+                  size="small"
+               
+                />
+              )}
+            />
+
+            <TextField
+              label="Unitprice"
+              variant="outlined"
+              name="unitprice"
+              type="number"
+              value={formData.unitprice}
+              onChange={handleChange}
+              error={Boolean(formErrors.unitprice)}
+              helperText={formErrors.unitprice}
+              size="small"  // <-- Reduce height
+             
+            /> 
+            <TextField
+              label="Orderqty"
+              variant="outlined"
+              name="orderqty"
+              type="text" // 👈 use text to control input better
+              value={formData.orderqty}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) { // ✅ only allow digits (0-9), no dot
+                  setFormData({ ...formData, orderqty: value });
+                }
+              }}
+              error={Boolean(formErrors.orderqty)}
+              helperText={formErrors.orderqty}
+              size="small"
+             
+            />
+            <TextField
+              label="Totalvalue"
+              InputProps={{ readOnly: true }}
+              variant="outlined"
+              name="totalvalue"
+              value={formData.totalvalue}
+              onChange={handleChange}
+              //  InputLabelProps={{ shrink: false }}
+              size="small"  // <-- Reduce height
           
-          <Autocomplete
-            disabled={isFrozen} // ✅ freeze if either is true
-
-
-
-            options={["Project", "Repair"]}
-            getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
-            value={formData.ordertype || []}
-            onChange={(event, newValue) => setFormData({ ...formData, ordertype: newValue || [] })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Order Type"
-                variant="outlined"
-                error={Boolean(formErrors.ordertype)}
-                helperText={formErrors.ordertype}
-                size="small"  // <-- Reduce height
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green", // label color when floated
-                    fontWeight: 'bold'
-                  }
-                }}
-              />
-            )}
-          />
-          <Autocomplete
-            disabled={isFrozen} // ✅ freeze after Add
-
-            options={["I-BUY", "P20", "SRM", "Nokia Internal Transfer", "RC Internal Transfer"]}
-            getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
-            value={formData.potool || []}
-            onChange={(event, newValue) => setFormData({ ...formData, potool: newValue || [] })}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Potoll"
-                variant="outlined"
-                error={Boolean(formErrors.potool)}
-                helperText={formErrors.potool}
-                size="small"  // <-- Reduce height
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green", // label color when floated
-                    fontWeight: 'bold'
-                  }
-                }}
-              />
-            )}
-          />
-          <TextField
-            id="outlined-basic"
-            label="PoNumber"
-            variant="outlined"
-            disabled={hidePonumber || isFrozen} // ✅ freeze if either is true
-
-            name="ponumber"
-            value={formData.ponumber}
-            onChange={handleChange}
-            error={Boolean(formErrors.ponumber)}
-            helperText={formErrors.ponumber}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            id="outlined-basic"
-            label="Po Date"
-            InputLabelProps={{ shrink: true }}
-            disabled={isFrozen} // ✅ freeze after Add
-            variant="outlined"
-            name="podate"
-            value={formData.podate?.split(" ")[0] || ""}
-            type="Date"
-            onChange={handleChange}
-            error={Boolean(formErrors.podate)}
-            helperText={formErrors.podate}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <Autocomplete
-            disabled={isFrozen} // ✅ freeze after Add
-
-            options={filteredCurrencyOptions}
-            getOptionLabel={(option) => option.currencyname || ""}
-            value={
-              filteredCurrencyOptions.find(
-                (item) => item.currencyname === formData.currency
-              ) || null
-            }
-            onChange={(event, newValue) => {
-              setFormData({
-                ...formData,
-                currency: newValue?.currencyname || "",
-                ccf: newValue?.currencyvalue || "",
-              });
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Currency"
-                error={Boolean(formErrors.currency)}
-                helperText={formErrors.currency}
-                variant="outlined"
-                size="small"
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green",
-                    fontWeight: "bold",
-                  },
-                }}
-              />
-            )}
-          />
-
-
-          <Autocomplete
-            disabled={isFrozen} // ✅ freeze after Add
-            options={vendorMaster}
-            getOptionLabel={(option) => option.vendorName || ""} // ensure it's a string
-            value={vendorMaster.find(item => item.vendorName === formData.vendorname) || null}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                setFormData({
-                  ...formData,
-                  vendorname: newValue.vendorName,
-                  vendorcode: newValue.vendorCode,
-                });
-              } else {
-                setFormData({
-                  ...formData,
-                  vendorname: "",
-                  vendorcode: "",
-                });
-              }
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Vendorname"
-                variant="outlined"
-                error={Boolean(formErrors.vendorname)}
-                helperText={formErrors.vendorname}
-                size="small"
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green",
-                    fontWeight: "bold",
-                  },
-                }}
-              />
-            )}
-          />
-
-
-          <TextField
-            disabled={isFrozen} // ✅ freeze after Add
-
-            label="Vendorcode"
-            InputProps={{ readOnly: true }}
-
-            variant="outlined"
-            name="Vendorcode"
-            value={formData.vendorcode}
-            onChange={handleChange}
-            //  InputLabelProps={{ shrink: false }}
-
-            // error={Boolean(formErrors.vendorcode)}
-            // helperText={formErrors.vendorcode}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <Autocomplete
-            options={rcMainStore}
-            getOptionLabel={(option) => option?.partcode || ""}
-            isOptionEqualToValue={(option, value) => option.partcode === value.partcode}
-            value={rcMainStore.find(item => item.partcode === formData.partcode) || null}
-            ListboxComponent={DropdownCom}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                setFormData({
-                  ...formData,
-                  partcode: newValue.partcode,
-                  partdescription: newValue.partdescription  // ✅ spelling fix
-                });
-              } else {
-                setFormData({ ...formData, partcode: "", partdescription: "" });
-              }
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Partcode"
-                variant="outlined"
-                error={Boolean(formErrors.partcode)}
-                helperText={formErrors.partcode}
-                size="small"
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green",
-                    fontWeight: 'bold',
-                  }
-                }}
-              />
-            )}
-          />
-          <Autocomplete
-            options={rcMainStore}
-            ListboxComponent={DropdownCom}
-            PopperComponent={CustomPopper}
-            getOptionLabel={(option) => option?.partdescription || ""}  // ✅ fix here
-            isOptionEqualToValue={(option, value) => option.partdescription === value.partdescription}
-            value={rcMainStore.find(item => item.partdescription === formData.partdescription) || null}
-            onChange={(event, newValue) => {
-              if (newValue) {
-                setFormData({
-                  ...formData,
-                  partcode: newValue.partcode,
-                  partdescription: newValue.partdescription
-
-                });
-              } else {
-                setFormData({ ...formData, partcode: "", partdescription: "" });
-              }
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Partdescription"
-                variant="outlined"
-                error={Boolean(formErrors.partdescription)}
-                helperText={formErrors.partdescription}
-                size="small"
-                sx={{
-                  "& label.MuiInputLabel-shrink": {
-                    color: "green",
-                    fontWeight: 'bold',
-                  }
-                }}
-              />
-            )}
-          />
-
-          <TextField
-            label="Unitprice"
-            variant="outlined"
-            name="unitprice"
-            type="number"
-            value={formData.unitprice}
-            onChange={handleChange}
-            error={Boolean(formErrors.unitprice)}
-            helperText={formErrors.unitprice}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            label="Orderqty"
-            variant="outlined"
-            name="orderqty"
-            type="text" // 👈 use text to control input better
-            value={formData.orderqty}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^\d*$/.test(value)) { // ✅ only allow digits (0-9), no dot
-                setFormData({ ...formData, orderqty: value });
-              }
-            }}
-            error={Boolean(formErrors.orderqty)}
-            helperText={formErrors.orderqty}
-            size="small"
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green",
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            label="Totalvalue"
-            InputProps={{ readOnly: true }}
-            variant="outlined"
-            name="totalvalue"
-            value={formData.totalvalue}
-            onChange={handleChange}
-            //  InputLabelProps={{ shrink: false }}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            label="Currency convertion factor"
-            InputProps={{ readOnly: true }}
-            variant="outlined"
-            name="ccf"
-            value={formData.ccf}
-            onChange={handleChange}
-            //InputLabelProps={{ shrink: false }}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
-          <TextField
-            label="Totalvalueeuro"
-            InputProps={{ readOnly: true }}
-            variant="outlined"
-            name="totalvalueeuro"
-            value={formData.totalvalueeuro}
-            onChange={handleChange}
-            //InputLabelProps={{ shrink: false }}
-            size="small"  // <-- Reduce height
-            sx={{
-              "& label.MuiInputLabel-shrink": {
-                color: "green", // label color when floated
-                fontWeight: 'bold'
-              }
-            }}
-          />
+            />
+            <TextField
+              label="Currency convertion factor"
+              InputProps={{ readOnly: true }}
+              variant="outlined"
+              name="ccf"
+              value={formData.ccf}
+              onChange={handleChange}
+              //InputLabelProps={{ shrink: false }}
+              size="small"  // <-- Reduce height
+         
+            />
+            <TextField
+              label="Totalvalueeuro"
+              InputProps={{ readOnly: true }}
+              variant="outlined"
+              name="totalvalueeuro"
+              value={formData.totalvalueeuro}
+              onChange={handleChange}
+              //InputLabelProps={{ shrink: false }}
+              size="small"  // <-- Reduce height
+ 
+            />
           </ThemeProvider>
         </div>
         <div className='ComCssButton9'>
@@ -1144,60 +1082,7 @@ const Add_Po_Detail = () => {
             highlightOnHover
             className="react-datatable"
             //conditionalRowStyles={rowHighlightStyle}
-            customStyles={{
-              headRow: {
-                style: {
-                  background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  textAlign: "center",
-                  minHeight: "50px",
-
-                },
-              },
-              rows: {
-                style: {
-                  fontSize: "14px",
-                  textAlign: "center",
-                  alignItems: "center", // Centers content vertically
-                  fontFamily: "Arial, Helvetica, sans-serif",
-                },
-              },
-              cells: {
-                style: {
-                  padding: "5px",  // Removed invalid negative padding
-                  //textAlign: "center",
-                  justifyContent: "center",  // Centers header text
-                  whiteSpace: 'pre-wrap', // wrap text
-                  wordBreak: 'break-word', // allow breaking words
-                },
-              },
-              headCells: {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",  // Centers header text
-                  alignItems: "left",
-                  textAlign: "left",
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                },
-              },
-              pagination: {
-                style: {
-                  border: "1px solid #ddd",
-                  backgroundColor: "#f9f9f9",
-                  color: "#333",
-                  minHeight: "35px",
-                  padding: "5px",
-                  fontSize: "12px",
-                  fontWeight: "bolder",
-                  display: "flex",
-                  justifyContent: "flex-end", // Corrected
-                  alignItems: "center", // Corrected
-                },
-              },
-            }}
+           
           />
 
           <div className='ComCssSubmitButton9'>
@@ -1247,61 +1132,7 @@ const Add_Po_Detail = () => {
           fixedHeaderScrollHeight="400px"
           highlightOnHover
           className="react-datatable"
-          //conditionalRowStyles={rowHighlightStyle}
-          customStyles={{
-            headRow: {
-              style: {
-                background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: "14px",
-                textAlign: "center",
-                minHeight: "50px",
-
-              },
-            },
-            rows: {
-              style: {
-                fontSize: "14px",
-                textAlign: "center",
-                alignItems: "center", // Centers content vertically
-                fontFamily: "Arial, Helvetica, sans-serif",
-              },
-            },
-            cells: {
-              style: {
-                padding: "5px",  // Removed invalid negative padding
-                //textAlign: "center",
-                justifyContent: "center",  // Centers header text
-                whiteSpace: 'pre-wrap', // wrap text
-                wordBreak: 'break-word', // allow breaking words
-              },
-            },
-            headCells: {
-              style: {
-                display: "flex",
-                justifyContent: "center",  // Centers header text
-                alignItems: "left",
-                textAlign: "left",
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              },
-            },
-            pagination: {
-              style: {
-                border: "1px solid #ddd",
-                backgroundColor: "#f9f9f9",
-                color: "#333",
-                minHeight: "35px",
-                padding: "5px",
-                fontSize: "12px",
-                fontWeight: "bolder",
-                display: "flex",
-                justifyContent: "flex-end", // Corrected
-                alignItems: "center", // Corrected
-              },
-            },
-          }}
+         
         />
       </div>
       <CustomDialog
@@ -1309,6 +1140,7 @@ const Add_Po_Detail = () => {
         onClose={() => setShowSuccessPopup(false)}
         title="Success"
         message={successMessage}
+          severity="success" 
         color="primary"
       />
       <CustomDialog
@@ -1316,16 +1148,17 @@ const Add_Po_Detail = () => {
         onClose={() => setShowErrorPopup(false)}
         title="Error"
         message={errorMessage}
+           severity="error" 
         color="secondary"
       />
       <CustomDialog
-                open={confirmDelete}
-                onClose={handleCancel}
-                onConfirm={handleDelete}
-                title="Confirm"
-                message="Are you sure you want to delete this?"
-                color="primary"
-              />    
+        open={confirmDelete}
+        onClose={handleCancel}
+        onConfirm={handleDelete}
+        title="Confirm"
+        message="Are you sure you want to delete this?"
+        color="primary"
+      />
     </div>
   )
 }

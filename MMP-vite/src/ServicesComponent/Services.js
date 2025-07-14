@@ -67,6 +67,18 @@ export const getRcmainMasterFind = (page = 0, size = 10, search = "")=>{
   return axios.get(Get_RCStoreFind, { params: { page, size,search: search || undefined, }, });
 } 
 
+// const Get_RCStoreFind = `${url}/RcMain/es-search`;
+
+// export const getRcmainMasterFind = (page = 0, size = 10, search = "") => {
+//   return fetch(
+//     `${Get_RCStoreFind}?page=${page}&size=${size}${search ? `&keyword=${encodeURIComponent(search)}` : ""}`
+//   ).then(res => {
+//     if (!res.ok) throw new Error("Network response was not ok");
+//     return res.json();
+//   });
+// };
+
+
 // const Get_RcStore = `${url}/RcMain/getRcdata`
 // export const getRcmainMaster= ()=>axios.get(Get_RcStore);
 const update_Rc = `${url}/RcMain/updateRcStore`;
@@ -273,4 +285,5 @@ export const downloadSearchPoDetail = (search) =>
   });
 
 
-  
+  const getRcstore = `${url}/RcMain/getPageDatatyu`;
+  export const fetchRc=()=>{return axios.get(getRcstore)}
