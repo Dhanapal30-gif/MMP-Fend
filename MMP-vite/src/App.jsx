@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Routes ,useLocation  } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-
 import './App.css'
-import Login from './userAuth/Login'
-import HeaderComponents from './components/HeaderComponents';
-import HomeComponenet from './components/HomeComponenet';
-import ProductFamilyMaster from './Master/ProductFamilyMaster';
-import CreateAccount from './userAuth/CreateAccount';
-import RcMainStore from './Master/RcMainStore';
-import VeendorMaster from './Master/VeendorMaster';
-
-
-import BomMaster from './Master/BomMaster';
-import CurencyMaster from './Master/CurencyMaster';
-import ApprovalMaster from './Master/ApprovalMaster';
-import Add_Po_Detail from './RcMainStore/Add_Po_Detail';
-import Receving from './RcMainStore/Receving';
+import Login from './Pages/UserAuthentication/Login/Login'
+import HeaderComponents from './components/HeaderComponents/HeaderComponents';
+import HomeComponenet from './components/Homecomponents/HomeComponenet';
+import ProductFamilyMaster from './Pages/ProductMaster/ProductFamilyMaster';
+import CreateAccount from './Pages/UserAuthentication/CreateAccount/CreateAccount';
+import RcMainStore from './Pages/MainMaster/RcMainStore';
+import VeendorMaster from './Pages/VendorMaster/VeendorMaster';
+import BomMaster from './Pages/BomMaster/BomMaster';
+import CurencyMaster from './Pages/CuurencyMaster/CurencyMaster';
+import ApprovalMaster from './Pages/ApprovalMaster/ApprovalMaster';
+import Add_Po_Detail from './Pages/PoDetail/Add_Po_Detail';
+import Receving from './Pages/Receving/Receving';
+import PrivateRoute from './components/Route/PrivateRoute'; 
 
 function App() {
   const [count, setCount] = useState(0)
@@ -55,7 +53,18 @@ function App() {
         <Route path='/curencyMaster' element={<CurencyMaster />} />
         <Route path='/approvalMaster' element={<ApprovalMaster />} />
         <Route path='/add_Po_Detail' element={<Add_Po_Detail />} />
-        <Route path='/receving' element={<Receving />} />
+        {/* <Route path='/receving' element={<Receving />} /> */}
+
+<Route
+  path="/receving"
+  element={
+    <PrivateRoute>
+      <Receving />
+    </PrivateRoute>
+  }
+/>
+
+
 
     </Routes>
     </div>

@@ -1,0 +1,17 @@
+.CurencyTexfiled {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 50px;
+    width: 70%;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}
+
+@media screen and (max-width: 2500px) {
+    .CurencyTexfiled {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 2fr));
+        gap: 30px;
+        width: 70%;
+    }
+}
