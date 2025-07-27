@@ -11,14 +11,14 @@ const renderRow = ({ data, index, style }) => {
       style={{
         ...style,
         top: style.top + LISTBOX_PADDING,
-        whiteSpace: "normal",
-        wordBreak: "break-word",
-        overflowWrap: "break-word",
-        padding: "8px 12px",
-        fontSize: "14px", // ✅ your desired font size
-        fontFamily: "Arial, sans-serif", // ✅ your font
-        lineHeight: "1.4", // ✅ ensures proper spacing
-        boxSizing: "border-box",
+        whiteSpace: 'normal',
+        wordBreak: 'break-word',
+        overflowWrap: 'break-word',
+        padding: '8px 12px',
+        fontSize: '14px',
+        fontFamily: 'Arial, sans-serif',
+        lineHeight: '1.4',
+        boxSizing: 'border-box',
       }}
       title={option.props.children}
     >
@@ -27,20 +27,21 @@ const renderRow = ({ data, index, style }) => {
   );
 };
 
-
 const DropdownCom = React.forwardRef(function DropdownCom(props, ref) {
   const { children, ...other } = props;
-  const itemData = [];
-
-  React.Children.forEach(children, (child) => {
-    itemData.push(child);
-  });
+  const itemData = React.Children.toArray(children); // cleaned
 
   const itemCount = itemData.length;
   const itemSize = 39;
 
   return (
-    <div ref={ref} {...other}>
+    <div
+      ref={ref}
+      {...other}
+      style={{
+        overflow: 'hidden', // ✅ prevent outer scrollbars
+      }}
+    >
       <FixedSizeList
         height={300}
         width="100%"
@@ -48,6 +49,9 @@ const DropdownCom = React.forwardRef(function DropdownCom(props, ref) {
         itemCount={itemCount}
         itemData={itemData}
         overscanCount={5}
+        style={{
+          overflowX: 'hidden', // ✅ block horizontal scroll
+        }}
       >
         {renderRow}
       </FixedSizeList>

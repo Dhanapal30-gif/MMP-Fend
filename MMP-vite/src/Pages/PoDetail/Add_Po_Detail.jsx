@@ -362,9 +362,9 @@ const Add_Po_Detail = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("selectedRows", selectedRows);
-  }, [selectedRows]);
+  // useEffect(() => {
+  //   console.log("selectedRows", selectedRows);
+  // }, [selectedRows]);
 
   const handleRowSelect = (rowKey) => {
     setHandleUpdateButton(false);
@@ -373,7 +373,7 @@ const Add_Po_Detail = () => {
     //setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
     setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
-
+      console.log("row",rowKey)
       const updatedRows = isRowSelected
         ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect
         : [...prevSelectedRows, rowKey]; // Select row
@@ -515,21 +515,46 @@ const Add_Po_Detail = () => {
     const [year, month, day] = dateStr.split(" ")[0].split("-");
     return `${day}/${month}/${year}`;
   };
+  // const handleAddClick = () => {
+  //   if (!valiDate()) return;
+  //   setShowTable(true);
+  //   setTableData(prev => [...prev, formData]); // add row
+  //   setIsFrozen(true);
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     partcode: "",
+  //     partdescription: "",
+  //     unitprice: "",
+  //     orderqty: "",
+  //     totalvalue: "",
+  //     totalvalueeuro: "",
+  //   }));
+  // };
   const handleAddClick = () => {
-    if (!valiDate()) return;
-    setShowTable(true);
-    setTableData(prev => [...prev, formData]); // add row
-    setIsFrozen(true);
-    setFormData(prev => ({
-      ...prev,
-      partcode: "",
-      partdescription: "",
-      unitprice: "",
-      orderqty: "",
-      totalvalue: "",
-      totalvalueeuro: "",
-    }));
-  };
+  if (!valiDate()) return;
+
+  // Check if partcode already exists
+  const isDuplicate = tableData.some(item => item.partcode === formData.partcode);
+  if (isDuplicate) {
+    setErrorMessage("Partcode already exists");
+    setShowErrorPopup(true);
+    return;
+  }
+
+  setShowTable(true);
+  setTableData(prev => [...prev, formData]);
+  setIsFrozen(true);
+  setFormData(prev => ({
+    ...prev,
+    partcode: "",
+    partdescription: "",
+    unitprice: "",
+    orderqty: "",
+    totalvalue: "",
+    totalvalueeuro: "",
+  }));
+};
+
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -554,6 +579,9 @@ const Add_Po_Detail = () => {
         setSuccessMessage(response.data.message);
         setShowSuccessPopup(true);
         fetchPoDetail(page, perPage);
+        setShowTable(false);
+        setTableData([]);
+        formClear();
         // fetchProduct(page, perPage);
         //setPage(1);
       })

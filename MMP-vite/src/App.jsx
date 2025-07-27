@@ -15,6 +15,8 @@ import ApprovalMaster from './Pages/ApprovalMaster/ApprovalMaster';
 import Add_Po_Detail from './Pages/PoDetail/Add_Po_Detail';
 import Receving from './Pages/Receving/Receving';
 import PrivateRoute from './components/Route/PrivateRoute'; 
+import GRN from './Pages/GRN/GRN';
+import PoStatus from './Pages/PoStatus/PoStatus';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -53,7 +55,8 @@ function App() {
         <Route path='/curencyMaster' element={<CurencyMaster />} />
         <Route path='/approvalMaster' element={<ApprovalMaster />} />
         <Route path='/add_Po_Detail' element={<Add_Po_Detail />} />
-        {/* <Route path='/receving' element={<Receving />} /> */}
+        <Route path='/grn' element={<GRN />} />
+        <Route path='/poStatus' element={<PoStatus />} />
 
 <Route
   path="/receving"

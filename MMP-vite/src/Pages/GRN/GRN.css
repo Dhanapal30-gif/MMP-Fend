@@ -1,0 +1,30 @@
+.GRNTexfiled {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  gap: 30px;
+  width: 30%;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  height: 35px;
+}
+
+.GRNTexfiledInput {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 237px)); /* fixed width */
+  gap: 15px;
+  width: 100%;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  height: 35px;
+}
+
+
+.GRNTable {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  border-radius: 10px;
+  margin-top:15px;
+  justify-content: flex-start;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}

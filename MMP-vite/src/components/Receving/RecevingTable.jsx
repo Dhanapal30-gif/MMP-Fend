@@ -44,6 +44,8 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
         }
     };
 
+    console.log("handleselect",selectedRows)
+
     const handleSelect = (row, checked) => {
         const key = getRowKey(row);
         if (checked) {
@@ -143,6 +145,9 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                         if (Number(value) > Number(row.orderqty)) {
                             setErrorMessage("Receving Qty cannot be more than Order Qty");
                             setShowErrorPopup(true);
+                               // Reset the field
+      handleFieldChange(index, 'recevingQty', "");
+      return;
                         }
                         if (formErrors[`recevingQty-${index}`] && Number(value) > 0) {
                             setFormErrors((prev) => {
@@ -161,22 +166,33 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             name: "TotalValue",
             cell: (row, index) => (
                 <TextField
-                    variant="outlined"
-                    placeholder='totalValue'
-                    name='totalValue'
-                    value={row.totalValue || ""}
-                    type='number'
-                    onChange={(e) => {
-                        const total = parseFloat(e.target.value) || 0;
-                        const ccf = parseFloat(row.ccf) || 1;
-                        const euro = total * ccf;
-                        handleFieldChange(index, 'totalValue', total);
-                        handleFieldChange(index, 'totalValueEuro', euro.toFixed(2)); // ✅ update Euro value
-                    }}
-                    error={Boolean(formErrors[`totalValue-${index}`])}                        // ✅ show red border if error
-                    helperText={formErrors[`totalValue-${index}`]}
-                    className="invoice-input"
-                />
+  variant="outlined"
+  placeholder="totalValue"
+  name="totalValue"
+  value={row.totalValue || ""}
+  type="text" // Use text to fully control input
+  inputProps={{
+    inputMode: "decimal", // only numeric keyboard on mobile
+    pattern: "^[0-9]*\\.?[0-9]*$" // optional decimal
+  }}
+  onChange={(e) => {
+    const value = e.target.value;
+
+    // Allow only digits and decimal point
+    if (!/^\d*\.?\d*$/.test(value)) return;
+
+    const total = parseFloat(value) || 0;
+    const ccf = parseFloat(row.ccf) || 1;
+    const euro = total * ccf;
+
+    handleFieldChange(index, 'totalValue', value);
+    handleFieldChange(index, 'totalValueEuro', euro.toFixed(2));
+  }}
+  error={Boolean(formErrors[`totalValue-${index}`])}
+  helperText={formErrors[`totalValue-${index}`]}
+  className="invoice-input"
+/>
+
             ),
         }
         ,
@@ -295,28 +311,21 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
     )
 }
 
-export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPage, setPage, setPerPage, loading, searchText, setSearchText, handleEdit, exportToExcel }) => {
+export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPage, setPage, setPerPage, loading, searchText, setSearchText, handleEdit,handleRowSelect,selectedDeleteRows, exportToExcel}) => {
     //const [searchText, setSearchText] = useState("");
 
     const column = [
         {
             name: (
                 <div style={{ textAlign: 'center' }}>
-                    <label>Select All</label><br />
-                    <input
-                        type="checkbox"
-                    // checked={allSelected}
-                    // onChange={handleSelectAll}
-                    />
+                    <label>Select </label><br />
+                   
                 </div>
             ),
             cell: (row) => (
                 <div style={{ paddingLeft: '23px', width: '100%' }}>
-                    <input
-                        type="checkbox"
-                    // checked={selectedRows.includes(getRowKey(row))}
-                    // onChange={(e) => handleSelect(row, e.target.checked)}
-                    />
+          <input type="checkbox" checked={selectedDeleteRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
+/>
                 </div>
             ),
             width: "97px",
@@ -335,14 +344,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             wrap: true,
             width: '130px'
         },
-        {
-            name: "Podate",
-            selector: row => row.podate,
-            sortable: true,
-            // width: '130px'
-            //   width: `${calculateColumnWidth('orderqty')}px`
-            width: "115px"
-        },
+        
         {
             name: "vendorname",
             selector: row => row.vendorname,
@@ -372,8 +374,50 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             width: '290px'
         },
         {
+            name: "UOM",
+            selector: row => row.UOM,
+            wrap: true,
+            grow: 2,
+            width: '190px'
+        },
+        {
+            name: "TYC",
+            selector: row => row.TYC,
+            wrap: true,
+            grow: 2,
+            width: '190px'
+        },
+        {
+            name: "Order_qty",
+            selector: row => row.orderqty,
+            wrap: true,
+            grow: 2,
+            width: '130px'
+        },
+        {
+            name: "Open Order_qty",
+            selector: row => row.orderqty-row.recevingQty,
+            wrap: true,
+            grow: 2,
+            width: '130px'
+        },
+        {
             name: "Rec_qty",
             selector: row => row.recevingQty,
+            wrap: true,
+            grow: 2,
+            width: '130px'
+        },
+        {
+            name: "currency",
+            selector: row => row.currency,
+            wrap: true,
+            grow: 2,
+            width: '130px'
+        },
+        {
+            name: "currnecy con factor",
+            selector: row => row.ccf,
             wrap: true,
             grow: 2,
             width: '130px'
@@ -385,13 +429,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             grow: 2,
             width: '130px'
         },
-        {
-            name: "Exp_date",
-            selector: row => row.exp_date,
-            wrap: true,
-            grow: 2,
-            width: '130px'
-        },
+        
         {
             name: "totalvalueeuro",
             selector: row => row.totalValueEuro,
@@ -399,6 +437,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             grow: 2,
             width: '130px'
         },
+
         {
             name: "invoiceno",
             selector: row => row.invoiceNo,
@@ -416,6 +455,13 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
         {
             name: "receivingdate",
             selector: row => row.receivingDate,
+            wrap: true,
+            grow: 2,
+            width: '130px'
+        },
+        {
+            name: "Exp_date",
+            selector: row => row.exp_date,
             wrap: true,
             grow: 2,
             width: '130px'
@@ -440,7 +486,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
     return (
 
 
-        <div className='RecevingInputHide'>
+      
             <div className='RecevingDetailTable'>
                 <h5 className='ComCssTableName'>Receving Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
@@ -459,7 +505,8 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
                             </span>
                         )}
                     </div>
-                </div>
+                    
+                
             </div>
 
             <DataTable
@@ -483,7 +530,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
                 highlightOnHover
                 className="react-datatable"
             />
-        </div> // ✅ This was missing
+        </div> 
 
 
     )
