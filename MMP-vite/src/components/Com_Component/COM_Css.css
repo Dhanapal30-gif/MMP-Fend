@@ -250,6 +250,39 @@
 
 
 
+.ComTableMenu {
+  position: absolute;
+  top: 45px;
+  left: 120%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  border: 5px solid #12de1d;
+  animation: blinkBorder 1s infinite;
+  box-shadow: 0 0 10px rgba(57, 191, 52, 0.1);
+  padding: 5px;
+  z-index: 1000;
+  border-radius: 5px;
+  min-width: 160px;
+  font-size: smaller
+}
+@keyframes blinkBorder {
+  0% {
+    border-color: #37e91f;
+  }
+  50% {
+    border-color: transparent;
+  }
+  100% {
+    border-color: #1a7783;
+  }
+}
+
+.comCloseIcon{
+  color: red;
+  font-size: 20px;
+  cursor: pointer;
+  transition: "transform 0.2s"
+}
 
 /* Head row */
 .react-datatable .rdt_TableHeadRow {

@@ -5,11 +5,12 @@ import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import "./Receving.css";
 import { fetchPoNumberData, fetchPoDeatil, fetchReceving, fetchfind, fetchRecevingData, download } from '../../components/Receving/ReceivingActions';
 import { RecevingTextFiled, RecevingTextFiled2, RecevingTextFiled3, RecevingTextFiled4, RecevingTextFiled5, RecevingTextFiled6, RecevingTextFiled7, RecevingTextFiled8, RecevingTextFiled9, RecevingTextFiled17 } from '../../components/Receving/RecevingTextFiled'; // ✅ no curly braces
-import { downloadRecevingDetail, fetchPoDetail, recevingDetail } from '../../Services/Services_09';
+import { deleteRecDetail, downloadRecevingDetail, fetchPoDetail, recevingDetail, updateRecDeatil } from '../../Services/Services_09';
 import { RecevingTable, ColumnTable } from '../../components/Receving/RecevingTable';
 import { GlobalStyles } from '@mui/material';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import * as XLSX from "xlsx";
+
 import { FaFileExcel } from "react-icons/fa";
 
 const Receving = () => {
@@ -28,16 +29,16 @@ const Receving = () => {
   const [perPage, setPerPage] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [recTicketNo, setRecTicketNo] = useState("");
+  const [submitButton,setSubmitButton]=useState(true);
+    const [confirmDelete, setConfirmDelete] = useState(false);
+  const [updateButton,setUpdateButton]=useState(false);
+    const [deleteButton,setDeleteButton]=useState(false);
+
+  const [selectedDeleteRows,setSelectedDeleteRows ] =useState([]);
   const [formData, setFormData] = useState({
     ponumber: "", vendorname: "", currency: "", postingdate: "", rcBactchCode: "",
     invoiceNo: "", invoiceDate: "", receivingDate: ""
   })
-
-  // const generateRecevingNumber = (lastNumber = 250) => {
-  //   const prefeix = "RE";
-  //   const number = lastNumber + 1;
-  //   return prefeix + number.toString().padStart(8, "0");
-  // }
 
   const handleFieldChange = (index, field, value) => {
     setPoDetail((prev) =>
@@ -110,12 +111,6 @@ const Receving = () => {
     fetchPoNumberData(setPonumber);
   }, [])
 
-  //   useEffect(() => {
-  //   fetchRecevingData(setRecTicketNo);
-  //   // fetchReceving(setRecevingData, setTotalRows); 
-  //     console.log("recTicketNo",setRecTicketNo)
-  // }, [])
-
 
   const commonFileds = {
     ponumber: formData.ponumber,
@@ -146,57 +141,173 @@ const Receving = () => {
     invoiceDate: formData.invoiceDate ? `${formData.invoiceDate} 00:00:00.000` : null,
   }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!valiDate()) return;
-    if (selectedRows.length === 0) {
-      setErrorMessage("Please select at least one item before submitting.");
-      setShowErrorPopup(true);
-      return;
-    }
-    const selectedKeys = new Set(selectedRows); // selectedRows = ["P001-IT01", "P001-IT02"]
-    const filteredData = finalData.filter((row) =>
-      selectedKeys.has(`${row.ponumber}-${row.partcode}`)
-    );
 
-    if (filteredData.length === 0) {
-      setErrorMessage("Selected data not matching.");
-      setShowErrorPopup(true);
-      return;
-    }
-    const username = sessionStorage.getItem("userName") || "System";
-    const updatedFormData = filteredData.map((row) => ({
-      ...row,
-      createdby: username,
+// const handleAction = (e) => {
+//   e.preventDefault();
+
+//   if (!valiDate()) return;
+
+//   if (selectedRows.length === 0) {
+//     setErrorMessage("Please select at least one item before submitting.");
+//     setShowErrorPopup(true);
+//     return;
+//   }
+
+//   const selectedKeys = new Set(selectedRows); // selectedRows = ["P001-IT01", "P001-IT02"]
+//   const filteredData = finalData.filter((row) =>
+//     selectedKeys.has(`${row.ponumber}-${row.partcode}`)
+//   );
+
+//   if (filteredData.length === 0) {
+//     setErrorMessage("Selected data not matching.");
+//     setShowErrorPopup(true);
+//     return;
+//   }
+
+//   const username = sessionStorage.getItem("userName") || "System";
+//   const updatedFormData = filteredData.map((row) => ({
+//     ...row,
+//     createdby: username,
+//     updatedby: username,
+//   }));
+
+
+//   const updatedYTFormData = handleEdit.map((row) => ({
+//     ...row,
+//     updatedby: username,
+//   }));
+
+//   //  Choose correct API based on button type
+//   const apiCall = submitButton
+//     ? recevingDetail
+//     : updateButton
+//     ? updateRecDeatil
+//     : null;
+
+//   if (!apiCall) {
+//     setErrorMessage("No action specified (Submit or Update).");
+//     setShowErrorPopup(true);
+//     return;
+//   }
+
+//   apiCall(updatedFormData, updatedYTFormData)
+//     .then((response) => {
+//       setSuccessMessage(response.data.message);
+//       setShowSuccessPopup(true);
+//       setShowRecevingTable(false);
+//       setPoDetail([]);
+//       setFormData({});
+
+//       // ✅ Regenerate new ticket after save
+//       fetchRecevingData((ticketNo) => {
+//         setRecTicketNo(ticketNo);
+//         setFormData((prev) => ({
+//           ...prev,
+//           recevingTicketNo: ticketNo,
+//         }));
+//       });
+//     })
+//     .catch((error) => {
+//       const message =
+//         error?.response?.data?.message || "Network error, please try again";
+//       setErrorMessage(message);
+//       setShowErrorPopup(true);
+//     });
+// };
+const handleAction = (e) => {
+  e.preventDefault();
+
+  if (!valiDate()) return;
+
+  if (selectedRows.length === 0) {
+    setErrorMessage("Please select at least one item before submitting.");
+    setShowErrorPopup(true);
+    return;
+  }
+
+  const selectedKeys = new Set(selectedRows);
+  const filteredData = finalData.filter((row) =>
+    selectedKeys.has(`${row.ponumber}-${row.partcode}`)
+  );
+
+  const username = sessionStorage.getItem("userName") || "System";
+
+  if (submitButton) {
+      setShowErrorPopup(false);
+  setShowSuccessPopup(false);
+    // const submitData = filteredData.map((row) => ({
+    //   ...row,
+    //   createdby: username,
+    //   updatedby: username,
+    // }));
+    const submitData = filteredData.map((row) => ({
+  ...row,
+  recevingTicketNo: formData.recevingTicketNo, // ✅ important
+  createdby: username,
+  updatedby: username,
+}));
+    recevingDetail(submitData)
+      .then(handleSuccess)
+      .catch(handleError);
+  } else if (updateButton) {
+      setShowErrorPopup(false);
+  setShowSuccessPopup(false);
+    // Merge formData + poDetail[0] into single object
+    const mergedData = {
+      ...formData,
+        invoiceDate: formData.invoiceDate ? `${formData.invoiceDate} 00:00:00.000` : null,
+        postingdate: formData.postingdate ? `${formData.postingdate} 00:00:00.000` : null,
+      ...poDetail[0],
       updatedby: username,
+    };
 
+    const id = formData.id;
+
+    updateRecDeatil(id, mergedData)
+      .then(handleSuccess)
+      .catch(handleError);
+  } 
+  else {
+    setErrorMessage("No action specified (Submit or Update).");
+    setShowErrorPopup(true);
+  }
+};
+
+
+const handleSuccess = (response) => {
+  setSuccessMessage(response.data.message);
+  setShowSuccessPopup(true);
+  setShowErrorPopup(false);
+
+  setShowRecevingTable(false);
+  setPoDetail([]);
+  setFormData({});
+  setUpdateButton(false);
+  setSubmitButton(true);
+  setDeleteButton(false);
+  setSelectedDeleteRows([]);
+  setSelectedRows([]);
+  fetchFindData(page, perPage, searchText);
+  // ✅ Remove or replace this
+  // finalData(); ← this is the source of the error
+
+  fetchRecevingData((ticketNo) => {
+    setRecTicketNo(ticketNo);
+    setFormData((prev) => ({
+      ...prev,
+      recevingTicketNo: ticketNo,
     }));
-    console.log("Selected Rows:", selectedRows);
-    console.log("Filtered Data:", filteredData);
-    recevingDetail(updatedFormData)
-      .then((response) => {
-        setSuccessMessage(response.data.message);
-        setShowSuccessPopup(true);
-        setShowRecevingTable(false);
-        setPoDetail([]);
-        setFormData({});
-        // ✅ Regenerate new ticket after save
-        fetchRecevingData((ticketNo) => {
-          setRecTicketNo(ticketNo);
-          setFormData((prev) => ({
-            ...prev,
-            recevingTicketNo: ticketNo,
-          }));
-        });
-      })
+  });
+};
 
-      .catch((error) => {
-        const message =
-          error?.response?.data?.message || "Network error, please try again";
-        setErrorMessage(message);
-        setShowErrorPopup(true);
-      });
-  };
+
+const handleError = (error) => {
+  const message =
+    error?.response?.data?.message || "Network error, please try again";
+  setErrorMessage(message);
+  setShowErrorPopup(true);
+};
+
 
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -222,42 +333,99 @@ const Receving = () => {
       fetchReceving(setRecevingData, setTotalRows, page, size);
     }
   };
-  const handleEdit = (rowData) => {
-    setShowRecevingTable(true);
-    setFormData(rowData);
+const formatToDateTime = (dateStr) => {
+  return dateStr ? `${dateStr}T00:00:00` : null;
+};
 
-    fetchPoDetail(rowData.ponumber).then((res) => {
-      if (res?.data?.length > 0) {
-        const mappedData = res.data.map((po) => ({
-          ponumber: po.ponumber,
-          vendorname: po.vendorname,
-          partcode: po.partcode,
-          uom: po.uom,
-          partdescription: po.partdescription,
-          tyc: po.tyc,
-          currency: po.currency,
-          orderqty: po.orderqty,
-          ccf: po.ccf,
-          unitprice: po.unitprice,
-          recevingQty: po.rec_qty,
-          totalValue: po.totalValue,
-          totalValueEuro: po.totalValueEuro,
-          // expdateapplicable: po.expdateapplicable,
-          // shelflife: po.shelflife,
-          openOrderQty: (po.orderqty || 0) - (po.rec_qty || 0),
-          // expiryAutoSet: false,
-
-        }));
-        setPoDetail(mappedData);
-      } else {
-        setPoDetail([]);
-      }
-    });
-  };
 
   const exportToExcel = (search = "") => {
     download(search)
   }
+
+  const formClear = () => {
+    finalData({ponumber:""})
+  }
+
+
+  
+  const handleEdit = (rowData) => {
+  setShowRecevingTable(true);
+  setSubmitButton(false);
+  setUpdateButton(true);
+
+  setFormData({
+    id: rowData.id || "",
+    ponumber: rowData.ponumber,
+    vendorname: rowData.vendorname,
+    postingdate: rowData.postingdate,
+    currency: rowData.currency,
+    ccf: rowData.ccf,
+    invoiceNo: rowData.invoiceNo,
+  invoiceDate: rowData.invoiceDate?.substring(0, 10) || "",
+    //receivingDate: rowData.receivingDate,
+    rcBactchCode: rowData.rcBactchCode,
+        receivingDate: rowData.receivingDate ? `${rowData.receivingDate} 00:00:00.000` : null,
+    //invoiceDate: rowData.invoiceDate,
+  });
+
+  const combinedRow = {
+    partcode: rowData.partcode,
+    partdescription: rowData.partdescription,
+    orderqty: rowData.orderqty || "",
+    openOrderQty: rowData.orderqty - rowData.recevingQty || "",
+    UOM: rowData.UOM || "",
+    tyc: rowData.TYC,
+    recevingQty: rowData.recevingQty,
+    totalValue: rowData.totalValue,
+    totalValueEuro: rowData.totalValueEuro,
+   // exp_date: rowData.exp_date,
+    exp_date: rowData.exp_date ? `${rowData.exp_date} 00:00:00.000` : null,
+  };
+console.log("receivingDate:", rowData.receivingDate);
+console.log("invoiceDate :", rowData.invoiceDate);
+console.log("postingdate :", rowData.postingdate);
+
+setPoDetail([combinedRow]); 
+};
+const handleRowSelect = (id) => {
+  setDeleteButton(true);
+  setSubmitButton(false);
+  setUpdateButton(false);
+  setSelectedDeleteRows((prev) =>
+    prev.includes(id)
+      ? prev.filter((item) => item !== id) // uncheck
+      : [...prev, id] // check
+  );
+};
+const deleteRec = async () => {
+  try {
+    setConfirmDelete(false);
+
+    const res = await deleteRecDetail(selectedDeleteRows);
+
+    setSuccessMessage(res.data.message);
+    setShowSuccessPopup(true);
+    setSelectedDeleteRows([]);
+fetchFindData();
+
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Delete failed";
+    setErrorMessage(msg);
+    setShowErrorPopup(true);
+  }
+};
+
+
+const onDeleteClick = () => {
+    setConfirmDelete(true);
+
+  }; const handleCancel = () => {
+    setSelectedDeleteRows([]);
+    setConfirmDelete(false);
+  };
+useEffect(() => {
+  console.log("Updated selectedDeleteRows:", selectedDeleteRows);
+}, [selectedDeleteRows]);
 
 
   return (
@@ -363,12 +531,32 @@ const Receving = () => {
               />
             </div>
           )}
+          {submitButton &&  (
+          <div className='ComCssButton9'>           
+            <button style={{ backgroundColor: 'green' }} onClick={handleAction} >Submit</button>
+                                <button >Clear</button>
 
-          <div className='ComCssButton9'>
-            {<button style={{ backgroundColor: 'green' }} onClick={handleSubmit} >Submit</button>}
           </div>
+          )}
+          {updateButton &&  (
+          <div className='ComCssButton9'>           
+            <button style={{ backgroundColor: 'orange' }} onClick={handleAction} >Update</button>
+                                <button onClick={formClear}>Clear</button>
+
+          </div>
+          )}
+          
+
         </div>
       }
+        <div className='RecevingInputHide'>
+      {deleteButton &&  (
+          <div className='ComCssButton9'>           
+            <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick} >Delete</button>
+            <button onClick={formClear}>Clear</button>
+
+          </div>
+          )}
       <ColumnTable
         recevingData={recevingData}
         selectedRows={selectedRows}
@@ -380,8 +568,10 @@ const Receving = () => {
         searchText={searchText}
         setSearchText={setSearchText}
         handleEdit={handleEdit}
+        handleRowSelect={handleRowSelect}
+        selectedDeleteRows={selectedDeleteRows}
         exportToExcel={exportToExcel}
-      />
+      /> </div>
       {/* </div> */}
       {/* </div> */}
       <CustomDialog
@@ -400,6 +590,14 @@ const Receving = () => {
         severity="error"
         color="secondary"
       />
+      <CustomDialog
+              open={confirmDelete}
+              onClose={handleCancel}
+              onConfirm={deleteRec}
+              title="Confirm"
+              message="Are you sure you want to delete this?"
+              color="primary"
+            />
     </div>
   )
 }

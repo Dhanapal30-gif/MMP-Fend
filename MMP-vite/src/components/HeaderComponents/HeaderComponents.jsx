@@ -165,6 +165,8 @@ const HeaderComponents = () => {
                 <ul className="dropdown-menu">
                   <li><Link to="/add_Po_Detail" className="dropdown-item" onClick={closeServicesDropdown}>Add Po Detail</Link></li>
                   <li><Link to="/receving" className="dropdown-item" onClick={closeServicesDropdown}>Receving</Link></li>
+                  <li><Link to="/grn" className="dropdown-item" onClick={closeServicesDropdown}>GRN</Link></li>
+                  <li><Link to="/poStatus" className="dropdown-item" onClick={closeServicesDropdown}>PoStatus</Link></li>
 
                   {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
                 </ul>

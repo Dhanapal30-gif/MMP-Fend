@@ -121,10 +121,13 @@ export const RecevingTextFiled8 = ({ formData, setFormData, formErrors }) => (
     helperText={formErrors?.invoiceNo || ""}
   />
 );
+
 export const RecevingTextFiled9 = ({ formData, setFormData, formErrors }) => (
   <TextField
     type="date"
     variant="outlined"
+        name="invoiceDate"
+
     value={formData.invoiceDate || ""}
     InputLabelProps={{ shrink: true }}
     // className="invoice-input"
@@ -144,8 +147,8 @@ export const RecevingTextFiled9 = ({ formData, setFormData, formErrors }) => (
         }));
       }
     }}
-    error={Boolean(formErrors?.invoiceDate)}         // ✅ safe access using optional chaining
-    helperText={formErrors?.invoiceDate || ""}       // ✅ safe fallback
+    error={Boolean(formErrors?.invoiceDate)}         
+    helperText={formErrors?.invoiceDate || ""}       
   />
 );
 
