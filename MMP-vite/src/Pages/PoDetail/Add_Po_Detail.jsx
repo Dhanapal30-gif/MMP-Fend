@@ -49,7 +49,8 @@ const Add_Po_Detail = () => {
   const [vendorMaster, setVendorMaster] = useState([]);
   const [curencyMaster, setCurencyMaster] = useState([]);
   const [rcMainStore, setRcMainStore] = useState([]);
-
+  const [downloadProgress, setDownloadProgress] = useState(null);
+  const [downloadDone, setDownloadDone] = useState(false);
   const [formData, setFormData] = useState({
     ordertype: "", potool: "", ponumber: "", podate: "",
     currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
@@ -373,7 +374,7 @@ const Add_Po_Detail = () => {
     //setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
     setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
-      console.log("row",rowKey)
+      console.log("row", rowKey)
       const updatedRows = isRowSelected
         ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect
         : [...prevSelectedRows, rowKey]; // Select row
@@ -531,29 +532,29 @@ const Add_Po_Detail = () => {
   //   }));
   // };
   const handleAddClick = () => {
-  if (!valiDate()) return;
+    if (!valiDate()) return;
 
-  // Check if partcode already exists
-  const isDuplicate = tableData.some(item => item.partcode === formData.partcode);
-  if (isDuplicate) {
-    setErrorMessage("Partcode already exists");
-    setShowErrorPopup(true);
-    return;
-  }
+    // Check if partcode already exists
+    const isDuplicate = tableData.some(item => item.partcode === formData.partcode);
+    if (isDuplicate) {
+      setErrorMessage("Partcode already exists");
+      setShowErrorPopup(true);
+      return;
+    }
 
-  setShowTable(true);
-  setTableData(prev => [...prev, formData]);
-  setIsFrozen(true);
-  setFormData(prev => ({
-    ...prev,
-    partcode: "",
-    partdescription: "",
-    unitprice: "",
-    orderqty: "",
-    totalvalue: "",
-    totalvalueeuro: "",
-  }));
-};
+    setShowTable(true);
+    setTableData(prev => [...prev, formData]);
+    setIsFrozen(true);
+    setFormData(prev => ({
+      ...prev,
+      partcode: "",
+      partdescription: "",
+      unitprice: "",
+      orderqty: "",
+      totalvalue: "",
+      totalvalueeuro: "",
+    }));
+  };
 
 
   const handlePageChange = (newPage) => {
@@ -712,44 +713,35 @@ const Add_Po_Detail = () => {
       })
   }
   const exportToExcel = (search = "") => {
-    console.log("searchTeaxt", search)
-    if (search && search.trim() !== "") {
-      setLoading(true);
-      downloadSearchPoDetail(search) // <- pass search here
-        .then((response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "PoDetail.xlsx");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        })
-        .catch((error) => {
-          console.error("Download failed:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(true);
-      downloadPoDetail()
-        .then((response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "PoDetail.xlsx");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        })
-        .catch((error) => {
-          console.error("Download failed:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
+    setDownloadDone(false);
+    setDownloadProgress(null);
+    setLoading(true);
+
+    const apiCall = search?.trim() !== "" ? downloadSearchPoDetail : downloadPoDetail;
+
+    apiCall(search, {
+      onDownloadProgress: (progressEvent) => {
+        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setDownloadProgress(percent);
+      },
+    })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "PoDetail.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setDownloadDone(true);
+      })
+      .catch((error) => {
+        console.error("Download failed:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+        setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
+      });
   };
   return (
     <div className='COMCssContainer'>
@@ -1055,9 +1047,20 @@ const Add_Po_Detail = () => {
       <div className='ComCssTable'>
         <h5 className='ComCssTableName'>PO Detail</h5>
         <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-          <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
-            <FaFileExcel /> Export
+          <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
+            {loading
+              ? downloadProgress !== null
+                ? `Downloading... ${downloadProgress}%`
+                : "Downloading..."
+              : downloadDone
+                ? "✅ Done"
+                : (
+                  <>
+                    <FaFileExcel /> Export
+                  </>
+                )}
           </button>
+
           <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
             <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
               onChange={(e) => setSearchText(e.target.value)}

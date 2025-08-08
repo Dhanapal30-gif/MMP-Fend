@@ -50,17 +50,17 @@ if (selectedRows && handleSelect ) {
     });
   }
   // Add Edit column only if showEdit is true and onEdit exists
-  if (showEdit && onEdit) {
-    baseColumns.push({
-      name: "Edit",
-      cell: row => (
-        <button className="edit-button" onClick={() => onEdit(row)}>
-          Edit
-        </button>
-      ),
-      width: "80px",
-    });
-  }
+  // if (showEdit && onEdit) {
+  //   baseColumns.push({
+  //     name: "Edit",
+  //     // cell: row => (
+  //     //   <button className="edit-button" onClick={() => onEdit(row)}>
+  //     //     Edit
+  //     //   </button>
+  //     // ),
+  //     width: "80px",
+  //   });
+  // }
 
   return [...baseColumns, ...dynamicColumns];
 };

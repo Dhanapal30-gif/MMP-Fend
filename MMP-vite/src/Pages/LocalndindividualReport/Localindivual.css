@@ -1,0 +1,37 @@
+.cat {
+  margin: 40px auto;
+  position: relative;
+  width: 16em;
+  height: 16em;
+}
+
+.cat__segment {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3em;
+  height: 2em;
+  transform: rotate(var(--i)) translateY(-8em);
+  animation: catPulse 1.2s infinite ease-in-out;
+  animation-delay: calc(var(--i) * 0.05s);
+}
+
+.cat__segment::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.25em;
+  background-color: #20c997;
+}
+
+@keyframes catPulse {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}

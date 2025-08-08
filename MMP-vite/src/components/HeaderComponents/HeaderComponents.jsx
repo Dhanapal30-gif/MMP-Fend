@@ -5,13 +5,17 @@ import Avatar from "@mui/material/Avatar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Imagee from "../../assets/Nokia_9-removebg-preview.png";
 import './HeaderComponents.css';
-import { Badge, IconButton } from '@mui/material';
+import {
+  Badge, IconButton, Menu, MenuItem, ListItemText, Box,
+  ListItemSecondaryAction
+} from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { FaHome, FaCog, FaCubes, FaStore, FaWarehouse, FaChartPie, FaFileAlt } from "react-icons/fa";
 import { AiFillHome } from "react-icons/ai";
 import { IoSettingsSharp } from "react-icons/io5";
 import { GiCube } from "react-icons/gi";
 import { HiChartBar } from "react-icons/hi";
+import CloseIcon from '@mui/icons-material/Close';
 
 const HeaderComponents = () => {
   const [empName, setEmpName] = useState("");
@@ -34,7 +38,7 @@ const HeaderComponents = () => {
 
   const handleSignOut = () => {
     sessionStorage.clear();
-    localStorage.clear();         
+    localStorage.clear();
     setIsLoggedIn(false);
     navigate("/");
   };
@@ -51,8 +55,29 @@ const HeaderComponents = () => {
     setIsMenuOpen((prev) => !prev); // Toggle the mobile menu open/close
   };
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const [notifications, setNotifications] = useState([
+    "Have receving ticket RE0000789",
+    "Have GRN ticket RE0000789",
+    "Have Putaway ticket RE0000789",
+    "Have Isuuance ticket RE0000789",
+  ]);
+  const handleRemove = (index) => {
+    setNotifications((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
-    <header >
+    <>
+    <header className="header-container">
       <div className="header7">
         <div class="header-logo-box"></div>
         <div className="logo-section">
@@ -67,12 +92,41 @@ const HeaderComponents = () => {
 
         </div>
         <div className="notification">
-          <IconButton sx={{ color: 'white' }} >
-            <Badge badgeContent={4} color="error">
+          <IconButton sx={{ color: 'white' }} onClick={handleClick}>
+            <Badge badgeContent={notifications.length} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
+
+          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+            {notifications.length === 0 ? (
+              <MenuItem disabled>No new notifications</MenuItem>
+            ) : (
+              notifications.map((note, index) => (
+                <MenuItem key={index} disableRipple>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: '#e0d5d5ff',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      width: '100%',
+                      gap: 1
+                    }}
+                  >
+                    <ListItemText primary={note} />
+                    <IconButton size="small" onClick={() => handleRemove(index)}>
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </MenuItem>
+              ))
+            )}
+          </Menu>
         </div>
+
         <div className="avatar-container">
           {isLoggedIn ? (
             <div className="avatar-wrapper">
@@ -146,9 +200,11 @@ const HeaderComponents = () => {
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
-                  <li><Link to="/userList" className="dropdown-item" onClick={closeServicesDropdown}>userList</Link></li>
-                  <li><Link to="/ProjectDashBoard" className="dropdown-item" onClick={closeServicesDropdown}>ScreenAccess</Link></li>
-                  <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li>
+                  <li><Link to="/PTLMaster" className="dropdown-item" onClick={closeServicesDropdown}>PTL Master</Link></li>
+                  <li><Link to="/repaier" className="dropdown-item" onClick={closeServicesDropdown}>Repaier</Link></li>
+                  <li><Link to="/reworker" className="dropdown-item" onClick={closeServicesDropdown}>Reworker</Link></li>
+                  <li><Link to="/PTLOpreator" className="dropdown-item" onClick={closeServicesDropdown}>PTLOpreator</Link></li>
+
                 </ul>
               )}
             </li>
@@ -167,6 +223,7 @@ const HeaderComponents = () => {
                   <li><Link to="/receving" className="dropdown-item" onClick={closeServicesDropdown}>Receving</Link></li>
                   <li><Link to="/grn" className="dropdown-item" onClick={closeServicesDropdown}>GRN</Link></li>
                   <li><Link to="/poStatus" className="dropdown-item" onClick={closeServicesDropdown}>PoStatus</Link></li>
+                  <li><Link to="/putaway" className="dropdown-item" onClick={closeServicesDropdown}>Putaway</Link></li>
 
                   {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
                 </ul>
@@ -183,9 +240,8 @@ const HeaderComponents = () => {
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
-                  <li><Link to="/userList" className="dropdown-item" onClick={closeServicesDropdown}>userList</Link></li>
-                  <li><Link to="/ProjectDashBoard" className="dropdown-item" onClick={closeServicesDropdown}>ScreenAccess</Link></li>
-                  <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li>
+                  <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
+                  <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li>
                 </ul>
               )}
             </li>
@@ -200,16 +256,18 @@ const HeaderComponents = () => {
               </span>
               {servicesDropdown && (
                 <ul className="dropdown-menu">
-                  <li><Link to="/userList" className="dropdown-item" onClick={closeServicesDropdown}>userList</Link></li>
-                  <li><Link to="/ProjectDashBoard" className="dropdown-item" onClick={closeServicesDropdown}>ScreenAccess</Link></li>
-                  <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li>
+                  <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localnd individual Report</Link></li>
+                  <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li>
                 </ul>
               )}
             </li>
           </ul>
         </nav>
       </div>
+
     </header>
+    {/* <div class="footer">Footer</div> */}
+</>
   );
 }
 export default HeaderComponents;

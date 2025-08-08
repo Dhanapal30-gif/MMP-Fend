@@ -1,0 +1,39 @@
+
+.ReworkerButton9 {
+    display: flex;
+    justify-content: flex-end;       /* Align buttons to the right */
+    gap: 15px;                       /* Space between buttons */
+    margin-top: -10px;                /* Gap between button rows */
+    /* width: 100%; */
+}
+
+.ReworkerButton9 button {
+    color: white;
+    background-color: #20c9c6;          
+    height: 30px;
+    padding: 0 16px;           /* Add horizontal padding instead of fixed width */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;  
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    margin-top: 10px;                
+    white-space: nowrap;      /* Prevent text wrapping */
+}
+
+
+
+.ReworkerButton9 button:hover {
+    background-color: #0d9a95;         
+    transform: scale(1.05);             
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+}
+
+.ReworkerButton9 button:active {
+    /* transform: scale(0.98);     */
+    transform: scale(1.30);    
+
+}
