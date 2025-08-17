@@ -3,6 +3,7 @@ import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns';
 import { TextField } from "@mui/material";
 import { saveDoneRequest, savePickequest } from '../../Services/Services_09';
+import CryptoJS from "crypto-js";
 
 const PTLOpreatoreTable = ({
   data = [],
@@ -13,11 +14,15 @@ const PTLOpreatoreTable = ({
   setPage,
   setPerPage,
   handleQtyChange,
+  formData,
   pickButton,
-  setpickButton
+  setpickButton,
+  setSuccessMessage,
+  setShowSuccessPopup
 }) => {
 
   const [pickedRows, setPickedRows] = useState([]);
+const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
 
   const columns = generateColumns({
     fields: [
@@ -37,51 +42,92 @@ const PTLOpreatoreTable = ({
     ]
     ,
     customCellRenderers: {
-      pickingqty: (row) => (
-        <TextField
-          type="number"
-          value={row.pickingqty || ""}
-          onChange={(e) => {
-            const inputValue = Number(e.target.value);
-            const max = Number(row.availableqty || 0);
-            if (inputValue <= max) {
-              handleQtyChange(row.selectedid, inputValue);
-            }
-          }}
-          className="invoice-input"
-        />
-      ),
+  pickingqty: (formData) => (
+    <TextField
+      type="number"
+      value={editedQty[formData.selectedid] ?? formData.pickingqty ?? ""}
+      onChange={(e) => {
+        const inputValue = Number(e.target.value);
+        const max = Number(row.availableqty || 0);
+        if (inputValue <= max) {
+          setEditedQty(prev => ({ ...prev, [row.selectedid]: inputValue }));
+          handleQtyChange(row.selectedid, inputValue); // update main state too if needed
+        }
+      }}
+      className="invoice-input"
+    />
+  ),
       Pick: (row) => (
-  <div className="ReworkerButton9">
-    {!pickedRows.includes(row.id) && pickButton && (
-      <button
-        style={{ backgroundColor: 'blue', color: 'white' }}
-        onClick={() => handlePick(row.id, row.pickingqty)}
-      >
-        Pick
-      </button>
-    )}
-  </div>
-)
-
-
+        <div className="ReworkerButton9">
+          {pickButton && (
+            pickedRows.includes(row.id) ? (
+              <span style={{ color: 'green', fontWeight: 'bold', marginTop: '15px ' }}>Done</span>
+            ) : (
+              <button
+                style={{
+                  backgroundColor: 'blue',
+                  color: 'white'
+                }}
+                onClick={() =>
+                  handlePick(
+                    row.pickingqty,
+                    row.racklocation,
+                    row.partcode,
+                    row.partdescription,
+                    row.id
+                  )
+                }
+              >
+                Pick
+              </button>
+            )
+          )}
+         
+        </div>
+        
+      )
     }
   })
+  
+  const SECRET_KEY = "1234567890123456"; // same as backend
+  const handlePick = (pickingqty, racklocation, partcode, partdescription, rowId) => {
+    const formData = [{
+      Qty: pickingqty,
+      LocationName: racklocation,
+      PartNO: partcode,
+      Description: partdescription
+    }];
 
-  const handlePick = (id, pickingqty) => {
-  const formData = [{ id, pickingqty }];
+    const jsonString = JSON.stringify(formData);
 
-  savePickequest(formData)
-    .then((response) => {
-      if (response.status === 200 && response.data) {
-        setPickedRows(prev => [...prev, id]); 
-        // setpickButton(false);
-      }
-    })
-    .catch((error) => {
-      console.error("Error saving:", error);
-    });
-};
+    const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+    const encrypted = CryptoJS.AES.encrypt(jsonString, key, {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.Pkcs7
+    }).toString();
+
+    savePickequest(encrypted)
+      .then(res => {
+        const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+        const decrypted = CryptoJS.AES.decrypt(res.data, key, {
+          mode: CryptoJS.mode.ECB,
+          padding: CryptoJS.pad.Pkcs7
+        }).toString(CryptoJS.enc.Utf8);
+
+        try {
+          const parsedData = JSON.parse(decrypted);
+          setSuccessMessage(parsedData.message); // store only the string
+          setShowSuccessPopup(true);
+          setPickedRows(prev => [...prev, rowId]);
+
+          console.log(parsedData);
+        } catch (e) {
+          console.error("Invalid JSON response:", decrypted);
+        }
+      })
+
+  };
+
   return (
     <CommonDataTable
       columns={columns}

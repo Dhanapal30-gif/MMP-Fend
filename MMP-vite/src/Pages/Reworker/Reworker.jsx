@@ -7,7 +7,7 @@ import './Reworker.css';
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLRequest, savePTLStore, saveReworkerSubmit } from '../../Services/Services_09';
 
 
 const Reworker = () => {
@@ -69,12 +69,12 @@ const Reworker = () => {
         try {
             const response = await fetchBoardSerialNumber();
             if (response.status === 200) {
-                const modifiedData = response.data.map((item, idx) => ({
+                const fetchBoardDetail = response.data.map((item, idx) => ({
                     ...item,
                     selectedid: item.selectedid ?? idx, // fallback index as unique id
                     RequestedQty: item.pickingqty || 0
                 }));
-                setTableData(modifiedData);
+                setTableData(fetchBoardDetail);
             } else {
                 console.error("Failed to fetch data");
             }
@@ -177,6 +177,28 @@ const Reworker = () => {
     //         reworkername: userName
     //     }));
 
+   
+   const handleSubmit = async () => {
+     const payload = filteredData.map(item => ({
+       id: item.id,   // use selectedid if that's your row ID
+     pickingqty: item.availableqty // match backend field
+     }));
+   
+     console.log("payload", payload);
+   
+     // send payload to API if needed
+     try {
+       const response = await saveReworkerSubmit(payload);
+       setSuccessMessage("API success:", response.message)
+       setShowSuccessPopup(true)
+       setShowTable(false)
+       console.log("API success:", response);
+     } catch (error) {
+       setErrorMessage("Error sending payload:", error)
+       setShowErrorPopup(true)
+       console.error("Error sending payload:", error);
+     }
+   };
     const handleCancelBoard = () => {
         setIsFrozen(true);
         setSubmitButton(false)
@@ -205,7 +227,9 @@ const Reworker = () => {
 
                 <ReworkerTextFiled
                     formData={formData}
+                    setFormData={setFormData}
                     handleChange={handleChange}
+                    tableData={tableData}
                 // formErrors={formErrors} // ✅ Pass this prop
                 // handlePoChange={handlePoChange}
                 // productOptions={productOptions}
@@ -249,7 +273,7 @@ const Reworker = () => {
 
                         {
                             filteredData.length > 0 &&
-                            (filteredData[0].is_ptlrequest == 1) && (
+                            (filteredData[0].is_ptlrequest == 2) && (
                                 <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
                             )
                         }
@@ -260,7 +284,7 @@ const Reworker = () => {
                             )
                         }
                         {submitButton && (
-                            <button style={{ backgroundColor: 'green' }}>Submit</button>
+                            <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
                         )}
                         {clearButton && (
                             <button style={{ backgroundColor: 'blue' }} onClick={handleClear}>Clear</button>

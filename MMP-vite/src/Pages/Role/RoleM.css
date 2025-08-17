@@ -1,0 +1,45 @@
+.RoleComCssInput {
+    flex-direction: column;
+    /* background-color: floralwhite; */
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    width: 35%;
+    margin-top: 20px;
+    margin-left: 40px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    /* Space evenly */
+    gap: 30px;
+    background-color: white;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    flex-wrap: wrap
+        /* Space between rows */
+}
+
+.RoleComCssInput1 {
+    flex-direction: column;
+    /* background-color: floralwhite; */
+    border: 2px solid #edd9d9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    width: 35%;
+    margin-top: -199px;
+    margin-left: 640px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    /* Space evenly */
+    gap: 30px;
+    background-color: white;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    flex-wrap: wrap
+        /* Space between rows */
+}

@@ -29,7 +29,7 @@ const renderRow = ({ data, index, style }) => {
 
 const DropdownCom = React.forwardRef(function DropdownCom(props, ref) {
   const { children, ...other } = props;
-  const itemData = React.Children.toArray(children); // cleaned
+  const itemData = React.Children.toArray(children);
 
   const itemCount = itemData.length;
   const itemSize = 39;

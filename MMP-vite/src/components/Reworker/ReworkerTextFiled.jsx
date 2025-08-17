@@ -5,10 +5,17 @@ import TextFiledTheme from '../Com_Component/TextFiledTheme';
 import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-const ReworkerTextFiled = ({ formData, setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
+const ReworkerTextFiled = ({ formData, setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange,tableData, formErrors }) => {
 
-    const handleSearchClick = () => {
-        console.log("Search clicked", formData.productname);
+   const handleSearchClick = () => {
+        const foundRow = tableData.find(
+            row => row.boardserialnumber === formData.productname
+        );
+        if (foundRow) {
+            setFormData({ ...formData, ...foundRow });
+        } else {
+            alert("No record found for this serial number");
+        }
     };
 
     return (
@@ -17,10 +24,9 @@ const ReworkerTextFiled = ({ formData, setFormData, isFrozen, partOptions, handl
                 <ComTextFiled
                     label="Module Serial Number"
                     name="productname"
-                    value={formData.productname}
+                    // value={formData.productname}
                     onChange={handleChange}
-                    error={Boolean(formErrors?.productname)}
-                    helperText={formErrors?.productname || ""}
+                  
                     sx={{ width: '320px' }}
                     InputProps={{
                         endAdornment: (

@@ -3,7 +3,7 @@ import PTLTextfiled from "../../components/Local-PTL-Master/PTLTextfiled";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import { getLocalMaster, savePTLStore } from '../../Services/Services_09';
+import { downloadLocalMaster, downloadSearchLocalMaster, getLocalkMasterSearch, getLocalMaster, savePTLStore } from '../../Services/Services_09';
 
 import PTLTable from "../../components/Local-PTL-Master/PTLTable";
 
@@ -31,6 +31,9 @@ const PTLMaster = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [downloadDone, setDownloadDone] = useState(false);
+          const [downloadProgress, setDownloadProgress] = useState(null);
+        
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -102,7 +105,7 @@ const PTLMaster = () => {
     const fetchData = (page = 1, size = 10, search = "") => {
         console.log("searchfetch", search);
         if (search && search.trim() !== "") {
-            //   fetchfind(page, size, search);
+              fetchfindSearch(page, size, search);
 
         } else {
             fetchPTLDetail(page, perPage);
@@ -117,12 +120,55 @@ const PTLMaster = () => {
                 // console.log('fetchPodetail', response.data);
             })
     }
-
+ const fetchfindSearch = ( page = 1, size = 10, search = "") => {
+            getLocalkMasterSearch(page - 1, size,  search)
+                .then((response) => {
+                    if (response?.data?.content) {
+                        setLocalStore(response.data.content);
+                        setTotalRows(response.data.totalElements || 0);
+                    } else {
+                        console.warn("No content found in response:", response.data);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching search data:", error);
+                });
+        };
     const handleEdit = (row) => {
         setFormData({ ...row });
         setIsEditMode(true);
     };
-
+ const exportToExcel = (search = "") => {
+        setDownloadDone(false);
+        setDownloadProgress(null);
+        setLoading(true);
+    
+        const apiCall = search?.trim() !== "" ? downloadSearchLocalMaster : downloadLocalMaster;
+    
+        apiCall(search, {
+          onDownloadProgress: (progressEvent) => {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress(percent);
+          },
+        })
+          .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "PTLMaster.xlsx");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setDownloadDone(true);
+          })
+          .catch((error) => {
+            console.error("Download failed:", error);
+          })
+          .finally(() => {
+            setLoading(false);
+            setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
+          });
+      };
     const handleClear = () => {
         setFormData({
             partcode: "", partdescription: "", rohsstatus: "", msdstatus: "",
@@ -137,7 +183,7 @@ const PTLMaster = () => {
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>PTLStore</h5>
+                    <p>PTL Master</p>
                 </div>
 
                 <PTLTextfiled
@@ -149,26 +195,36 @@ const PTLMaster = () => {
                 <div className="ComCssButton9">
 
                     {!isEditMode && (
-                        <button style={{ backgroundColor: 'green' }} onClick={handleSubmit} >
+                        <button className='ComCssSubmitButton' onClick={handleSubmit} >
                             Submit
                         </button>)}
                     {isEditMode && (
 
-                        <button style={{ backgroundColor: 'orange' }} onClick={handleSubmit} >
+                        <button className='ComCssUpdateButton' onClick={handleSubmit} >
                             Update
                         </button>
                     )}
-                    <button onClick={handleClear} > Clear </button>
+                    <button className='ComCssClearButton' onClick={handleClear} > Clear </button>
 
                 </div>
             </div>
             <div className='ComCssTable'>
 
-                <h5 className='ComCssTableName'>Po Summary</h5>
+                <h5 className='ComCssTableName'>PTL Master Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
-                        <FaFileExcel /> Export
-                    </button>
+                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
+                                                   {loading
+                                                     ? downloadProgress !== null
+                                                       ? `Downloading... ${downloadProgress}%`
+                                                       : "Downloading..."
+                                                     : downloadDone
+                                                       ? "✅ Done"
+                                                       : (
+                                                         <>
+                                                           <FaFileExcel /> Export
+                                                         </>
+                                                       )}
+                                                 </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}

@@ -44,7 +44,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
         }
     };
 
-    console.log("handleselect",selectedRows)
+    // console.log("handleselect",selectedRows)
 
     const handleSelect = (row, checked) => {
         const key = getRowKey(row);
@@ -77,24 +77,24 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                 </div>
             ),
             width: "97px",
-            center: true,
+            // center: true,
         },
 
         {
-            name: "partcode",
+            name: "PartCode",
             selector: row => row.partcode?.split(" ")[0],
             //width: `${calculateColumnWidth( 'modifieddate')}px`
             width: '130px'
         },
         {
-            name: "partdescription",
+            name: "Part Description",
             selector: row => row.partdescription,
             wrap: true,
             //  width: `${calculateColumnWidth( 'currency')}px`
             width: '310px'
         },
         {
-            name: "orderqty",
+            name: "Order Qty",
             selector: row => row.orderqty,
             sortable: true,
             // width: '130px'
@@ -102,7 +102,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             width: "115px"
         },
         {
-            name: "openOrderQty",
+            name: "OpenOrder Qty",
             selector: row => row.openOrderQty,
             wrap: true,
             width: '150px'
@@ -116,7 +116,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             width: '130px'
         },
         {
-            name: "Type of Component",
+            name: "Type Of Component",
             selector: row => row.tyc,
             wrap: true,
 
@@ -124,7 +124,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             //   width: '130px'
         },
         {
-            name: "unitprice",
+            name: "Unitprice",
             selector: row => row.unitprice,
             width: `${calculateColumnWidth('unitprice')}px`
         },
@@ -145,9 +145,9 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                         if (Number(value) > Number(row.orderqty)) {
                             setErrorMessage("Receving Qty cannot be more than Order Qty");
                             setShowErrorPopup(true);
-                               // Reset the field
-      handleFieldChange(index, 'recevingQty', "");
-      return;
+                            // Reset the field
+                            handleFieldChange(index, 'recevingQty', "");
+                            return;
                         }
                         if (formErrors[`recevingQty-${index}`] && Number(value) > 0) {
                             setFormErrors((prev) => {
@@ -166,38 +166,38 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             name: "TotalValue",
             cell: (row, index) => (
                 <TextField
-  variant="outlined"
-  placeholder="totalValue"
-  name="totalValue"
-  value={row.totalValue || ""}
-  type="text" // Use text to fully control input
-  inputProps={{
-    inputMode: "decimal", // only numeric keyboard on mobile
-    pattern: "^[0-9]*\\.?[0-9]*$" // optional decimal
-  }}
-  onChange={(e) => {
-    const value = e.target.value;
+                    variant="outlined"
+                    placeholder="totalValue"
+                    name="totalValue"
+                    value={row.totalValue || ""}
+                    type="text" // Use text to fully control input
+                    inputProps={{
+                        inputMode: "decimal", // only numeric keyboard on mobile
+                        pattern: "^[0-9]*\\.?[0-9]*$" // optional decimal
+                    }}
+                    onChange={(e) => {
+                        const value = e.target.value;
 
-    // Allow only digits and decimal point
-    if (!/^\d*\.?\d*$/.test(value)) return;
+                        // Allow only digits and decimal point
+                        if (!/^\d*\.?\d*$/.test(value)) return;
 
-    const total = parseFloat(value) || 0;
-    const ccf = parseFloat(row.ccf) || 1;
-    const euro = total * ccf;
+                        const total = parseFloat(value) || 0;
+                        const ccf = parseFloat(row.ccf) || 1;
+                        const euro = total * ccf;
 
-    handleFieldChange(index, 'totalValue', value);
-    handleFieldChange(index, 'totalValueEuro', euro.toFixed(2));
-  }}
-  error={Boolean(formErrors[`totalValue-${index}`])}
-  helperText={formErrors[`totalValue-${index}`]}
-  className="invoice-input"
-/>
+                        handleFieldChange(index, 'totalValue', value);
+                        handleFieldChange(index, 'totalValueEuro', euro.toFixed(2));
+                    }}
+                    error={Boolean(formErrors[`totalValue-${index}`])}
+                    helperText={formErrors[`totalValue-${index}`]}
+                    className="invoice-input"
+                />
 
             ),
         }
         ,
         {
-            name: "totalValueEuro",
+            name: "TotalValue Euro",
             selector: row => row.totalValueEuro,
             width: `${calculateColumnWidth('totalValueEuro')}px`
         }
@@ -226,7 +226,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                     }, 0);
                 }
 
-                console.log("expApplicable:", expApplicable);
+                // console.log("expApplicable:", expApplicable);
 
                 // Calculate min date (2 months after receivingDate)
                 const receiving = new Date(formData.receivingDate);
@@ -311,7 +311,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
     )
 }
 
-export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPage, setPage, setPerPage, loading, searchText, setSearchText, handleEdit,handleRowSelect,selectedDeleteRows, exportToExcel}) => {
+export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPage, setPage, setPerPage, loading, searchText, setSearchText, handleEdit, handleRowSelect, selectedDeleteRows, exportToExcel }) => {
     //const [searchText, setSearchText] = useState("");
 
     const column = [
@@ -319,22 +319,22 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             name: (
                 <div style={{ textAlign: 'center' }}>
                     <label>Select </label><br />
-                   
+
                 </div>
             ),
             cell: (row) => (
                 <div style={{ paddingLeft: '23px', width: '100%' }}>
-          <input type="checkbox" checked={selectedDeleteRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
-/>
+                    <input type="checkbox" checked={selectedDeleteRows.includes(row.id)} onChange={() => handleRowSelect(row.id)}
+                    />
                 </div>
             ),
             width: "97px",
-            center: true,
+            // center: true,
         },
         { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
 
         {
-            name: "Rec_ticket_no",
+            name: "Rec Ticket No",
             selector: row => row.recevingTicketNo, // ⬅️ Extract date part before space
             width: '130px'
         },
@@ -344,16 +344,16 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             wrap: true,
             width: '130px'
         },
-        
+
         {
-            name: "vendorname",
+            name: "vendorName",
             selector: row => row.vendorname,
             wrap: true,
             width: '150px'
 
         },
         {
-            name: "Postingdate",
+            name: "Posting Date",
             selector: row => row.postingdate,
             wrap: true,
             grow: 2,
@@ -367,7 +367,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             width: '130px'
         },
         {
-            name: "partdescription",
+            name: "part Description",
             selector: row => row.partdescription,
             wrap: true,
             grow: 2,
@@ -388,50 +388,50 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             width: '190px'
         },
         {
-            name: "Order_qty",
+            name: "Order Qty",
             selector: row => row.orderqty,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "Open Order_qty",
-            selector: row => row.orderqty-row.recevingQty,
+            name: "Open Order Qty",
+            selector: row => row.orderqty - row.recevingQty,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "Rec_qty",
+            name: "Rec Qty",
             selector: row => row.recevingQty,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "currency",
+            name: "Currency",
             selector: row => row.currency,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "currnecy con factor",
+            name: "currnecyCon factor",
             selector: row => row.ccf,
             wrap: true,
             grow: 2,
-            width: '130px'
+            width: '150px'
         },
         {
-            name: "Total_value",
+            name: "Total Value",
             selector: row => row.totalValue,
             wrap: true,
             grow: 2,
             width: '130px'
         },
-        
+
         {
-            name: "totalvalueeuro",
+            name: "TotalValue Euro",
             selector: row => row.totalValueEuro,
             wrap: true,
             grow: 2,
@@ -439,35 +439,35 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
         },
 
         {
-            name: "invoiceno",
+            name: "Invoice No",
             selector: row => row.invoiceNo,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "invoicedate",
+            name: "Invoice Date",
             selector: row => row.invoiceDate,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "receivingdate",
+            name: "Receiving Date",
             selector: row => row.receivingDate,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "Exp_date",
+            name: "Exp Date",
             selector: row => row.exp_date,
             wrap: true,
             grow: 2,
             width: '130px'
         },
         {
-            name: "rcbatchcode",
+            name: "RcBatch Code",
             selector: row => row.rcBactchCode,
             wrap: true,
             grow: 2,
@@ -486,27 +486,27 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
     return (
 
 
-      
-            <div className='RecevingDetailTable'>
-                <h5 className='ComCssTableName'>Receving Detail</h5>
-                <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
-                        <FaFileExcel /> Export
-                    </button>
-                    <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-                        <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
-                        {searchText && (
-                            <span
-                                onClick={() => setSearchText("")}
-                                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
-                                ✖
-                            </span>
-                        )}
-                    </div>
-                    
-                
+
+        <div className='RecevingDetailTable'>
+            <h5 className='ComCssTableName'>Receving Detail</h5>
+            <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
+                    <FaFileExcel /> Export
+                </button>
+                <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                    <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                    />
+                    {searchText && (
+                        <span
+                            onClick={() => setSearchText("")}
+                            style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
+                            ✖
+                        </span>
+                    )}
+                </div>
+
+
             </div>
 
             <DataTable
@@ -530,7 +530,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
                 highlightOnHover
                 className="react-datatable"
             />
-        </div> 
+        </div>
 
 
     )

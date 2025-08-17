@@ -6,13 +6,14 @@ import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLStore } from '../../Services/Services_09';
+import { FaTimesCircle } from "react-icons/fa";
 
 
 const Repaier = () => {
     const [formData, setFormData] = useState({
         productname: "",
-        productfamily: "",
-        productgroup: "",
+        // productfamily: "",
+        // productgroup: "",
         boardserialnumber: "",
         type: "",
         partcode: "",
@@ -21,11 +22,15 @@ const Repaier = () => {
         availableqty: "",
         pickingqty: "",
         repairercomments: "",
-        SUINo: "",
-        Quantity: "",
-        repaierName: ""
+        // SUINo: "",
+        tgquantity: "",
+        repairername: ""
     });
-
+const [extraFields, setExtraFields] = useState({
+  productGroup: "",
+  productFamily: "",
+  SUINo:""
+});
     const [formErrors, setFormErrors] = useState({});
     const [table1Data, setTable1Data] = useState([]);
     const [table2Data, setTable2Data] = useState([]);
@@ -43,15 +48,24 @@ const Repaier = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        const numericValue = value.replace(/\D/g, "");
 
-        if (name === "boardserialnumber") {
-            // Allow only digits and max 11 characters
-            const digitOnly = value.replace(/\D/g, "").slice(0, 11);
-            setFormData((prev) => ({ ...prev, [name]: digitOnly }));
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
+        if (name === "pickingqty") {
+            if (Number(numericValue) > Number(formData.availableqty)) {
+                setErrorMessage("Picking quantity cannot be greater than available quantity")
+                setShowErrorPopup(true)
+                return; // stop updating
+            }
         }
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === "boardserialnumber"
+                ? value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 11) // allow only letters & numbers
+                : value
+        }));
     };
+
+
 
 
     const handlePoChange = (name, value) => {
@@ -81,14 +95,14 @@ const Repaier = () => {
         }
 
         if (!formData.boardserialnumber?.trim()) {
-    errors.boardserialnumber = "Enter Module Serial Number";
-    isValid = false;
-} else if (formData.boardserialnumber.length !== 11) {
-    errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
-    isValid = false;
-}
+            errors.boardserialnumber = "Enter Module Serial Number";
+            isValid = false;
+        } else if (formData.boardserialnumber.length !== 11) {
+            errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+            isValid = false;
+        }
 
-if (!formData.pickingqty) {
+        if (!formData.pickingqty) {
             errors.pickingqty = "Please Enter Picking Qty";
             isValid = false;
         }
@@ -131,48 +145,62 @@ if (!formData.pickingqty) {
         return isValid;
     };
 
+const handleSubmit = (e) => {
+    e.preventDefault();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    // if (!showTable) {
+    //     if (!valiDate());
+    //      return;
+    // }
 
-        if (!showTable && !valiDate()) return;
+    const userName = sessionStorage.getItem("userName") || "System";
 
-        const userName = sessionStorage.getItem("userName") || "System";
+    let updatedFormData = {};
 
-        const updatedFormData = tableData.map((row) => ({
+    if (showTable) {
+        if (!valiDate()) return;
+        updatedFormData = tableData.map((row) => ({
             ...row,
             createdby: userName,
             modifiedby: userName,
-            repaierName: userName
+            repairername: userName
         }));
+    } else {
+        // if (!valiDate()) return;
+        updatedFormData = {
+            ...formData,
+            createdby: userName,
+            modifiedby: userName,
+            repairername: userName
+        };
+    }
 
-        savePTLRepaier(updatedFormData)
-            .then((response) => {
-                console.log("RESPONSE:", response);
-                if (response.status === 200 && response.data) {
-                    const { message } = response.data;
-                    setSuccessMessage(message || "Saved successfully");
-                    setShowSuccessPopup(true);
-                    setTableData([]);
-                    setShowTable(false);
-                    setIsFrozen(false);
-                    // ✅ only call if it exists
-                    if (typeof handleClear === "function") handleClear();
-                } else {
-                    setErrorMessage(response.data?.message || "Unknown error");
-                    setShowErrorPopup(true);
-                    setTableData([]);
-                    setShowTable(false);
-                }
-            })
-            .catch((error) => {
-                console.log("ERROR:", error);
-                const errMsg = error?.response?.data?.message || "Network error, please try again";
-                setErrorMessage(errMsg);
+    savePTLRepaier(updatedFormData)
+        .then((response) => {
+            console.log("RESPONSE:", response);
+            if (response.status === 200 && response.data) {
+                const { message } = response.data;
+                setSuccessMessage(message || "Saved successfully");
+                setShowSuccessPopup(true);
+                setTableData([]);
+                setShowTable(false);
+                setIsFrozen(false);
+                if (typeof handleClear === "function") handleClear();
+            } else {
+                setErrorMessage(response.data?.message || "Unknown error");
                 setShowErrorPopup(true);
-            });
+                setTableData([]);
+                setShowTable(false);
+            }
+        })
+        .catch((error) => {
+            console.log("ERROR:", error);
+            const errMsg = error?.response?.data?.message || "Network error, please try again";
+            setErrorMessage(errMsg);
+            setShowErrorPopup(true);
+        });
+};
 
-    };
 
     useEffect(() => {
         fetchData();
@@ -211,12 +239,18 @@ if (!formData.pickingqty) {
 
     const handleAddClick = () => {
         if (!valiDate()) return;
+        if (tableData.some(item => item.partcode === formData.partcode)) {
+            setErrorMessage("Partcode Already Added")
+            setShowErrorPopup(true);
+            return;
+        }
+        if (!valiDate()) return;
 
         setTableData(prev => [...prev, formData]);
         setIsFrozen(true);
         setFormData(prev => ({
             ...prev,
-            productname: "",
+            // productname: "",
             //  boardserialnumber: "",
             // Type: "",
             partcode: "",
@@ -258,16 +292,16 @@ if (!formData.pickingqty) {
             Quantity: ""
         });
         setFormErrors({});
-         setTableData([]);
+        setTableData([]);
         setShowTable(false);
         setIsFrozen(false);
     }
-    
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>Repaier</h5>
+                    <p>Repaier</p>
                 </div>
 
                 <RepaierTextfile
@@ -279,6 +313,8 @@ if (!formData.pickingqty) {
                     setFormData={setFormData}
                     partOptions={partOptions}
                     isFrozen={isFrozen}
+                    setExtraFields={setExtraFields}
+                    extraFields={extraFields}
 
                 />
                 <div className="ComCssButton9">
@@ -302,7 +338,11 @@ if (!formData.pickingqty) {
                         totalRows={tableData.length}
                         loading={false}
                         setPage={setPage}
+                        setShowTable={setShowTable}
                         setPerPage={setPerPage}
+                        setFormData={setFormData}
+                        setIsFrozen={setIsFrozen}
+                        setTableData={setTableData}
                     />
                     <div className="ComCssButton9">
                         <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>

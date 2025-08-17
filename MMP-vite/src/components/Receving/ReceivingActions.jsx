@@ -35,8 +35,9 @@ export const fetchReceving = (setDataCallback, setTotalRows, page = 1, size = 10
     });
 };
 
-export const fetchfind = (setDataCallback, setTotalRows, page = 1, size = 10,search ="") => {
-  getRecDetailFind(page - 1, size,search)
+// recvingAction.js
+export const fetchfind = (setDataCallback, setTotalRows, page = 1, size = 10, search = "") => {
+  return getRecDetailFind(page - 1, size, search)
     .then((response) => {
       if (response?.data?.content) {
         setDataCallback(response.data.content);
@@ -47,8 +48,10 @@ export const fetchfind = (setDataCallback, setTotalRows, page = 1, size = 10,sea
     })
     .catch((error) => {
       console.error("Error fetching receiving data:", error);
+      throw error; // important to propagate
     });
 };
+
 
 export const fetchRecevingData = (setData) => {
   fetchRecTicketNo()

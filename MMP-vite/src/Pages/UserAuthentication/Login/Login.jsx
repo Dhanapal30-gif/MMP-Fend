@@ -3,10 +3,11 @@ import "./Login.css";
 import { TextField, Button } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { LoginUser } from "../../../Services/Services";
+import { fetchScreens } from "../../../Services/Services_09";
 
 const Login = () => {
     const navigate = useNavigate();
-
+    const [screen,setScreen]=useState([]);
     const [formData, setFormData] = useState({
         userId: "",
         password: ""
@@ -37,39 +38,82 @@ const Login = () => {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (validate()) {
-            LoginUser(formData)
-                .then((response) => {
-                    if (response.data) {
-                        // Store user details in session storage
-                        sessionStorage.setItem("userId", response.data.empId); // Corrected Line
-                        sessionStorage.setItem("userName", response.data.empName);
-                        sessionStorage.setItem("userRole", response.userRole);
-                        // sessionStorage.setItem("isLoggedIn", "true");
-                        localStorage.setItem("isLoggedIn", "true");
-                        localStorage.setItem("userName", response.data.empName); // ✅ Add this
 
-                        //console.log("User Name:", response.data.empName);
-                        //console.log("User Id:", response.data.empId);
-                        //console.log("Full Response:", response.data);
-                        navigate("/home");
-                    } else {
-                        alert(response.message || "Login failed");
-                    }
-                })
-                .catch((error) => {
-                    // console.error("Error logging in:", error);
-                    alert("An error occurred during login.");
-                });
-            setFormData({
-                userId: "",
-                password: ""
-            });
+
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    try {
+        const response = await LoginUser(formData);
+        const data = response.data; // directly use response.data
+
+        if (!data || !data.empId) { // check if empId exists instead of success
+            alert("Login failed");
+            return;
         }
-    };
 
+        // Store user details
+        sessionStorage.setItem("userId", data.empId);
+        sessionStorage.setItem("userName", data.empName);
+        sessionStorage.setItem("userRole", JSON.stringify(data.userrole));
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userName", data.empName);
+
+        // Fetch screens
+        const roleStr = sessionStorage.getItem("userRole");
+        const role = roleStr ? JSON.parse(roleStr) : [];
+        if (role.length) {
+    const screensRes = await fetchScreens(role);
+
+const allowedScreens = screensRes.data
+  .map(item => item.split(",")) // splits first string
+  .flat()
+  .map(s => s.trim());
+    // Store correctly
+    sessionStorage.setItem("allowedScreens", JSON.stringify(allowedScreens));
+    setScreen(allowedScreens); // mounted component
+    console.log("allowedScreens:", allowedScreens);
+
+}
+        // Navigate to home AFTER fetching screens
+        navigate("/home");
+    } catch (error) {
+    if (error.response) {
+        console.error("Server responded with error:", error.response.data);
+        alert(error.response.data.message || "Login failed (server error)");
+    } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("No response from server. Check your network.");
+    } else {
+        console.error("Error in request setup:", error.message);
+        alert("Login error: " + error.message);
+    }
+}
+
+
+    setFormData({ userId: "", password: "" });
+};
+
+
+
+
+// Fetch role screens
+const fetchUserRoleData = async (userRole) => {
+    if (!userRole) return;
+
+    setLoading(true);
+    try {
+        const roles = userRole.split(",").map(r => r.trim());
+        const response = await fetchScreens(roles);
+        sessionStorage.setItem("allowedScreens", JSON.stringify(response.data));
+        setScreen(response.data);
+    } catch (error) {
+        console.error("Error fetching screens", error);
+    } finally {
+        setLoading(false);
+    }
+};
     return (
         <div className="loginBacground">
             <div className="bubble"></div>

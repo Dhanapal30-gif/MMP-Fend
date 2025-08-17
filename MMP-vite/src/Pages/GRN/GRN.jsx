@@ -83,8 +83,8 @@ const GRN = () => {
         return isValid;
     };
 
-    console.log("selectedRows", selectedRows)
-    console.log("groupedData", groupedData)
+    // console.log("selectedRows", selectedRows)
+    // console.log("groupedData", groupedData)
 
     const handleGRNQtyChange = (selectedid, field, value) => {
         setData((prev) =>
@@ -200,6 +200,7 @@ const GRN = () => {
                             setSelectedRows([]);
                             setIsEditMode(false);
                             fetchPendingGrn();
+                            fetchFindData();
                         },
                     });
                 })
@@ -248,7 +249,7 @@ const GRN = () => {
     };
 
 
-    console.log("data", data)
+    // console.log("data", data)
     const formClear = () => {
         setFormData({});
         setSelectedRows([]);
@@ -268,7 +269,7 @@ const GRN = () => {
     const fetchFindData = (page = 1, size = 10, search = "") => {
         if (isPendingView) return; //  Prevent any API call in pending mode
 
-        console.log("searchfetch", search);
+        // console.log("searchfetch", search);
 
         if (search && search.trim() !== "") {
             fetchfind(setGRNCloseData, setTotalCloseRows, page, size, search);
@@ -340,23 +341,21 @@ const GRN = () => {
         setSelectedRows([]);
         setConfirmDelete(false);
     };
-    const deleteRec = async () => {   
-     try {
-       setConfirmDelete(false);
-       console.log("Selected rows to delete:", selectedRows); // ✅ Add this
-   
-       const res = await deleteRecDetail(selectedRows); // selectedDeleteRows must be array or ID(s)
-   
-       setSuccessMessage(res.data.message || "Deleted successfully");
-       setShowSuccessPopup(true);
-       setSelectedRows([]);
-       fetchPendingGrn();
-   
-     } catch (error) {
-       const msg = error?.response?.data?.message || "Delete failed";
-    
-     }
-   };
+    const deleteRec = async () => {
+        try {
+            setConfirmDelete(false);
+            // console.log("Selected rows to delete:", selectedRows); 
+            const res = await deleteRecDetail(selectedRows); 
+            setSuccessMessage(res.data.message || "Deleted successfully");
+            setShowSuccessPopup(true);
+            setSelectedRows([]);
+            fetchPendingGrn();
+
+        } catch (error) {
+            const msg = error?.response?.data?.message || "Delete failed";
+
+        }
+    };
     const onDeleteClick = () => {
         setConfirmDelete(true);
     };
@@ -364,7 +363,7 @@ const GRN = () => {
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>GRN</h5>
+                    <p>GRN</p>
                 </div>
                 <GRNTextField formData={formData} setFormData={setFormData} handleChange={handleChange}
                     poOptions={poOptions} partOptions={partOptions} ticketOptions={ticketOptions}
@@ -390,33 +389,37 @@ const GRN = () => {
                             editingRowId={editingRowId}
                         />
                         <div className='ComCssButton9'>
-                            
-                            <div className="ComCssButton9">
                                 {!isEditMode && (
-                                    <button style={{ backgroundColor: 'green' }} onClick={handleGrnAction}>
+                                    <button className='ComCssSubmitButton' onClick={handleGrnAction}>
                                         Submit
                                     </button>
                                 )}
 
                                 {isEditMode && (
-                                    <button style={{ backgroundColor: 'orange' }} onClick={handleGrnAction}>
+                                    <button className='ComCssUpdateButton' onClick={handleGrnAction}>
                                         Update
                                     </button>
                                 )}
-
-
-                                <button onClick={formClear}>Clear</button>
-                            </div>
-
-
-
+                                <button className='ComCssClearButton' onClick={formClear}>Clear</button> 
                         </div>
-
                     </div>
+                    
                 </div>
+                
             )}
 
             <div className='ComCssTable'>
+                {selectedRows.length > 0 && !isEditMode && (
+
+                    <div className="ComCssButton9">
+
+                        <button className='ComCssDeleteButton' onClick={onDeleteClick}>
+                            delete
+                        </button>
+                        <button className='ComCssClearButton' onClick={formClear}>Clear</button>
+
+                    </div>
+                )}
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                     <div className="d-flex align-items-center gap-2 position-relative">
 
@@ -451,8 +454,9 @@ const GRN = () => {
 
                             </div>
                         )}
+                        
                     </div>
-                    
+
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText} onChange={(e) => setSearchText(e.target.value)}
                         />
@@ -501,17 +505,7 @@ const GRN = () => {
                     />
 
                 )}
-{selectedRows.length > 0 && !isEditMode && (
-
-                        <div className="ComCssButton9">
-
-                            <button style={{ backgroundColor: 'Red' }} onClick={onDeleteClick}>
-                                delete
-                            </button>
-                                <button onClick={formClear}>Clear</button>
-
-                        </div>
-                    )}
+                
             </div>
             <CustomDialog
                 open={showSuccessPopup}

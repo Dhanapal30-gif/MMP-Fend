@@ -15,6 +15,7 @@ import DropdownCom from '../../components/Com_Component/DropdownCom'
 import Popper from '@mui/material/Popper';
 import './BOM.css'
 import { ThemeProvider } from '@mui/material/styles';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const BomMaster = () => {
     const [formErrors, setFormErrors] = useState({});
@@ -201,7 +202,7 @@ const BomMaster = () => {
                 }
             };
             reader.onerror = (error) => {
-                console.error("File read error:", error);
+                // console.error("File read error:", error);
                 setLoading(false);
             };
         }, 0);
@@ -226,6 +227,7 @@ const BomMaster = () => {
         setHandleUploadButton(false);
         setShowBomTable(true);
         setExcelUploadData([]);
+        setFormErrors("");
         setHandleSubmitButton(true);
         setHandleUpdateButton(false);
         setFileInputKey(Date.now()); // Change key to force re-render
@@ -235,7 +237,10 @@ const BomMaster = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         if (!valiDate()) return;
+                        setLoading(true)
+
         const createdby = sessionStorage.getItem("userName") || "System";
         const updatedby = sessionStorage.getItem("userName") || "System";
         const updatedFormData = {
@@ -268,6 +273,7 @@ const BomMaster = () => {
             })
             .finally(() => {
                 formClear();
+                setLoading(false)
             })
     }
 
@@ -306,7 +312,7 @@ const BomMaster = () => {
         setPage(newPage);
     };
     const uploadColumn = useMemo(() => {
-        console.log("Recalculating column widths...");
+        // console.log("Recalculating column widths...");
         return [
             {
                 name: "Partcode", selector: row => row.partcode, sortable: true, width: `${calculateColumnWidthExcelUpload(excelUploadData, 'partcode')}px`
@@ -343,7 +349,7 @@ const BomMaster = () => {
     };
 
     useEffect(() => {
-        console.log("selectedRows", selectedRows);
+        // console.log("selectedRows", selectedRows);
     }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
@@ -377,6 +383,8 @@ const BomMaster = () => {
     const handleCancel = () => {
         setSelectedRows([]);
         setConfirmDelete(false);
+        setDeletButton(false);
+        setHandleSubmitButton(true)
     };
     const handleDelete = async () => {
         setConfirmDelete(false);
@@ -396,8 +404,8 @@ const BomMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: 'center', }}>
-                    <label>Delete All</label>
+                <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+                    <label>Select</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
                         checked={selectedRows.length === bomMaster.length && bomMaster.length > 0}
@@ -411,7 +419,7 @@ const BomMaster = () => {
                 </div>
             ),
             width: "97px",
-            center: true,
+            // center: true,
         },
 
         { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "60px" },
@@ -423,24 +431,24 @@ const BomMaster = () => {
             width: `${calculateColumnWidth(bomMaster, 'partcode')}px`
         },
         {
-            name: "Partdescription",
+            name: "partDescription",
             selector: row => row.partdescription,
             wrap: true,
             // width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
             width:"250px"
         },
         {
-            name: "productname",
+            name: "Product Name",
             selector: row => row.productname,
             width: `${calculateColumnWidth(bomMaster, 'productname')}px`
         },
         {
-            name: "productGroup",
+            name: "Product Group",
             selector: row => row.productgroup,
             width: `${calculateColumnWidth(bomMaster, 'productgroup')}px`
         },
         {
-            name: "productFamily",
+            name: "Product Family",
             selector: row => row.productfamily,
             width: `${calculateColumnWidth(bomMaster, 'productfamily')}px`
         }
@@ -463,7 +471,7 @@ const BomMaster = () => {
         getProduct()
             .then((response) => {
                 setStoreProduct(response.data)
-                console.log("product", response.data);
+                // console.log("product", response.data);
             })
     }
     useEffect(() => {
@@ -562,7 +570,7 @@ const BomMaster = () => {
 
     const handleEdit = (row) => {
         setFormData(row);
-        console.log("Editing Row Data:", row);  // Debugging
+        // console.log("Editing Row Data:", row);  // Debugging
         setFormData({
             intsysid: row.intsysid || "",
             partcode: row.partcode || "",
@@ -598,6 +606,7 @@ const BomMaster = () => {
                 setHandleSubmitButton(true);
                 setHandleUpdateButton(false);
                 setHandleUploadButton(false);
+                setSearchText("");
             }).catch((error) => {
                 setLoading(false);
                 if (error.response) {
@@ -618,7 +627,7 @@ const BomMaster = () => {
     }
 
     const exportToExcel = (search = "") => {
-        console.log("searchTeaxt", search)
+        // console.log("searchTeaxt", search)
         if (search && search.trim() !== "") {
 
             setLoading(true);
@@ -663,11 +672,11 @@ const BomMaster = () => {
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>BOM Master </h5>
+                    <p>BOM Master </p>
                 </div>
                 <div className='ComCssUpload'>
                     <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
-                    < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
+                    < button  onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
 
                     <button onClick={handleDownloadExcel}> Excel Download </button>
                 </div>
@@ -697,7 +706,7 @@ const BomMaster = () => {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="Partcode"
+                                    label="Part Code"
                                     variant="outlined"
                                     error={Boolean(formErrors.partcode)}
                                     className='ProductTexfiled-textfield '
@@ -743,7 +752,7 @@ const BomMaster = () => {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="partdescription"
+                                    label="Part Description"
                                     variant="outlined"
 
                                     size="small"
@@ -782,7 +791,7 @@ const BomMaster = () => {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="productname"
+                                    label="Product Name"
                                     variant="outlined"
                                     error={Boolean(formErrors.productname)}
                                     helperText={formErrors.productname}
@@ -799,7 +808,7 @@ const BomMaster = () => {
                         />
                         <TextField
                             id="outlined-basic"
-                            label="productGroup"
+                            label="Product Group"
                             variant="outlined"
                             name="productgroup"
                             value={formData.productgroup}
@@ -815,7 +824,7 @@ const BomMaster = () => {
                         />
                         <TextField
                             id="outlined-basic"
-                            label="productFamily"
+                            label="Product Family"
                             variant="outlined"
                             name="productfamily"
                             value={formData.productfamily}
@@ -832,12 +841,13 @@ const BomMaster = () => {
                     </ThemeProvider>
                 </div>
                 <div className='ComCssButton9'>
-                    {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
-                    {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.intsysid)}>Update</button>}
-                    {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload}>Upload</button>}
-                    {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}   >Delete</button>}
-                    <button onClick={formClear}>Clear</button>
-                </div>
+                    {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>}
+                    {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.intsysid)}>Update</button>}
+                    {handleUploadButton && <button className='ComCssExcelUploadButton' onClick={handleExcelUpload}>Upload</button>}
+                    {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
+<button className='ComCssClearButton' onClick={formClear}>
+  Clear
+</button>                </div>
             </div>
             <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (
@@ -867,7 +877,11 @@ const BomMaster = () => {
                         </div>
                     </div>
                 )}
+                
+                  <LoadingOverlay loading={loading} />
+                
                 {showBomTable && !showUploadTable && (
+                    
                     <DataTable
                         columns={column}
                         data={bomMaster}

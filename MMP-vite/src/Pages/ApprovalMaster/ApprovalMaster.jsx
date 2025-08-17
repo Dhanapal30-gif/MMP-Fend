@@ -168,7 +168,7 @@ const ApprovalMaster = () => {
         fetchProdcutDetail()
             .then((response) => {
                 setStoreProduct(response.data);
-                console.log("product", response.data);
+                // console.log("product", response.data);
             })
     }
     const getLoginEmailId = () => {
@@ -183,7 +183,7 @@ const ApprovalMaster = () => {
             .then(response => {
                 setApprovalMaster(response.data.data || []);
                 setTotalRows(response.data.toatlElements || 0);
-                console.log("fetchCurrency", response.data.data);
+                // console.log("fetchCurrency", response.data.data);
             });
 
     }
@@ -261,7 +261,7 @@ const ApprovalMaster = () => {
     };
 
     useEffect(() => {
-        console.log("selectedRows", selectedRows);
+        // console.log("selectedRows", selectedRows);
     }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
@@ -290,8 +290,8 @@ const ApprovalMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: 'center', }}>
-                    <label>Delete All</label>
+                <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+                    <label>Select</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
                         checked={selectedRows.length === approvalMaster.length && approvalMaster.length > 0}
@@ -305,30 +305,30 @@ const ApprovalMaster = () => {
                 </div>
             ),
             width: "97px",
-            center: true,
+            // center: true,
         }
         ,
         { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)} ><FaEdit /></button>), width: "79px" },
         ,
         {
-            name: "Requesttype",
+            name: "Request Type",
             selector: row => row.requesttype,
             sortable: true,
             width: `${calculateColumnWidth(approvalMaster, 'Requesttype')}px`
         },
         {
-            name: "issuancetype",
+            name: "Issuance Type",
             selector: row => row.issuancetype,
             wrap: true,
             width: `${calculateColumnWidth(approvalMaster, 'issuancetype')}px`
         },
         {
-            name: "Componenttype",
+            name: "Component Type",
             selector: row => row.componenttype,
             width: `${calculateColumnWidth(approvalMaster, 'Componenttype')}px`
         },
         {
-            name: "Productgroup",
+            name: "Product Group",
             selector: row => row.productgroup,
             width: `${calculateColumnWidth(approvalMaster, 'Productgroup')}px`
         },
@@ -484,7 +484,7 @@ const ApprovalMaster = () => {
                 }
             };
             reader.onerror = (error) => {
-                console.error("File read error:", error);
+                // console.error("File read error:", error);
                 setLoading(false);
             };
         }, 0);
@@ -546,6 +546,8 @@ const ApprovalMaster = () => {
     const handleCancel = () => {
         setSelectedRows([]);
         setConfirmDelete(false);
+        setDeletButton(false)
+        setHandleSubmitButton(true)
     };
     const handleDelete = async () => {
         setConfirmDelete(false);
@@ -558,6 +560,7 @@ const ApprovalMaster = () => {
             setHandleSubmitButton(true);
             setDeletButton(false);
             fetchApprovalMaster();
+            setSearchText("");
         } catch (error) {
             setErrorMessage("delete error", error);
             setShowErrorPopup(true);
@@ -608,7 +611,7 @@ const ApprovalMaster = () => {
     }
     const handleEdit = (row) => {
         setFormData(row);
-        console.log("Editing Row Data:", row);  // Debugging
+        // console.log("Editing Row Data:", row);  // Debugging
         setFormData({
             id: row.id || "",
             requesttype: row.requesttype || "",
@@ -655,7 +658,7 @@ const ApprovalMaster = () => {
     const exportToExcel = (searchText = "") => {
         if (searchText && searchText.trim() !== "") {
             if (!Array.isArray(approvalMaster) || filteredApproval.length === 0) {
-                console.warn("No data to export.");
+                // console.warn("No data to export.");
                 return;
             }
             const sheet = XLSX.utils.json_to_sheet(filteredApproval);
@@ -665,7 +668,7 @@ const ApprovalMaster = () => {
 
         } else {
             if (!Array.isArray(approvalMaster) || approvalMaster.length === 0) {
-                console.warn("No data to export.");
+                // console.warn("No data to export.");
                 return;
             }
             const sheet = XLSX.utils.json_to_sheet(approvalMaster);
@@ -679,7 +682,7 @@ const ApprovalMaster = () => {
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>Approval Master </h5>
+                    <p>Approval Master </p>
                 </div>
                 <div className='ComCssUpload'>
                     <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" style={{ display: 'none' }} onChange={handleUpload} />
@@ -877,11 +880,11 @@ const ApprovalMaster = () => {
                     </ThemeProvider>
                 </div>
                 <div className='ComCssButton9'>
-                    {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
-                    {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
-                    {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload}>Upload</button>}
-                    {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}   >Delete</button>}
-                    <button onClick={formClear}>Clear</button>
+                    {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>}
+                    {handleUpdateButton && <button sclassName='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+                    {handleUploadButton && <button className='ComCssExcelUploadButton' onClick={handleExcelUpload}>Upload</button>}
+                    {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
+                    <button className='ComCssClearButton' onClick={formClear}>Clear</button>
                 </div>
             </div>
             <div className='ComCssTable'>

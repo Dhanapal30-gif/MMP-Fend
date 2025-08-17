@@ -6,8 +6,9 @@ import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import { fetchBoardSerialNumber, fetchproductPtl, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, getLocalMaster, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { downloadIndiviualReport, downloadLocalIndiviualReportFilter, downloadLocalIndiviualReportSearch, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, } from '../../Services/Services_09';
 import "./Localindivual.css";
+import { downloadSearchProduct } from '../../Services/Services';
 const LocalndindividualReport = () => {
 
     const [formData, setFormData] = useState({
@@ -36,6 +37,8 @@ const LocalndindividualReport = () => {
     const [searchText, setSearchText] = useState("");
     const [indiviualReport, setIndiviualReport] = useState([])
     const [isFilterActive, setIsFilterActive] = useState(false);
+    const [downloadDone, setDownloadDone] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(null);
 
     console.log("formData", formData);
     const handlePoChange = (field, value) => {
@@ -46,10 +49,6 @@ const LocalndindividualReport = () => {
     };
 
 
-    // const handleInputChange = (e) => {
-    //     const { name, value } = e.target;
-    //     handlePoChange(name, value);
-    // };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
@@ -113,7 +112,8 @@ const LocalndindividualReport = () => {
         console.log("searchfetch", search);
         if (search && search.trim() !== "") {
             fetchfindSearch(userId, page, size, search);
-        } else if (isFilterActive) {
+        }
+        else if (isFilterActive) {
             fetchFilterResult();
         }
         else {
@@ -121,8 +121,8 @@ const LocalndindividualReport = () => {
         }
     };
 
-    const fetchIndiviualDetail = (userId, page = 1, size = 10) => { 
-            setLoading(true); // <-- start loading
+    const fetchIndiviualDetail = (userId, page = 1, size = 10) => {
+        setLoading(true); // <-- start loading
         getLocalINdiviual(page - 1, size, userId)
             .then((response) => {
                 if (response?.data?.content) {
@@ -135,10 +135,10 @@ const LocalndindividualReport = () => {
             .catch((error) => {
                 console.error("Error fetching receiving data:", error);
             })
-      .finally(() => {
-            setLoading(false); // <-- stop loading
-        });
-        };
+            .finally(() => {
+                setLoading(false); // <-- stop loading
+            });
+    };
 
     const fetchfindSearch = (userId, page = 1, size = 10, search = "") => {
         getindiviualDetailFind(page - 1, size, userId, search)
@@ -159,8 +159,8 @@ const LocalndindividualReport = () => {
         e.preventDefault();
         if (!valiDate()) return;
 
-        setIsFilterActive(true); // triggers filter in useEffect
-        fetchFilterResult();     // directly call API
+        setIsFilterActive(true);
+        fetchFilterResult();
 
     };
     const fetchFilterResult = () => {
@@ -179,7 +179,7 @@ const LocalndindividualReport = () => {
     const Clear = () => {
         setIsFilterActive(false);
         setSearchText("");
-                fetchData(userId, page, perPage, debouncedSearch);
+        fetchData(userId, page, perPage, debouncedSearch);
 
         setFormData({
             status: "",
@@ -187,6 +187,47 @@ const LocalndindividualReport = () => {
             endDate: "",
             download: null
         })
+    };
+    const exportToExcel = (search = "") => {
+        setDownloadDone(false);
+        setDownloadProgress(null);
+        setLoading(true);
+        let apiCall;  // Declare here
+       // const apiCall = search?.trim() !== "" ? downloadSearchProduct : downloadLocalIndiviual;
+        if (search?.trim() !== "") {
+            apiCall = () => downloadLocalIndiviualReportSearch(search,userId);
+        } 
+        else if (isFilterActive) {
+            apiCall = () => downloadLocalIndiviualReportFilter(formData,userId);
+        } 
+        else {
+            apiCall = () => downloadIndiviualReport(userId);
+        }
+
+        apiCall(search, {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setDownloadProgress(percent);
+            },
+        })
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "LocalIndiviualReport.xlsx");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setDownloadDone(true);
+            })
+            .catch((error) => {
+                console.error("Download failed:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+                setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
+            });
     };
     return (
         <div className='ComCssContainer'>
@@ -215,8 +256,18 @@ const LocalndindividualReport = () => {
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Report Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
-                        <FaFileExcel /> Export
+                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
+                        {loading
+                            ? downloadProgress !== null
+                                ? `Downloading... ${downloadProgress}%`
+                                : "Downloading..."
+                            : downloadDone
+                                ? "✅ Done"
+                                : (
+                                    <>
+                                        <FaFileExcel /> Export
+                                    </>
+                                )}
                     </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
@@ -231,7 +282,7 @@ const LocalndindividualReport = () => {
                         )}
                     </div>
                 </div>
-                
+
                 <LocalReportIndiviualTable
                     data={indiviualReport}
                     page={page}
@@ -242,7 +293,7 @@ const LocalndindividualReport = () => {
                     setPerPage={setPerPage}
 
                 />
-      
+
 
             </div>
         </div>

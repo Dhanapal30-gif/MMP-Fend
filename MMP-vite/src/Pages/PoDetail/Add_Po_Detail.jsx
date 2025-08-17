@@ -13,6 +13,7 @@ import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import { deletePoDetail, downloadPoDetail, downloadSearchPoDetail, fetchCurency, fetchPoDeatil, getPartcode, getPoDetailFind, getVenodtMaster, savePoDetail, updatePoDeatil } from '../../Services/Services';
 import dayjs from "dayjs"; // or use native JS date
 import { FaTimesCircle } from "react-icons/fa";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const Add_Po_Detail = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -127,16 +128,24 @@ const Add_Po_Detail = () => {
     />
   );
   const fetchVendotMaster = async () => {
-    setLoading(true);
-    try {
-      const response = await getVenodtMaster();
-      setVendorMaster(response.data);
-    } catch (error) {
-      // console.error("Error fetching vendors", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await getVenodtMaster();
+
+    // Filter out items where vendorName is null/undefined
+    const cleanedData = (response.data || []).filter(
+      item => item.vendorName != null && item.vendorName !== ""
+    );
+
+    setVendorMaster(cleanedData);
+  } catch (error) {
+    console.error("Error fetching vendors", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   const fetchCurrencyMaster = async () => {
     setLoading(true);
     try {
@@ -180,7 +189,7 @@ const Add_Po_Detail = () => {
   }, [page, perPage, debouncedSearch])
 
   const fetchData = (page = 1, size = 10, search = "") => {
-    console.log("searchfetch", search);
+    // console.log("searchfetch", search);
     if (search && search.trim() !== "") {
       fetchfind(page, size, search);
 
@@ -220,14 +229,15 @@ const Add_Po_Detail = () => {
   }, [formData.totalvalue, formData.ccf]);
 
   const formClear = () => {
-    setHandleAdd(true); // Enable submit button
+    setHandleAdd(true); 
     setIsFrozen(false);
     setShowTable(false);
     setHandleUpdateButton(false);
     setDeletButton(false);
+    setFormErrors("");
     // isvalid(false);
     setFormData({
-      orderType: "", potool: "", ponumber: "", podate: "",
+      ordertype: "", potool: "", ponumber: "", podate: "",
       currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
       ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", postatus: "", ordertype: "", partdiscription: "", UOM: ""
     })
@@ -262,8 +272,8 @@ const Add_Po_Detail = () => {
       width: "80px",
     },
     {
-      name: "orderType",
-      selector: row => row.orderType,
+      name: "OrderType",
+      selector: row => row.ordertype,
       sortable: true,
       width: '130px'
       // width: `${calculateColumnWidth( 'orderType')}px`
@@ -360,13 +370,12 @@ const Add_Po_Detail = () => {
       setSelectedRows([]);
       setDeletButton(false);
       setHandleSubmitButton(true);
+            setHandleAdd(true)
+
     }
   };
 
-  // useEffect(() => {
-  //   console.log("selectedRows", selectedRows);
-  // }, [selectedRows]);
-
+ 
   const handleRowSelect = (rowKey) => {
     setHandleUpdateButton(false);
     setHandleAdd(false);
@@ -374,7 +383,7 @@ const Add_Po_Detail = () => {
     //setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
     setSelectedRows((prevSelectedRows) => {
       const isRowSelected = prevSelectedRows.includes(rowKey);
-      console.log("row", rowKey)
+      // console.log("row", rowKey)
       const updatedRows = isRowSelected
         ? prevSelectedRows.filter((key) => key !== rowKey) // Deselect
         : [...prevSelectedRows, rowKey]; // Select row
@@ -383,9 +392,12 @@ const Add_Po_Detail = () => {
         setDeletButton(false);
         setHandleSubmitButton(true);
         setHandleUpdateButton(false);
+                setHandleAdd(true)
+
       } else {
         setDeletButton(true);
         setHandleSubmitButton(false);
+        
       }
       return updatedRows;
     });
@@ -393,8 +405,8 @@ const Add_Po_Detail = () => {
   const Defaultcolumn = [
     {
       name: (
-        <div style={{ textAlign: 'center', }}>
-          <label>Delete All</label>
+        <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+          <label>Select</label>
           <br />
           <input type="checkbox" onChange={handleSelectAll}
             checked={selectedRows.length === poDetail.length && poDetail.length > 0}
@@ -408,33 +420,33 @@ const Add_Po_Detail = () => {
         </div>
       ),
       width: "97px",
-      center: true,
+      // center: true,
     }
     ,
     { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}  ><FaEdit /></button>), width: "79px" },
     ,
     {
-      name: "orderType",
+      name: "Order Type",
       selector: row => row.ordertype,
       sortable: true,
       width: '130px'
       // width: `${calculateColumnWidth('ordertype')}px`
     },
     {
-      name: "Potool",
+      name: "Po Tool",
       selector: row => row.potool,
       wrap: true,
       width: '130px'
     },
     {
-      name: "Ponumber",
+      name: "Po Number",
       selector: row => row.ponumber,
       wrap: true,
       width: `${calculateColumnWidth('ponumber')}px`
       // width: '130px'
     },
     {
-      name: "Podate",
+      name: "Po Date",
       selector: row => row.podate?.split(" ")[0],
       //width: `${calculateColumnWidth( 'modifieddate')}px`
       width: '130px'
@@ -446,14 +458,14 @@ const Add_Po_Detail = () => {
       width: '130px'
     },
     {
-      name: "VendorName",
+      name: "Vendor Name",
       selector: row => row.vendorname,
       wrap: true,
       grow: 2,
       width: `${calculateColumnWidth('vendorName')}px`
     },
     {
-      name: "VendorCode",
+      name: "Vendor Code",
       selector: row => row.vendorcode,
       //width: `${calculateColumnWidth( 'vendorCode')}px`
       width: '130px'
@@ -477,7 +489,7 @@ const Add_Po_Detail = () => {
       width: '130px'
     },
     {
-      name: "Orderqty",
+      name: "Order Qty",
       selector: row => row.orderqty,
       //width: `${calculateColumnWidth( 'orderqty')}px`
       width: '130px'
@@ -496,7 +508,7 @@ const Add_Po_Detail = () => {
       // width: `${calculateColumnWidth( 'ccf')}px`
     },
     {
-      name: "Totalvalueeuro",
+      name: "Totalvalue Euro",
       selector: row => row.totalvalueeuro,
       width: `${calculateColumnWidth('totalvalueeuro')}px`
     }
@@ -508,9 +520,15 @@ const Add_Po_Detail = () => {
 
     if (newData.length === 0) {
       setShowTable(false);
+ setFormData({
+      ordertype: "", potool: "", ponumber: "", podate: "",
+      currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
+      ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", postatus: "", ordertype: "", partdiscription: "", UOM: ""
+    })    
+      setIsFrozen(false);
     }
   };
-  console.log("tabledata", poDetail)
+  // console.log("tabledata", poDetail)
   const formatToDDMMYYYY = (dateStr) => {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split(" ")[0].split("-");
@@ -654,6 +672,7 @@ const Add_Po_Detail = () => {
         setHandleSubmitButton(true);
         setHandleUpdateButton(false);
         fetchPoDetail(page, perPage);
+        setSearchText("");
       }).catch((error) => {
         setLoading(false);
         if (error.response) {
@@ -678,6 +697,8 @@ const Add_Po_Detail = () => {
   const handleCancel = () => {
     setSelectedRows([]);
     setConfirmDelete(false);
+    setDeletButton(false);
+    setHandleSubmitButton(true)
   };
   const handleDelete = async () => {
     setConfirmDelete(false);
@@ -690,6 +711,7 @@ const Add_Po_Detail = () => {
       setHandleSubmitButton(true);
       setDeletButton(false);
       fetchPoDetail(page, perPage);
+      setSearchText("");
     } catch (error) {
       setErrorMessage("delete error", error);
       setShowErrorPopup(true);
@@ -704,7 +726,7 @@ const Add_Po_Detail = () => {
         const data = response.data || {};
         setPoDetail(data.content);
         setTotalRows(data.totalElements);
-        console.log("search", data.content);
+        // console.log("search", data.content);
       }).catch((error) => {
         setErrorMessage("data not availbe", error);
         setShowErrorPopup(true);
@@ -747,7 +769,7 @@ const Add_Po_Detail = () => {
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
         <div className='ComCssFiledName'>
-          <h5>ADD PO</h5>
+          <p>ADD PO</p>
         </div>
         <div className='ProductTexfiled'>
           <ThemeProvider theme={TextFiledTheme}>
@@ -779,7 +801,7 @@ const Add_Po_Detail = () => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Potoll"
+                  label="Po Toll"
                   variant="outlined"
                   error={Boolean(formErrors.potool)}
                   helperText={formErrors.potool}
@@ -789,7 +811,7 @@ const Add_Po_Detail = () => {
             />
             <TextField
               id="outlined-basic"
-              label="PoNumber"
+              label="Po Number"
               variant="outlined"
               disabled={hidePonumber || isFrozen}
               name="ponumber"
@@ -843,6 +865,8 @@ const Add_Po_Detail = () => {
             <Autocomplete
               disabled={isFrozen}
               options={vendorMaster}
+                            ListboxComponent={DropdownCom}
+
               getOptionLabel={(option) => option.vendorName || ""} // ensure it's a string
               value={vendorMaster.find(item => item.vendorName === formData.vendorname) || null}
               onChange={(event, newValue) => {
@@ -863,7 +887,7 @@ const Add_Po_Detail = () => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Vendorname"
+                  label="Vendor Name"
                   variant="outlined"
                   error={Boolean(formErrors.vendorname)}
                   helperText={formErrors.vendorname}
@@ -874,7 +898,7 @@ const Add_Po_Detail = () => {
             />
             <TextField
               disabled={isFrozen}
-              label="Vendorcode"
+              label="Vendor Code"
               InputProps={{ readOnly: true }}
               variant="outlined"
               name="Vendorcode"
@@ -934,7 +958,7 @@ const Add_Po_Detail = () => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Partdescription"
+                  label="part Description"
                   variant="outlined"
                   error={Boolean(formErrors.partdescription)}
                   helperText={formErrors.partdescription}
@@ -943,7 +967,7 @@ const Add_Po_Detail = () => {
               )}
             />
             <TextField
-              label="Unitprice"
+              label="Unit Price"
               variant="outlined"
               name="unitprice"
               type="number"
@@ -954,7 +978,7 @@ const Add_Po_Detail = () => {
               size="small"
             />
             <TextField
-              label="Orderqty"
+              label="Order Qty"
               variant="outlined"
               name="orderqty"
               type="text"
@@ -971,7 +995,7 @@ const Add_Po_Detail = () => {
 
             />
             <TextField
-              label="Totalvalue"
+              label="Total Value"
               InputProps={{ readOnly: true }}
               variant="outlined"
               name="totalvalue"
@@ -981,7 +1005,7 @@ const Add_Po_Detail = () => {
               size="small"
             />
             <TextField
-              label="Currency convertion factor"
+              label="Currency Convertion Factor"
               InputProps={{ readOnly: true }}
               variant="outlined"
               name="ccf"
@@ -991,7 +1015,7 @@ const Add_Po_Detail = () => {
               size="small"
             />
             <TextField
-              label="Totalvalueeuro"
+              label="Total Value Euro"
               InputProps={{ readOnly: true }}
               variant="outlined"
               name="totalvalueeuro"
@@ -1003,10 +1027,10 @@ const Add_Po_Detail = () => {
           </ThemeProvider>
         </div>
         <div className='ComCssButton9'>
-          {handleAdd && <button style={{ backgroundColor: 'green' }} onClick={handleAddClick} >ADD</button>}
-          {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
-          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}   >Delete</button>}
-          <button onClick={formClear}>Clear</button>
+          {handleAdd && <button className='ComCssAddButton' onClick={handleAddClick} >ADD</button>}
+          {handleUpdateButton && <button className='ComCssUpdateButton'  onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+          {deletButton && <button className='ComCssDeleteButton'  onClick={onDeleteClick}   >Delete</button>}
+          <button className='ComCssClearButton' onClick={formClear}>Clear</button>
         </div>
 
       </div>
@@ -1039,7 +1063,7 @@ const Add_Po_Detail = () => {
           />
 
           <div className='ComCssSubmitButton9'>
-            {handleAdd && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit} >Submit</button>}
+            {handleAdd && <button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>}
           </div>
         </div>
       )}
@@ -1062,6 +1086,7 @@ const Add_Po_Detail = () => {
           </button>
 
           <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+            
             <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
@@ -1074,6 +1099,7 @@ const Add_Po_Detail = () => {
             )}
           </div>
         </div>
+        <LoadingOverlay loading={loading} />
         <DataTable
           columns={Defaultcolumn}
           data={poDetail}
