@@ -141,11 +141,11 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
 }
 
 .notification {
-  margin-left: auto;
-  /* pushes it to the right */
+  margin-left: auto;   /* push to flex-end correctly */
   margin-right: 10px;
   display: flex;
   align-items: center;
+  margin-top: 0;       /* remove negative top margin */
 }
 /* Avatar area */
 .avatar-container {
@@ -314,7 +314,7 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
   gap: 20px;
 }
 
-@media (min-width: 1024px) and (max-width: 1239.98px) {
+@media  (max-width: 1020.98px) {
   .header7 {
     flex-direction: column;
     align-items: flex-start;
@@ -327,9 +327,10 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
   }
 
   .avatar-container {
+    display: flex;
     justify-content: flex-end;
     width: 100%;
-    margin-top: -130px;
+    margin-top: -75px;
   }
 
   .avatar-name {
@@ -364,4 +365,45 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
   }
 }
 
-@media (min-width: 1239.98px) and (max-width: 1439.98px) {}
+
+
+/* Keep header aligned nicely for tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .header7 {
+    flex-direction: row; /* keep row, don’t break into column */
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: auto;
+  }
+
+  .logo-section {
+    flex: 1;
+  }
+
+  .navgation {
+    flex: 2;
+    justify-content: center;
+  }
+
+ .notification {
+  margin: 0;
+  margin-left: auto;   /* <-- push to flex-end */
+  display: flex;
+  align-items: center;
+}
+
+  .avatar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar-name {
+    font-size: 12px;
+  }
+
+  .logo-text {
+    font-size: 14px;
+  }
+}
