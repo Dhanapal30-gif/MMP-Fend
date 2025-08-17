@@ -94,46 +94,17 @@ const ProductFamilyMaster = () => {
   }, [searchText]);
 
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!valiDate()) return;
-    const createdby = sessionStorage.getItem("userName") || "System";
-    const modifiedby = sessionStorage.getItem("userName") || "System";
-    const updatedFormData = {
-      ...formData,
-      createdby,
-      modifiedby,
-    };
+ const handleSubmit = async () => {
+  if (!valiDate()) return;
 
-    saveProductMaster(updatedFormData)
-      .then((response) => {
-        setSuccessMessage("Product Updated Successfully");
-        setShowSuccessPopup(true);
-        setFormData({
-          productname: "",
-          productgroup: "",
-          productfamily: "",
-          lineLead: [],
-          recordstatus: "",
-          productEngineer: [],
-        });
-        fetchProduct(page, perPage);
-        setPage(1);
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status === 409) {
-            setErrorMessage("Product already exists");
-            setShowErrorPopup(true);
-          } else {
-            setErrorMessage("Something went wrong");
-            setShowErrorPopup(true);
-          }
-        } else {
-          setErrorMessage("Network error, please try again");
-          setShowErrorPopup(true);
-        }
-      });
+  const createdby = sessionStorage.getItem("userName") || "System";
+  const modifiedby = sessionStorage.getItem("userName") || "System";
+  const updatedFormData = { ...formData, createdby, modifiedby };
+
+  try {
+    const response = await saveProductMaster(updatedFormData);
+    setSuccessMessage("Product Updated Successfully");
+    setShowSuccessPopup(true);
     setFormData({
       productname: "",
       productgroup: "",
@@ -142,7 +113,23 @@ const ProductFamilyMaster = () => {
       recordstatus: "",
       productEngineer: [],
     });
-  };
+
+    // Refresh table
+    fetchProduct(1, perPage); // reset to first page
+    setPage(1);
+  } catch (error) {
+    if (error.response) {
+      const message =
+        error.response.status === 409
+          ? "Product already exists"
+          : "Something went wrong";
+      setErrorMessage(message);
+    } else {
+      setErrorMessage("Network error, please try again");
+    }
+    setShowErrorPopup(true);
+  }
+};
 
   //FetchAllproduct
   const fetchProduct = (page = 1, size = 10, search = "") => {
@@ -259,7 +246,7 @@ const ProductFamilyMaster = () => {
         : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
     },
     {
-      name: "status", selector: row => row.recordstatus, width: "199px",
+      name: "Status", selector: row => row.recordstatus, width: "199px",
     },
   ];
 
@@ -605,6 +592,8 @@ const ProductFamilyMaster = () => {
   const handleCancel = () => {
     setSelectedRows([]);
     setConfirmDelete(false);
+    setDeletButton(false)
+    setHandleSubmitButton(true)
   };
 
   const handleDelete = async () => {
@@ -626,7 +615,7 @@ const ProductFamilyMaster = () => {
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
         <div className='ComCssFiledName' >
-          <h5 >Product Master</h5>
+          <p >Product Master</p>
         </div>
         <div className='ComCssUpload'>
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
@@ -724,11 +713,11 @@ const ProductFamilyMaster = () => {
 
         </div>
         <div className='ComCssButton9'>
-          {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
-          {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
-          {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload}>Upload</button>}
-          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick} >Delete</button>}
-          <button onClick={formClear}>Clear</button>
+          {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>}
+          {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+          {handleUploadButton && <button className='ComCssExcelUploadButton' onClick={handleExcelUpload}>Upload</button>}
+          {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick} >Delete</button>}
+          <button className='ComCssClearButton' onClick={formClear}>Clear</button>
         </div>
       </div>
 

@@ -10,9 +10,12 @@ export const RecevingTextFiled = ({
   ponumber,
   onSelectPonumber,
   setPoDetail,
-  setShowRecevingTable // ✅ newly added
+  setShowRecevingTable 
+  
 }) => {
+  
   return (
+    
     <Autocomplete
       options={ponumber || []}
       ListboxComponent={DropdownCom}

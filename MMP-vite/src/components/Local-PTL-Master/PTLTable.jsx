@@ -21,66 +21,80 @@ const PTLTable = ({
   searchText = ""
 }) => {
 
-    
-  const handleSelectAll = () => {
-  if (selectedRows.length === data.length) {
-    setSelectedRows([]); // Unselect all
-  } else {
-    setSelectedRows(data); // Select all
-  }
-};
 
-const handleSelect = (row) => {
-  setSelectedRows((prev) => {
-    const exists = prev.find((r) => r.partcode === row.partcode);
-    if (exists) {
-      return prev.filter((r) => r.partcode !== row.partcode);
+  const handleSelectAll = () => {
+    if (selectedRows.length === data.length) {
+      setSelectedRows([]); // Unselect all
     } else {
-      return [...prev, row];
+      setSelectedRows(data); // Select all
     }
-  });
-};
+  };
+
+  const handleSelect = (row) => {
+    setSelectedRows((prev) => {
+      const exists = prev.find((r) => r.partcode === row.partcode);
+      if (exists) {
+        return prev.filter((r) => r.partcode !== row.partcode);
+      } else {
+        return [...prev, row];
+      }
+    });
+  };
 
 
   const columns = generateColumns({
-  fields: [
-    "select", // this makes generateColumns create your custom checkbox
-    "edit",
-    "partcode",
-    "partdescription",
-    "rohsstatus",
-    "msdstatus",
-    "technology",
-    "racklocation",
-    "unitprice",
-    "customduty",
-    "quantity",
-    "catmovement",
-    "MOQ",
-    "TRQty"
-  ],
-  data,
-  selectedRows,
-  handleSelect,
-  handleSelectAll,
-  onEdit,
-  customCellRenderers: {
-    select: (row) => (
-      <div style={{ paddingLeft: '15px' }}>
-        <input
-          type="checkbox"
-checked={Array.isArray(selectedRows) && selectedRows.some(r => r.partcode === row.partcode)}
-          onChange={() => handleSelect(row)}
-        />
-      </div>
-    ),
-    edit: (row) => (
-      <button className="edit-button" onClick={() => onEdit(row)}>
-        <FaEdit />
-      </button>
-    )
-  }
-});
+    fields: [
+      // "select",
+      "edit",
+      "partcode",
+      "partdescription",
+      "rohsstatus",
+      "msdstatus",
+      "technology",
+      "racklocation",
+      "unitprice",
+      "customduty",
+      "quantity",
+      "catmovement",
+      "MOQ",
+      "TRQty"
+    ],
+    data,
+    selectedRows,
+    handleSelect,
+    handleSelectAll,
+    onEdit,
+
+    customConfig: {
+      partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      rohsstatus: { label: "Rohs Status" },
+      msdstatus: { label: "Msdstatus" },
+
+      technology: { label: "Technology" },
+      racklocation: { label: "Rack Location" },
+      unitprice: { label: "Unitprice" },
+      customduty: { label: "CustomDuty" },
+      quantity: { label: "Quantity" },
+      catmovement: { label: "Cat Movement" }
+    },
+    customCellRenderers: {
+      select: (row) => (
+        <div style={{ paddingLeft: '15px' }}>
+          {/* <input
+            type="checkbox"
+            checked={Array.isArray(selectedRows) && selectedRows.some(r => r.partcode === row.partcode)}
+            onChange={() => handleSelect(row)}
+          /> */}
+        </div>
+      ),
+      edit: (row) => (
+        <button className="edit-button" onClick={() => onEdit(row)}>
+          <FaEdit />
+        </button>
+      )
+    }
+  });
   return (
     <CommonDataTable
       columns={columns}

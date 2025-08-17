@@ -12,17 +12,19 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  /* change from height */
   display: flex;
-  overflow: hidden;
-  position: relative;
   justify-content: center;
   align-items: center;
-
+  overflow: auto;
+  /* allow scrolling when content grows */
+  padding: 20px;
+  /* optional: some space */
 }
 
 /* Logo */
-.cretaeimgae {
+.cretaeimgaeuyef {
   background-image: url('../../../assets/Nokia_9-removebg-preview.png');
   background-size: contain;
   background-position: center;
@@ -42,9 +44,13 @@ body {
   align-items: center;
   width: 90%;
   max-width: 800px;
+  max-height: 75vh;
+  /* prevent overflow beyond screen */
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  /* scroll inside container if needed */
 }
 
 .form-grid {
@@ -58,6 +64,9 @@ body {
 .form-field {
   width: calc(33.33% - 12px);
   min-width: 200px;
+  
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
 }
 
 @media (max-width: 768px) {

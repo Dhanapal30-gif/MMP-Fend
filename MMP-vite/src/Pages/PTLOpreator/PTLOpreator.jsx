@@ -8,7 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import ComTextFiled from '../../components/Com_Component/ComTextFiled'; // adjust path if needed
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme'; // adjust path if needed
 import { Autocomplete, TextField } from "@mui/material";
-import { fetchPTLBoard } from '../../Services/Services_09';
+import { fetchPTLBoard, savePTLSubmit } from '../../Services/Services_09';
 
 const PTLOpreator = () => {
     const [formData, setFormData] = useState({
@@ -22,7 +22,10 @@ const PTLOpreator = () => {
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [pickButton, setpickButton] = useState(true);
-
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     useEffect(() => {
         fetchData(); // call immediately on mount
 
@@ -78,6 +81,28 @@ const PTLOpreator = () => {
         }
     }, [formData.boardserialnumber]);
 
+const handleSubmit = async () => {
+  const payload = filteredData.map(item => ({
+    id: item.id,   // use selectedid if that's your row ID
+  pickingqty: item.availableqty // match backend field
+  }));
+
+  console.log("payload", payload);
+
+  // send payload to API if needed
+  try {
+    const response = await savePTLSubmit(payload);
+    setSuccessMessage("API success:", response.message)
+    setShowSuccessPopup(true)
+    setShowTable(false)
+    console.log("API success:", response);
+  } catch (error) {
+    setErrorMessage("Error sending payload:", error)
+    setShowErrorPopup(true)
+    console.error("Error sending payload:", error);
+  }
+};
+
 
     return (
         <div className='ComCssContainer'>
@@ -126,8 +151,6 @@ const PTLOpreator = () => {
             </div>
             {showTable && (
                 <div className='ComCssTable'>
-
-
                     <PTLOpreatoreTable
                         data={filteredData}
                         page={0}
@@ -139,11 +162,31 @@ const PTLOpreator = () => {
                         setPerPage={() => { }}
                         pickButton={pickButton}
                         setpickButton={setpickButton}
+                        setSuccessMessage={setSuccessMessage}
+                        setShowSuccessPopup={setShowSuccessPopup}
+
                     />
-
-
+                    <div className="ComCssButton9">
+                        <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                    </div>
                 </div>
             )}
+            <CustomDialog
+                open={showSuccessPopup}
+                onClose={() => setShowSuccessPopup(false)}
+                title="Success"
+                message={successMessage}
+                severity="success"
+                color="primary"
+            />
+            <CustomDialog
+                open={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="Error"
+                message={errorMessage}
+                severity="error"
+                color="secondary"
+            />
         </div>
     )
 }

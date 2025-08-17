@@ -4,7 +4,7 @@ import ComTextFiled from '../Com_Component/ComTextFiled'; // adjust path if need
 import TextFiledTheme from '../Com_Component/TextFiledTheme'; // adjust path if needed
 import { Autocomplete, TextField } from "@mui/material";
 
-const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
+const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
     const RepaierType = [
         { label: "SUI", value: "SUI" },
         { label: "Rework", value: "Rework" },
@@ -33,18 +33,26 @@ const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleC
                 /> */}
                 <Autocomplete
                     options={productOptions}
+                    disabled={isFrozen}
+
                     getOptionLabel={(option) => option.label || ""}
                     value={productOptions.find(opt => opt.value === formData.productname) || null}
                     onChange={(e, newValue) => {
                         setFormData(prev => ({
                             ...prev,
                             productname: newValue?.value || "",
-                            productGroup: newValue?.productgroup || "",
-                            productFamily: newValue?.productfamily || ""
+                            // productGroup: newValue?.productgroup || "",
+                            // productFamily: newValue?.productfamily || ""
                         }));
+                        setExtraFields({
+    productGroup: newValue?.productgroup || "",
+    productFamily: newValue?.productfamily || ""
+  });
                     }}
                     renderInput={(params) => (
-                        <TextField {...params} label="Product Name" variant="outlined" size="small" />
+                        <TextField {...params} label="Product Name"
+                            variant="outlined" size="small"
+                        />
                     )}
                 />
 
@@ -53,7 +61,7 @@ const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleC
                     name="productGroup"
                     InputLabelProps={{ shrink: true }}
 
-                    value={formData.productGroup}
+                    value={extraFields.productGroup}
                     InputProps={{ readOnly: true }}
 
                 />
@@ -63,7 +71,7 @@ const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleC
 
                     label="Product Family"
                     name="productFamily"
-                    value={formData.productFamily}
+                    value={extraFields.productFamily}
                     InputProps={{ readOnly: true }}
                 />
 
@@ -78,16 +86,16 @@ const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleC
                     helperText={formErrors?.boardserialnumber || ""}
                 /> */}
                 <ComTextFiled
-  label="Module Serial Number"
-  name="boardserialnumber"
-  value={formData.boardserialnumber}
-  onChange={handleChange}
-  disabled={isFrozen}
-  error={Boolean(formErrors?.boardserialnumber)}
-  helperText={formErrors?.boardserialnumber || ""}
-    inputProps={{ maxLength: 11 }}
+                    label="Module Serial Number"
+                    name="boardserialnumber"
+                    value={formData.boardserialnumber}
+                    onChange={handleChange}
+                    disabled={isFrozen}
+                    error={Boolean(formErrors?.boardserialnumber)}
+                    helperText={formErrors?.boardserialnumber || ""}
+                // inputProps={{ maxLength: 11 }}
 
-/>
+                />
 
                 <Autocomplete
 
@@ -95,10 +103,10 @@ const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleC
                     getOptionLabel={(option) => option.label}
                     value={getOptionObj(formData.type, RepaierType)}
                     onChange={(e, newValue) => handlePoChange("type", newValue?.value || "")}
-                     disabled={isFrozen}
+                    disabled={isFrozen}
                     renderInput={(params) => (
-                        
-                        <TextField {...params} label="Type" variant="outlined" size="small"/>
+
+                        <TextField {...params} label="Type" variant="outlined" size="small" />
                     )}
                 />
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") && (
@@ -182,23 +190,29 @@ const RepaierTextfile = ({ formData, setFormData, isFrozen, partOptions, handleC
                 {formData.type === "SUI" && (
                     <>
                         <ComTextFiled
-                            label="SUI No"
-                            name="SUINo"
-                            value={formData.SUINo}
-                            onChange={handleChange}
-                            error={Boolean(formErrors?.SUINo)}
-                            helperText={formErrors?.SUINo || ""}
-                        />
+    label="SUI No"
+    name="SUINo"
+    value={extraFields.SUINo}
+    onChange={(e) =>
+        setExtraFields(prev => ({
+            ...prev,
+            SUINo: e.target.value
+        }))
+    }
+    error={Boolean(formErrors?.SUINo)}
+    helperText={formErrors?.SUINo || ""}
+/>
+
                     </>
                 )}
                 {formData.type === "ThermalGEL" && (
                     <>
                         <ComTextFiled
                             label="Quantity"
-                            name="Quantity"
-                            value={formData.Quantity}
+                            name="tgquantity"
+                            value={formData.tgquantity}
                             onChange={handleChange}
-                            error={Boolean(formErrors?.Quantity)}
+                            error={Boolean(formErrors?.tgquantity)}
                             helperText={formErrors?.Partcode || ""}
                         />
                     </>

@@ -2,10 +2,10 @@ import axios from "axios";
 import { url } from '../app.config';
 
 //Login API
-const Login_Api = `${url}/login`
+const Login_Api = `${url}/userAuth/login`
 export const LoginUser = (formData) => axios.post(Login_Api, formData);
 
-const Careate_Api = `${url}/createAccount`
+const Careate_Api = `${url}/userAuth/createAccount`
 export const CreateAccountUser = (formData) => axios.post(Careate_Api, formData);
 
 //Product family master API
@@ -287,3 +287,9 @@ export const downloadSearchPoDetail = (search) =>
 
   const getRcstore = `${url}/RcMain/getPageDatatyu`;
   export const fetchRc=()=>{return axios.get(getRcstore)}
+
+  const getUserRole = `${url}/userAuth/fetchAllRoles`;
+  export const fetchUserRole=()=>{return axios.get(getUserRole)}
+
+   const getScreen = `${url}/userAuth/fetchScreen`;
+  export const fetchScreenName=()=>{return axios.get(getScreen)}

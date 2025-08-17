@@ -65,7 +65,7 @@ const GRNDefaultTable = ({
       "GRNQty",
       "GRNo",
       "GRDate",
-            "GRNComment",
+      "GRNComment",
 
     ],
     // onEdit,

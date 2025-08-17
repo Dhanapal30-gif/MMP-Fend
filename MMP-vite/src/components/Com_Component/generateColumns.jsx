@@ -3,34 +3,37 @@ export const generateColumns = ({
   onEdit,
   selectedRows,
   data = [],
-
   handleSelect,
-
   handleSelectAll,
   customConfig = {},
   showEdit = true,
   customCellRenderers = {},
 }) => {
+  const totalColumns = fields.length + (selectedRows && handleSelect ? 1 : 0);
+  const equalWidth = `${100 / totalColumns}%`; // dynamic equal width in %
 
-  const dynamicColumns = fields.map((field) => ({
-    name: customConfig[field]?.label || field,
-    selector: row => row[field],
-    cell: customCellRenderers[field]
-      ? (row, index) => customCellRenderers[field](row, index)
-      : row => row[field],
-    wrap: true,
-    width: customConfig[field]?.width || '130px',
-  }));
+ const dynamicColumns = fields.map((field) => ({
+  name: (
+    <div style={{ whiteSpace: 'nowrap', overflow: 'visible' }}>
+      {customConfig[field]?.label || field}
+    </div>
+  ),
+  selector: row => row[field],
+  cell: customCellRenderers[field]
+    ? (row, index) => customCellRenderers[field](row, index)
+    : row => row[field],
+  wrap: false, // prevent header wrapping
+  minWidth: '130px', // optional, prevents extremely small columns
+}));
 
 
   const baseColumns = [];
 
-
-if (selectedRows && handleSelect ) {
+  if (selectedRows && handleSelect) {
     baseColumns.push({
       name: (
         <div style={{ paddingLeft: '15px' }}>
-          <span>Select</span><br></br>
+          <span>Select</span><br />
           <input
             type="checkbox"
             checked={selectedRows.length === data.length && data.length > 0}
@@ -46,21 +49,10 @@ if (selectedRows && handleSelect ) {
             onChange={(e) => handleSelect(row.id, e.target.checked)}
           />
         </div>
-      )
+      ),
+      width: equalWidth, // same width for checkbox column
     });
   }
-  // Add Edit column only if showEdit is true and onEdit exists
-  // if (showEdit && onEdit) {
-  //   baseColumns.push({
-  //     name: "Edit",
-  //     // cell: row => (
-  //     //   <button className="edit-button" onClick={() => onEdit(row)}>
-  //     //     Edit
-  //     //   </button>
-  //     // ),
-  //     width: "80px",
-  //   });
-  // }
 
   return [...baseColumns, ...dynamicColumns];
 };

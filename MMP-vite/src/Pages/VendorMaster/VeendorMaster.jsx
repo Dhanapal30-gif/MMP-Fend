@@ -165,6 +165,7 @@ const VeendorMaster = () => {
         setHandleSubmitButton(true);
         setHandleUploadButton(false);
         setHandleUpdateButton(false)
+        setFormErrors("");
         setShowVendorTable(true);
         setShowUploadTable(false);
         setDeletButton(false);
@@ -224,6 +225,7 @@ const VeendorMaster = () => {
                     vendorName: "",
                     country: ""
                 })
+                setSearchText("");
                 fetchVendotMaster();
 
             })
@@ -292,8 +294,8 @@ const VeendorMaster = () => {
     const columns = [
         {
             name: (
-                <div style={{ textAlign: 'center', }}>
-                    <label>Delete All</label>
+                <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+                    <label>Select</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
                         checked={selectedRows.length === vendorMaster.length && vendorMaster.length > 0}
@@ -312,25 +314,25 @@ const VeendorMaster = () => {
         ,
         { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
         {
-            name: "vendorcode", selector: row => row.vendorCode, sortable: true, width: `${calculateColumnWidth(vendorMaster, 'vendorcode')}px`
+            name: "Vendor code", selector: row => row.vendorCode, sortable: true, width: `${calculateColumnWidth(vendorMaster, 'vendorcode')}px`
         },
         {
-            name: "vendorname", selector: row => row.vendorName, width: `${calculateColumnWidth(vendorMaster, 'vendorname')}px`
+            name: "Vendor Name", selector: row => row.vendorName, width: `${calculateColumnWidth(vendorMaster, 'vendorname')}px`
         },
         {
-            name: "country", selector: row => row.country, width: `${calculateColumnWidth(vendorMaster, 'country')}px`
+            name: "Country", selector: row => row.country, width: `${calculateColumnWidth(vendorMaster, 'country')}px`
         }
     ];
 
     const uploadColumns = [
         {
-            name: "vendorCode", selector: row => row.vendorCode, sortable: true, width: `${calculateColumnWidth(vendorMaster, 'vendorCode')}px`
+            name: "Vendor Code", selector: row => row.vendorCode, sortable: true, width: `${calculateColumnWidth(vendorMaster, 'vendorCode')}px`
         },
         {
-            name: "vendorName", selector: row => row.vendorName, width: `${calculateColumnWidth(vendorMaster, 'vendorName')}px`
+            name: "Vendor Name", selector: row => row.vendorName, width: `${calculateColumnWidth(vendorMaster, 'vendorName')}px`
         },
         {
-            name: "country", selector: row => row.country, width: `${calculateColumnWidth(vendorMaster, 'country')}px`
+            name: "Country", selector: row => row.country, width: `${calculateColumnWidth(vendorMaster, 'country')}px`
         }
     ];
 
@@ -465,6 +467,7 @@ const VeendorMaster = () => {
                     country: ""
                 })
                 setHandleUpdateButton(false);
+                setSearchText("");
                 setHandleSubmitButton(true);
                 fetchVendotMaster().then(() => {
                     setPage(1); // 👈 Reset pagination AFTER data is fetched
@@ -494,6 +497,10 @@ const VeendorMaster = () => {
     const handleCancel = () => {
         setSelectedRows([]);
         setConfirmDelete(false);
+        setSearchText("");
+        setDeletButton(false)
+         setHandleSubmitButton(true)   
+        
     };
     const handleDelete = async () => {
         try {
@@ -536,7 +543,7 @@ const VeendorMaster = () => {
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>Vendor Master</h5>
+                    <p>Vendor Master</p>
                 </div>
                 <div className='ComCssUpload'>
                     <input type="file" accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
@@ -548,7 +555,7 @@ const VeendorMaster = () => {
 
                         <TextField
                             id="outlined-basic"
-                            label="vendorCode"
+                            label="Vendor Code"
                             variant="outlined"
                             name="vendorCode"
                             value={formData.vendorCode}
@@ -563,7 +570,7 @@ const VeendorMaster = () => {
                         />
                         <TextField
                             id="outlined-basic"
-                            label="vendorName"
+                            label="Vendor Name"
                             variant="outlined"
                             name="vendorName"
                             value={formData.vendorName}
@@ -584,7 +591,7 @@ const VeendorMaster = () => {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="country"
+                                    label="Country"
                                     variant="outlined"
                                     size="small"
                                     error={Boolean(formErrors.country)}
@@ -605,20 +612,20 @@ const VeendorMaster = () => {
     </LocalizationProvider> */}
                 </div>
                 <div className='ComCssButton9'>
-                    {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit} >Submit</button>}
-                    {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+                    {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>}
+                    {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
                     {handleUploadButton && (
                         isLoading ? (
-                            <div style={{ textAlign: 'center', margin: '20px' }}>
+                            <div className='ComCssExcelUploadButton'>
                                 <div className="spinner"></div>
                                 <p>Uploading, please wait...</p>
                             </div>
                         ) : (
-                            <button style={{ backgroundColor: 'orange' }} onClick={handleExcelUpload} disabled={isLoading}>Upload </button>
+                            <button className='ComCssExcelUploadButton' onClick={handleExcelUpload} disabled={isLoading}>Upload </button>
                         )
                     )}
-                    {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}  >Delete</button>}
-                    <button onClick={formClear}>Clear</button>
+                    {deletButton && <button className='ComCssDeleteButton'onClick={onDeleteClick}  >Delete</button>}
+                    <button className='ComCssClearButton' onClick={formClear}>Clear</button>
                 </div>
             </div>
             <div className='ComCssTable'>

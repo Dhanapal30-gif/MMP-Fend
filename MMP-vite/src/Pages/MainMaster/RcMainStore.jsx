@@ -83,6 +83,7 @@ const RcMainStore = () => {
       createdby: '', modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '',
       TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
     });
+    setFormErrors("");
     setFileInputKey(Date.now());
     setExcelUploadData([]);
     setHandleSubmitButton(true);
@@ -335,7 +336,6 @@ const RcMainStore = () => {
 
   const handleRowSelect = (rowKey) => {
     setHandleUpdateButton(false);
-    setHandleUpdateButton(false);
 
     setFormData({
       partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '', createdby: '',
@@ -362,11 +362,11 @@ const RcMainStore = () => {
     });
   };
 
-  const column = useMemo(() => [
+  const column =[
     {
       name: (
-        <div style={{ textAlign: 'center', }}>
-          <label>Delete All</label>
+        <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+          <label>Select </label>
           <br />
           <input type="checkbox" onChange={handleSelectAll}
             checked={selectedRows.length === rcStoreData.length && rcStoreData.length > 0}
@@ -380,7 +380,6 @@ const RcMainStore = () => {
         </div>
       ),
       width: "97px",
-      center: true,
     }
     ,
     { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
@@ -392,7 +391,7 @@ const RcMainStore = () => {
       width: `${calculateColumnWidth(rcStoreData, 'partcode')}px`
     },
     {
-      name: "Partdescription",
+      name: "Part Description",
       selector: row => row.partdescription,
       wrap: true,
       width: `${calculateColumnWidth(rcStoreData, 'partdescription')}px`
@@ -486,17 +485,7 @@ const RcMainStore = () => {
       width: `${calculateColumnWidth(rcStoreData, 'shelflife')}px`
     }
 
-  ], []);
-
-  // const handlePerRowsChange = (newPerPage, newPage) => {
-  //   setPerPage(newPerPage);
-  //   setPage(newPage);
-  // }
-
-  // const handlePerRowsChange = useCallback((newPerPage,newPage)=>setPerPage(newPerPage),setPage(newPage),[]);
-  // const handlePageChange = (newPage) => {
-  //   setPage(newPage);
-  // };
+  ];
 
   const handlePerRowsChange = useCallback((newPerPage, newPage) => {
     setPerPage(newPerPage);
@@ -591,9 +580,9 @@ const RcMainStore = () => {
     setLoading(true); // ✅ Start loading before fetch
     getRcmainMaster(page - 1, size)
       .then((response) => {
-        const data = response?.data || {};
-        setRcStoreData(data.content || []);
-        setTotalRows(data.totalElements || 0);
+        // const data = response?.data || {};
+        setRcStoreData(response.data.content || []);
+        setTotalRows(response.data.totalElements || 0);
         // console.log("data.totalElements", data.totalElements)
         // console.log("data.content", data.content)
       })
@@ -610,7 +599,7 @@ const RcMainStore = () => {
     getRcmainMasterFind(page - 1, size, search)
       .then((response) => {
         const data = response?.data || {};
-        setRcStoreData(data.content || []);
+        setRcStoreData(data.content );
         setTotalRows(data.totalElements || 0);
         // console.log("findFetch", data.totalElements)
         // console.log("data.content", data.content)
@@ -652,6 +641,8 @@ const RcMainStore = () => {
   const handleCancel = () => {
     setSelectedRows([]);
     setConfirmDelete(false);
+    setDeletButton(false);
+    setHandleSubmitButton(true)
   };
   const handleDelete = async () => {
     try {
@@ -775,7 +766,7 @@ const RcMainStore = () => {
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
         <div className='ComCssFiledName'>
-          <h5>RC Store</h5>
+          <p>RC Store</p>
         </div>
         <div className='ComCssUpload'>
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
@@ -786,7 +777,7 @@ const RcMainStore = () => {
           <ThemeProvider theme={TextFiledTheme}>
             <TextField
               id="outlined-basic"
-              label="partcode"
+              label="Partcode"
               variant="outlined"
               name="partcode"
               value={formData.partcode}
@@ -798,7 +789,7 @@ const RcMainStore = () => {
             />
             <TextField
               id="outlined-basic"
-              label="part Description"
+              label="Part Description"
               variant="outlined"
               name="partdescription"
               value={formData.partdescription}
@@ -1020,10 +1011,9 @@ const RcMainStore = () => {
                 label="Shelf Life"
                 name="shelflife"
                 type="number"
-                value={formData.shelflife}
+  value={formData.shelflife || 0}  // optional fallback
                 onChange={handleChange}
                 inputProps={{ min: 0 }}
-                defaultValue={0}
                 variant="outlined"
                 size="small"
                 className='ProductTexfiled-textfield '
@@ -1032,17 +1022,17 @@ const RcMainStore = () => {
           </ThemeProvider>
         </div>
         <div className='ComCssButton9'>
-          {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
-          {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
-          {handleUploadButton && <button style={{ backgroundColor: 'orange' }} onClick={excelUpload}>Upload</button>}
-          {deletButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}  >Delete</button>}
-          <button onClick={formClear}>Clear</button>
+          {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>}
+          {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+          {handleUploadButton && <button className='ComCssExcelUploadButton' onClick={excelUpload}>Upload</button>}
+          {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}  >Delete</button>}
+          <button className='ComCssClearButton' onClick={formClear}>Clear</button>
         </div>
       </div>
 
       <div className='ComCssTable'>
         {showRcTable && !showUploadTable && (
-          <h5 className='ComCssTableName'>All Master deatil</h5>
+          <h5 className='ComCssTableName'>RCStore Detail</h5>
         )}
         {showUploadTable && !showRcTable && (
           <h5 className='ComCssTableName'>Upload Master deatil</h5>
@@ -1087,7 +1077,7 @@ const RcMainStore = () => {
             fixedHeaderScrollHeight="400px"
             highlightOnHover
             className="react-datatable"
-            conditionalRowStyles={rowHighlightStyle}
+            // conditionalRowStyles={rowHighlightStyle}
           />
         )}
 

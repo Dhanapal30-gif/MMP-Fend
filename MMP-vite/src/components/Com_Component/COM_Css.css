@@ -28,6 +28,25 @@
   z-index: 1;
     flex-wrap: wrap                         /* Space between rows */
 }
+.ComCssSubmitButton {
+  background-color: rgb(26, 171, 33) !important;
+}
+
+.ComCssUpdateButton {
+  background-color: orange !important;
+}
+.ComCssDeleteButton {
+  background-color: red !important;
+}
+.ComCssAddButton {
+  background-color: rgb(26, 171, 33) !important;
+}
+.ComCssClearButton {
+  background-color: rgb(220, 49, 200) !important;
+}
+.ComCssExcelUploadButton {
+  background-color: rgb(26, 171, 33) !important;
+}
 
 .ComCssInput {
     flex-direction: column;
@@ -113,7 +132,7 @@
 }
 .ComCssFiledName {
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 700;
     color: #0070b4;
     margin: 0;
     padding-left:-10px;
@@ -138,6 +157,7 @@
     gap: 15px;                       /* Space between buttons */
     margin-top: -10px;                /* Gap between button rows */
     width: 100%;
+    font-size: 14px;
 }
 
 .ComCssButton9 button {
@@ -209,14 +229,14 @@
     display: flex;
     justify-content: flex-start;       /* Align buttons to the right */
     gap: 15px;                       /* Space between buttons */
-    margin-top: -10px;                /* Gap between button rows */
+    margin-top: -30px;                /* Gap between button rows */
     width: 100%;
     margin-left: 0px;
 
 }
 .ComCssUpload button {
     color: white;
-    background-color: #20c9c6;          
+    background-color: #e76ea8;          
     height: 30px;
     font-size: smaller;
     font-weight: bold;
@@ -307,7 +327,7 @@
 .react-datatable .rdt_TableHeadRow {
   /* background: linear-gradient(to right, #701964, #179999); */
     /* background: linear-gradient(to right, #214b6f, #06c585); */
-    background: linear-gradient(to right, #b81b58, #06c585);
+    background: linear-gradient(to right, #900441);
 
   color: white;
   font-weight: bold;
@@ -315,6 +335,7 @@
   text-align: left;
   min-height: 40px;
   margin-left: -10px;
+  
 }
 
 /* Head cells */
@@ -323,6 +344,7 @@
   /* margin-left:-3px; */
   justify-content:flex-start;
   font-weight: bold;
+  
 }
 
 /* Data rows */
@@ -389,9 +411,9 @@
     font-weight: bold;
     
 }
-.ComCssFiledName {
+/* .ComCssFiledName {
     font-size: 15px;
-}
+} */
 .ComCssTableName{
         font-size: 15px;
 
@@ -416,8 +438,21 @@
 
 
   /* Extra-large screens (TVs, 4K) */
-@media (min-width: 1440px) and (max-width: 5560.98px) {
- 
+@media (min-width: 1024px) and (max-width: 1440px)  {
+ .ComCssButton9 {
+    /* margin-top: -73px;                 */
+    width: 100%;
+    font-size: 14px;
+}
+.ComCssFiledName {
+    font-size: 15px;
+    font-weight: 700;
+}
+.ComCssUpload{
+    margin-top: -30px;                /* Gap between button rows */
+   
+
+}
    
   }
 

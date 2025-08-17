@@ -21,18 +21,18 @@ const PoTextFiled = ({
     { label: "Canceled", value: "Canceled" },
     { label: "On Hold", value: "On Hold" }
   ];
-  
+
 
 
   const getOptionObj = (value, options) => {
     return options.find((opt) => opt.value === value) || null;
   };
 
-//   const ponumberOptions = [
-//   { label: "PO123", value: "PO123" },
-//   { label: "PO456", value: "PO456" },
-//   // add more or fetch dynamically
-// ];
+  //   const ponumberOptions = [
+  //   { label: "PO123", value: "PO123" },
+  //   { label: "PO456", value: "PO456" },
+  //   // add more or fetch dynamically
+  // ];
 
 
   const { ponumberOptions, partcodeOptions, partDescriptionOptions } = poDropdownOptions;
@@ -40,7 +40,7 @@ const PoTextFiled = ({
   return (
     <div className="ComCssTexfiled">
       <ThemeProvider theme={TextFiledTheme}>
-        
+
         <Autocomplete
           options={yearOptions}
           getOptionLabel={(option) => option.label}
@@ -61,31 +61,31 @@ const PoTextFiled = ({
           )}
         />
         <Autocomplete
-  freeSolo
-  options={ponumberOptions}
-  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
-  value={formData.ponumber || ""}
-  onChange={(e, newValue) => {
-    if (typeof newValue === 'string') {
-      handleChange("ponumber", newValue);
-    } else {
-      handleChange("ponumber", newValue?.value || "");
-    }
-  }}
-  onInputChange={(e, newInputValue) => {
-    handleChange("ponumber", newInputValue); // update typing input
-    setPonumberInput(newInputValue); // fetch suggestions dynamically
-  }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Ponumber"
-      variant="outlined"
-      size="small"
-    />
-  )}
-  filterOptions={(x) => x} // allow full list
-/>
+          freeSolo
+          options={ponumberOptions}
+          getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+          value={formData.ponumber || ""}
+          onChange={(e, newValue) => {
+            if (typeof newValue === 'string') {
+              handleChange("ponumber", newValue);
+            } else {
+              handleChange("ponumber", newValue?.value || "");
+            }
+          }}
+          onInputChange={(e, newInputValue) => {
+            handleChange("ponumber", newInputValue); // update typing input
+            setPonumberInput(newInputValue); // fetch suggestions dynamically
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Ponumber"
+              variant="outlined"
+              size="small"
+            />
+          )}
+          filterOptions={(x) => x} // allow full list
+        />
 
 
 

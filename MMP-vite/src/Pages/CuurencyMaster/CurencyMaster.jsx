@@ -86,6 +86,7 @@ const CurencyMaster = () => {
             currencyname: "", currencyvalue: "", effectivedate: getFirstDayOfMonth()
         })
         setShowCurnecyTable(true);
+        setFormErrors("");
         setHandleSubmitButton(true);
         setHandleUpdateButton(false);
         setHandleDeleteButton(false);
@@ -143,6 +144,7 @@ const CurencyMaster = () => {
                 setShowSuccessPopup(true);
                 formClear();
                 fetchCurencyMaster();
+                setSearchText("");
             }).catch((error) => {
                 setLoading(false);
                 if (error.response) {
@@ -169,6 +171,8 @@ const CurencyMaster = () => {
     const handleCancel = () => {
         setSelectedRows([]);
         setConfirmDelete(false);
+        setHandleDeleteButton(false)
+        setHandleSubmitButton(true)
     }
 
     const handleDelete = async () => {
@@ -303,24 +307,24 @@ const CurencyMaster = () => {
             width: "79px",
         },
         {
-            name: "CurrencyName",
+            name: "Currency Name",
             selector: row => row.currencyname,
             sortable: true,
             width: `${calculateColumnWidth(curencyMster, 'CurrencyName')}px`
         },
         {
-            name: "CurrencyValue",
+            name: "Currency Value",
             selector: row => row.currencyvalue,
             wrap: true,
             width: `${calculateColumnWidth(curencyMster, 'CurrencyValue')}px`
         },
         {
-            name: "Effectivedate",
+            name: "Effective Date",
             selector: row => row.effectivedate,
             width: `${calculateColumnWidth(curencyMster, 'Effectivedate')}px`
         },
         {
-            name: "modifieddate",
+            name: "Modified Date",
             selector: row => row.modifieddate,
             width: `${calculateColumnWidth(curencyMster, 'modifieddate')}px`
         }
@@ -357,7 +361,7 @@ const CurencyMaster = () => {
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>Curnecy Master</h5>
+                    <p>Curnecy Master</p>
                 </div>
                 <div className='ProductTexfiled'>
                     <ThemeProvider theme={TextFiledTheme}>
@@ -371,7 +375,7 @@ const CurencyMaster = () => {
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
-                                        label="currencyname"
+                                        label="Currency Name"
                                         variant="outlined"
                                         error={Boolean(formErrors.currencyname)}
                                         helperText={formErrors.currencyname}
@@ -419,10 +423,10 @@ const CurencyMaster = () => {
                     </ThemeProvider>
                 </div>
                 <div className='ComCssButton9'>
-                    {handleSubmitButton && <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>}
-                    {handleUpdateButton && <button style={{ backgroundColor: 'orange' }} onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
-                    {handleDeleteButton && <button style={{ backgroundColor: 'orange' }} onClick={onDeleteClick}   >Delete</button>}
-                    <button onClick={formClear}>Clear</button>
+                    {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>}
+                    {handleUpdateButton && <button className='ComCssUpdateButton'  onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+                    {handleDeleteButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
+                    <button className='ComCssClearButton' onClick={formClear}>Clear</button>
                 </div>
             </div>
 

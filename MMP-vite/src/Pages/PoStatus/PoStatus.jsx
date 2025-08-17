@@ -149,6 +149,7 @@ const PoStatus = () => {
     return;
   }
 
+ 
   const selectedPoStatusData = poData
     .filter(row => selectedRows.includes(row.id))
     .map(row => ({
@@ -172,12 +173,14 @@ const PoStatus = () => {
   }
 };
 
-
+ const formClear =()=>{
+    setSelectedRows([]);
+  }
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <h5>PoStatus</h5>
+                    <p>PoStatus</p>
                 </div>
 
                 <PoTextFiled
@@ -226,7 +229,10 @@ const PoStatus = () => {
                         <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>
                             Submit
                         </button>
+
                     )}
+                     <button className='ComCssClearButton' onClick={formClear}>Clear</button>
+
                 </div>
             </div>
 
