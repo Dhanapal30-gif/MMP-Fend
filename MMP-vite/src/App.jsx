@@ -25,7 +25,7 @@ import PTLOpreator from './Pages/PTLOpreator/PTLOpreator';
 import LocalndindividualReportCom from './components/LocalndindividualReport/LocalndindividualReportCom';
 import LocalndindividualReport from './Pages/LocalndindividualReport/LocalndindividualReport';
 import LocalReport from './Pages/LocalReport/LocalReport';
-import LocalPutaway from './Pages/LocalPutaway/putaway';
+import LocalPutaway from './Pages/LocalPutaway/LocalPutaway';
 import RoleMaster from './Pages/RoleMaster/RoleMaster';
 import Role from './Pages/Role/Role';
 import Technology from './Pages/Technology/Technology';
