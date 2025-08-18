@@ -34,14 +34,31 @@ const CreateAccount = () => {
     productGroup: [],
     productname: []
   });
-  useEffect(() => {
-    if (isEdit) {
-      setFormData({
-        // ...formData,
-        ...editFormData
-      });
-    }
-  }, [isEdit, editFormData]);
+  
+useEffect(() => {
+  if (isEdit && storeProduct.length > 0) {
+    const availableGroups = [...new Set(storeProduct.map(item => item.productGroup))]; // unique
+    const availableNames = storeProduct.map(item => item.productName);
+
+    setFormData({
+      ...editFormData,
+      userRole: editFormData.userRole || [],
+      requesterType: editFormData.requesterType || [],
+      requestType: editFormData.requestType || [],
+      productGroup: Array.isArray(editFormData.productGroup)
+        ? editFormData.productGroup.filter(pg => availableGroups.includes(pg))
+        : availableGroups.includes(editFormData.productGroup)
+          ? [editFormData.productGroup]
+          : [],
+      productname: editFormData.productname?.filter(pn => availableNames.includes(pn)) || []
+    });
+  }
+}, [isEdit, editFormData, storeProduct]);
+
+
+console.log("editFormData",editFormData)
+
+
   const [userRoleData, setUserRoleData] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [showErrorPopup, setShowErrorPopup] = useState(false);
@@ -362,7 +379,7 @@ const CreateAccount = () => {
                       <TextField
                         {...params}
                         label="Product Group"
-                        name="asignUserrole"
+                        name="productGroup"
                         error={Boolean(formErrors.productGroup)}
                         helperText={formErrors.productGroup}
                         variant="outlined"

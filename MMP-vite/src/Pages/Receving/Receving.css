@@ -112,3 +112,50 @@
   transform: scale(1.03);
 
 }
+
+
+
+
+@media (min-width: 2000px) {
+  .RecevingInputHide {
+    margin-left: 58px;
+  }
+  
+}
+
+
+
+@media (min-width: 710px) and (max-width: 1024px) {
+  .RecevingInputHide {
+    margin-left: 28px;
+  }
+  .RecevingTexfiled {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+  gap: 30px;
+  width: 80%;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  height: 35px;
+}
+
+
+.RecevingTable {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  border-radius: 10px;
+  margin-top: 90px;
+  justify-content: flex-start;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
+}
+  
+}
+
+@media (min-width: 510px) and (max-width: 718px) {
+  .RecevingInputHide {
+    margin-left: 18px;
+  }
+  
+}

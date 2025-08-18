@@ -177,7 +177,7 @@ const handleSubmit = (e) => {
 
     savePTLRepaier(updatedFormData)
         .then((response) => {
-            console.log("RESPONSE:", response);
+            // console.log("RESPONSE:", response);
             if (response.status === 200 && response.data) {
                 const { message } = response.data;
                 setSuccessMessage(message || "Saved successfully");
@@ -194,7 +194,7 @@ const handleSubmit = (e) => {
             }
         })
         .catch((error) => {
-            console.log("ERROR:", error);
+            // console.log("ERROR:", error);
             const errMsg = error?.response?.data?.message || "Network error, please try again";
             setErrorMessage(errMsg);
             setShowErrorPopup(true);
@@ -220,7 +220,7 @@ const handleSubmit = (e) => {
             console.error("Error fetching data:", error);
         }
     };
-    console.log("setTable1Data", table2Data);
+    // console.log("setTable1Data", table2Data);
 
     const productOptions = table1Data.map(item => ({
         label: item.productname,
@@ -272,8 +272,8 @@ const handleSubmit = (e) => {
             setShowTable(true);
         }
     }, [tableData]);
-    console.log("showTable:", showTable);
-    console.log("tableData:", tableData);
+    // console.log("showTable:", showTable);
+    // console.log("tableData:", tableData);
 
     const handleClear = () => {
         setFormData({
@@ -319,11 +319,11 @@ const handleSubmit = (e) => {
                 />
                 <div className="ComCssButton9">
                     {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") ? (
-                        <button style={{ backgroundColor: 'green' }} onClick={handleAddClick}>ADD</button>
+                        <button className='ComCssSubmitButton' onClick={handleAddClick}>ADD</button>
                     ) : (
-                        <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                        <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
                     )}
-                    <button onClick={handleClear}> Clear </button>
+                    <button className='ComCssClearButton' onClick={handleClear}> Clear </button>
                 </div>
 
             </div>

@@ -82,7 +82,7 @@ const Reworker = () => {
             console.error("Error fetching data:", error);
         }
     };
-    console.log("tableData", tableData);
+    // console.log("tableData", tableData);
 
 
     const typeOptions = [...new Set(tableData.map(i => i.type))].map(val => ({ label: val, value: val }));
@@ -127,8 +127,8 @@ const Reworker = () => {
         }
     }, [formData.boardserialnumber]);
 
-    console.log("formData", formData);
-    console.log("table", showTable);
+    // console.log("formData", formData);
+    // console.log("table", showTable);
 
     const handlePTLRequest = (e) => {
         e.preventDefault();
@@ -140,11 +140,11 @@ const Reworker = () => {
             reworkername: userName
         }));
         // setPtlRequestData(prev => [...prev, filteredData]);
-        console.log("PTL Request Data:", updatedFilteredData);
+        // console.log("PTL Request Data:", updatedFilteredData);
 
         savePTLRequest(updatedFilteredData)
             .then((response) => {
-                console.log("RESPONSE:", response);
+                // console.log("RESPONSE:", response);
                 if (response.status === 200 && response.data) {
                     const { message } = response.data;
                     setSuccessMessage(message || "Saved successfully");
@@ -162,7 +162,7 @@ const Reworker = () => {
                 }
             })
             .catch((error) => {
-                console.log("ERROR:", error);
+                // console.log("ERROR:", error);
                 const errMsg = error?.response?.data?.message || "Network error, please try again";
                 setErrorMessage(errMsg);
                 setShowErrorPopup(true);
@@ -184,7 +184,7 @@ const Reworker = () => {
      pickingqty: item.availableqty // match backend field
      }));
    
-     console.log("payload", payload);
+    //  console.log("payload", payload);
    
      // send payload to API if needed
      try {
@@ -192,11 +192,11 @@ const Reworker = () => {
        setSuccessMessage("API success:", response.message)
        setShowSuccessPopup(true)
        setShowTable(false)
-       console.log("API success:", response);
+    //    console.log("API success:", response);
      } catch (error) {
        setErrorMessage("Error sending payload:", error)
        setShowErrorPopup(true)
-       console.error("Error sending payload:", error);
+    //    console.error("Error sending payload:", error);
      }
    };
     const handleCancelBoard = () => {
@@ -217,7 +217,7 @@ const Reworker = () => {
         });
         
     }
-    console.log("PTL Request Data:", filteredData.is_ptlrequest);
+    // console.log("PTL Request Data:", filteredData.is_ptlrequest);
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -280,14 +280,14 @@ const Reworker = () => {
                         {requestButton &&
                             filteredData.length > 0 &&
                             (filteredData[0].is_ptlrequest === null || filteredData[0].is_ptlrequest === "0") && (
-                                <button style={{ backgroundColor: 'green' }} onClick={handlePTLRequest}>Request</button>
+                                <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
                             )
                         }
                         {submitButton && (
-                            <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                            <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
                         )}
                         {clearButton && (
-                            <button style={{ backgroundColor: 'blue' }} onClick={handleClear}>Clear</button>
+                            <button className='ComCssClearButton' onClick={handleClear}>Clear</button>
                         )}
                     </div>
                 </div>

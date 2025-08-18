@@ -54,7 +54,7 @@ const PTLOpreator = () => {
             console.error("Error fetching data:", error);
         }
     };
-    console.log("tableData", tableData);
+    // console.log("tableData", tableData);
     const boardSerialOprion = Array.isArray(tableData)
         ? [...new Set(tableData.map(i => i.boardserialnumber))]
             .filter(Boolean)
@@ -72,7 +72,7 @@ const PTLOpreator = () => {
         setTableData(updatedData);
     };
 
-    console.log("filteredData", filteredData);
+    // console.log("filteredData", filteredData);
     useEffect(() => {
         if (formData.boardserialnumber) {
             setShowTable(true);
@@ -87,7 +87,7 @@ const handleSubmit = async () => {
   pickingqty: item.availableqty // match backend field
   }));
 
-  console.log("payload", payload);
+//   console.log("payload", payload);
 
   // send payload to API if needed
   try {
@@ -95,11 +95,11 @@ const handleSubmit = async () => {
     setSuccessMessage("API success:", response.message)
     setShowSuccessPopup(true)
     setShowTable(false)
-    console.log("API success:", response);
+    // console.log("API success:", response);
   } catch (error) {
     setErrorMessage("Error sending payload:", error)
     setShowErrorPopup(true)
-    console.error("Error sending payload:", error);
+    // console.error("Error sending payload:", error);
   }
 };
 
@@ -167,7 +167,7 @@ const handleSubmit = async () => {
 
                     />
                     <div className="ComCssButton9">
-                        <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                        <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
                     </div>
                 </div>
             )}

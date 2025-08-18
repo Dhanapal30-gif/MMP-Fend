@@ -42,7 +42,7 @@ const LocalReport = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
 
-    console.log("formData", formData);
+    // console.log("formData", formData);
 
     const handlePoChange = (field, value) => {
         setFormData(prev => ({
@@ -79,7 +79,7 @@ const LocalReport = () => {
     const debouncedSearch = useDebounce(searchText, 500);
     const userId = sessionStorage.getItem("userId");
 
-    console.log("userId", userId);
+    // console.log("userId", userId);
 
     const valiDate = () => {
         const errors = {};
@@ -127,7 +127,7 @@ const LocalReport = () => {
 
 
     const fetchData = (page = 1, size = 10, search = "") => {
-        console.log("searchfetch", search);
+        // console.log("searchfetch", search);
         if (search && search.trim() !== "") {
             fetchfindSearch(page, size, search);
         }
@@ -175,7 +175,7 @@ const LocalReport = () => {
             });
     };
 
-    console.log("formData", formData);
+    // console.log("formData", formData);
 
     const handleFilter = (e) => {
         e.preventDefault();
@@ -271,8 +271,8 @@ const LocalReport = () => {
                 />
 
                 <div className="ReworkerButton9">
-                    <button style={{ backgroundColor: 'green' }} onClick={handleFilter}>Search</button>
-                    <button style={{ backgroundColor: 'blue' }} onClick={Clear}>Clear</button>
+                    <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
+                    <button className='ComCssClearButton' onClick={Clear}>Clear</button>
                 </div>
 
             </div>
@@ -306,18 +306,18 @@ const LocalReport = () => {
                     </div>
                 </div>
 
-              <>
-  <LoadingOverlay loading={loading} />
+                <>
+                    <LoadingOverlay loading={loading} />
 
-  <LocalReportTbale
-    data={localReportData}
-    page={page}
-    perPage={perPage}
-    totalRows={totalRows}
-    setPage={setPage}
-    setPerPage={setPerPage}
-  />
-</>
+                    <LocalReportTbale
+                        data={localReportData}
+                        page={page}
+                        perPage={perPage}
+                        totalRows={totalRows}
+                        setPage={setPage}
+                        setPerPage={setPerPage}
+                    />
+                </>
             </div>
         </div>)
 }

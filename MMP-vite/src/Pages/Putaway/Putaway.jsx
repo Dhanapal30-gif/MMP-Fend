@@ -42,7 +42,7 @@ const Putaway = () => {
   fetchPutawayDetail(page, perPage, setPutawayDetail);
 }, []);
 
-console.log("setPutawayDetail", putawayDetail);
+// console.log("setPutawayDetail", putawayDetail);
 
     // useEffect(() => {
     //     console.log("putawayTicketguyguy", putawayTicket);
