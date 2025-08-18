@@ -314,56 +314,6 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
   gap: 20px;
 }
 
-@media  (max-width: 1020.98px) {
-  .header7 {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px 20px;
-    height: 47px;
-  }
-
-  .logo-section {
-    margin-bottom: 8px;
-  }
-
-  .avatar-container {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    margin-top: -75px;
-  }
-
-  .avatar-name {
-    font-size: 10px;
-
-  }
-
-  .logo-text {
-    font-size: 15px;
-  }
-  .nav-link {
-    text-decoration: none;
-    color: white;
-    font-size: 12px;
-    padding: 3px 0px;
-    cursor: pointer;
-    font-weight: bold;
-
-  }
-
-  .nav-links li a {
-    font-size: 13px;
-  }
-
-  .notification {
-    margin-left: 838px;
-    /* pushes it to the right */
-    margin-right: 10px;
-    margin-top: -150px;
-    display: flex;
-    align-items: center;
-  }
-}
 
 
 
@@ -388,15 +338,18 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
 
  .notification {
   margin: 0;
-  margin-left: auto;   /* <-- push to flex-end */
+  margin-left: 0;   
   display: flex;
   align-items: center;
+
 }
 
   .avatar-container {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin:0;
+    margin-left:auto;
   }
 
   .avatar-name {
@@ -405,5 +358,88 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
 
   .logo-text {
     font-size: 14px;
+  }
+
+  
+
+  .avatar-name {
+    font-size: 10px;
+
+  }
+
+  .logo-text {
+    font-size: 15px;
+  }
+  .nav-link {
+    text-decoration: none;
+    color: white;
+    font-size: 12px;
+    padding: 3px 0px;
+    cursor: pointer;
+    font-weight: bold;
+
+  }
+
+  .nav-links li a {
+    font-size: 13px;
+  }
+}
+
+/* ///////////////////// */
+
+/* Default: hide hamburger */
+.hamburger-menu {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+/* Mobile / Tablet (below 1020px) */
+@media (max-width: 1020px) {
+  .hamburger-menu {
+    display: block; /* show hamburger */
+  }
+
+  .navigation {
+    display: none; /* hide by default */
+    position: absolute;
+    top: 45px; /* just below header */
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to right, #4e0a4b, #179999);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+    z-index: 1000;
+  }
+
+  .navigation.show {
+    display: flex; /* show when toggled */
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .nav-links li {
+    width: 100%;
+  }
+
+  .nav-links li a,
+  .nav-link {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    color: white;
+  }
+
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+    border: none;
   }
 }

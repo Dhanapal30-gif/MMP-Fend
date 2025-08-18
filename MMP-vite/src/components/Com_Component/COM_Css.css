@@ -1,33 +1,37 @@
-
 .COMCssContainer {
-    min-height: 100vh; /* Prevents shrinking but keeps it scrollable */
-    display: flex;
-    flex-direction: column;
-    overflow: auto;            /* ✅ Scrollbar appears if content overflows */
-    justify-content: flex-start;
+  min-height: 100vh;
+  /* Prevents shrinking but keeps it scrollable */
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  /* ✅ Scrollbar appears if content overflows */
+  justify-content: flex-start;
 }
 
 
 .ComCssInputHide {
-    flex-direction: column;
-    /* background-color: floralwhite; */
-    border: 2px solid #edd9d9;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    width: 95%;
-    margin-top: 20px;
-    margin-left: 40px;
-    padding: 20px;
-    display: flex;                    
-    justify-content: space-between;    /* Space evenly */
-    gap: 30px;
-    background-color: white;
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
- position: relative;
+  flex-direction: column;
+  /* background-color: floralwhite; */
+  border: 2px solid #edd9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  width: 95%;
+  margin-top: 20px;
+  margin-left: 40px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  /* Space evenly */
+  gap: 30px;
+  background-color: white;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  position: relative;
   overflow: hidden;
   z-index: 1;
-    flex-wrap: wrap                         /* Space between rows */
+  flex-wrap: wrap
+    /* Space between rows */
 }
+
 .ComCssSubmitButton {
   background-color: rgb(26, 171, 33) !important;
 }
@@ -35,38 +39,44 @@
 .ComCssUpdateButton {
   background-color: orange !important;
 }
+
 .ComCssDeleteButton {
   background-color: red !important;
 }
+
 .ComCssAddButton {
   background-color: rgb(26, 171, 33) !important;
 }
+
 .ComCssClearButton {
   background-color: rgb(220, 49, 200) !important;
 }
+
 .ComCssExcelUploadButton {
   background-color: rgb(26, 171, 33) !important;
 }
 
 .ComCssInput {
-    flex-direction: column;
-    /* background-color: floralwhite; */
-    border: 2px solid #edd9d9;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    width: 95%;
-    margin-top: 20px;
-    margin-left: 40px;
-    padding: 20px;
-    display: flex;                    
-    justify-content: space-between;    /* Space evenly */
-    gap: 30px;
-    background-color: white;
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
- position: relative;
+  flex-direction: column;
+  /* background-color: floralwhite; */
+  border: 2px solid #edd9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  width: 95%;
+  margin-top: 20px;
+  margin-left: 40px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  /* Space evenly */
+  gap: 30px;
+  background-color: white;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  position: relative;
   overflow: hidden;
   z-index: 1;
-    flex-wrap: wrap                         /* Space between rows */
+  flex-wrap: wrap
+    /* Space between rows */
 }
 
 
@@ -79,12 +89,10 @@
   left: 2px;
   right: 2px;
   bottom: 2px;
-  background: conic-gradient(
-    from 0deg,
-    #4bd52c,
-    #d7c247,
-    #cd3eb1
-  );
+  background: conic-gradient(from 0deg,
+      #4bd52c,
+      #d7c247,
+      #cd3eb1);
   border-radius: 10px;
   z-index: -1;
   animation: spin 4s linear infinite;
@@ -110,180 +118,202 @@
     transform: rotate(1turn);
   }
 }
+
 .ComCssInputHide7 {
-    flex-direction: column;
-    /* background-color: floralwhite; */
-    border: 2px solid #edd9d9;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    width: 95%;
-    margin-top: 20px;
-    margin-left: 40px;
-    padding: 20px;
-    display: flex;                    
-    justify-content: space-between;    /* Space evenly */
-    gap: 30px;
-    background-color: white;
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
- position: relative;
+  flex-direction: column;
+  /* background-color: floralwhite; */
+  border: 2px solid #edd9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  width: 95%;
+  margin-top: 20px;
+  margin-left: 40px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  /* Space evenly */
+  gap: 30px;
+  background-color: white;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  position: relative;
   overflow: hidden;
   z-index: 1;
-    flex-wrap: wrap                         /* Space between rows */
+  flex-wrap: wrap
+    /* Space between rows */
 }
+
 .ComCssFiledName {
-    font-size: 18px;
-    font-weight: 700;
-    color: #0070b4;
-    margin: 0;
-    padding-left:-10px;
-    padding-top: 0px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    align-self: flex-start; 
-    /* font-family: Prometo; */
+  font-size: 18px;
+  font-weight: 500;
+  color: #0070b4;
+  margin: 0;
+  padding-left: -10px;
+  padding-top: 0px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  align-self: flex-start;
+  /* font-family: Prometo; */
 }
+
 /* Ensure 4 fields in a row */
 .ComCssTexfiled {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 2fr)); /* Responsive fields */
-    gap: 20px;
-    width: 100%;
-    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 2fr));
+  /* Responsive fields */
+  gap: 20px;
+  width: 100%;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 
 }
 
 .ComCssButton9 {
-    display: flex;
-    justify-content: flex-end;       /* Align buttons to the right */
-    gap: 15px;                       /* Space between buttons */
-    margin-top: -10px;                /* Gap between button rows */
-    width: 100%;
-    font-size: 14px;
+  display: flex;
+  justify-content: flex-end;
+  /* Align buttons to the right */
+  gap: 15px;
+  /* Space between buttons */
+  margin-top: -10px;
+  /* Gap between button rows */
+  width: 100%;
+  font-size: 14px;
 }
 
 .ComCssButton9 button {
-    color: white;
-    background-color: #20c9c6;          
-    height: 30px;
-    width: 70px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;  
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    margin-top: 10px;                
+  color: white;
+  background-color: #20c9c6;
+  height: 30px;
+  width: 70px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-top: 10px;
 
 }
 
 
 .ComCssButton9 button:hover {
-    background-color: #0d9a95;         
-    transform: scale(1.05);             
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+  background-color: #0d9a95;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .ComCssButton9 button:active {
-    /* transform: scale(0.98);     */
-    transform: scale(1.30);    
+  /* transform: scale(0.98);     */
+  transform: scale(1.30);
 
 }
+
 .ComCssSubmitButton9 {
-    display: flex;
-    justify-content:flex-end;       /* Align buttons to the right */
- /* gap: 15px;                       Space between buttons */
-    /* margin-top: -7px; */
-    width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  /* Align buttons to the right */
+  /* gap: 15px;                       Space between buttons */
+  /* margin-top: -7px; */
+  width: 100%;
 }
+
 .ComCssSubmitButton9 button {
-    color: white;
-    background-color: #20c9c6;          
-    height: 30px;
-    width: 70px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;  
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    margin-top: 20px; 
-    margin-right: 87px;               /* Gap between button rows */
-    /* margin-bottom: -20px;                */
+  color: white;
+  background-color: #20c9c6;
+  height: 30px;
+  width: 70px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-right: 87px;
+  /* Gap between button rows */
+  /* margin-bottom: -20px;                */
 
 }
+
 .ComCssSubmitButton9 button:hover {
-    background-color: #0d9a95;         
-    transform: scale(1.05);             
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+  background-color: #0d9a95;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .ComCssSubmitButton9 button:active {
-    /* transform: scale(0.98);     */
-    transform: scale(1.30);    
+  /* transform: scale(0.98);     */
+  transform: scale(1.30);
 
 }
-.ComCssUpload{
-    display: flex;
-    justify-content: flex-start;       /* Align buttons to the right */
-    gap: 15px;                       /* Space between buttons */
-    margin-top: -30px;                /* Gap between button rows */
-    width: 100%;
-    margin-left: 0px;
+
+.ComCssUpload {
+  display: flex;
+  justify-content: flex-start;
+  /* Align buttons to the right */
+  gap: 15px;
+  /* Space between buttons */
+  margin-top: -30px;
+  /* Gap between button rows */
+  width: 100%;
+  margin-left: 0px;
 
 }
+
 .ComCssUpload button {
-    color: white;
-    background-color: #e76ea8;          
-    height: 30px;
-    font-size: smaller;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    
+  color: white;
+  background-color: #e76ea8;
+  height: 30px;
+  font-size: smaller;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+
 }
 
 .ComCssUpload button:hover {
-    background-color: #0d9a95;         
-    transform: scale(1.05);             
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);  
+  background-color: #0d9a95;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .ComCssUpload button:active {
-     transform: scale(0.98);    
+  transform: scale(0.98);
 }
 
 .ComCssTable {
-    display: flex;
-    flex-direction: column;              /* Stack table vertically */
-    height: auto;                        /* Adjust height automatically */
-    width: 95%;
-    margin-left: 40px;
-    margin-top: 30px;
-    justify-content: flex-start;   
-    border: 2px solid #edd9d9;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 20px;
-           font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  /* Stack table vertically */
+  height: auto;
+  /* Adjust height automatically */
+  width: 95%;
+  margin-left: 40px;
+  margin-top: 30px;
+  justify-content: flex-start;
+  border: 2px solid #edd9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 
-    /* overflow: auto;                      Prevent overflow */
+  /* overflow: auto;                      Prevent overflow */
 }
+
 .ComCssTableName {
-    font-size: 15.9px;
-    font-weight: bold;
-    color: rgb(6, 132, 154);
-    /* color: rgb(34, 92, 208); */
-    position:relative;
-            /* font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15.9px;
+  font-weight: bold;
+  color: rgb(6, 132, 154);
+  /* color: rgb(34, 92, 208); */
+  position: relative;
+  /* font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
 }
 
@@ -304,19 +334,22 @@
   min-width: 160px;
   font-size: smaller
 }
+
 @keyframes blinkBorder {
   0% {
     border-color: #37e91f;
   }
+
   50% {
     border-color: transparent;
   }
+
   100% {
     border-color: #1a7783;
   }
 }
 
-.comCloseIcon{
+.comCloseIcon {
   color: red;
   font-size: 20px;
   cursor: pointer;
@@ -326,8 +359,8 @@
 /* Head row */
 .react-datatable .rdt_TableHeadRow {
   /* background: linear-gradient(to right, #701964, #179999); */
-    /* background: linear-gradient(to right, #214b6f, #06c585); */
-    background: linear-gradient(to right, #900441);
+  /* background: linear-gradient(to right, #214b6f, #06c585); */
+  background: linear-gradient(to right, #900441);
 
   color: white;
   font-weight: bold;
@@ -335,24 +368,24 @@
   text-align: left;
   min-height: 40px;
   margin-left: -10px;
-  
+
 }
 
 /* Head cells */
 .react-datatable .rdt_TableCol {
   text-align: left;
   /* margin-left:-3px; */
-  justify-content:flex-start;
+  justify-content: flex-start;
   font-weight: bold;
-  
+
 }
 
 /* Data rows */
 .react-datatable .rdt_TableRow {
   display: flex;
   font-size: 12px;
-  font-weight:700;
-   /* margin-left: 10px; */
+  font-weight: 700;
+  /* margin-left: 10px; */
   text-align: left;
   align-items: flex-start;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -387,73 +420,155 @@
   color: white;
   cursor: pointer;
 }
-.btn.btn-success{
-    font-size: 13px;
-    font-weight: bold;
-    height: 32px;   
+
+.btn.btn-success {
+  font-size: 13px;
+  font-weight: bold;
+  height: 32px;
 }
 
 
 
- /* *********************************************************************************************** */
+/* *********************************************************************************************** */
 
 @media (min-width: 1024px) and (max-width: 1439.98px) {
-    .ComCssTexfiled {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 19px;
-        width: 100%;
-        font-size:xx-small;
-    }
-    .ComCssUpload button {
+  .ComCssTexfiled {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 19px;
+    width: 100%;
+    font-size: xx-small;
+  }
+
+  .ComCssUpload button {
     height: 22px;
     font-size: x-small;
     font-weight: bold;
-    
-}
-/* .ComCssFiledName {
+
+  }
+
+  /* .ComCssFiledName {
     font-size: 15px;
 } */
-.ComCssTableName{
-        font-size: 15px;
+  .ComCssTableName {
+    font-size: 15px;
 
-}
-.ComCssExport{
-            font-size: 15px;
-}
+  }
 
-.ComCssInput {    
-    margin-left: 30px; 
-                   
-}
-.ComCssTable{
-        margin-left: 30px;                    
-}
-.btn.btn-success{
+  .ComCssExport {
+    font-size: 15px;
+  }
+
+  .ComCssInput {
+    margin-left: 30px;
+
+  }
+
+  .ComCssTable {
+    margin-left: 35px;
+  }
+
+  .btn.btn-success {
     font-size: 12px;
     font-weight: bold;
-    height: 27px;   
-}
+    height: 27px;
+  }
 }
 
 
-  /* Extra-large screens (TVs, 4K) */
-@media (min-width: 1024px) and (max-width: 1440px)  {
- .ComCssButton9 {
+/* Extra-large screens (TVs, 4K) */
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .ComCssButton9 {
     /* margin-top: -73px;                 */
     width: 100%;
-    font-size: 14px;
-}
-.ComCssFiledName {
-    font-size: 15px;
-    font-weight: 700;
-}
-.ComCssUpload{
-    margin-top: -30px;                /* Gap between button rows */
-   
+    font-size: 12px;
+  }
+.ComCssButton9 button {
+
+  height: 28px;
+  width: 65px;
+ 
 
 }
-   
+  .ComCssFiledName {  
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .ComCssUpload {
+    margin-top: -30px;
+    /* Gap between button rows */
+
+
+  }
+
+}
+
+@media (min-width: 2000px) {
+  .ComCssInput {
+    margin-left: 58px;
   }
 
   
+  .ComCssTable {
+    margin-left: 58px;
+  }
+
+  
+.ComCssInputHide7 {
+
+  margin-left: 58px;
+  
+}
+  
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .ComCssButton9 {
+    /* margin-top: -73px;                 */
+    width: 100%;
+    font-size: 10px;
+  }
+.ComCssButton9 button {
+
+  height: 25px;
+  width: 65px;
+ 
+}
+  .ComCssFiledName {  
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .ComCssUpload {
+    margin-top: -30px;
+    /* Gap between button rows */
+
+
+  }
+
+    .ComCssInput {
+    margin-left: 26px;
+  }
+
+  
+  .ComCssTable {
+    margin-left: 26px;
+  }
+
+  
+.ComCssInputHide7 {
+
+  margin-left: 26px;
+  
+}
+
+}
+
+@media (min-width: 510px) and (max-width: 718px) {
+
+    .ComCssInput {
+    margin-left: 5px;
+  }
+
+}

@@ -88,7 +88,7 @@ const Technology = () => {
         return isValid;
     };
 
-    console.log("formdata", formData)
+    // console.log("formdata", formData)
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -105,7 +105,7 @@ const Technology = () => {
 
         saveTechnology(updatedFormData)
             .then((response) => {
-                console.log("RESPONSE:", response);
+                // console.log("RESPONSE:", response);
                 if (response.status === 200 && response.data) {
                     const { message } = response.data;
                     setSuccessMessage(message || "Saved successfully");
@@ -123,7 +123,7 @@ const Technology = () => {
                 }
             })
             .catch((error) => {
-                console.log("ERROR:", error);
+                // console.log("ERROR:", error);
                 const errMsg = error?.response?.data?.message || "Network error, please try again";
                 setErrorMessage(errMsg);
                 setShowErrorPopup(true);
@@ -161,10 +161,10 @@ setErrorMessage("Partcode Already Added")
 setShowErrorPopup(true);
     return;
     }
-        console.log("Before adding, tableData:", tableData);
+        // console.log("Before adding, tableData:", tableData);
         setTableData(prev => {
             const newData = [...prev, { ...formData }];
-            console.log("After adding, new data:", newData);
+            // console.log("After adding, new data:", newData);
             return newData;
         });
         setIsFrozen(true);
@@ -184,12 +184,13 @@ setShowErrorPopup(true);
             setShowTable(true);
         }
     }, [tableData]);
-    console.log("showTable:", showTable);
-    console.log("tableData:", tableData);
+    // console.log("showTable:", showTable);
+    // console.log("tableData:", tableData);
     const clear = () => {
         setShowTable(false)
         setIsFrozen(false)
         setTableData([])
+        setFormErrors("");
         setFormData({
             sui: "",
             partcode: "",
@@ -222,8 +223,8 @@ setShowErrorPopup(true);
                 />
 
                 <div className="ReworkerButton9">
-                    <button style={{ backgroundColor: 'green' }} onClick={handleAddClick} >ADD</button>
-                    <button style={{ backgroundColor: 'blue' }} onClick={clear}>Clear</button>
+                    <button className='ComCssSubmitButton' onClick={handleAddClick} >ADD</button>
+                    <button className='ComCssClearButton' onClick={clear}>Clear</button>
                 </div>
 
             </div>

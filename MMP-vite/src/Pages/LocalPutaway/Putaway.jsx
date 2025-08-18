@@ -42,7 +42,7 @@ const LocalPutaway = () => {
       const [downloadDone, setDownloadDone] = useState(false);
       const [downloadProgress, setDownloadProgress] = useState(null);
     
-    console.log("ptldata", ptldata);
+    // console.log("ptldata", ptldata);
     const handlePoChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -101,7 +101,7 @@ const LocalPutaway = () => {
     }, [page, perPage, debouncedSearch]);
 
     const fetchPutawayDetailTable = (page = 1, size = 10, search = "") => {
-        console.log("searchfetch", search);
+        // console.log("searchfetch", search);
         if (search && search.trim() !== "") {
             fetchfindSearch(page, size, search);
         }
@@ -145,7 +145,7 @@ const LocalPutaway = () => {
                 console.error("Error fetching search data:", error);
             });
     };
-    console.log("putawayTable", putawayTableData)
+    // console.log("putawayTable", putawayTableData)
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -203,7 +203,7 @@ const LocalPutaway = () => {
                 }
             });
     }
-    console.log("formdata", formData)
+    // console.log("formdata", formData)
 
     useEffect(() => {
         if (formData.quantity) {
@@ -270,13 +270,13 @@ const LocalPutaway = () => {
 
                 />
                 <div className="ReworkerButton9">
-                    <button style={{ backgroundColor: 'blue' }} onClick={formClear} >Clear</button>
+                    <button className='ComCssClearButton' onClick={formClear} >Clear</button>
 
                     {submitButton &&
-                        <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                        <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
                     }
                     {formData.quantity &&
-                        <button style={{ backgroundColor: 'orange' }} onClick={handlePut}>Put</button>
+                        <button className='ComCssUpdateButton' onClick={handlePut}>Put</button>
                     }
 
 

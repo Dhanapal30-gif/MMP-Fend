@@ -40,7 +40,7 @@ const LocalndindividualReport = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
 
-    console.log("formData", formData);
+    // console.log("formData", formData);
     const handlePoChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -78,7 +78,7 @@ const LocalndindividualReport = () => {
     const debouncedSearch = useDebounce(searchText, 500); // delay in ms
     const userId = sessionStorage.getItem("userId");
 
-    console.log("userId", userId);
+    // console.log("userId", userId);
 
 
     const valiDate = () => {
@@ -109,7 +109,7 @@ const LocalndindividualReport = () => {
     }, [userId, page, perPage, debouncedSearch]);
 
     const fetchData = (userId, page = 1, size = 10, search = "") => {
-        console.log("searchfetch", search);
+        // console.log("searchfetch", search);
         if (search && search.trim() !== "") {
             fetchfindSearch(userId, page, size, search);
         }
@@ -248,8 +248,8 @@ const LocalndindividualReport = () => {
 
                 <div className="ReworkerButton9">
 
-                    <button style={{ backgroundColor: 'green' }} onClick={handleFilter}>Search</button>
-                    <button style={{ backgroundColor: 'green' }} onClick={Clear}>Clear</button>
+                    <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
+                    <button className='ComCssClearButton' onClick={Clear}>Clear</button>
 
                 </div>
             </div>

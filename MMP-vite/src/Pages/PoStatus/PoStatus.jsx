@@ -175,12 +175,13 @@ const PoStatus = () => {
 
  const formClear =()=>{
     setSelectedRows([]);
+
   }
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>PoStatus</p>
+                    <p>PO Status</p>
                 </div>
 
                 <PoTextFiled
