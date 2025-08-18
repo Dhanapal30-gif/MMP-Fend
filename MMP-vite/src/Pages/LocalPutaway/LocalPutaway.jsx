@@ -325,7 +325,6 @@ const LocalPutaway = () => {
                 />
 
             </div>
-
         </div>
     )
 }
