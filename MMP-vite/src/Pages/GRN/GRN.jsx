@@ -20,6 +20,7 @@ const GRN = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
+        const [selectedGrnRows, setSelectedGrnRows] = useState([]);
     const [data, setData] = useState([]);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
@@ -72,7 +73,7 @@ const GRN = () => {
             errors.grnDate = "Please Enter grnDate";
             isValid = false;
         }
-        selectedRows.forEach((id) => {
+        selectedGrnRows.forEach((id) => {
             const item = data.find((d) => d.selectedid === id);
             if (item && (item.GRNQty === undefined || item.GRNQty === "")) {
                 errors[`GRNQty_${item.selectedid}`] = "Enter GRN Qty";
@@ -166,13 +167,13 @@ const GRN = () => {
         const username = sessionStorage.getItem("userName") || "System";
 
         if (!isEditMode) {
-            if (selectedRows.length === 0) {
+            if (selectedGrnRows.length === 0) {
                 setErrorMessage("Please select at least one row");
                 setShowErrorPopup(true);
                 return;
             }
 
-            const selectedKeys = new Set(selectedRows);
+            const selectedKeys = new Set(selectedGrnRows);
             const filteredData = data.filter((row) => selectedKeys.has(row.selectedid));
 
             const submitData = filteredData.map((row) => ({
@@ -197,7 +198,7 @@ const GRN = () => {
                         setShowSuccessPopup,
                         afterSuccess: () => {
                             setFormData({});
-                            setSelectedRows([]);
+                            setSelectedGrnRows([]);
                             setIsEditMode(false);
                             fetchPendingGrn();
                             fetchFindData();
@@ -361,6 +362,8 @@ const GRN = () => {
     };
     return (
         <div className='ComCssContainer'>
+                    {/* <div className='body_Background'> */}
+
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
                     <p>GRN</p>
@@ -381,8 +384,8 @@ const GRN = () => {
                             loading={loading}
                             setPage={setPage}
                             setPerPage={setPerPage}
-                            selectedRows={selectedRows}
-                            setSelectedRows={setSelectedRows}
+                            selectedGrnRows={selectedGrnRows}
+                            setSelectedGrnRows={setSelectedGrnRows}
                             handleGRNQtyChange={handleGRNQtyChange}
                             formErrors={formErrors}
                             isEditMode={isEditMode}
@@ -532,6 +535,7 @@ const GRN = () => {
                 color="primary"
             />
         </div>
+        // </div>
     )
 }
 export default GRN

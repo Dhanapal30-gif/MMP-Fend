@@ -13,6 +13,8 @@ const GRNTable = ({
   setPage,
   setPerPage,
   selectedRows,
+  selectedGrnRows,
+  setSelectedGrnRows,
   setSelectedRows,
   onEdit,
   handleGRNQtyChange,
@@ -21,18 +23,18 @@ const GRNTable = ({
 }) => {
 
   // Function to handle select all rows
-const handleSelectAll=(e)=>{
+const handleGrnSelectAll=(e)=>{
   if(e.target.checked){
-    setSelectedRows(data.map((row)=>row.id));
+    setSelectedGrnRows(data.map((row)=>row.id));
   }
   else{
-    setSelectedRows([])
+    setSelectedGrnRows([])
   }
 };
 
 
-const handleSelect = (rowkey) => {
-  setSelectedRows((prevSelectedRows) => {
+const handleGrnSelect = (rowkey) => {
+  setSelectedGrnRows((prevSelectedRows) => {
     const isRowSelected = prevSelectedRows.includes(rowkey);
     const updatedRows = isRowSelected
       ? prevSelectedRows.filter((key) => key !== rowkey)
@@ -48,12 +50,12 @@ const handleSelect = (rowkey) => {
       "invoiceDate", "receivingDate", "recevingQty", "orderqty",
       "unitprice", "GRNQty","Comment"
     ],
-    
+     
     onEdit,
     showEdit: false,
-    selectedRows,
-    handleSelect,
-    handleSelectAll,
+    selectedRows:selectedGrnRows,
+    handleSelect:handleGrnSelect,
+    handleSelectAll:handleGrnSelectAll,
   data, 
     customConfig: {
       recevingTicketNo: { label: "Ticket No", width: "140px" },

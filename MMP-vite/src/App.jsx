@@ -33,6 +33,7 @@ import OpenReport from './Pages/OpenReport/OpenReport';
 import axios from "axios";
 import { url } from './app.config';
 import UserDetail from './Pages/UserList/UserDetail';
+import Requester from './Pages/Requester/Requester';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -71,7 +72,8 @@ function App() {
       { name: "Technology", path: "/technology" },
       { name: "Open Report", path: "/openReport" },
       { name: "Receiving", path: "/receving" },
-            { name: "UserDetail", path: "/userDetail" }
+            { name: "UserDetail", path: "/userDetail" },
+            { name: "Requester", path: "/requester" }
 
     ];
     try {
@@ -140,6 +142,7 @@ function App() {
           <Route path='/technology' element={<Technology />} />
           <Route path='/openReport' element={<OpenReport />} />
           <Route path='/userDetail' element={<UserDetail />} />
+          <Route path='/requester' element={<Requester />} />
 
           <Route
             path="/receving"
