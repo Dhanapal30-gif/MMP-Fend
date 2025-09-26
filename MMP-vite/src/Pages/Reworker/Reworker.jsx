@@ -238,9 +238,18 @@ const Reworker = () => {
                 // isFrozen={isFrozen}
 
                 />
-
+<ReworkerTextFiled7
+                    formData={formData}
+                    handleChange={handleChange}
+                    typeOptions={typeOptions}
+                    groupOptions={groupOptions}
+                    nameOptions={nameOptions}
+                    serialOptions={serialOptions}
+                    handlePoChange={handlePoChange}
+                    isFrozen={isFrozen}
+                />
             </div>
-            <div className='ComCssInputHide7'>
+            {/* <div className='ComCssInputHide7'>
                 <div className='ComCssFiledName'>
                     <h5>Reworker</h5>
                 </div>
@@ -254,7 +263,7 @@ const Reworker = () => {
                     handlePoChange={handlePoChange}
                     isFrozen={isFrozen}
                 />
-            </div>
+            </div> */}
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>ADD Board</h5>

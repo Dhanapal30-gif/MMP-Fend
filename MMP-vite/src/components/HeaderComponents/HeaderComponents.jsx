@@ -283,6 +283,7 @@ const handleLinkClick = () => {
                     {(userRole.includes("Admin") || isScreenAllowed("GRN")) && (<li><Link to="/grn" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>GRN</Link></li>)}
                     {(userRole.includes("Admin") || isScreenAllowed("PO Status")) && (<li><Link to="/poStatus" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>PoStatus</Link></li>)}
                     {(userRole.includes("Admin") || isScreenAllowed("Putaway")) && (<li><Link to="/putaway" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Putaway</Link></li>)}
+                    {(userRole.includes("Admin") || isScreenAllowed("requester")) && (<li><Link to="/requester" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Requester</Link></li>)}
 
                     {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
                   </ul>

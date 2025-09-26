@@ -1,3 +1,21 @@
+/* @font-face {
+  font-family: 'Roboto';
+  src: url('../font/roboto/Roboto-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../font/roboto/Roboto-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+} */
+
 .COMCssContainer {
   min-height: 100vh;
   /* Prevents shrinking but keeps it scrollable */
@@ -8,8 +26,14 @@
   justify-content: flex-start;
 }
 
+.body_Background {
+  margin-top:-20px ;
+  /* background-image: url('../../assets/3d-rendering-hexagonal-texture-background.jpg'); */
+  background-size: cover;
 
+}
 .ComCssInputHide {
+
   flex-direction: column;
   /* background-color: floralwhite; */
   border: 2px solid #edd9d9;
@@ -56,6 +80,25 @@
   background-color: rgb(26, 171, 33) !important;
 }
 
+
+.ComCssExportButton {
+  background-color: rgb(13, 151, 61) !important;
+}
+
+
+.ComCssPendingButton {
+  background-color: orange !important;
+}
+
+.ComCssPariallButton {
+  background-color: rgb(14, 120, 99) !important;
+}
+
+.ComCssAllButton {
+  background-color: rgb(16, 157, 9) !important;
+}
+
+
 .ComCssInput {
   flex-direction: column;
   /* background-color: floralwhite; */
@@ -70,7 +113,7 @@
   justify-content: space-between;
   /* Space evenly */
   gap: 30px;
-  background-color: white;
+  background-color: rgb(9, 146, 156);
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   position: relative;
   overflow: hidden;
@@ -89,10 +132,14 @@
   left: 2px;
   right: 2px;
   bottom: 2px;
-  background: conic-gradient(from 0deg,
+  /* background: conic-gradient(from 0deg,
       #4bd52c,
       #d7c247,
-      #cd3eb1);
+      #cd3eb1); */
+       background: conic-gradient(from 0deg,
+      #21ad0f,
+      #d7c247,
+      #dd1ed6);
   border-radius: 10px;
   z-index: -1;
   animation: spin 4s linear infinite;
@@ -203,7 +250,7 @@
 
 .ComCssButton9 button:active {
   /* transform: scale(0.98);     */
-  transform: scale(1.30);
+  transform: scale(1.10);
 
 }
 
@@ -360,7 +407,9 @@
 .react-datatable .rdt_TableHeadRow {
   /* background: linear-gradient(to right, #701964, #179999); */
   /* background: linear-gradient(to right, #214b6f, #06c585); */
-  background: linear-gradient(to right, #900441);
+    background: linear-gradient(to right, #11828d, #0b7e57);
+
+  /* background: linear-gradient(to right, #900441); */
 
   color: white;
   font-weight: bold;
@@ -428,6 +477,65 @@
 }
 
 
+
+.ComCssButtonMenu {
+  display: flex;
+  justify-content: flex-start;
+  /* Align buttons to the right */
+  gap: 15px;
+  /* Space between buttons */
+  margin-top: -10px;
+  /* Gap between button rows */
+  width: 100%;
+  font-size: 14px;
+  margin-left: 30px;
+}
+
+.ComCssButtonMenu button {
+  color: white;
+  background-color: #20c9c6;
+  height: 30px;
+  width: 70px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-top: 10px;
+
+}
+
+
+.ComCssButtonMenu button:hover {
+  background-color: #0d9a95;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ComCssButtonMenu button:active {
+  /* transform: scale(0.98);     */
+  transform: scale(1.30);
+
+}
+
+/* CSS */
+/* CSS */
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; }
+  25%, 75% { opacity: 0.3; box-shadow: 0 0 20px currentColor; }
+}
+
+.blinking {
+  width: 50px;
+  height: 50px;
+  border-radius: 90%;
+  display: inline-block;
+  margin-right: 10px;
+  animation: blink 1s infinite;
+}
 
 /* *********************************************************************************************** */
 

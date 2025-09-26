@@ -477,7 +477,7 @@ console.log("editFormData",editFormData)
               <div className="form-field" style={{ width: '100%' }}>
                 <FormLabel component="legend">Request Type</FormLabel>
                 <FormGroup row>
-                  {["Submodule", "others"].map((reqType) => (
+                  {["Submodule", "others","ThermalGel"].map((reqType) => (
                     <FormControlLabel
                       key={reqType}
                       control={

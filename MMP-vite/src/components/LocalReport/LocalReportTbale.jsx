@@ -72,6 +72,8 @@ const LocalReportTbale = ({
           enddate: formatDateArray(item.enddate),
         }));
       }, [data]);
+
+      
         const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
       
   return (

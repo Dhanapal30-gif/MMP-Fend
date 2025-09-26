@@ -10,30 +10,30 @@ export const generateColumns = ({
   customCellRenderers = {},
 }) => {
   const totalColumns = fields.length + (selectedRows && handleSelect ? 1 : 0);
-  const equalWidth = `${100 / totalColumns}%`; // dynamic equal width in %
+  const equalWidth = `${100 / totalColumns}%`;
 
- const dynamicColumns = fields.map((field) => ({
-  name: (
-    <div style={{ whiteSpace: 'nowrap', overflow: 'visible' }}>
-      {customConfig[field]?.label || field}
-    </div>
-  ),
-  selector: row => row[field],
-  cell: customCellRenderers[field]
-    ? (row, index) => customCellRenderers[field](row, index)
-    : row => row[field],
-  wrap: false, // prevent header wrapping
-  minWidth: '130px', // optional, prevents extremely small columns
-}));
-
+  const dynamicColumns = fields.map((field) => ({
+    name: (
+      <div style={{ whiteSpace: "nowrap", overflow: "visible" }}>
+        {customConfig[field]?.label || field}
+      </div>
+    ),
+    selector: (row) => row[field],
+    cell: customCellRenderers[field]
+      ? (row, index) => customCellRenderers[field](row, index)
+      : (row) => row[field],
+    wrap: false,
+    minWidth: "130px",
+  }));
 
   const baseColumns = [];
 
   if (selectedRows && handleSelect) {
     baseColumns.push({
       name: (
-        <div style={{ paddingLeft: '15px' }}>
-          <span>Select</span><br />
+        <div style={{ paddingLeft: "15px" }}>
+          <span>Select</span>
+          <br />
           <input
             type="checkbox"
             checked={selectedRows.length === data.length && data.length > 0}
@@ -42,7 +42,7 @@ export const generateColumns = ({
         </div>
       ),
       cell: (row) => (
-        <div style={{ paddingLeft: '15px' }}>
+        <div style={{ paddingLeft: "15px" }}>
           <input
             type="checkbox"
             checked={selectedRows.includes(row.id)}
@@ -50,7 +50,7 @@ export const generateColumns = ({
           />
         </div>
       ),
-      width: equalWidth, // same width for checkbox column
+      // width: equalWidth,
     });
   }
 
