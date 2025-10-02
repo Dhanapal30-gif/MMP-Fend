@@ -414,8 +414,34 @@ console.log("editFormData",editFormData)
               </ThemeProvider>
 
             </div>
+{userRoleData.length > 0 && (
+  <div className="form-field" style={{ width: '100%' }}>
+    <FormLabel component="legend">User Role</FormLabel>
+    <FormGroup row>
+      {userRoleData.map((role) => (
+        <FormControlLabel
+          key={role}
+          control={
+            <Checkbox
+              checked={formData.userRole.includes(role)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                const updatedRoles = checked
+                  ? [...formData.userRole, role]
+                  : formData.userRole.filter((r) => r !== role);
+                setFormData({ ...formData, userRole: updatedRoles });
+              }}
+            />
+          }
+          label={role}
+        />
+      ))}
+    </FormGroup>
+    {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
+  </div>
+)}
 
-            <div className="form-field" style={{ width: '100%' }}>
+            {/* <div className="form-field" style={{ width: '100%' }}>
               <FormLabel component="legend">User Role</FormLabel>
               <FormGroup row>
                 {userRoleData.map((role) => (
@@ -438,7 +464,7 @@ console.log("editFormData",editFormData)
                 ))}
               </FormGroup>
               {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
-            </div>
+            </div> */}
 
             {formData.userRole.includes("Requester") && (
               <div className="form-field" style={{ width: '100%' }}>

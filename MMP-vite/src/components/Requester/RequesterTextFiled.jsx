@@ -31,17 +31,15 @@ const RequesterTextFiled = ({
     const uniqueProducts = Array.from(
         new Map((productandPartcode || []).map(item => [item.productname, item])).values()
     );
-
     const availbleqty = compatibilityData?.[0]?.Availbleqty ?? "0";
 
-
     const compatability = (compatibilityData || [])
-    .filter(item => item.compatabilityPartcode) // remove undefined
-    .map(item => ({
-        compatibilityPartCode: item.compatabilityPartcode,
-        compatibilityAvailableQty: item.compatabilityQty
-    }));
-console.log("compatabilitylength", compatability.length);
+        .filter(item => item.compatabilityPartcode) // remove undefined
+        .map(item => ({
+            compatibilityPartCode: item.compatabilityPartcode,
+            compatibilityAvailableQty: item.compatabilityQty
+        }));
+    console.log("compatabilitylength", compatability.length);
 
     console.log("compatability", compatability);
     // const filteredPartCodes = Array.from(
@@ -70,12 +68,10 @@ console.log("compatabilitylength", compatability.length);
             }));
     }, [formData.productName, productandPartcode]);
 
-    
+
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
-
-
                 {/* <Autocomplete
                     options={requesterForOption}
                     getOptionLabel={(option) => option.label}
@@ -106,34 +102,34 @@ console.log("compatabilitylength", compatability.length);
                 />
 
                 {formData.requestFor?.value !== "Material Request" ? (
-    <Autocomplete
-    options={orderTypeOption}
-    readOnly={isFrozen}
-    value={
-        formData.orderType
-            ? { label: formData.orderType, value: formData.orderType }
-            : null
-    }
-    getOptionLabel={(option) => option.label}
-    onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
-    renderInput={(params) => (
-        <TextField {...params}
-            error={Boolean(formErrors?.orderType)}
-            helperText={formErrors?.orderType || ""}
-            label="Order Type" variant="outlined" size="small" />
-    )}
-/>
+                    <Autocomplete
+                        options={orderTypeOption}
+                        readOnly={isFrozen}
+                        value={
+                            formData.orderType
+                                ? { label: formData.orderType, value: formData.orderType }
+                                : null
+                        }
+                        getOptionLabel={(option) => option.label}
+                        onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
+                        renderInput={(params) => (
+                            <TextField {...params}
+                                error={Boolean(formErrors?.orderType)}
+                                helperText={formErrors?.orderType || ""}
+                                label="Order Type" variant="outlined" size="small" />
+                        )}
+                    />
 
-) : (
-    <TextField
-        label="Order Type"
-        value="Repair"
-        variant="outlined"
-        size="small"
-        disabled
-        fullWidth
-    />
-)}
+                ) : (
+                    <TextField
+                        label="Order Type"
+                        value="Repair"
+                        variant="outlined"
+                        size="small"
+                        disabled
+                        fullWidth
+                    />
+                )}
 
                 <Autocomplete
                     options={userId.toLowerCase() === "admin" ? requestTypeOption : requestType} // ternary
@@ -179,9 +175,7 @@ console.log("compatabilitylength", compatability.length);
                     )}
                 />
 
-
                 {/* 
-
     {isFrozen ? (
   <TextField
     label="Product Name"
@@ -214,8 +208,6 @@ console.log("compatabilitylength", compatability.length);
     )}
   />
 )}
-
-
 */}
 
                 <TextField
@@ -307,7 +299,7 @@ console.log("compatabilitylength", compatability.length);
                     onChange={(e) => handleChange("availableQty", e.target.value)}
                 />
 
-                {compatability.length >0 && (
+                {compatability.length > 0 && (
                     <Autocomplete
                         options={compatability}
                         value={compatability.find(

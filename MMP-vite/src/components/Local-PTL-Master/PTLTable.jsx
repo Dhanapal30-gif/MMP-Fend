@@ -80,14 +80,15 @@ const PTLTable = ({
     },
     customCellRenderers: {
       select: (row) => (
-        <div style={{ paddingLeft: '15px' }}>
-          {/* <input
-            type="checkbox"
-            checked={Array.isArray(selectedRows) && selectedRows.some(r => r.partcode === row.partcode)}
-            onChange={() => handleSelect(row)}
-          /> */}
-        </div>
-      ),
+  <div style={{ paddingLeft: '15px' }}>
+    <input
+      type="checkbox"
+      checked={Array.isArray(selectedRows) && selectedRows.some(r => r.partcode === row.partcode)}
+      onChange={() => handleSelect(row)}
+    />
+  </div>
+),
+
       edit: (row) => (
         <button className="edit-button" onClick={() => onEdit(row)}>
           <FaEdit />

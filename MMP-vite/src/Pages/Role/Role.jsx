@@ -58,7 +58,7 @@ const Role = () => {
     let isValid = true;
 
     // Validate main role
-    if (!formData.userrole) {
+    if (!formData7.asignUserrole) {
         errors.userrole = "Please Enter userrole";
         isValid = false;
     }
@@ -80,10 +80,22 @@ const Role = () => {
     return isValid;
 };
 
+ const creationvaliDate = () => {
+    const errors = {};
+    let isValid = true;
+
+    if(!formData.userrole ){
+        errors.userrole = "Please Enter userrole";
+        isValid = false;
+    }
+    setFormErrors(errors);
+    return isValid;
+};
+
+
 
     const handleCreate = async () => {
-        if (!valiDate()) return;
-
+        if (!creationvaliDate()) return;
         const createdby = sessionStorage.getItem("userName") || "System";
         console.log(formData)
         const updatedFormData = { ...formData, createdby };
@@ -94,9 +106,10 @@ const Role = () => {
             setShowSuccessPopup(true);
             setFormData({
                 userrole: "",
-
             });
 
+        setAddRole(false);
+        fetchUserRoleData();
             // Refresh table
             // fetchProduct(1, perPage); // reset to first page
             // setPage(1);
@@ -182,6 +195,9 @@ const Role = () => {
             userrole: "",
             screenNameSelect: ""
         })
+        setFormData({
+            userrole: "",
+        })
     }
     const handleSubmit = async () => {
             if (!valiDate()) return; // ✅ validate first
@@ -197,11 +213,18 @@ const Role = () => {
 
         try {
             const response = await saveScreenAsign(updatedFormData);
-            setSuccessMessage("Product Updated Successfully");
+            setSuccessMessage(response.data.message );
             setShowSuccessPopup(true);
+await fetchRoleAndScreen();
+
             setFormData({
                 userrole: "",
             });
+            setFormData7({
+            userrole: "",
+            screenNameSelect: ""
+        })
+
         } catch (error) {
             if (error.response) {
                 const message =
@@ -246,20 +269,28 @@ const Role = () => {
     };
 
     const columns = React.useMemo(
-        () =>
-            generateColumns({
-                fields,
-                customConfig,
-                customCellRenderers: {
-                    edit: (row) => (
-                        <button className="edit-button" onClick={() => handleEditClick(row)}>
-                            <FaEdit />
-                        </button>
-                    ),
-                },
-            }),
-        [fields, customConfig, handleEditClick]
-    );
+  () =>
+    generateColumns({
+      fields,
+      customConfig,
+      customCellRenderers: {
+        edit: (row) => (
+          <button className="edit-button" onClick={() => handleEditClick(row)}>
+            <FaEdit />
+          </button>
+        ),
+        screenNameSelect: (row) => (
+          <div>
+            {row.screenNameSelect?.map((screen, i) => (
+              <div key={i}>{screen}</div>
+            ))}
+          </div>
+        ),
+      },
+    }),
+  [fields, customConfig, handleEditClick]
+);
+
 
     const handleUpdate = () => {
         //    if (!valiDate()) return;
@@ -292,6 +323,8 @@ const Role = () => {
                 setLoading(false);
             });
     }
+
+    
     return (
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
@@ -382,7 +415,7 @@ const Role = () => {
                 </div>
             </div>
             <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>Report Detail</h5>
+                <h5 className='ComCssTableName'>Roles & Screens</h5>
                 {/* <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                                 <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
                                     {loading
@@ -410,6 +443,7 @@ const Role = () => {
                                     )}
                                 </div>
                             </div> */}
+                            
                 <CommonDataTable
                     columns={columns}
                     data={roleAndScreen}

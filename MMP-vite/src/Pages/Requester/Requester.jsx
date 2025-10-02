@@ -4,11 +4,11 @@ import RequesterAddTable from "../../components/Requester/RequesterAddTable";
 import RequesterDefaultTable from "../../components/Requester/RequesterDefaultTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import {fetchRequesterDetail,fetchRequesterSearch  } from "../../components/Requester/RequesterActions.js";
+import { fetchRequesterDetail, fetchRequesterSearch } from "../../components/Requester/RequesterActions.js";
 
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { saveGRN } from '../../Services/Services_09.js';
-import { checkAvailable, downloadRequester,  fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType,  saveRequester } from '../../Services/Services-Rc.js';
+import { checkAvailable, downloadRequester, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, saveRequester } from '../../Services/Services-Rc.js';
 import { ContactSupportOutlined } from '@mui/icons-material';
 
 const Requester = () => {
@@ -45,10 +45,10 @@ const Requester = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [downloadDone, setDownloadDone] = useState(false);
-    const [requesterDeatil, setRequesterDetail]=useState([]);
-    const [page, setPage] = useState(0);
-    const [perPage, setPerPage] = useState(20);
-        const [totalRows, setTotalRows] = useState(0);
+    const [requesterDeatil, setRequesterDetail] = useState([]);
+    const [page, setPage] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
     const [downloadProgress, setDownloadProgress] = useState(null);
 
@@ -65,7 +65,7 @@ const Requester = () => {
 
     const availbleqty = compatibilityData?.[0]?.Availbleqty ?? "0";
     const compAvailbleQty = compatibilityData?.[0]?.compatabilityQty ?? "0";
-    console.log("availbleqtrtyy", availbleqty)
+    // console.log("availbleqtrtyy", availbleqty)
 
     const handleChange = (field, value) => {
         setFormData((prev) => {
@@ -107,7 +107,7 @@ const Requester = () => {
             }
 
 
-            console.log("field, value", field, value)
+            // console.log("field, value", field, value)
             return { ...prev, [field]: value };
         });
     };
@@ -119,39 +119,39 @@ const Requester = () => {
             compatibilityAvailableQty: item.compatabilityQty
         }));
 
-    console.log("compatabilitylengthRequester", compatability.length);
+    // console.log("compatabilitylengthRequester", compatability.length);
 
     const valiDate = () => {
         const errors = {};
         let isValid = true;
 
         if (!formData.requestFor) {
-            errors.requestFor = "Please Select requestFor";
+            errors.requestFor = " Select requestFor";
             isValid = false;
         }
         if (!formData.orderType) {
-            errors.orderType = "Please Select orderType";
+            errors.orderType = " Select orderType";
             isValid = false;
         }
         if (!formData.requesterType) {
-            errors.requesterType = "Please Select requesterType";
+            errors.requesterType = " Select requesterType";
             isValid = false;
         }
         if (!formData.productName) {
-            errors.productName = "Please Select productName";
+            errors.productName = " Select productName";
             isValid = false;
         }
 
         if (!formData.partCode) {
-            errors.partCode = "Please Select partCode";
+            errors.partCode = " Select partCode";
             isValid = false;
         }
         if (!formData.partCode?.partdescription) {
-            errors.partDescription = "Please Select partDescription";
+            errors.partDescription = " Select partDescription";
             isValid = false;
         }
         if (!formData.requestQty) {
-            errors.requestQty = "Please Select requestQty";
+            errors.requestQty = " Select requestQty";
             isValid = false;
         }
         //         if (formData.partCode) {
@@ -169,26 +169,22 @@ const Requester = () => {
         // }
 
         if (!formData.requestercomments) {
-            errors.requestercomments = "Please Select requestercomments";
+            errors.requestercomments = " Select requestercomments";
             isValid = false;
         }
         if (compatability.length >= 1 && !formData.compatibilityPartCode) {
-            errors.compatibilityPartCode = "Please Select compatibilityPartCode";
+            errors.compatibilityPartCode = " Select compatibilityPartCode";
             isValid = false;
         }
         if (formData.requesterType === "Submodule" && !formData.faultySerialNumber) {
-            errors.faultySerialNumber = "Please Select faultySerialNumber";
+            errors.faultySerialNumber = " Select faultySerialNumber";
             isValid = false;
         }
         if (formData.requesterType === "Submodule" && !formData.faultyUnitModuleSerialNo) {
-            errors.faultyUnitModuleSerialNo = "Please Select faultyUnitModuleSerialNo";
+            errors.faultyUnitModuleSerialNo = "Select faultyUnitModuleSerialNo";
             isValid = false;
         }
-        // if (!formData.Quantity) {
-        //     errors.Quantity = "Please Enter Quantity";
-        //     isValid = false;
-        // }
-
+        
         setFormErrors(errors);
         return isValid;
     };
@@ -210,7 +206,7 @@ const Requester = () => {
         }
 
     }, [userId, formData?.orderType])
-    console.log("formData.partCode", formData.availableQty);
+    // console.log("formData.partCode", formData.availableQty);
     useEffect(() => {
         if (formData?.partCode) {
             const partCodeValue = typeof formData.partCode === "object" ? formData.partCode.partcode : formData.partCode;
@@ -298,7 +294,7 @@ const Requester = () => {
         try {
             setLoading(true);
             const response = await checkAvailable(partcodeQtyMap);
-            console.log("Availability response:", response.data);
+            // console.log("Availability response:", response.data);
             if (response.data?.success === false && response.data.insufficientParts?.length > 0) {
                 // Extract all failing partCodes
                 const partCodes = response.data.insufficientParts
@@ -348,7 +344,7 @@ const Requester = () => {
             RecevingTicketNo: "",
             requestFor: formData.requestFor,
             requesterType: formData.requesterType,
-            orderType: formData.orderType.value,
+            orderType: formData.orderType,
             productName: prev.productName,
             productGroup: prev.productGroup || prev.productName?.productgroup || "",
             productFamily: prev.productFamily || prev.productName?.productfamily || "",
@@ -367,7 +363,7 @@ const Requester = () => {
     }
     const formClear = () => {
         setFormData(prev => {
-            console.log("isFrozen in formClear:", isFrozen);
+            // console.log("isFrozen in formClear:", isFrozen);
             if (isFrozen == true) {
                 // preserve frozen fields like productName and productGroup
                 return {
@@ -432,10 +428,10 @@ const Requester = () => {
             }
         });
 
-        console.log("check:", check);
+        // console.log("check:", check);
 
         const availability = await checkAvilability(partcodeQtyMap);
-        console.log("availability result:", availability);
+        // console.log("availability result:", availability);
         const userName = sessionStorage.getItem("userName") || "System";
 
         if (availability === true) {
@@ -448,14 +444,20 @@ const Requester = () => {
 
             saveRequester(updatedFormData)
                 .then((response) => {
-                    // console.log("RESPONSE:", response);
                     if (response.status === 200 && response.data) {
                         const { message } = response.data;
                         setSuccessMessage(message || "Saved successfully");
                         setShowSuccessPopup(true);
                         setTableData([]);
                         setShowTable(false);
+
                         setIsFrozen(false);
+                        fetchRequester()
+                        // formClear();
+                        setFormData({
+                                    requestFor: null, 
+                        })
+                        // console.log("formdata after submit", formData)
                         // if (typeof handleClear === "function") handleClear();
                     } else {
                         setErrorMessage(response.data?.message || "Unknown error");
@@ -473,38 +475,39 @@ const Requester = () => {
         }
     };
 
- const fetchRequester = () => {
-            const userId = sessionStorage.getItem("userName") || "System";
+    const fetchRequester = () => {
+        const userId = sessionStorage.getItem("userName") || "System";
+fetchRequesterDetail(page -1, perPage, userId, setRequesterDetail, setTotalRows);
 
-        fetchRequesterDetail(page, perPage,userId, setRequesterDetail, setTotalRows);
+        // fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
         // setHiddenButton("closed");
     }
 
-     const fetchfindSearch = (page, size, search) => {
+    const fetchfindSearch = (page, size, search) => {
         // console.log("searchfetch", search);
-            // setLoading(true)
-                        const userId = sessionStorage.getItem("userName") || "System";
-fetchRequesterSearch(page, userId, perPage, setRequesterDetail, search, setTotalRows);
+        // setLoading(true)
+        const userId = sessionStorage.getItem("userName") || "System";
+        fetchRequesterSearch(page, userId, perPage, setRequesterDetail, search, setTotalRows);
 
-        };
+    };
 
-        const useDebounce = (value, delay) => {
-                const [debouncedValue, setDebouncedValue] = useState(value);
-                useEffect(() => {
-                    const handler = setTimeout(() => setDebouncedValue(value), delay);
-                    return () => clearTimeout(handler);
-                }, [value, delay]);
-                return debouncedValue;
-            };
-        
-   const debouncedSearch = useDebounce(searchText, 500);
-   
-         useEffect(() => {
-                fetchData(page, perPage, debouncedSearch);
-            }, [page, perPage, debouncedSearch]);
-        
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
 
- const fetchData = (page = 1, size = 10, search = "") => {
+    const debouncedSearch = useDebounce(searchText, 500);
+
+    useEffect(() => {
+        fetchData(page, perPage, debouncedSearch);
+    }, [page, perPage, debouncedSearch]);
+
+
+    const fetchData = (page = 0, size = 10, search = "") => {
         // console.log("searchfetch", search);
         if (search && search.trim() !== "") {
             fetchfindSearch(page, size, search);
@@ -516,46 +519,46 @@ fetchRequesterSearch(page, userId, perPage, setRequesterDetail, search, setTotal
             fetchRequester(page, size)
         }
     };
-const exportToExcel = (search = "") => {
-                const userId = sessionStorage.getItem("userName") || "System";
+    const exportToExcel = (search = "") => {
+        const userId = sessionStorage.getItem("userName") || "System";
 
-    setDownloadDone(false);
-    setDownloadProgress(null);
-    setLoading(true);
+        setDownloadDone(false);
+        setDownloadProgress(null);
+        setLoading(true);
 
-    let apiCall;
+        let apiCall;
 
-    if (search?.trim() !== "") {
-               apiCall = () => downloadRequester(userId,search);
-           }
- else {
-            apiCall = () => downloadRequester(userId,search);
+        if (search?.trim() !== "") {
+            apiCall = () => downloadRequester(userId, search);
+        }
+        else {
+            apiCall = () => downloadRequester(userId, search);
         }
 
-    // Call apiCall without arguments, since it’s already a function returning a Promise
-    apiCall()
-        .then(response => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", "LocalReport.xlsx");
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            setDownloadDone(true);
-        })
-        .catch((error) => {
-            console.error("Download failed:", error);
-        })
-        .finally(() => {
-            setLoading(false);
-            setTimeout(() => setDownloadDone(false), 5000);
-        });
-};
+        // Call apiCall without arguments, since it’s already a function returning a Promise
+        apiCall()
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "LocalReport.xlsx");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setDownloadDone(true);
+            })
+            .catch((error) => {
+                console.error("Download failed:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+                setTimeout(() => setDownloadDone(false), 5000);
+            });
+    };
 
-    
 
-    console.log("search", searchText)
+
+    // console.log("search", searchText)
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -647,7 +650,7 @@ const exportToExcel = (search = "") => {
                     setPage={setPage}
                     setPerPage={setPerPage}
 
-                 />
+                />
             </div>
             <CustomDialog
                 open={showSuccessPopup}

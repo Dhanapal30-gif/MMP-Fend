@@ -34,6 +34,8 @@ import axios from "axios";
 import { url } from './app.config';
 import UserDetail from './Pages/UserList/UserDetail';
 import Requester from './Pages/Requester/Requester';
+import Approver from './Pages/Approver/Approver';
+import Issuance from './Pages/Issuance/Issuance';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -72,8 +74,11 @@ function App() {
       { name: "Technology", path: "/technology" },
       { name: "Open Report", path: "/openReport" },
       { name: "Receiving", path: "/receving" },
-            { name: "UserDetail", path: "/userDetail" },
-            { name: "Requester", path: "/requester" }
+      { name: "UserDetail", path: "/userDetail" },
+      { name: "Requester", path: "/requester" },
+      { name: "Approver", path: "/approver" },
+      { name: "Issuance", path: "/issuance" }
+
 
     ];
     try {
@@ -118,10 +123,10 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/createAccount" element={<CreateAccount />} />
           <Route path="/home" element={<HomeComponenet />} />
-         
-            <Route path="/product" element={<ProductFamilyMaster />} />
-              
-           <Route path="/rcMainStore" element={<RcMainStore />} />
+
+          <Route path="/product" element={<ProductFamilyMaster />} />
+
+          <Route path="/rcMainStore" element={<RcMainStore />} />
           <Route path="/veendorMaster" element={<VeendorMaster />} />
           <Route path='/bomMaster' element={<BomMaster />} />
           <Route path='/curencyMaster' element={<CurencyMaster />} />
@@ -143,6 +148,8 @@ function App() {
           <Route path='/openReport' element={<OpenReport />} />
           <Route path='/userDetail' element={<UserDetail />} />
           <Route path='/requester' element={<Requester />} />
+          <Route path='/approver' element={<Approver />} />
+          <Route path='/issuance' element={<Issuance />} />
 
           <Route
             path="/receving"

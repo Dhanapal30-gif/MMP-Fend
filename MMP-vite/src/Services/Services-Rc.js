@@ -60,7 +60,7 @@ export const saveRequester = (formData) => axios.post(requester, formData);
 
 const fetchRequestTicketDetail = `${url}/RequesterCon/fetchRequesterDetail`;
 
-export const fetchRequestDetail = (page = 0,  userId,size = 10) => {
+export const fetchRequestDetail = (page ,  userId,size ) => {
   return axios.get(fetchRequestTicketDetail, {
     params: { page, size, userId }, // ✅ Pass userId as query param
   });
@@ -81,3 +81,45 @@ export const downloadRequester = (userId,search) =>
     params: { userId,search },
     responseType: "blob",
   });
+
+
+  const fetchApproverTicketList = `${url}/ApproverConController/fetchRequesterApproverTicketList`
+export const fetchApproverTicket = (userId) => {
+  return axios.get(fetchApproverTicketList, {
+    params: { userId }   // ✅ pass userId as query param
+  });
+};
+
+
+ const FetchApproverDetail = `${url}/ApproverConController/fetchRequesterApproverTicketDetail`
+export const fetchApproverTicketDetails = (rec_ticket_no) => {
+  return axios.get(FetchApproverDetail, {
+    params: { rec_ticket_no }   // ✅ pass userId as query param
+  });
+};
+
+const saveApproverTicket = `${url}/ApproverConController/saveApproverTicket`
+export const saveApproverTickets = (payload) => axios.put(saveApproverTicket, payload);
+
+
+  const fetchRequestTicket = `${url}/IssuacneCon/fetchRequestedList`
+export const fetchIssueTicketList = (category) => {
+  return axios.get(fetchRequestTicket, {
+    params: { category }   // ✅ pass userId as query param
+  });
+};
+
+
+ const fetchpickDetail = `${url}/IssuacneCon/fetchpickTicketList`
+export const fetchpickTicketDetails = (rec_ticket_no) => {
+  return axios.get(fetchpickDetail, {
+    params: { rec_ticket_no }   // ✅ pass userId as query param
+  });
+};
+
+const saveIssueBatchcode = `${url}/IssuacneCon/saveIssueQty`
+export const saveIssueBatchcodeQty = (payload) => axios.post(saveIssueBatchcode, payload);
+
+
+const saveDeliverStataus = `${url}/IssuacneCon/saveDeliverStataus`
+export const saveDeliver = (submitData) => axios.post(saveDeliverStataus, submitData);
