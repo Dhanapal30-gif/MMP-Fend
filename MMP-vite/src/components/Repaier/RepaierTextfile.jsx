@@ -4,7 +4,7 @@ import ComTextFiled from '../Com_Component/ComTextFiled'; // adjust path if need
 import TextFiledTheme from '../Com_Component/TextFiledTheme'; // adjust path if needed
 import { Autocomplete, TextField } from "@mui/material";
 
-const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
+const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
     const RepaierType = [
         { label: "SUI", value: "SUI" },
         { label: "Rework", value: "Rework" },
@@ -45,13 +45,15 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
                             // productFamily: newValue?.productfamily || ""
                         }));
                         setExtraFields({
-    productGroup: newValue?.productgroup || "",
-    productFamily: newValue?.productfamily || ""
-  });
+                            productGroup: newValue?.productgroup || "",
+                            productFamily: newValue?.productfamily || ""
+                        });
                     }}
                     renderInput={(params) => (
                         <TextField {...params} label="Product Name"
                             variant="outlined" size="small"
+                            error={Boolean(formErrors?.productname)}
+                    helperText={formErrors?.productname || ""}
                         />
                     )}
                 />
@@ -60,7 +62,6 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
                     label="Product Group"
                     name="productGroup"
                     InputLabelProps={{ shrink: true }}
-
                     value={extraFields.productGroup}
                     InputProps={{ readOnly: true }}
 
@@ -68,7 +69,6 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
 
                 <ComTextFiled
                     InputLabelProps={{ shrink: true }}
-
                     label="Product Family"
                     name="productFamily"
                     value={extraFields.productFamily}
@@ -106,7 +106,11 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
                     disabled={isFrozen}
                     renderInput={(params) => (
 
-                        <TextField {...params} label="Type" variant="outlined" size="small" />
+                        <TextField {...params} label="Type"
+                         error={Boolean(formErrors?.type)}
+                    helperText={formErrors?.type || ""}
+                     variant="outlined" size="small" />
+
                     )}
                 />
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") && (
@@ -143,8 +147,8 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
                             name="partdescription"
                             value={formData.partdescription}
                             onChange={handleChange}
-                            error={Boolean(formErrors?.partdescription)}
-                            helperText={formErrors?.partdescription || ""}
+                            // error={Boolean(formErrors?.partdescription)}
+                            // helperText={formErrors?.partdescription || ""}
                         />
 
                         <ComTextFiled
@@ -190,18 +194,18 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
                 {formData.type === "SUI" && (
                     <>
                         <ComTextFiled
-    label="SUI No"
-    name="SUINo"
-    value={extraFields.SUINo}
-    onChange={(e) =>
-        setExtraFields(prev => ({
-            ...prev,
-            SUINo: e.target.value
-        }))
-    }
-    error={Boolean(formErrors?.SUINo)}
-    helperText={formErrors?.SUINo || ""}
-/>
+                            label="SUI No"
+                            name="SUINo"
+                            value={extraFields.SUINo}
+                            onChange={(e) =>
+                                setExtraFields(prev => ({
+                                    ...prev,
+                                    SUINo: e.target.value
+                                }))
+                            }
+                            // error={formErrors?.SUINo}
+                            // helperText={formErrors?.SUINo || ""}
+                        />
 
                     </>
                 )}
@@ -212,8 +216,8 @@ const RepaierTextfile = ({ formData,extraFields, setExtraFields,setFormData, isF
                             name="tgquantity"
                             value={formData.tgquantity}
                             onChange={handleChange}
-                            error={Boolean(formErrors?.tgquantity)}
-                            helperText={formErrors?.Partcode || ""}
+                            error={formErrors?.tgquantity}
+                            helperText={formErrors?.tgquantity || ""}
                         />
                     </>
                 )}

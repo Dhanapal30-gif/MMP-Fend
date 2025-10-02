@@ -22,11 +22,11 @@ const HeaderComponents = () => {
   const [userRole, setUserRole] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for toggling the mobile menu
-  
+
   const [servicesDropdown, setServicesDropdown] = useState(false);
   const navigate = useNavigate();
 
-    const [openIcon, setOpenIcon] = useState(false);
+  const [openIcon, setOpenIcon] = useState(false);
 
 
   useEffect(() => {
@@ -40,11 +40,11 @@ const HeaderComponents = () => {
     setUserRole(role);
     setIsLoggedIn(loginStatus);
   }, []);
-const handleLinkClick = () => {
-  setIsMenuOpen(false);
-  setOpenIcon(false);
-  setServicesDropdown(false);
-};
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+    setOpenIcon(false);
+    setServicesDropdown(false);
+  };
 
   const handleSignOut = () => {
     sessionStorage.clear();
@@ -100,12 +100,19 @@ const handleLinkClick = () => {
 
   // console.log("allowedScreens", sessionStorage.getItem("allowedScreens"))
 
-  const isScreenAllowed = (screenName) => {
-    const allowedScreens = JSON.parse(sessionStorage.getItem("allowedScreens") || "[]");
-    return allowedScreens.includes(screenName);
-  };
+const isScreenAllowed = (screenName) => {
+  const allowedScreens = JSON.parse(sessionStorage.getItem("allowedScreens") || "[]");
+  // console.log("Allowed Screens from sessionStorage:", allowedScreens);
+  // console.log("Checking screenName:", screenName);
+
+  const result = allowedScreens.includes(screenName);
+  // console.log("isScreenAllowed Result:", result);
+
+  return result;
+};
 
   // console.log("userRole", userRole)
+  //   console.log("isScreenAllowed", isScreenAllowed("userDetail"))
 
 
   return (
@@ -210,119 +217,121 @@ const handleLinkClick = () => {
           <div className="hamburger-menu" onClick={() => setOpenIcon(!openIcon)}>
             {isMenuOpen ? <FaTimes /> : <FaBars />} {/* Show hamburger icon or close icon */}
           </div>
-             
+
 
           <nav className={`navgation ${isMenuOpen ? "open" : ""}`}>
-               <nav className={`navigation ${openIcon ? "show" : ""}`}>
-            <ul className="nav-links">
-              <li className="dropdown-container" >
-                {/* <ul><Link to="/home">Home</Link></ul> */}
-                <span className="nav-link">
-                  <AiFillHome className="nav-icon" /> Home
-                </span>
-              </li>
-              <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+            <nav className={`navigation ${openIcon ? "show" : ""}`}>
+              <ul className="nav-links">
+                <li className="dropdown-container" >
+                  {/* <ul><Link to="/home">Home</Link></ul> */}
+                  <span className="nav-link">
+                    <AiFillHome className="nav-icon" /> Home
+                  </span>
+                </li>
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
-                <span className="nav-link">
-                  <IoSettingsSharp className="nav-icon" /> Settings <FaChevronDown className="dropdown-icon" />
-                </span>
-                {servicesDropdown && (
-                  <ul className="dropdown-menu">
-                    {/* <li><Link to="/userList" className="dropdown-item" onClick={closeServicesDropdown}>userList</Link></li> */}
-                    {(userRole.includes("Admin") || isScreenAllowed("userDetail")) && <li><Link to="/userDetail" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}  >User Detail</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("Role")) && <li><Link to="/role" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Role Master</Link></li>}
-                  </ul>
-                )}
-              </li>
+                  <span className="nav-link">
+                    <IoSettingsSharp className="nav-icon" /> Settings <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {/* <li><Link to="/userList" className="dropdown-item" onClick={closeServicesDropdown}>userList</Link></li> */}
+                      {(userRole.includes("Admin") || isScreenAllowed("userDetail")) && <li><Link to="/userDetail" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}  >User Detail</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("Role")) && <li><Link to="/role" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Role Master</Link></li>}
+                    </ul>
+                  )}
+                </li>
 
-              <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
-                <span className="nav-link">
-                  <GiCube className="nav-icon" /> Masters <FaChevronDown className="dropdown-icon" />
-                </span>
-                {servicesDropdown && (
-                  <ul className="dropdown-menu">
-                    {(userRole.includes("Admin") || isScreenAllowed("Product Family Master")) && <li><Link to="/product" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Product family master</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("BOM Master")) && <li><Link to="/bomMaster" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Bom Master</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("RC Main Store")) && <li><Link to="/rcMainStore" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>RC main store</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("Vendor Master")) && <li><Link to="/veendorMaster" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>VendorMaster</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("Currency Master")) && <li><Link to="/curencyMaster" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>curencyMaster</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("Product Family Master")) && <li><Link to="/compatabilityMaster" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>compatabilityMaster</Link></li>}
-                    {(userRole.includes("Admin") || isScreenAllowed("Approval Master")) && <li><Link to="/approvalMaster" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Approval Master</Link></li>}
-                  </ul>
-                )}
-              </li>
+                  <span className="nav-link">
+                    <GiCube className="nav-icon" /> Masters <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {(userRole.includes("Admin") || isScreenAllowed("Product Family Master")) && <li><Link to="/product" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Product family master</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("BOM Master")) && <li><Link to="/bomMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Bom Master</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("RC Main Store")) && <li><Link to="/rcMainStore" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>RC main store</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("Vendor Master")) && <li><Link to="/veendorMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>VendorMaster</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("Currency Master")) && <li><Link to="/curencyMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>curencyMaster</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("Product Family Master")) && <li><Link to="/compatabilityMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>compatabilityMaster</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("Approval Master")) && <li><Link to="/approvalMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approval Master</Link></li>}
+                    </ul>
+                  )}
+                </li>
 
-              <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
-                <span className="nav-link">
-                  <FaStore className="nav-icon" /> Local PTL Store <FaChevronDown className="dropdown-icon" />
-                </span>
-                {servicesDropdown && (
-                  <ul className="dropdown-menu">
-                    {(userRole.includes("Admin") || isScreenAllowed("PTL Master")) && (<li><Link to="/PTLMaster" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>PTL Master</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Repair")) && (<li><Link to="/repaier" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Repaier</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Reworker")) && (<li><Link to="/reworker" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Reworker</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("PTL Operator")) && (<li><Link to="/PTLOpreator" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>PTLOpreator</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Local Putaway")) && (<li><Link to="/localPutaway" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Putaway</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Technology")) && (<li><Link to="/technology" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Technology</Link></li>)}
+                  <span className="nav-link">
+                    <FaStore className="nav-icon" /> Local PTL Store <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {(userRole.includes("Admin") || isScreenAllowed("PTL Master")) && (<li><Link to="/PTLMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTL Master</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Repair")) && (<li><Link to="/repaier" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Repaier</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Reworker")) && (<li><Link to="/reworker" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Reworker</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("PTL Operator")) && (<li><Link to="/PTLOpreator" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTLOpreator</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Local Putaway")) && (<li><Link to="/localPutaway" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Putaway</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Technology")) && (<li><Link to="/technology" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Technology</Link></li>)}
 
-                  </ul>
-                )}
-              </li>
+                    </ul>
+                  )}
+                </li>
 
-              <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
-                <span className="nav-link">
-                  <FaWarehouse className="nav-icon" /> Rc Main Store <FaChevronDown className="dropdown-icon" />
-                </span>
-                {servicesDropdown && (
-                  <ul className="dropdown-menu">
-                    {(userRole.includes("Admin") || isScreenAllowed("Add PO Detail")) && (<li><Link to="/add_Po_Detail" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Add Po Detail</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Receiving")) && (<li><Link to="/receving" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Receving</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("GRN")) && (<li><Link to="/grn" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>GRN</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("PO Status")) && (<li><Link to="/poStatus" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>PoStatus</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Putaway")) && (<li><Link to="/putaway" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Putaway</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("requester")) && (<li><Link to="/requester" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Requester</Link></li>)}
+                  <span className="nav-link">
+                    <FaWarehouse className="nav-icon" /> Rc Main Store <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {(userRole.includes("Admin") || isScreenAllowed("Add PO Detail")) && (<li><Link to="/add_Po_Detail" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Add Po Detail</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Receiving")) && (<li><Link to="/receving" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Receving</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("GRN")) && (<li><Link to="/grn" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>GRN</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("PO Status")) && (<li><Link to="/poStatus" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PoStatus</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Putaway")) && (<li><Link to="/putaway" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Putaway</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Requester")) && (<li><Link to="/requester" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Requester</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Approver")) && (<li><Link to="/approver" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approver</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Issuance")) && (<li><Link to="/issuance" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance</Link></li>)}
 
-                    {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
-                  </ul>
-                )}
-              </li>
+                      {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
+                    </ul>
+                  )}
+                </li>
 
-              {/* Dashboard Dropdown */}
-              <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+                {/* Dashboard Dropdown */}
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
-                <span className="nav-link">
-                  <FaChartPie className="nav-icon" /> Dashboard <FaChevronDown className="dropdown-icon" />
-                </span>
-                {servicesDropdown && (
-                  <ul className="dropdown-menu">
-                    {/* <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
+                  <span className="nav-link">
+                    <FaChartPie className="nav-icon" /> Dashboard <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {/* <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
                     <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li> */}
 
-                  </ul>
-                )}
-              </li>
+                    </ul>
+                  )}
+                </li>
 
-              {/* Report Dropdown */}
-              <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+                {/* Report Dropdown */}
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
-                <span className="nav-link">
-                  <FaFileAlt className="nav-icon" /> Report <FaChevronDown className="dropdown-icon" />
-                </span>
-                {servicesDropdown && (
-                  <ul className="dropdown-menu">
-                    {(userRole.includes("Admin") || isScreenAllowed("Local & Individual Report")) && (
-                      <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>localnd individual Report</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>local Report</Link></li>)}
-                    {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => {closeServicesDropdown();handleLinkClick();}}>Open Report</Link></li>)}
+                  <span className="nav-link">
+                    <FaFileAlt className="nav-icon" /> Report <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {(userRole.includes("Admin") || isScreenAllowed("Local & Individual Report")) && (
+                        <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>localnd individual Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>local Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
 
-                  </ul>
-                )}
-              </li>
-            </ul>
-          </nav>
+                    </ul>
+                  )}
+                </li>
+              </ul>
+            </nav>
           </nav>
         </div>
 

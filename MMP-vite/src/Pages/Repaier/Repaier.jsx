@@ -26,11 +26,11 @@ const Repaier = () => {
         tgquantity: "",
         repairername: ""
     });
-const [extraFields, setExtraFields] = useState({
-  productGroup: "",
-  productFamily: "",
-  SUINo:""
-});
+    const [extraFields, setExtraFields] = useState({
+        productGroup: "",
+        productFamily: "",
+        SUINo: ""
+    });
     const [formErrors, setFormErrors] = useState({});
     const [table1Data, setTable1Data] = useState([]);
     const [table2Data, setTable2Data] = useState([]);
@@ -76,99 +76,127 @@ const [extraFields, setExtraFields] = useState({
         setFormData(newData);
     };
     const valiDate = () => {
-        const errors = {};
-        let isValid = true;
+  const errors = {};
+  let isValid = true;
 
-        if (!formData.type) {
-            errors.type = "Please Select Type";
-            isValid = false;
-        }
+  if (!formData.type) {
+      errors.type = "Please Select Type";
+      isValid = false;
+  }
 
-        if (!formData.partcode) {
-            errors.partcode = "Please Enter Partcode";
-            isValid = false;
-        }
+  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
+      if (!formData.partcode) {
+          errors.partcode = "Please Enter Partcode";
+          isValid = false;
+      }
+  }
 
-        if (!formData.productname) {
-            errors.productname = "Please Enter Product Name";
-            isValid = false;
-        }
+  if (!formData.productname) {
+      errors.productname = "Please Enter Product Name";
+      isValid = false;
+  }
 
-        if (!formData.boardserialnumber?.trim()) {
-            errors.boardserialnumber = "Enter Module Serial Number";
-            isValid = false;
-        } else if (formData.boardserialnumber.length !== 11) {
-            errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
-            isValid = false;
-        }
+  if (!formData.type) {
+      errors.type = "Please Enter type Name";   // 🔴 overrides previous type error
+      isValid = false;
+  }
 
-        if (!formData.pickingqty) {
-            errors.pickingqty = "Please Enter Picking Qty";
-            isValid = false;
-        }
-        if (!formData.pickingqty) {
-            errors.pickingqty = "Please Enter Picking Qty";
-            isValid = false;
-        }
+  if (!formData.boardserialnumber?.trim()) {
+      errors.boardserialnumber = "Enter Module Serial Number";
+      isValid = false;
+  } else if (formData.boardserialnumber.length !== 11) {
+      errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+      isValid = false;
+  }
 
-        if (
-            ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
-            !formData.repairercomments
-        ) {
-            errors.repairercomments = "Please enter Comments";
-            isValid = false;
-        }
+  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
+      if (!formData.pickingqty) {
+          errors.pickingqty = "Please Enter Picking Qty";
+          isValid = false;
+      }
+  }
 
-        if (
-            ["SUINo"].includes(formData.type) &&
-            !formData.SUINo
-        ) {
-            errors.SUINo = "Please Enter SUINo";
-            isValid = false;
-        }
+  if (
+      ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
+      !formData.repairercomments
+  ) {
+      errors.repairercomments = "Please enter Comments";
+      isValid = false;
+  }
+
+  setFormErrors(errors);
+  return isValid;
+};
+
+const addValiDate = () => {
+  const errors = {};
+  let isValid = true;
+
+  if (!formData.type) {
+      errors.type = "Please Select Type";
+      isValid = false;
+  }
+
+  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
+      if (!formData.partcode) {
+          errors.partcode = "Please Enter Partcode";
+          isValid = false;
+      }
+  }
+
+  if (!formData.productname) {
+      errors.productname = "Please Enter Product Name";
+      isValid = false;
+  }
 
 
-        if (
-            ["Quantity"].includes(formData.type) &&
-            !formData.Quantity
-        ) {
-            errors.Quantity = "Please Enter Quantity";
-            isValid = false;
-        }
 
-        // if (!formData.Quantity) {
-        //     errors.Quantity = "Please Enter Quantity";
-        //     isValid = false;
-        // }
+  if (!formData.boardserialnumber?.trim()) {
+      errors.boardserialnumber = "Enter Module Serial Number";
+      isValid = false;
+  } else if (formData.boardserialnumber.length !== 11) {
+      errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+      isValid = false;
+  }
 
-        setFormErrors(errors);
-        return isValid;
-    };
+  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
+      if (!formData.pickingqty) {
+          errors.pickingqty = "Please Enter Picking Qty";
+          isValid = false;
+      }
+  }
 
-const handleSubmit = (e) => {
+  if (
+      ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
+      !formData.repairercomments
+  ) {
+      errors.repairercomments = "Please enter Comments";
+      isValid = false;
+  }
+
+  setFormErrors(errors);
+  return isValid;
+};
+   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // if (!showTable) {
-    //     if (!valiDate());
-    //      return;
-    // }
-
     const userName = sessionStorage.getItem("userName") || "System";
-
-    let updatedFormData = {};
+    let updatedFormData;
 
     if (showTable) {
-        if (!valiDate()) return;
-        updatedFormData = tableData.map((row) => ({
-            ...row,
-            createdby: userName,
-            modifiedby: userName,
-            repairername: userName
-        }));
+        updatedFormData = tableData.map((row) => {
+            const { productfamily, productgroup,SUINo,Quantity, ...rest } = row; // remove both
+            return {
+                ...rest,
+                createdby: userName,
+                modifiedby: userName,
+                repairername: userName
+            };
+        });
     } else {
-        // if (!valiDate()) return;
+            const { productfamily, productgroup,SUINo,Quantity, ...rest } = row; // remove both
+        
         updatedFormData = {
-            ...formData,
+            ...rest,
             createdby: userName,
             modifiedby: userName,
             repairername: userName
@@ -176,30 +204,30 @@ const handleSubmit = (e) => {
     }
 
     savePTLRepaier(updatedFormData)
-        .then((response) => {
-            // console.log("RESPONSE:", response);
-            if (response.status === 200 && response.data) {
-                const { message } = response.data;
-                setSuccessMessage(message || "Saved successfully");
-                setShowSuccessPopup(true);
-                setTableData([]);
-                setShowTable(false);
-                setIsFrozen(false);
-                if (typeof handleClear === "function") handleClear();
-            } else {
-                setErrorMessage(response.data?.message || "Unknown error");
+            .then((response) => {
+                // console.log("RESPONSE:", response);
+                if (response.status === 200 && response.data) {
+                    const { message } = response.data;
+                    setSuccessMessage(message || "Saved successfully");
+                    setShowSuccessPopup(true);
+                    setTableData([]);
+                    setShowTable(false);
+                    setIsFrozen(false);
+                    if (typeof handleClear === "function") handleClear();
+                } else {
+                    setErrorMessage(response.data?.message || "Unknown error");
+                    setShowErrorPopup(true);
+                    setTableData([]);
+                    setShowTable(false);
+                }
+            })
+            .catch((error) => {
+                // console.log("ERROR:", error);
+                const errMsg = error?.response?.data?.message || "Network error, please try again";
+                setErrorMessage(errMsg);
                 setShowErrorPopup(true);
-                setTableData([]);
-                setShowTable(false);
-            }
-        })
-        .catch((error) => {
-            // console.log("ERROR:", error);
-            const errMsg = error?.response?.data?.message || "Network error, please try again";
-            setErrorMessage(errMsg);
-            setShowErrorPopup(true);
-        });
-};
+            });
+    };
 
 
     useEffect(() => {
@@ -238,13 +266,13 @@ const handleSubmit = (e) => {
     }));
 
     const handleAddClick = () => {
-        if (!valiDate()) return;
+        // if (!valiDate()) return;
         if (tableData.some(item => item.partcode === formData.partcode)) {
             setErrorMessage("Partcode Already Added")
             setShowErrorPopup(true);
             return;
         }
-        if (!valiDate()) return;
+        if (!addValiDate()) return;
 
         setTableData(prev => [...prev, formData]);
         setIsFrozen(true);

@@ -487,12 +487,16 @@ const RcMainStore = () => {
 
   ];
 
-  const handlePerRowsChange = useCallback((newPerPage, newPage) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-  }, []);
+ const handlePageChange = useCallback((newPage) => {
+  setPage(newPage);
+  fetchMainMaster(newPage, perPage); // call API for new page
+}, [perPage]);
 
-  const handlePageChange = useCallback((newPage) => setPage(page), []);
+const handlePerRowsChange = useCallback((newPerPage, page) => {
+  setPerPage(newPerPage);
+  setPage(page);
+  fetchMainMaster(page, newPerPage); // call API for new perPage
+}, []);
 
   const excelUpload = (e) => {
     e.preventDefault();
@@ -1073,12 +1077,66 @@ const RcMainStore = () => {
               // selectAllRowsItem: true,
               // selectAllRowsItemText: 'All',
             }}
+            customStyles={{
+              headRow: {
+                style: {
+                  background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  textAlign: "center",
+                  minHeight: "50px",
+                },
+              },
+              rows: {
+                style: {
+                  fontSize: "14px",
+                  textAlign: "center",
+                  alignItems: "center", // Centers content vertically
+                  fontFamily: "Arial, Helvetica, sans-serif",
+                },
+              },
+              cells: {
+                style: {
+                  padding: "5px",  // Removed invalid negative padding
+                  //textAlign: "center",
+                  justifyContent: "center",  // Centers header text
+                  whiteSpace: 'pre-wrap', // wrap text
+                  wordBreak: 'break-word', // allow breaking words
+                },
+              },
+              headCells: {
+                style: {
+                  display: "flex",
+                  justifyContent: "center",  // Centers header text
+                  alignItems: "left",
+                  textAlign: "left",
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                },
+              },
+              pagination: {
+                style: {
+                  border: "1px solid #ddd",
+                  backgroundColor: "#f9f9f9",
+                  color: "#333",
+                  minHeight: "35px",
+                  padding: "5px",
+                  fontSize: "12px",
+                  fontWeight: "bolder",
+                  display: "flex",
+                  justifyContent: "flex-end", // Corrected
+                  alignItems: "center", // Corrected
+                },
+              },
+            }}
             fixedHeader
             fixedHeaderScrollHeight="400px"
             highlightOnHover
             className="react-datatable"
             // conditionalRowStyles={rowHighlightStyle}
           />
+          
         )}
 
         {showUploadTable && !showRcTable && (

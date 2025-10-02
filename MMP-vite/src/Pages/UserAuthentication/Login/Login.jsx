@@ -4,6 +4,8 @@ import { TextField, Button, colors } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { LoginUser } from "../../../Services/Services";
 import { fetchScreens } from "../../../Services/Services_09";
+import { ThemeProvider } from '@mui/material/styles';
+import TextFiledTheme from '../../../components/Com_Component/TextFiledTheme';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -96,8 +98,62 @@ const allowedScreens = screensRes.data
 };
 
 
+{/* 
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
+    try {
+        const response = await LoginUser(formData);
+        const data = response.data; // directly use response.data
 
+        if (!data || !data.empId) { // check if empId exists instead of success
+            alert("Login failed");
+            return;
+        }
+
+        // Store user details
+        sessionStorage.setItem("userId", data.empId);
+        sessionStorage.setItem("userName", data.empName);
+        sessionStorage.setItem("userRole", JSON.stringify(data.userrole));
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userName", data.empName);
+
+        // Fetch screens based on user role
+        const roleStr = sessionStorage.getItem("userRole");
+        const role = roleStr ? JSON.parse(roleStr) : [];
+        if (role.length) {
+            const screensRes = await fetchScreens(role); // backend API returns screens per role
+
+            const allowedScreens = screensRes.data
+                .map(item => item.split(",")) // splits first string
+                .flat()
+                .map(s => s.trim());
+
+            // Store screens dynamically in sessionStorage
+            sessionStorage.setItem("allowedScreens", JSON.stringify(allowedScreens));
+            setScreen(allowedScreens); // update mounted component state
+            console.log("allowedScreens:", allowedScreens);
+        }
+
+        // Navigate to home AFTER fetching screens
+        navigate("/home");
+    } catch (error) {
+        if (error.response) {
+            console.error("Server responded with error:", error.response.data);
+            alert(error.response.data.message || "Login failed (server error)");
+        } else if (error.request) {
+            console.error("No response received:", error.request);
+            alert("No response from server. Check your network.");
+        } else {
+            console.error("Error in request setup:", error.message);
+            alert("Login error: " + error.message);
+        }
+    }
+
+    setFormData({ userId: "", password: "" });
+};
+*/}
 // Fetch role screens
 const fetchUserRoleData = async (userRole) => {
     if (!userRole) return;
@@ -124,8 +180,10 @@ const fetchUserRoleData = async (userRole) => {
             <div className="loginForm-container">
                 <h5 style={{ color: "white", fontSize: "17px", fontStyle: 'italic' }}>Welcome Mat Man Pro</h5>
                 {/* <div className="cretaeimgae"></div> */}
-               <p style={{color:"white"}}>ORKA</p>
+               <p style={{color:"white"}}>NOKIA</p>
                 <form onSubmit={handleSubmit}>
+                                {/* <ThemeProvider theme={TextFiledTheme}> */}
+                    
                     <TextField
                         label="User ID"
                         variant="outlined"
@@ -186,6 +244,7 @@ const fetchUserRoleData = async (userRole) => {
                     >
                         Sign In
                     </Button>
+                    {/* </ThemeProvider> */}
                 </form>
                 <Link
                     to="/createAccount"

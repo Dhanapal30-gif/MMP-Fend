@@ -547,27 +547,25 @@ const ProductFamilyMaster = () => {
         fetchProduct();
         setShowProductTable(true);
       })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.status === 409) {
-            const errorMessage = error.response.data?.error;
-            setErrorMessage("errorMessage", errorMessage);
-            setShowErrorPopup(true);
-            const duplicateName = errorMessage?.split(": ")[1];
-            const duplicateMail = errorMessage?.split(": ")[1];
-            setDuplicateProducts([duplicateName]);
-            setShowUploadTable(true);
-            setShowProductTable(false);
-          }
-          else {
-            setErrorMessage("Something went wrong");
-            setShowErrorPopup(true);
-          }
-        } else {
-          setErrorMessage("Network error, please try again");
-          setShowErrorPopup(true);
-        }
-      });
+        .catch((error) => {
+    // Extract error message from response
+    const message = error.response?.data?.error || "Something went wrong";
+
+    setErrorMessage(message); // Correctly set error message
+    setShowErrorPopup(true);
+
+    // Extract duplicate product name if present
+    const duplicateName = message.includes(":") ? message.split(": ")[1] : null;
+
+    if (duplicateName) {
+      setDuplicateProducts([duplicateName]);
+    } else {
+      setDuplicateProducts([]);
+    }
+
+    setShowUploadTable(true);
+    setShowProductTable(false);
+  });
     setShowProductTable(true);
   };
   const rowHighlightStyle = [
@@ -726,7 +724,7 @@ const ProductFamilyMaster = () => {
           <h5 className='ComCssTableName'>Product Detail</h5>
         )}
         {showUploadTable && !showProductTable && (
-          <h5 className='ComCssTableName'>Upload product deatil</h5>
+          <h5 className='ComCssTableName'>Upload product Detail</h5>
         )}
         <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
           <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >

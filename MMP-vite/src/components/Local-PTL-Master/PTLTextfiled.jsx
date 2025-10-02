@@ -12,8 +12,8 @@ const PTLTextfiled = ({ formData, handleChange, formErrors }) => {
           name="partcode"
           value={formData.partcode}
           onChange={handleChange}
-          error={Boolean(formErrors?.Partcode)}
-          helperText={formErrors?.Partcode || ""}
+          error={Boolean(formErrors?.partcode)}
+          helperText={formErrors?.partcode || ""}
         />
         <ComTextFiled
           label="PartDescription"
@@ -55,7 +55,8 @@ const PTLTextfiled = ({ formData, handleChange, formErrors }) => {
           name="quantity"
           value={formData.quantity}
           onChange={handleChange}
-         
+         error={Boolean(formErrors?.quantity)}
+          helperText={formErrors?.quantity || ""}
         />
         <ComTextFiled
           label="Unit Price"

@@ -49,6 +49,10 @@ const PTLMaster = () => {
             errors.partcode = "Please Enter Partcode";
             isValid = false;
         }
+        if (!formData.quantity) {
+            errors.quantity = "Please Enter quantity";
+            isValid = false;
+        }
 
         setFormErrors(errors);
         return isValid;
@@ -64,7 +68,9 @@ const PTLMaster = () => {
         const submitData = {
             ...formData,
             createdby,
-            updatedby
+            updatedby,
+             quantity: formData.quantity || null,
+  TRQty: formData.TRQty || null,
         };
 
         savePTLStore(submitData)
