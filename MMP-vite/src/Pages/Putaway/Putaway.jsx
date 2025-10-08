@@ -3,17 +3,20 @@ import PutawayTextFiled from "../../components/Putaway/PutawayTextFiled";
 import PutawayDefaultTable from "../../components/Putaway/PutawayDefaultTable";
 import './Putaway.css';
 import PutawayProcessTable from "../../components/Putaway/PutawayProcessTable";
+import PutawayRetProcessTable from "../../components/Putaway/PutawayRetProcessTable";
+
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 
-import { fetchPutawayTicket, fetchPutawayDetail, fetchPutawayPendingDetail, fetchPutawayPartiallyDetail, PutawayProcessDetail } from '../../components/Putaway/PutawayActions.js';
+import { fetchPutawayTicket, fetchPutawayDetail, fetchPutawayPendingDetail, fetchPutawayPartiallyDetail, fetchPutawayAllDetail, PutawayProcessDetail, PutawayReturningProcessDetail, fetchPutawayAllDetailSearch } from '../../components/Putaway/PutawayActions.js';
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { saveGRN } from '../../Services/Services_09.js';
-import { saveLEDRequest, savePutawayRequest } from '../../Services/Services-Rc.js';
+import { fetchTransferTicket, fetchTransferTicketDetail, saveLEDRequest, savePutawayRequest, savePutawayRetRequest } from '../../Services/Services-Rc.js';
 
 const Putaway = () => {
     const [formData, setFormData] = useState({
-        RecevingTicketNo: ""
+        RecevingTicketNo: "",
+        ReturningTicket: ""
     });
     const [formPutPrecssData, setFormPutPrecssData] = useState({
         RecevingTicketNo: ""
@@ -30,7 +33,8 @@ const Putaway = () => {
     const [putawayPartiallyDetail, setPutawayPartiallyDetail] = useState([]);
     const [hiddenButton, setHiddenButton] = useState("");
     const [hiddenPutButton, setHiddenPutButton] = useState(false);
-
+    const [recevingPutProcess, setRecevingPutProcess] = useState(false);
+    const [returningPutProcess, setReturningPutProcess] = useState(false);
     const [putawayProcessDetail, setPutawayProcessDetail] = useState([])
     const menuRef = useRef(null);
     const [selectedRows1, setSelectedRows1] = useState([]);
@@ -40,11 +44,14 @@ const Putaway = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [isPutProcess, setIsPutProcess] = useState(false)
-       const [isUserActive, setIsUserActive] = useState(false)
-
+    const [isUserActive, setIsUserActive] = useState(false)
+    const [pageClose, setPageClose] = useState(1);
+    const [perPageClose, setPerPageClose] = useState(10);
     const [colourCode, setColourCode] = useState("")
     const [selectedSubmitRows, setSelectedSubmitRows] = useState([]);
-
+    const [transferTicketNoList, setTransferTicketNoList] = useState([])
+    const [transferTicketNoDetail,setTransferTicketNoDetail]=useState([])
+    const [showTable,setShowTable]=useState(false)
     const handleGRNQtyChange = (rowId, field, value) => {
         setPutawayProcessDetail((prev) =>
             prev.map((item) =>
@@ -68,15 +75,44 @@ const Putaway = () => {
         }
     };
 
+    // const handleChange = (name, value) => {
+    //     setFormData({ ...formData, [name]: value });
+    // };
     const handleChange = (name, value) => {
-        setFormData({ ...formData, [name]: value });
+        if (name === "RecevingTicketNo") {
+            setFormData({
+                ...formData,
+                RecevingTicketNo: value || null,
+                ReturningTicket: null,
+                transferType: null
+            });
+        } else if (name === "ReturningTicket") {
+            setFormData({
+                ...formData,
+                ReturningTicket: value || null,
+                RecevingTicketNo: null,
+                transferType: null
+            });
+        } else if (name === "transferType") {
+            setFormData({
+                ...formData,
+                transferType: value || null,
+                RecevingTicketNo: null,
+                ReturningTicket: null,
+            });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+
+        setShowTable(false);
     };
+
 
     useEffect(() => {
         fetchPutawayTicket(setPutawayTicket);
         // fetchPutawayDetail(page, perPage, setPutawayDetail, setTotalRows);
     }, []);
-
+    console.log("putawayTicket", putawayTicket.ReturningTicket_No)
     useEffect(() => {
         // fetchPutawayTicket(setPutawayTicket);
         fetchPutawayDetail(page, perPage, setPutawayDetail, setTotalRows);
@@ -92,12 +128,79 @@ const Putaway = () => {
         setHiddenButton("partial");
     }
 
+    const fetchPutawayAll = (page = 1, perPage = 10, search = "") => {
+        if (search && search.trim() !== "") {
+            fetchPutawayAllDetailSearch(page, perPage, search, setPutawayDetail, setTotalRows);
+            setHiddenButton("All");
+        } else {
+            fetchPutawayAllDetail(page, perPage, setPutawayDetail, setTotalRows);
+
+        }
+
+
+    };
+
+
     const fetchPutaway = () => {
         fetchPutawayDetail(page, perPage, setPutawayDetail, setTotalRows);
         setHiddenButton("closed");
     }
+
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
+
+    const debouncedSearch = useDebounce(searchText, 500); // delay in ms
+
+    useEffect(() => {
+
+        fetchPutawayAll(pageClose, perPageClose, debouncedSearch);
+
+    }, [pageClose, perPageClose, debouncedSearch]);
+
     // const fetchPutawayProcessDetail = (formData) => {
     //     return PutawayProcessDetail(formData, setPutawayProcessDetail, setTotalRows);
+    // };
+
+    // const fetchPutawayProcessDetail = (formData) => {
+    //     return PutawayProcessDetail(formData, (data) => {
+    //         const withIds = data.map((item, index) => ({
+    //             ...item,
+    //             selectedid: item.selectedid ?? item.id ?? index,
+    //             setHiddenPutButton: !!item.user, // hide button if user exists
+    //         }));
+    //     setIsPutProcess(true);
+
+    //         // 🔹 Derive color based on user (like LED logic)
+    //         const users = withIds
+    //             .map(item => item.user)
+    //             .filter(u => u != null);
+    //         const uniqueUsers = [...new Set(users)];
+
+    //         // Example mapping: user 1 → green, 2 → blue, etc.
+    //         let colour = null;
+    //         if (uniqueUsers.length) {
+    //             switch (uniqueUsers[0]) {
+    //                 case 1: colour = "green"; break;
+    //                 case 2: colour = "blue"; break;
+    //                 case 3: colour = "red"; break;
+    //                 case 4: colour = "yellow"; break;
+    //                 default: colour = "green";
+    //             }
+    //                     setIsUserActive(true);
+
+    //         }
+
+    //         setColourCode(colour);
+
+    //         setPutawayProcessDetail(withIds);
+    //         setTotalRows(withIds.length);
+    //     });
     // };
 
     const fetchPutawayProcessDetail = (formData) => {
@@ -107,17 +210,19 @@ const Putaway = () => {
                 selectedid: item.selectedid ?? item.id ?? index,
                 setHiddenPutButton: !!item.user, // hide button if user exists
             }));
-        setIsPutProcess(true);
+
+            setIsPutProcess(true);
 
             // 🔹 Derive color based on user (like LED logic)
             const users = withIds
                 .map(item => item.user)
-                .filter(u => u != null);
+                .filter(u => u !== null && u !== undefined);
+
             const uniqueUsers = [...new Set(users)];
 
-            // Example mapping: user 1 → green, 2 → blue, etc.
-            let colour = null;
-            if (uniqueUsers.length) {
+            let colour = null; // ✅ restore variable
+
+            if (uniqueUsers.length > 0) {
                 switch (uniqueUsers[0]) {
                     case 1: colour = "green"; break;
                     case 2: colour = "blue"; break;
@@ -125,28 +230,117 @@ const Putaway = () => {
                     case 4: colour = "yellow"; break;
                     default: colour = "green";
                 }
-                        setIsUserActive(true);
-
+                setIsUserActive(true);
+            } else {
+                setIsUserActive(false); // 👈 ensure inactive when null
             }
 
             setColourCode(colour);
-
             setPutawayProcessDetail(withIds);
             setTotalRows(withIds.length);
         });
     };
 
+    //Returning Process
+    console.log("formdata", formData)
+    const fetchReturningProcessDetail = (formData) => {
+        return PutawayReturningProcessDetail(formData, (data) => {
+            const withIds = data.map((item, index) => ({
+                ...item,
+                selectedid: item.selectedid ?? item.id ?? index,
+                setHiddenPutButton: !!item.user, // hide button if user exists
+            }));
 
+            setIsPutProcess(true);
 
+            // 🔹 Derive color based on user (like LED logic)
+            const users = withIds
+                .map(item => item.user)
+                .filter(u => u !== null && u !== undefined);
+
+            const uniqueUsers = [...new Set(users)];
+
+            let colour = null; // ✅ restore variable
+
+            if (uniqueUsers.length > 0) {
+                switch (uniqueUsers[0]) {
+                    case 1: colour = "green"; break;
+                    case 2: colour = "blue"; break;
+                    case 3: colour = "red"; break;
+                    case 4: colour = "yellow"; break;
+                    default: colour = "green";
+                }
+                setIsUserActive(true);
+            } else {
+                setIsUserActive(false); // 👈 ensure inactive when null
+            }
+
+            setColourCode(colour);
+            setPutawayProcessDetail(withIds);
+            setTotalRows(withIds.length);
+        });
+    };
+
+    const fetchStockTransferTicketNo = async (formData) => {
+        try {
+            const response = await fetchTransferTicket(formData);
+            const list = Array.isArray(response?.data) ? response.data : [];
+            setTransferTicketNoList(list);
+            console.log("Fetched list:", list); console.log("setTransferTicketNoList", transferTicketNoList)
+        } catch (error) {
+            console.error("Error fetching transfer ticket numbers:", error);
+            setTransferTicketNoList([]);
+        }
+    };
+const fetchStockTransferTicketDetail = async (formData) => {
+        try {
+            const response = await fetchTransferTicketDetail(formData);
+
+            setTransferTicketNoDetail(response);
+            console.log("Fetched list:", list); console.log("setTransferTicketNoList", transferTicketNoList)
+        } catch (error) {
+            console.error("Error fetching transfer ticket numbers:", error);
+            // setTransferTicketNoList([]);
+        }
+    };
     useEffect(() => {
         if (formData?.RecevingTicketNo) {
-            const ticketNo = formData.RecevingTicketNo.split("-")[0]; // RE00000929
-            console.log("Sending to API:", ticketNo);
-
-            fetchPutawayProcessDetail(ticketNo); // ✅ only pass ticketNo
+            const ticketNo = formData.RecevingTicketNo.split("-")[0];
+            fetchPutawayProcessDetail(ticketNo);
+            setRecevingPutProcess(true);
+            setReturningPutProcess(false);
         }
-    }, [formData?.RecevingTicketNo]);
+        else if (formData?.ReturningTicket) {
+            const ticketNo = formData.ReturningTicket;
+            fetchReturningProcessDetail(ticketNo);
+            setRecevingPutProcess(false);
+            setReturningPutProcess(true)
+        }
+        else if (formData?.transferType) {
+            const stockTransferType = formData.transferType;
+            fetchStockTransferTicketNo(stockTransferType);
+            setRecevingPutProcess(false);
+            setReturningPutProcess(true)
+        }
+        else if (formData?.StockTransferTicketNo) {
+            console.log("ejyguyfhijk")
+            const transferTicketno = formData.StockTransferTicketNo;
+            fetchStockTransferTicketDetail(transferTicketno);
+            setRecevingPutProcess(false);
+            setReturningPutProcess(true)
+        }
+    }, [formData?.RecevingTicketNo, formData?.ReturningTicket,formData?.transferType]);
 
+ useEffect(() => {
+       
+         if (formData?.StockTransferTicketNo) {
+            console.log("ejyguyfhijk")
+            const transferTicketno = formData.StockTransferTicketNo;
+            fetchStockTransferTicketDetail(transferTicketno);
+            setRecevingPutProcess(false);
+            setReturningPutProcess(true)
+        }
+    }, [formData?.StockTransferTicketNo]);
 
 
     console.log("fromData", formData)
@@ -207,14 +401,32 @@ const Putaway = () => {
             newSelectedRows.includes(row.selectedid)
         );
 
-        const submitData = filteredData.map((row) => ({
-            Location: row.location,
-            Product_Qty: row.GRNQty,
-            Product_Code: row.partcode,
-            Product_Name: row.partdescription,
-            ticketno: row.recevingTicketNo,
-        }));
+        // const submitData = filteredData.map((row) => ({
+        //     Location: row.location,
+        //     Product_Qty: row.GRNQty,
+        //     Product_Code: row.partcode,
+        //     Product_Name: row.partdescription,
+        //     ticketno: row.recevingTicketNo,
+        // }));
+        let submitData = [];
 
+        if (recevingPutProcess) {
+            submitData = filteredData.map((row) => ({
+                Location: row.location,
+                Product_Qty: row.GRNQty,
+                Product_Code: row.partcode,
+                Product_Name: row.partdescription,
+                ticketno: row.recevingTicketNo,
+            }));
+        } else if (returningPutProcess) {
+            submitData = filteredData.map((row) => ({
+                Location: row.location,
+                Product_Qty: row.Approved_Qty,
+                Product_Code: row.partcode,
+                Product_Name: row.partdescription,
+                ticketno: row.Rec_ticket_no, // corrected for returning
+            }));
+        }
         saveLEDRequest(submitData)
             .then((response) => {
                 let colour = "";
@@ -229,7 +441,7 @@ const Putaway = () => {
                     setSuccessMessage,
                     setShowSuccessPopup,
                 });
-                        setIsUserActive(true);
+                setIsUserActive(true);
 
             })
             .catch((error) => {
@@ -243,8 +455,66 @@ const Putaway = () => {
 
 
 
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     if (selectedRows1.length === 0) {
+    //         setErrorMessage("Please select at least one row");
+    //         setShowErrorPopup(true);
+    //         return;
+    //     }
+
+    //     const username = sessionStorage.getItem("userName") || "System";
+    //     const selectedKeys = new Set(selectedRows1);
+    //     const filteredData = putawayProcessDetail.filter((row) => selectedKeys.has(row.selectedid));
+
+    //     const submitData = []; // ✅ declare submitData
+
+    //     filteredData.forEach((row) => {
+    //         const putQtyDetails = row.putQtyDetails || {}; // { loc1: 5, loc2: 10 }
+
+    //         Object.keys(putQtyDetails).forEach((loc) => {
+    //             const qty = Number(putQtyDetails[loc] || 0);
+    //             if (qty > 0) { // skip zero entries
+    //                 submitData.push({
+    //                     location: loc,
+    //                     putqty: qty,
+    //                     batchcode: row.rcbatchcode,
+    //                     partcode: row.partcode,
+    //                     recevingTicketNo: row.recevingTicketNo,
+    //                     intsysid: row.id,
+    //                     createdby: username,
+    //                 });
+    //             }
+    //         });
+    //     });
+
+    //     savePutawayRequest(submitData)
+    //         .then((response) => {
+    //             handleSuccessCommon({
+    //                 response,
+    //                 setSuccessMessage,
+    //                 setShowSuccessPopup,
+    //             });
+    //             setIsPutProcess(false);
+    //             setFormData({
+    //                 RecevingTicketNo: ""
+    //             })
+    //             fetchPutawayTicket(setPutawayTicket)
+    //             setSelectedRows1([]);
+
+    //         })
+    //         .catch((error) => {
+    //             handleErrorCommon({
+    //                 error,
+    //                 setErrorMessage,
+    //                 setShowErrorPopup,
+    //             });
+    //         });
+    // };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
         if (selectedRows1.length === 0) {
             setErrorMessage("Please select at least one row");
             setShowErrorPopup(true);
@@ -255,34 +525,54 @@ const Putaway = () => {
         const selectedKeys = new Set(selectedRows1);
         const filteredData = putawayProcessDetail.filter((row) => selectedKeys.has(row.selectedid));
 
-        const submitData = []; // ✅ declare submitData
+        const submitData = [];
 
         filteredData.forEach((row) => {
-            const putQtyDetails = row.putQtyDetails || {}; // { loc1: 5, loc2: 10 }
+            const putQtyDetails = row.putQtyDetails || {};
 
             Object.keys(putQtyDetails).forEach((loc) => {
                 const qty = Number(putQtyDetails[loc] || 0);
-                if (qty > 0) { // skip zero entries
-                    submitData.push({
-                        location: loc,
-                        putqty: qty,
-                        batchcode: row.rcbatchcode,
-                        partcode: row.partcode,
-                        recevingTicketNo: row.recevingTicketNo,
-                        intsysid: row.id,
-                        createdby: username,
-                    });
+                if (qty > 0) {
+                    if (recevingPutProcess) {
+                        submitData.push({
+                            location: loc,
+                            putqty: qty,
+                            batchcode: row.rcbatchcode,
+                            partcode: row.partcode,
+                            recevingTicketNo: row.recevingTicketNo,
+                            intsysid: row.id,
+                            createdby: username,
+                        });
+                    } else if (returningPutProcess) {
+                        submitData.push({
+                            location: loc,
+                            qty: qty,
+                            batchcode: row.batchcode,
+                            partcode: row.Partcode,
+                            recevingTicketNo: row.Rec_ticket_no,
+                            id: row.id,
+                            createdby: username,
+                        });
+                    }
                 }
             });
         });
 
-        savePutawayRequest(submitData)
+        const apiCall = recevingPutProcess
+            ? savePutawayRequest(submitData)
+            : savePutawayRetRequest(submitData);
+
+        apiCall
             .then((response) => {
                 handleSuccessCommon({
                     response,
                     setSuccessMessage,
                     setShowSuccessPopup,
                 });
+                setIsPutProcess(false);
+                setFormData({ RecevingTicketNo: "" });
+                fetchPutawayTicket(setPutawayTicket);
+                setSelectedRows1([]);
             })
             .catch((error) => {
                 handleErrorCommon({
@@ -292,6 +582,9 @@ const Putaway = () => {
                 });
             });
     };
+
+
+
     const isPutButtonHidden = putawayProcessDetail.some(row => row.user); // true if any row has user
 
     const LightIndicator = ({ colour }) => {
@@ -303,9 +596,14 @@ const Putaway = () => {
     // }, [selectedSubmitRows]);
     // console.log("colour", setColourCode)
 
+
+    const handleEdit = (row) => {
+        setActiveRow(row);   // send the clicked row
+        setProcessOpen(true); // open process table/dialog
+    };
     return (
         <div className='ComCssContainer'>
-            
+
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
                     <p>Putaway</p>
@@ -314,34 +612,55 @@ const Putaway = () => {
                     formData={formData}
                     handleChange={handleChange}
                     handlePutawayChange={handlePutawayChange}
-                    poDropdownOptions={Array.isArray(putawayTicket) ? [...new Set(putawayTicket)] : []}
-
-
+                    poDropdownOptions={putawayTicket.ReceivingTicket_No}
+                    returningOptions={putawayTicket.ReturningTicket_No}
+                    transferTicketNoList={transferTicketNoList}
                 />
             </div>
             {isPutProcess && (
                 <div className='ComCssTable'>
+                    {
+                        recevingPutProcess &&
 
-                    <PutawayProcessTable
-                        data={putawayProcessDetail}
-                        // putawayProcessDetail={putawayProcessDetail}
-                        page={page}
-                        perPage={perPage}
-                        totalRows={putawayProcessDetail.length}
-                        loading={loading}
-                        setPage={setPage}
-                        setPerPage={setPerPage}
-                        selectedRows1={selectedRows1}
-                        formErrors={formErrors}
-                        setSelectedRows1={setSelectedRows1}
-                        setFormPutPrecssData={setFormPutPrecssData}
-                        handleGRNQtyChange={handleGRNQtyChange}
+                        <PutawayProcessTable
+                            data={putawayProcessDetail}
+                            // putawayProcessDetail={putawayProcessDetail}
+                            page={page}
+                            perPage={perPage}
+                            totalRows={putawayProcessDetail.length}
+                            loading={loading}
+                            setPage={setPage}
+                            setPerPage={setPerPage}
+                            selectedRows1={selectedRows1}
+                            formErrors={formErrors}
+                            setSelectedRows1={setSelectedRows1}
+                            setFormPutPrecssData={setFormPutPrecssData}
+                            handleGRNQtyChange={handleGRNQtyChange}
 
-                    />
+                        />
+                    }
+                    {returningPutProcess &&
+                        <PutawayRetProcessTable
+                            data={putawayProcessDetail}
+                            // putawayProcessDetail={putawayProcessDetail}
+                            page={page}
+                            perPage={perPage}
+                            totalRows={putawayProcessDetail.length}
+                            loading={loading}
+                            setPage={setPage}
+                            setPerPage={setPerPage}
+                            selectedRows1={selectedRows1}
+                            formErrors={formErrors}
+                            setSelectedRows1={setSelectedRows1}
+                            setFormPutPrecssData={setFormPutPrecssData}
+                            handleGRNQtyChange={handleGRNQtyChange}
+
+                        />
+                    }
                     {isUserActive && (
-                    <p>
-                        <LightIndicator colour={colourCode} /> User {colourCode} is active
-                    </p>
+                        <p>
+                            <LightIndicator colour={colourCode} /> User {colourCode} is active
+                        </p>
                     )}
                     <div className='ComCssButton9'>
                         {!isPutButtonHidden && (
@@ -362,44 +681,52 @@ const Putaway = () => {
                     {hiddenButton === "partial" && "Putaway Partial Detail"}
                     {hiddenButton === "closed" && "Putaway Closed Detail"}
                     {!hiddenButton && "Putaway Closed Detail"}
+                    {hiddenButton === "All" && "Putaway All Detail"}
+
                 </h5>
 
 
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                    <div className="d-flex align-items-center gap-2 position-relative">
 
-                    <button className="btn btn-light" onClick={() => setShowMenu(!showMenu)}>
-                        <FaBars />
-                    </button>
+                        <button className="btn btn-light" onClick={() => setShowMenu(!showMenu)}>
+                            <FaBars />
+                        </button>
 
-                    {showMenu && (
-                        <div className="ComCssButtonMenu">
-                            <button className='ComCssExportButton' onClick={() => setShowMenu(false)}>
-                                <FaFileExcel /> Export
-                            </button>
-                            {hiddenButton !== "pending" && (
-                                <button
-                                    className='ComCssPendingButton'
-                                    onClick={() => {
-                                        fetchPutawayPending();
-                                        setShowMenu(false);
-                                    }}
-                                >
-                                    Pending
+                        {showMenu && (
+                            <div className="ComCssButtonMenu">
+                                <button className='ComCssExportButton' onClick={() => setShowMenu(false)}>
+                                    <FaFileExcel /> Export
                                 </button>
-                            )}
-                            {hiddenButton !== "partial" && (
-                                <button className='ComCssPariallButton' onClick={() => {
-                                    fetchPutawayPartially();
-                                    setShowMenu(false);
-                                }}>Partial</button>)}
-                            {hiddenButton !== "closed" && (
-                                <button className='ComCssAllButton' onClick={() => {
-                                    fetchPutaway();
-                                    setShowMenu(false);
-                                }}>Closed</button>)}
-                        </div>
-                    )}
-
+                                {hiddenButton !== "pending" && (
+                                    <button
+                                        className='ComCssPendingButton'
+                                        onClick={() => {
+                                            fetchPutawayPending();
+                                            setShowMenu(false);
+                                        }}
+                                    >
+                                        Pending
+                                    </button>
+                                )}
+                                {hiddenButton !== "partial" && (
+                                    <button className='ComCssPariallButton' onClick={() => {
+                                        fetchPutawayPartially();
+                                        setShowMenu(false);
+                                    }}>Partial</button>)}
+                                {hiddenButton !== "closed" && (
+                                    <button className='ComCssCloseButton' onClick={() => {
+                                        fetchPutaway();
+                                        setShowMenu(false);
+                                    }}>Closed</button>)}
+                                {hiddenButton !== "All" && (
+                                    <button className='ComCssAllButton' onClick={() => {
+                                        fetchPutawayAll();
+                                        setShowMenu(false);
+                                    }}>All</button>)}
+                            </div>
+                        )}
+                    </div>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input
                             type="text"
@@ -410,8 +737,11 @@ const Putaway = () => {
                             onChange={(e) => setSearchText(e.target.value)}
                         />
                         {searchText && (
-                            <span onClick={() => setSearchText("")}>
-                                ✖
+                            <span
+                                onClick={() => setSearchText("")} style={{
+                                    position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold"
+                                }}
+                            > ✖
                             </span>
                         )}
                     </div>

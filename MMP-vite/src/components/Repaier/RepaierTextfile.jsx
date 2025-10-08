@@ -113,9 +113,10 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
 
                     )}
                 />
+                
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") && (
                     <>
-                        <br></br>
+                        
                         <Autocomplete
                             options={partOptions}
                             getOptionLabel={(option) => option.label || ""}
@@ -140,7 +141,6 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                                 />
                             )}
                         />
-
 
                         <ComTextFiled
                             label="partdescription"
@@ -173,7 +173,6 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                             error={Boolean(formErrors?.pickingqty)}
                             helperText={formErrors?.pickingqty || ""}
                         />
-
                     </>
                 )}
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "Soldring" || formData.type === "Desoldring"

@@ -7,10 +7,12 @@ const ApproverTextFiled = ({
     formData,
     handleChange,
     approverTicketsL1,
-    approverTicketsL2
+    approverTicketsL2,
+    approverReturningTicketsL1,
+    approverReturningTicketsL2
 }) => {
 
-    const allTickets = approverTicketsL1.concat(approverTicketsL2) || [];
+    const allTickets = approverTicketsL1.concat(approverTicketsL2).concat(approverReturningTicketsL1).concat(approverReturningTicketsL2) || [];
 
     // Filter options based on any selected value
     const filteredTickets = allTickets.filter(item => 

@@ -195,6 +195,8 @@ const Add_Po_Detail = () => {
 
     } else {
       fetchPoDetail(page, perPage);
+      setSelectedRows([]);
+    
     }
   }
 
@@ -241,6 +243,7 @@ const Add_Po_Detail = () => {
       currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
       ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", postatus: "", ordertype: "", partdiscription: "", UOM: ""
     })
+    setSelectedRows([]);
   }
   const calculateColumnWidth = (data, key, charWrap = 19, charWidth = 8, minWidth = 190, maxWidth = 318) => {
     if (!Array.isArray(data) || data.length === 0) return minWidth;

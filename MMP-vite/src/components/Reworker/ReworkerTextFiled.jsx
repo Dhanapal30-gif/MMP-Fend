@@ -5,16 +5,22 @@ import TextFiledTheme from '../Com_Component/TextFiledTheme';
 import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
-const ReworkerTextFiled = ({ formData, setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange,tableData, formErrors }) => {
+const ReworkerTextFiled = ({ formData, setFormData,setErrorMessage,setShowErrorPopup,setTableData, isFrozen, partOptions, handleChange, productOptions, handlePoChange,tableData, formErrors }) => {
 
    const handleSearchClick = () => {
         const foundRow = tableData.find(
             row => row.boardserialnumber === formData.productname
         );
+        setFormData({
+                Type: ""
+            })
+           
         if (foundRow) {
             setFormData({ ...formData, ...foundRow });
         } else {
-            alert("No record found for this serial number");
+            setErrorMessage("No record found for this serial number");
+            setShowErrorPopup(true);
+            // alert("No record found for this serial number");
         }
     };
 

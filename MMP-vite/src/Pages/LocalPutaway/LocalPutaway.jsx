@@ -157,9 +157,10 @@ const LocalPutaway = () => {
         savePutaway(updatedFormData)
             .then((response) => {
                 // fetchMainMaster(page, perPage);
-                setShowSuccessPopup(true);
-                setSuccessMessage("Masterdata Added Successfully")
-                formClear();
+              setSuccessMessage(response.data.message || "Masterdata Added Successfully");
+    setShowSuccessPopup(true);
+     formClear();
+                setSubmitButton(false);
             })
             .catch((error) => {
                 if (error.response) {
@@ -185,11 +186,11 @@ const LocalPutaway = () => {
         savePutLocation(updatedFormData)
             .then((response) => {
                 // fetchMainMaster(page, perPage);
-                setShowSuccessPopup(true);
-                setSuccessMessage("Masterdata Added Successfully")
+                // setShowSuccessPopup(true);
+                // setSuccessMessage("Masterdata Added Successfully")
                 setSubmitButton(true);
                 setPutButton(false)
-
+               
             })
             .catch((error) => {
                 if (error.response) {
@@ -325,6 +326,22 @@ const LocalPutaway = () => {
                 />
 
             </div>
+            <CustomDialog
+                open={showSuccessPopup}
+                onClose={() => setShowSuccessPopup(false)}
+                title="Success"
+                message={successMessage}
+                severity="success"
+                color="primary"
+            />
+            <CustomDialog
+                open={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="Error"
+                message={errorMessage}
+                severity="error"
+                color="secondary"
+            />
         </div>
     )
 }

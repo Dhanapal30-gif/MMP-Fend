@@ -54,16 +54,16 @@ const Receving = () => {
     );
   };
 
-
-  useEffect(() => {
-    fetchRecevingData((ticketNo) => {
-      setRecTicketNo(ticketNo);
-      setFormData((prev) => ({
-        ...prev,
-        recevingTicketNo: ticketNo, // ✅ Set into formData directly
-      }));
-    });
-  }, []);
+//receving ticket no fetching
+  // useEffect(() => {
+  //   fetchRecevingData((ticketNo) => {
+  //     setRecTicketNo(ticketNo);
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       recevingTicketNo: ticketNo, // ✅ Set into formData directly
+  //     }));
+  //   });
+  // }, []);
 
 
   const valiDate = () => {
@@ -245,7 +245,7 @@ const Receving = () => {
       // }));
       const submitData = filteredData.map((row) => ({
         ...row,
-        recevingTicketNo: formData.recevingTicketNo, // ✅ important
+        // recevingTicketNo: formData.recevingTicketNo, // ✅ important
         createdby: username,
         updatedby: username,
       }));
@@ -460,7 +460,7 @@ const Receving = () => {
         </div>
         <div className="RecevingTexfiled">
           <ThemeProvider theme={TextFiledTheme}>
-            <TextField
+            {/* <TextField
               id="outlined-basic"
               label="Receving Ticket"
               variant="outlined"
@@ -471,7 +471,7 @@ const Receving = () => {
                   height: '35px',
                 }
               }}
-            />
+            /> */}
             <RecevingTextFiled
               formData={formData}
               setFormData={setFormData}

@@ -10,7 +10,9 @@ const PutawayTextFiled = ({
   poDropdownOptions,
   onSelectPonumber,
   setFormData,
-  handlePutawayChange
+  returningOptions,
+  handlePutawayChange,
+  transferTicketNoList
 }) => {
 
 
@@ -22,13 +24,23 @@ const PutawayTextFiled = ({
     { label: "On Hold", value: "On Hold" }
   ];
 
-  const TransferType = [
+  const TransferTypeOption = [
     { label: "Internal Transfer", value: "Internal Transfer" },
     { label: "DHL Transfer", value: "DHL Transfer" },
 
   ];
 
-  //console.log("poDropdownOptions", poDropdownOptions);
+  //  const transferPartcodeOptions = React.useMemo(() =>
+  //         transferTicketNoList.map(item => ({
+  //             label: item.partcode,
+  //             value: item.partcode
+  //         })),
+  //         [transferTicketNoList]
+
+  //     ); 
+
+
+
   return (
     <div className="ComCssTexfiled">
       <ThemeProvider theme={TextFiledTheme}>
@@ -37,7 +49,10 @@ const PutawayTextFiled = ({
           value={formData.RecevingTicketNo || null}
           getOptionLabel={(option) => option}
           isOptionEqualToValue={(option, value) => option === value}
-          onChange={(e, newValue) => handleChange("RecevingTicketNo", newValue || "")}
+          onChange={(e, newValue) => {
+            // Delay state update to let Autocomplete finish selection
+            setTimeout(() => handleChange("RecevingTicketNo", newValue), 0);
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -53,33 +68,84 @@ const PutawayTextFiled = ({
         />
 
 
+        <Autocomplete
+          options={returningOptions || []}
+          value={formData.ReturningTicket || null}
+          getOptionLabel={(option) => option}
+          isOptionEqualToValue={(option, value) => option === value}
+          onChange={(e, newValue) => {
+            // Delay state update to let Autocomplete finish selection
+            setTimeout(() => handleChange("ReturningTicket", newValue), 0);
+          }}
+          // onChange={(e, newValue) => handleChange("ReturningTicket", newValue || "")}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Returning Ticket"
+              variant="outlined"
+              size="small"
+              sx={{
+                background: "linear-gradient(to right, #b8efddff, #ef53c6ff)",
+                borderRadius: "8px",
+              }}
+            />
+          )}
+        />
+        <Autocomplete
+          options={TransferTypeOption}
+          getOptionLabel={(option) => option.label}
+          value={TransferTypeOption.find(opt => opt.value === formData.transferType) || null}
+          isOptionEqualToValue={(option, value) => option.value === value?.value}
+          onChange={(e, newValue) => {
+            setTimeout(() => handleChange("transferType", newValue?.value || ""), 0);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Stock Transfer Type"
+              variant="outlined"
+              size="small"
+              sx={{
+                background: "linear-gradient(to right, #b8efddff, #ffcc70)",
+                borderRadius: "8px"
+              }}
+            />
+          )}
+        />
 
         <Autocomplete
-          options={statusOptions}
-          getOptionLabel={(option) => option.label}
-          //   value={getOptionObj(formData.year, yearOptions)}
-          //   onChange={(e, newValue) => handleChange("year", newValue?.value || "")}
+          options={transferTicketNoList || []}
+          getOptionLabel={(option) => option.InternalTicketNo || ""}
+          value={
+            transferTicketNoList.find(
+              (opt) => opt.InternalTicketNo === formData.StockTransferTicketNo
+            ) || null
+          }
+          isOptionEqualToValue={(option, value) =>
+            option.InternalTicketNo === value?.InternalTicketNo
+          }
+          onChange={(e, newValue) => {
+            setTimeout(() => handleChange("StockTransferTicketNo", newValue?.InternalTicketNo || ""), 0);
+          }}
           renderInput={(params) => (
-            <TextField {...params} label="Returning Ticket" variant="outlined" size="small" sx={{
-              background: "linear-gradient(to right, #b2e9d8ff, #d63498ff)",
-              borderRadius: "8px"
-            }} />
+            <TextField
+              {...params}
+              label="Stock Transfer Ticket"
+              variant="outlined"
+              size="small"
+              sx={{
+                background: "linear-gradient(to right, #b8efddff, #ef53c6ff)",
+                borderRadius: "8px"
+              }}
+            />
           )}
         />
-        <Autocomplete
-          options={TransferType}
-          getOptionLabel={(option) => option.label}
-          //   value={getOptionObj(formData.year, yearOptions)}
-          //   onChange={(e, newValue) => handleChange("year", newValue?.value || "")}
-          renderInput={(params) => (
-            <TextField {...params} label="Transfer Type" variant="outlined" size="small" sx={{
-              background: "linear-gradient(to right, #b8efddff, #ffcc70)",
-              borderRadius: "8px"
-            }} />
-          )}
-        />
-        <Autocomplete
-          options={statusOptions}
+
+
+
+
+        {/* <Autocomplete
+          options={transferTicketNoList}
           getOptionLabel={(option) => option.label}
           //   value={getOptionObj(formData.year, yearOptions)}
           //   onChange={(e, newValue) => handleChange("year", newValue?.value || "")}
@@ -89,7 +155,7 @@ const PutawayTextFiled = ({
               borderRadius: "8px"
             }} />
           )}
-        />
+        /> */}
 
 
 

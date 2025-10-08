@@ -1,81 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { generateColumns } from "../../components/Com_Component/generateColumns";
-import CommonDataTable from "../../components/Com_Component/CommonDataTable";
-import { FaEdit } from "react-icons/fa";
+import CommonDataTable from '../../components/Com_Component/CommonDataTable';
+import { generateColumns } from '../../components/Com_Component/generateColumns';
+import { fetchOpenReportFDetail } from '../../Services/Services-Rc';
+import './OpenReport.css';
 
-const OpenReport = () => {
-    const [formErrors, setFormErrors] = useState({});
-    const [tableData, setTableData] = useState([]);
-    const [showTable, setShowTable] = useState(false);
-    const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(10);
-    const [totalRows, setTotalRows] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [ptlRequestData, setPtlRequestData] = useState([]);
-    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [showErrorPopup, setShowErrorPopup] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [requestButton, setRequestButton] = useState(true);
-    const [isFrozen, setIsFrozen] = useState(false);
-    const [submitButton, setSubmitButton] = useState(true);
-    const [clearButton, setClearButton] = useState(false);
-    const [searchText, setSearchText] = useState("");
-    const [indiviualReport, setIndiviualReport] = useState([])
-    const [isFilterActive, setIsFilterActive] = useState(false);
-    const [repaierReworkerData, setRepaierReworkerData] = useState([]);
-    const [localReportData, setLocalReportData] = useState([]);
-    const [downloadDone, setDownloadDone] = useState(false);
-    const [downloadProgress, setDownloadProgress] = useState(null);
+const OpenReport = ({ page, perPage, totalRows, loading, setPage, setPerPage }) => {
+
+    const [openReportDetail, setOpenReportDetail] = useState([]);
+    const [totals, setTotals] = useState({ totalOngoing: 0, totalOpen: 0 });
 
     const columns = generateColumns({
-        fields: [
-            "edit",
-            "recevingTicketNo",
-            "ponumber",
-            "vendorname",
-            "postingdate",
-            "partcode",
-            "partdescription",
-            "UOM",
-            "TYC",
-            "invoiceNo",
-            "invoiceDate",
-            "receivingDate",
-            "recevingQty",
-            "orderqty",
-            "openOrderQty",
-            "totalValue",
-            "totalValueEuro",
-            "unitprice",
-            "GRNQty",
-            "GRNo",
-            "GRDate",
-            "GRNComment",
-
-        ],
-
+        fields: ["ProductName", "Ongoing", "Open"],
     });
+
+    const fetchApproverTicktes = async () => {
+        try {
+            const response = await fetchOpenReportFDetail();
+            const data = response.data;
+            setOpenReportDetail(data.productCounts || []);  // ✅ set productCounts as table data
+            setTotals({ totalOngoing: data.totalOngoing, totalOpen: data.totalOpen });
+            console.log("Open Report:", data);
+        } catch (error) {
+            console.error("Error fetching open report:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchApproverTicktes();
+    }, []);
+
     return (
-        <div className='ComCssContainer'>
-            <div className='ComCssInput'>
-
+       <div className='OpenRepoInput'>
                 <div className='ComCssFiledName'>
-                    <p>PTLOpreator</p>
+                    <p>Open Report</p>
                 </div>
-                <CommonDataTable
-                    columns={columns}
-                    data={indiviualReport}
-                    loading={loading}
-                    page={page}
-                    perPage={perPage}
-                    totalRows={totalRows}
-                    onPageChange={setPage}
-                    onPerPageChange={setPerPage}
-                />
+            <div style={{ marginBottom: 16 }}>
+                <strong>Total Ongoing:</strong> {totals.totalOngoing} &nbsp;&nbsp;
+                <strong>Total Open:</strong> {totals.totalOpen}
             </div>
+            <CommonDataTable
+                columns={columns}
+                data={openReportDetail}
+                page={page}
+                perPage={perPage}
+                totalRows={totalRows}
+                loading={loading}
+                onPageChange={setPage}
+                onRowsPerPageChange={setPerPage}
+            />
         </div>
-    )
-}
+    );
+};
 
-export default OpenReport
+export default OpenReport;
