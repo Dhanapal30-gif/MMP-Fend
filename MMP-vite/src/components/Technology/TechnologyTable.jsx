@@ -31,7 +31,7 @@ setIsFrozen(false)
   };
 
   const cancelColumn = {
-    name: "Cancel",
+    name: "---Cancel",
     cell: (row, index) => (
       <FaTimesCircle
         onClick={() => handleRemoveRow(index)}
@@ -57,8 +57,8 @@ setIsFrozen(false)
         "sui",
         "partcode",
         "partdescription",
-        "racklocation",
-        "availableqty",
+        "rackLocation",
+        "availbleQty",
         "req_qty",
       ],
     }),

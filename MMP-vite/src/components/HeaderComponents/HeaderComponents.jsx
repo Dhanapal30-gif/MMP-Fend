@@ -121,7 +121,7 @@ const isScreenAllowed = (screenName) => {
         <div className="header7">
           <div class="header-logo-box"></div>
           <div className="logo-section">
-            <p>ORKA   </p>
+            <p>NOKIA   </p>
             {/* <img src={Imagee} alt="Logo" className="logo" /> */}
             {/* <span className="logo-text">Mat Man Pro</span> */}
             {/* <div class="logo-text">
@@ -293,7 +293,7 @@ const isScreenAllowed = (screenName) => {
                       {(userRole.includes("Admin") || isScreenAllowed("Requester")) && (<li><Link to="/requester" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Requester</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Approver")) && (<li><Link to="/approver" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approver</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Issuance")) && (<li><Link to="/issuance" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance</Link></li>)}
-
+                      {(userRole.includes("Admin") || isScreenAllowed("Returning")) && (<li><Link to="/returning" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Returning</Link></li>)}
                       {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
                     </ul>
                   )}
@@ -325,6 +325,19 @@ const isScreenAllowed = (screenName) => {
                       {(userRole.includes("Admin") || isScreenAllowed("Local & Individual Report")) && (
                         <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>localnd individual Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>local Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
+
+                    </ul>
+                  )}
+                </li>
+                  <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+
+                  <span className="nav-link">
+                    <FaFileAlt className="nav-icon" /> Stock <FaChevronDown className="dropdown-icon" />
+                  </span>
+                  {servicesDropdown && (
+                    <ul className="dropdown-menu">
+                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/stockTransfer" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Transfer</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
 
                     </ul>

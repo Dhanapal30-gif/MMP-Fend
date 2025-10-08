@@ -13,6 +13,10 @@ const ReworkerTable = ({
     setPage,
     setPerPage,
     handleQtyChange,
+    fetchData,
+       setSuccessMessage,
+    setShowSuccessPopup,
+    setRequestButton
 }) => {
 
     const columns = generateColumns({
@@ -63,23 +67,19 @@ const ReworkerTable = ({
         }
     })
 
-    const handleDone = (id) => {
-
-        const formData = [{ id }];  // shorthand for { id: id }
-
+       const handleDone = (id) => {
+        const formData = [{ id }];
         saveDoneRequest(formData)
             .then((response) => {
-                console.log("RESPONSE:", response);
                 if (response.status === 200 && response.data) {
                     const { message } = response.data;
                     setSuccessMessage(message || "Saved successfully");
                     setShowSuccessPopup(true);
                     setRequestButton(false);
+                    fetchData(); // ✅ now works
                 }
             })
-            .catch((error) => {
-                console.error("Error saving:", error);
-            });
+            .catch((error) => console.error(error));
     };
 
 
@@ -93,8 +93,8 @@ const ReworkerTable = ({
             perPage={perPage}
             totalRows={totalRows}
             loading={loading}
-            onPageChange={setPage}
-            onRowsPerPageChange={setPerPage}
+              onPageChange={setPage}       // ✅ correct
+        onPerPageChange={setPerPage} // ✅ correct
         />)
 }
 

@@ -56,8 +56,28 @@ const PoStatus = () => {
             )
         );
     };
+    const [formErrors, setFormErrors] = useState({});
+
+ const valiDate = () => {
+        const errors = {};
+        let isValid = true;
+
+       
+        selectedRows.forEach((id) => {
+    const poid = Number(id.split("_")[0]); // extract numeric Poid
+    const item = filteredData.find((d) => d.Poid === poid);
+    if (item && (!item.postatus || item.postatus === "")) {
+        errors[`postatus${item.Poid}`] = "Enter postatus";
+        isValid = false;
+    } else if (!item) {
+        console.log("Row not found for Poid:", poid);
+    }
+});
 
 
+        setFormErrors(errors);
+        return isValid;
+    };
     const [poDropdownOptions, setPoDropdownOptions] = useState({
         ponumberOptions: [],
         partcodeOptions: [],
@@ -143,13 +163,13 @@ const PoStatus = () => {
     console.log("selectedRows", selectedRows);
 
    const handleSubmit = async () => {
+            if (!valiDate()) return;
+
   if (selectedRows.length === 0) {
     setErrorMessage("Select at least one row");
     setShowErrorPopup(true);
     return;
   }
-
- 
   const selectedPoStatusData = poData
     .filter(row => selectedRows.includes(row.id))
     .map(row => ({
@@ -175,6 +195,7 @@ const PoStatus = () => {
 
  const formClear =()=>{
     setSelectedRows([]);
+    setFormErrors({});
 
   }
     return (
@@ -224,6 +245,7 @@ const PoStatus = () => {
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
                     handlePoChange={handlePoChange}
+                    formErrors={formErrors}
                 />
                 <div className="ComCssButton9">
                     {poData.length > 0 && (

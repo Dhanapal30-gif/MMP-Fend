@@ -31,7 +31,7 @@ const PTLOpreator = () => {
 
         const intervalId = setInterval(() => {
             fetchData(); // call every 15 seconds
-        }, 15000); // 15000 ms = 15 seconds
+        }, 5000); // 15000 ms = 15 seconds
 
         return () => clearInterval(intervalId); // cleanup on unmount
     }, []);

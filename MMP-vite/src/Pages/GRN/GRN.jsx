@@ -6,6 +6,7 @@ import GRNTextField from "../../components/GRN/GRNTextField";
 import "../../components/Com_Component/COM_Css.css"
 import GRNTable from "../../components/GRN/GRNTable";
 import GRNDefaultTable from "../../components/GRN/GRNDefaultTable";
+import GRNPendingTable from "../../components/GRN/GRNPendingTable";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { deleteRecDetail, saveGRN, updateGRNDetail } from '../../Services/Services_09.js';
 import { FaFileExcel, FaBars } from "react-icons/fa";
@@ -436,19 +437,19 @@ const GRN = () => {
                                 className="comCloseIcon"
                                 onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
                                 onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                                style={{ cursor: "pointer", transition: "transform 0.2s" }}
+                                style={{ cursor: "pointer",fontSize: "49px"   , transition: "transform 0.2s" }}
                             />
                         )}
 
 
                         {showMenu && (
-                            <div className='ComTableMenu'>
-                                <button className="btn btn-info w-100 mb-2" onClick={() => exportToExcel(searchText)}>
-                                    Export
+                            <div className='ComCssButtonMenu'>
+                                <button className="ComCssExportButton" onClick={() => exportToExcel(searchText)}>
+                                <FaFileExcel />    Export
                                 </button>
                                 {!isPendingView && (
                                     <button
-                                        className="btn btn-warning w-100 mb-2"
+                                        className="ComCssPendingButton"
                                         onClick={() => setIsPendingView(true)}
                                     >
                                         Pending
@@ -479,7 +480,7 @@ const GRN = () => {
                 </div>
 
                 {isPendingView ? (
-                    <GRNDefaultTable
+                    <GRNPendingTable
                         data={grnPendding()}
                         page={pagePen}
                         perPage={perPagePen}

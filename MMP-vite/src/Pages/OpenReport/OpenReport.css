@@ -1,0 +1,56 @@
+.OpenRepoInput {
+  flex-direction: column;
+  border: 2px solid #edd9d9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  width: 75%;
+  max-width: 800px;        /* optional: limits box width */
+  margin: 20px auto;       /* ✅ centers horizontally */
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  background-color: rgb(9, 146, 156);
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+
+
+
+/* 🔥 Glowing animated border inside */
+.OpenRepoInput::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  /* background: conic-gradient(from 0deg,
+      #4bd52c,
+      #d7c247,
+      #cd3eb1); */
+       background: conic-gradient(from 0deg,
+      #21ad0f,
+      #d7c247,
+      #dd1ed6);
+  border-radius: 10px;
+  z-index: -1;
+  animation: spin 4s linear infinite;
+  filter: blur(8px);
+}
+
+/* Inner white layer */
+.OpenRepoInput::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  background: white;
+  border-radius: 8px;
+  z-index: -1;
+}

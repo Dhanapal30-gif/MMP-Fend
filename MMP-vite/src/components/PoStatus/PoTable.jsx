@@ -85,7 +85,10 @@ const handleSelect = (poid, isChecked) => {
                 handlePoChange(row.Poid, "postatus", newValue?.value || "")
               }
               renderInput={(params) => (
-                <TextField {...params} variant="outlined" size="small" />
+                <TextField {...params} variant="outlined" size="small" 
+                error={!!formErrors[`postatus${row.Poid}`]}           // ✅ correct key
+      helperText={formErrors[`postatus${row.Poid}`] || ""} // ✅ display message
+                />
               )}
               className="invoice-input"
             />

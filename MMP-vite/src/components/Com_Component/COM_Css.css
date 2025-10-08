@@ -95,9 +95,12 @@ body {
 }
 
 .ComCssAllButton {
-  background-color: rgb(16, 157, 9) !important;
+  background-color: rgb(219, 30, 144) !important;
 }
 
+.ComCssCloseButton {
+  background-color: rgb(16, 157, 9) !important;
+}
 
 .ComCssInput {
   flex-direction: column;

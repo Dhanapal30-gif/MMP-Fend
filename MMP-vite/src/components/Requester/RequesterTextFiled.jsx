@@ -101,7 +101,7 @@ const RequesterTextFiled = ({
                     )}
                 />
 
-                {formData.requestFor?.value !== "Material Request" ? (
+{(formData.requestFor?.value || formData.requestFor) !== "Material Request" ? (
                     <Autocomplete
                         options={orderTypeOption}
                         readOnly={isFrozen}

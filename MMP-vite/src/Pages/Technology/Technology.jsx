@@ -105,16 +105,12 @@ const Technology = () => {
 
         saveTechnology(updatedFormData)
             .then((response) => {
-                // console.log("RESPONSE:", response);
                 if (response.status === 200 && response.data) {
                     const { message } = response.data;
                     setSuccessMessage(message || "Saved successfully");
                     setShowSuccessPopup(true);
-                    setTableData([]);
-                    setShowTable(false);
-                    setIsFrozen(false);
-                    // ✅ only call if it exists
-                    if (typeof handleClear === "function") handleClear();
+                    clear();
+                    fetchPoDetail();
                 } else {
                     setErrorMessage(response.data?.message || "Unknown error");
                     setShowErrorPopup(true);
@@ -123,7 +119,6 @@ const Technology = () => {
                 }
             })
             .catch((error) => {
-                // console.log("ERROR:", error);
                 const errMsg = error?.response?.data?.message || "Network error, please try again";
                 setErrorMessage(errMsg);
                 setShowErrorPopup(true);
@@ -186,7 +181,7 @@ setShowErrorPopup(true);
     }, [tableData]);
     // console.log("showTable:", showTable);
     // console.log("tableData:", tableData);
-    const clear = () => {
+    const  clear = () => {
         setShowTable(false)
         setIsFrozen(false)
         setTableData([])

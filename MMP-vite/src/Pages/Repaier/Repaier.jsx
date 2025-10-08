@@ -84,20 +84,13 @@ const Repaier = () => {
       isValid = false;
   }
 
-  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
-      if (!formData.partcode) {
-          errors.partcode = "Please Enter Partcode";
-          isValid = false;
-      }
-  }
-
   if (!formData.productname) {
-      errors.productname = "Please Enter Product Name";
+      errors.productname = "Please Select Product Name";
       isValid = false;
   }
 
   if (!formData.type) {
-      errors.type = "Please Enter type Name";   // 🔴 overrides previous type error
+      errors.type = "Please Enter Type";   // 🔴 overrides previous type error
       isValid = false;
   }
 
@@ -109,12 +102,7 @@ const Repaier = () => {
       isValid = false;
   }
 
-  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
-      if (!formData.pickingqty) {
-          errors.pickingqty = "Please Enter Picking Qty";
-          isValid = false;
-      }
-  }
+ 
 
   if (
       ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
@@ -177,6 +165,8 @@ const addValiDate = () => {
   setFormErrors(errors);
   return isValid;
 };
+
+
    const handleSubmit = (e) => {
     e.preventDefault();
     const userName = sessionStorage.getItem("userName") || "System";
@@ -193,7 +183,8 @@ const addValiDate = () => {
             };
         });
     } else {
-            const { productfamily, productgroup,SUINo,Quantity, ...rest } = row; // remove both
+         if (!valiDate()) return;
+            const { productfamily, productgroup,SUINo,Quantity, ...rest } = formData; // remove both
         
         updatedFormData = {
             ...rest,
@@ -213,7 +204,8 @@ const addValiDate = () => {
                     setTableData([]);
                     setShowTable(false);
                     setIsFrozen(false);
-                    if (typeof handleClear === "function") handleClear();
+                    handleClear();
+                    // if (typeof handleClear === "function") handleClear();
                 } else {
                     setErrorMessage(response.data?.message || "Unknown error");
                     setShowErrorPopup(true);
@@ -319,6 +311,10 @@ const addValiDate = () => {
             SUINo: "",
             Quantity: ""
         });
+          setExtraFields({
+    productGroup: "",
+    productFamily: ""
+  });
         setFormErrors({});
         setTableData([]);
         setShowTable(false);

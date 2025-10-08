@@ -44,7 +44,7 @@ const RepaierAddTable = ({
   };
 
   const cancelColumn = {
-    name: "Cancel",
+    name: "----Cancel",
     cell: (row, index) => (
       <FaTimesCircle
         onClick={() => handleRemoveRow(index)}

@@ -141,9 +141,25 @@ const handleSave = async () => {
        putQty: (row) => {
     const hasDefaultQty = row.batchesQty?.some(bq => bq.savedQty > 0);
     return (
-        <Button variant="outlined" size="small" onClick={() => handleOpen(row)}>
-            {hasDefaultQty ? "Edit Qty" : "Add Qty"}
-        </Button>
+        // <Button variant="outlined" size="small" onClick={() => handleOpen(row)}>
+        //     {hasDefaultQty ? "Edit Qty" : "Add Qty"}
+        // </Button>
+
+        <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleOpen(row)}
+              sx={{
+                color: "white",
+                backgroundColor: hasDefaultQty ? "#e96929ff" : "#1bd0a6ff",  // brown for edit, green for add
+                borderColor: hasDefaultQty ? "brown" : "green",
+                "&:hover": {
+                  backgroundColor: hasDefaultQty ? "#8B4513" : "#3ef43eff"
+                }
+              }}
+            >
+              {hasDefaultQty ? "Edit Qty" : "Add Qty"}
+            </Button>
     );
 }
 
@@ -168,8 +184,15 @@ const handleSave = async () => {
             {/* ✅ Popup with Table */}
             <Dialog
                 open={open}
-                onClose={() => setOpen(false)}
-  maxWidth={false}      // disable default maxWidth
+                onClose={(event, reason) => {
+        // Only close on Cancel button, ignore backdrop click or escape
+        if (reason === "backdropClick" || reason === "escapeKeyDown") {
+            return;
+        }
+        setOpen(false);
+    }}
+    disableEscapeKeyDown // optional
+  maxWidth={false}     
                 fullWidth
                 PaperProps={{
                     sx: {

@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns';
@@ -16,7 +18,7 @@ import {
     TableContainer
 } from "@mui/material";
 
-const PutawayProcessTable = ({
+const PutawayRetProcessTable = ({
     data = [],
     page,
     perPage,
@@ -77,23 +79,17 @@ const PutawayProcessTable = ({
 
     const columns = generateColumns({
         fields: [
-            "recevingTicketNo",
-            "partcode",
-            "partdescription",
-            "UOM",
-            "recevingQty",
-            "GRNQty",
-            "location",
+            "Rec_ticket_no",
+            "RequesterType",
+            "Partcode",
+            "Partdescription",
+            "ReturningQty",
+            "Approved_Qty",
             "putQty",
-            "ponumber",
-            "poDate",
-            "vendorname",
-            "postingdate",
-            "GRNo",
-            "GRNQty",
-            "Status",
-            "createdon",
-            "showDetail"
+
+            "location",
+            "Batchcode",
+            
         ],
         selectedRows: selectedRows1,
         handleSelect: handleSelect1,
@@ -110,12 +106,6 @@ const PutawayProcessTable = ({
                     </div>
                 );
             },
-
-                // putQty: (row) => (
-                //     <Button variant="outlined" size="small" onClick={() => handleOpen(row)}>
-                //         {row.putQtyDetails ? "Edit Qty" : "Add Qty"}
-                //     </Button>
-                // ),
 
                 putQty: (row) => {
   const isEdit = !!row.putQtyDetails; // true → Edit Qty
@@ -193,10 +183,9 @@ onClose={(event, reason) => {
                         alignItems: 'center',
                     }}
                 >
-                    <span>Partcode: {activeRow?.partcode}</span>
-                    <span>Good Qty: {activeRow?.GRNQty}</span>
-                    <span>BatchCode: {activeRow?.postingdate}</span>
-                    <span>Put Qty: {activeRow?.Allowed_putqty}</span>
+                    <span>Partcode: {activeRow?.Partcode}</span>
+                    <span>BatchCode: {activeRow?.batchcode}</span>
+                    <span>Put Qty: {activeRow?.Approved_Qty}</span>
 
                 </DialogTitle>
 
@@ -237,8 +226,8 @@ onClose={(event, reason) => {
                                                         if (val === "" || /^\d*$/.test(val)) {
                                                             // check individual value doesn't exceed GRNQty
                                                             const numVal = val === "" ? 0 : Number(val);
-                                                            if (numVal > activeRow?.Allowed_putqty) {
-                                                                alert(`Value cannot exceed Allowed_putqty (${activeRow?.Allowed_putqty})`);
+                                                            if (numVal > activeRow?.Approved_Qty) {
+                                                                alert(`Value cannot exceed Approved_Qty (${activeRow?.Approved_Qty})`);
                                                                 return;
                                                             }
 
@@ -289,4 +278,4 @@ onClose={(event, reason) => {
     );
 };
 
-export default PutawayProcessTable;
+export default PutawayRetProcessTable;

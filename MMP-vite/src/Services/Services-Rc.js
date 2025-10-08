@@ -13,11 +13,22 @@ export const fetchPutawayPartially = (page = 0, size = 10) => {
   return axios.get(fetchPutawayPartiallyDetail, { params: { page, size }, });
 }
 
+const fetchPutawayAllDetail = `${url}/Putaway/fetchPutawayAll`
+export const fetchPutawayAll = (page = 0, size = 10) => {
+  return axios.get(fetchPutawayAllDetail, { params: { page, size }, });
+}
+
 
 export const putawayProcess = (ticketNo) => {
 const Get_PutawayProcess = `${url}/Putaway/fetchPutawayProcess?ticketNo=${ticketNo}`;
   return axios.get(Get_PutawayProcess);
 };
+
+
+const fetchPutawayDetailAllSearch = `${url}/Putaway/fetchFindDataAll`;
+export const fetchPutawayAllSearch = (page = 0, size = 10, search = "") => {
+  return axios.get(fetchPutawayDetailAllSearch, { params: { page, size, search: search || undefined, }, });
+}
 
 
 const saveLightRequest = `${url}/Putaway/sendHardwareInidcation`
@@ -123,3 +134,63 @@ export const saveIssueBatchcodeQty = (payload) => axios.post(saveIssueBatchcode,
 
 const saveDeliverStataus = `${url}/IssuacneCon/saveDeliverStataus`
 export const saveDeliver = (submitData) => axios.post(saveDeliverStataus, submitData);
+
+
+const fetchReturningPartcode = `${url}/ReturningController/fetchPartcode`
+export const fetchRetPartcode = (userId,returningType) => {
+  return axios.get(fetchReturningPartcode, {
+    params: { userId ,returningType}   // ✅ pass userId as query param
+  });
+};
+
+const saveReturningTicket = `${url}/ReturningController/saveReturning`
+export const saveReturning = (formData) => axios.post(saveReturningTicket, formData);
+
+
+const saveReturningApproverTicket = `${url}/ApproverConController/saveReturningApproverL1Ticket`
+export const saveAReturningpproverTickets = (payload) => axios.put(saveReturningApproverTicket, payload);
+
+export const putawayReturningProcess = (ticketNo) => {
+const Get_PutawayReturningrocess = `${url}/ReturningController/fetchReturningProcess?ticketNo=${ticketNo}`;
+  return axios.get(Get_PutawayReturningrocess);
+};
+
+
+const savePutawayReturnRequest = `${url}/Putaway/savePutawayReturningProcess`
+export const savePutawayRetRequest = (formData) => axios.put(savePutawayReturnRequest, formData);
+
+  const fetchOpenReport = `${url}/repaierCon/openReport`
+export const fetchOpenReportFDetail = (userId) => {
+  return axios.get(fetchOpenReport, {});
+};
+
+
+
+const fetchTransferPartcodeList = `${url}/StockTransferCon/fetchTransferPartcode`;
+export const fetchTransferPartcode = (orderType) =>
+  axios.get(fetchTransferPartcodeList, {
+    params: { orderType },
+  });
+
+  const saveStockTransferList = `${url}/StockTransferCon/saveStockTransfer`
+export const saveStockTransfer = (formData) => axios.post(saveStockTransferList, formData);
+
+
+const fetchStockTransfer = `${url}/StockTransferCon/fetchStockTransfer`;
+export const fetchStockTransferAll = (page = 0, size = 10) => {
+  return axios.get(fetchStockTransfer, {
+    params: { page, size},
+  });
+};
+
+const fetchTransferTicketList = `${url}/StockTransferCon/fetchTransferTicketNo`;
+export const fetchTransferTicket = (stockTransferType) =>
+  axios.get(fetchTransferTicketList, {
+    params: { stockTransferType },
+  });
+
+const fetchTransferTicketDetailList = `${url}/StockTransferCon/fetchTransferTicketProcess`;
+export const fetchTransferTicketDetail = (transferTicketno) =>
+  axios.get(fetchTransferTicketDetailList, {
+    params: { transferTicketno },
+  });

@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { TextField } from "@mui/material";
 import CommonDataTable from "../../components/Com_Component/CommonDataTable";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
 
-const fields = [
+const allFields = [
   "rec_ticket_no",
   "requestertype",
   "productname",
@@ -18,10 +18,24 @@ const fields = [
   "batchCode",
   "location",
   "allocatedQty",
-   "ApprovedL1Qty",  // fixed
-  "ApprovedL2Qty",  // fixed
+  "ApprovedL1Qty",
+  "ApprovedL2Qty",
   "Comment",
   "recordstatus"
+];
+
+// 🔹 hide these for Returning-L1
+const hideForReturning = [
+  "productname",
+  "productgroup",
+  "productfamily",
+  "componentType",
+  "compatabilitypartcode",
+  "req_qty",
+  "batchCode",
+  "location",
+  "allocatedQty",
+  "UOM",
 ];
 
 const customConfig = {
@@ -39,10 +53,8 @@ const customConfig = {
   batchCode: { label: "Batch Code" },
   location: { label: "Location" },
   allocatedQty: { label: "Allocated Qty" },
-  
   ApprovedL1Qty: { label: "Approved Qty L1" },
-ApprovedL2Qty: { label: "Approved Qty L2" },
-
+  ApprovedL2Qty: { label: "Approved Qty L2" },
   Comment: { label: "Comment", width: "250px" },
   recordstatus: { label: "Status" }
 };
@@ -57,81 +69,83 @@ const ApproverTable = ({
   setPerPage,
   setSelectedGrnRows,
   selectedGrnRows,
-  handleApproverChange, // handler for qty/comment
+  handleApproverChange,
   formErrors = {}
 }) => {
-  // Normalize batches
+  // 🔑 decide fields dynamically
+  const visibleFields = useMemo(() => {
+    if (!data || data.length === 0) return allFields;
+    const ticketNo = data[0]?.rec_ticket_no ?? "";
+     if (ticketNo.startsWith("RTN")) {
+    return allFields.filter(f => !hideForReturning.includes(f));
+  }
+
+    return allFields;
+  }, [data]);
+
+  // normalize batches
   const normalizedData = useMemo(() => {
-  return data.map((row) => ({
-    ...row,
-    batchCode: row.batches?.map((b) => b.batchCode).join(", "),
-    location: row.batches?.map((b) => b.location).join(", "),
-    allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", ")
-  }));
-}, [data]);
+    return data.map((row) => ({
+      ...row,
+      batchCode: row.batches?.map((b) => b.batchCode).join(", "),
+      location: row.batches?.map((b) => b.location).join(", "),
+      allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", ")
+    }));
+  }, [data]);
 
-
-  // Select all rows
+  // select all
   const handleGrnSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedGrnRows(data.map((row) => row.id)); // use unique key
-    } else {
-      setSelectedGrnRows([]);
-    }
+    setSelectedGrnRows(e.target.checked ? data.map((row) => row.id) : []);
   };
 
-  // Select one row
+  // select single
   const handleGrnSelect = (rowId) => {
-    setSelectedGrnRows((prevSelectedRows) => {
-      const isSelected = prevSelectedRows.includes(rowId);
-      return isSelected
-        ? prevSelectedRows.filter((id) => id !== rowId)
-        : [...prevSelectedRows, rowId];
-    });
-  };const columns = useMemo(() => {
-  const qtyField = data.some(row => row.ApprovedL1Qty !== undefined)
-    ? "ApprovedL1Qty"
-    : "ApprovedL2Qty";
+    setSelectedGrnRows((prev) =>
+      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+    );
+  };
 
-  return generateColumns({
-    fields,
-    customConfig,
-    selectedRows: selectedGrnRows,
-    handleSelect: handleGrnSelect,
-    handleSelectAll: handleGrnSelectAll,
-    customCellRenderers: {
-      [qtyField]: (row) => {
-        const totalAvailable = row.TotalAvailableQty ?? 0;
+  // generate columns
+  const columns = useMemo(() => {
+    const qtyField = data.some((r) => r.ApprovedL1Qty !== undefined)
+      ? "ApprovedL1Qty"
+      : "ApprovedL2Qty";
 
-        return (
+    return generateColumns({
+      fields: visibleFields, // ✅ use dynamic fields
+      customConfig,          // ✅ use your config
+      selectedRows: selectedGrnRows,
+      handleSelect: handleGrnSelect,
+      handleSelectAll: handleGrnSelectAll,
+      customCellRenderers: {
+        [qtyField]: (row) => (
           <TextField
             type="number"
             placeholder="Qty"
             value={row[qtyField] ?? ""}
             onChange={(e) => {
-    let val = Number(e.target.value);
-    if (val > row.TotalAvailableQty) val = row.TotalAvailableQty;
-    handleApproverChange(row.selectedId, qtyField, val);
-  }}
+              let val = Number(e.target.value);
+              if (val > row.TotalAvailableQty) val = row.TotalAvailableQty;
+              handleApproverChange(row.selectedId, qtyField, val);
+            }}
             error={!!formErrors?.[`${qtyField}${row.selectedId}`]}
             helperText={formErrors?.[`${qtyField}${row.selectedId}`] || ""}
             className="invoice-input"
           />
-        );
-      },
-      Comment: (row) => (
-        <TextField
-          placeholder="Enter Comment"
-          value={row.Comment || ""}
-          onChange={(e) =>
-            handleApproverChange(row.selectedId, "Comment", e.target.value)
-          }
-          className="invoice-input"
-        />
-      )
-    }
-  });
-}, [data, selectedGrnRows, formErrors]);
+        ),
+        Comment: (row) => (
+          <TextField
+            placeholder="Enter Comment"
+            value={row.Comment || ""}
+            onChange={(e) =>
+              handleApproverChange(row.selectedId, "Comment", e.target.value)
+            }
+            className="invoice-input"
+          />
+        )
+      }
+    });
+  }, [data, selectedGrnRows, formErrors, visibleFields]);
 
   return (
     <CommonDataTable

@@ -200,12 +200,24 @@ const Requester = () => {
         }
     }, [userId]);
 
-    useEffect(() => {
-        if (formData?.orderType) {
-            fetchProductPartcode(userId, formData?.orderType?.value || formData?.orderType);
-        }
+    // useEffect(() => {
+    //     if (formData?.orderType) {
+    //         fetchProductPartcode(userId, formData?.orderType?.value || formData?.orderType);
+    //     }
 
-    }, [userId, formData?.orderType])
+    // }, [userId, formData?.orderType])
+
+    useEffect(() => {
+    const orderTypeValue =
+        formData?.orderType?.value || formData?.orderType || 
+        (formData.requestFor?.value === "Material Request" ? "Repair" : null);
+
+    if (orderTypeValue) {
+        fetchProductPartcode(userId, orderTypeValue);
+    }
+}, [userId, formData?.orderType, formData?.requestFor]);
+
+
     // console.log("formData.partCode", formData.availableQty);
     useEffect(() => {
         if (formData?.partCode) {

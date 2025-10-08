@@ -36,6 +36,8 @@ import UserDetail from './Pages/UserList/UserDetail';
 import Requester from './Pages/Requester/Requester';
 import Approver from './Pages/Approver/Approver';
 import Issuance from './Pages/Issuance/Issuance';
+import Returning from './Pages/Returning/Returning';
+import StockTransfer from './Pages/StockTransfer/StockTransfer';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -77,7 +79,9 @@ function App() {
       { name: "UserDetail", path: "/userDetail" },
       { name: "Requester", path: "/requester" },
       { name: "Approver", path: "/approver" },
-      { name: "Issuance", path: "/issuance" }
+      { name: "Issuance", path: "/issuance" },
+      { name: "Returning", path: "/returning" },
+      { name: "StockTransfer", path: "/stockTransfer" }
 
 
     ];
@@ -150,6 +154,8 @@ function App() {
           <Route path='/requester' element={<Requester />} />
           <Route path='/approver' element={<Approver />} />
           <Route path='/issuance' element={<Issuance />} />
+          <Route path='/returning' element={<Returning />} />
+          <Route path='/stockTransfer' element={<StockTransfer />} />
 
           <Route
             path="/receving"
