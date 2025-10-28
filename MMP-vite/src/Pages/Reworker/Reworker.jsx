@@ -1,4 +1,4 @@
-import React, { useState, useEffect ,useCallback,useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ReworkerTextFiled from "../../components/Reworker/ReworkerTextFiled";
 import ReworkerTable from "../../components/Reworker/ReworkerTable";
 import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
@@ -8,6 +8,9 @@ import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLRequest, savePTLStore, saveReworkerSubmit } from '../../Services/Services_09';
+import { fetchSearchBoard } from '../../Services/Services-Rc';
+import ReworkerTypeBasedhide from "../../components/Reworker/ReworkerTypeBasedhide";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 
 const Reworker = () => {
@@ -27,9 +30,13 @@ const Reworker = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [requestButton, setRequestButton] = useState(true);
+    const [doneButton, setdoneButton] = useState(false);
     const [isFrozen, setIsFrozen] = useState(false);
-    const [submitButton, setSubmitButton] = useState(true);
+    const [submitButton, setSubmitButton] = useState(false);
     const [clearButton, setClearButton] = useState(false);
+    const [boardFetch, setBoardFetch] = useState([])
+
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -42,57 +49,102 @@ const Reworker = () => {
         }
     };
 
-    const handleQtyChange = (id, value) => {
-        const updatedData = tableData.map(item =>
-            item.selectedid === id ? { ...item, pickingqty: value } : item
-        );
-        setTableData(updatedData);
+
+
+    const handleSearchClick = (searchTerm) => {
+        // const searchTerm = formData.searchBoardserialNumber; // ✅ get search input value
+        console.log("formData", formData)
+        if (!searchTerm) {
+            console.warn("Please enter a module serial number.");
+            setErrorMessage("Please enter a module serial number.");
+            setShowErrorPopup(true);
+            return;
+        }
+
+        fetchSearchBoard(searchTerm)
+            .then((response) => {
+                const data = response.data; // directly use response.data
+                if (data && data.length > 0) {
+                    //   setTableData(data);
+                    const fetchBoardDetail = data.map(item => ({
+                        ...item,
+                        selectedid: item.id,   // Use unique id from API
+                        RequestedQty: item.pickingqty || 0,
+                    }));
+                    setBoardFetch(fetchBoardDetail);
+                    //   setBoardFetch(data)
+                    fetchData();
+                    //   setFormData({ ...formData, ...data[0] });
+                } else {
+                    console.warn("No content found:", data);
+                    setErrorMessage("No record found for this serial number.");
+                    setShowErrorPopup(true);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching board data:", error);
+                setErrorMessage("Error fetching board details.");
+                setShowErrorPopup(true);
+            });
     };
 
+
+    // const handleQtyChange = (id, value) => {
+    //     const updatedData = boardFetch.map(item =>
+    //         item.selectedid === id ? { ...item, pickingqty: value } : item
+    //     );
+    //     setBoardFetch(updatedData);
+    // };
+
+    const handleQtyChange = (id, value) => {
+    const updatedData = boardFetch.map(item =>
+        item.id === id ? { ...item, pickingqty: value } : item
+    );
+    setBoardFetch(updatedData);
+};
+
+
+    // console.log("boradeedr", boardFetch)
     // const filteredData = tableData.filter(
     //     (item) => item.boardserialnumber === formData.boardserialnumber
     // );
     const filteredData = useMemo(() => {
-  return tableData.filter(
-    (item) => item.boardserialnumber === formData.boardserialnumber
-  );
-}, [tableData, formData.boardserialnumber]);
+        return tableData.filter(
+            (item) => item.boardserialnumber === formData.boardserialnumber
+        );
+    }, [tableData, formData.boardserialnumber]);
 
-
-    // const handlePoChange = (name, value) => {
-    //     const newData = {
-    //         ...formData,
-    //         [name]: value
-    //     };
-    //     setFormData(newData);
-    // };
 
     const handlePoChange = (field, value) => {
-    if (field === "Type") {
-        setFormData(prev => ({
-            ...prev,
-            Type: value,
-            ProductGroup: "",
-            ProductName: "",
-            boardserialnumber: ""
-        }));
-    } else if (field === "ProductGroup") {
-        setFormData(prev => ({
-            ...prev,
-            ProductGroup: value,
-            ProductName: "",
-            boardserialnumber: ""
-        }));
-    } else if (field === "ProductName") {
-        setFormData(prev => ({
-            ...prev,
-            ProductName: value,
-            boardserialnumber: ""
-        }));
-    } else if (field === "boardserialnumber") {
-        setFormData(prev => ({ ...prev, boardserialnumber: value }));
-    }
-};
+        if (field === "Type") {
+            setFormData(prev => ({
+                ...prev,
+                Type: value,
+                ProductGroup: "",
+                ProductName: "",
+                boardserialnumber: "",
+                searchBoardserialNumber: ""
+            }));
+        } else if (field === "ProductGroup") {
+            setFormData(prev => ({
+                ...prev,
+                ProductGroup: value,
+                ProductName: "",
+                boardserialnumber: ""
+            }));
+        } else if (field === "ProductName") {
+            setFormData(prev => ({
+                ...prev,
+                ProductName: value,
+                boardserialnumber: ""
+            }));
+        } else if (field === "boardserialnumber") {
+            setFormData(prev => ({ ...prev, boardserialnumber: value }));
+
+            const searchTerm = value; // ✅ use the current input value
+            handleSearchClick(searchTerm);
+        }
+    };
 
 
     useEffect(() => {
@@ -116,25 +168,29 @@ const Reworker = () => {
     //         console.error("Error fetching data:", error);
     //     }
     // };
-    
+
 
     const fetchData = useCallback(async () => {
-  try {
-    const response = await fetchBoardSerialNumber();
-    if (response.status === 200) {
-      const fetchBoardDetail = response.data.map((item, idx) => ({
-        ...item,
-        selectedid: item.selectedid ?? idx,
-        RequestedQty: item.pickingqty || 0,
-      }));
-      setTableData(fetchBoardDetail);
-    }
-  } catch (error) {
-    console.error(error);
-  }
-}, []);
+        try {
+            const response = await fetchBoardSerialNumber();
+            if (response.status === 200) {
+                // const fetchBoardDetail = response.data.map((item, idx) => ({
+                //     ...item,
+                //     selectedid: item.selectedid ?? idx,
+                //     RequestedQty: item.pickingqty || 0,
+                // }));
+                // setBoardFetch(fetchBoardDetail);
+                setTableData(response.data)
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
 
-    const typeOptions = [...new Set(tableData.map(i => i.type))].map(val => ({ label: val, value: val }));
+    // const typeOptions = [...new Set(tableData.map(i => i.type))].map(val => ({ label: val, value: val }));
+const typeOptions = [...new Set(tableData.map(i => i.type).filter(v => v && v.trim() !== ''))]
+  .sort()
+  .map(val => ({ label: val, value: val }));
 
     const groupOptions = [...new Set(
         tableData.filter(i => i.type === formData.Type).map(i => i.productgroup)
@@ -156,7 +212,7 @@ const Reworker = () => {
         const errors = {};
         let isValid = true;
 
-        filteredData.forEach((row, index) => {
+        boardFetch.forEach((row, index) => {
             if (!row.pickingqty || Number(row.pickingqty) <= 0) {
                 errors[`pickingqty${index}`] = "Enter valid pickingqty";
                 isValid = false;
@@ -183,7 +239,7 @@ const Reworker = () => {
         e.preventDefault();
         if (!valiDate()) return;
         const userName = sessionStorage.getItem("userName") || "System";
-        const updatedFilteredData = filteredData.map((row) => ({
+        const updatedFilteredData = boardFetch.map((row) => ({
             ...row,
             modifiedby: userName,
             reworkername: userName
@@ -199,7 +255,7 @@ const Reworker = () => {
                     setSuccessMessage(message || "Saved successfully");
                     setShowSuccessPopup(true);
                     setRequestButton(false)
-                
+                    setdoneButton(true)
                     // setTableData([]);
                     // setShowTable(false);
                     // ✅ only call if it exists
@@ -220,24 +276,29 @@ const Reworker = () => {
     }
 
     const handleSubmit = async () => {
-        const payload = filteredData.map(item => ({
+        setLoading(true);
+
+        const payload = boardFetch.map(item => ({
             id: item.id,   // use selectedid if that's your row ID
             pickingqty: item.availableqty // match backend field
         }));
 
         try {
             const response = await saveReworkerSubmit(payload);
-            setSuccessMessage("API success:", response.data.message)
+            setSuccessMessage("Request Sent to Repaier")
             setShowSuccessPopup(true)
             setShowTable(false)
-                setFormData({
+            setFormData({
                 Type: ""
             })
+            fetchData();
             //    console.log("API success:", response);
         } catch (error) {
             setErrorMessage("Error sending payload:", error)
             setShowErrorPopup(true)
             //    console.error("Error sending payload:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -269,8 +330,10 @@ const Reworker = () => {
                     formData={formData}
                     setFormData={setFormData}
                     handleChange={handleChange}
-                    tableData={tableData}
-                    setTableData={setTableData}
+                    // tableData={tableData}
+                    // setTableData={setTableData}
+                    boardFetch={boardFetch}
+                    setBoardFetch={setBoardFetch}
                     errorMessage={errorMessage}
                     showErrorPopup={showErrorPopup}
                     setShowErrorPopup={setShowErrorPopup}
@@ -311,44 +374,101 @@ const Reworker = () => {
             </div> */}
             {showTable && (
                 <div className='ComCssTable'>
-                    <h5 className='ComCssTableName'>ADD Board</h5>
+                    <h5 className='ComCssTableName'>Board Detail</h5>
 
-                    <ReworkerTable
-    data={filteredData}
-    page={0}
-    perPage={10}
-    totalRows={filteredData.length}
-    loading={false}
-    setPage={() => {}}
-    setPerPage={() => {}}
-    handleQtyChange={handleQtyChange}
-    fetchData={fetchData}
-    setSuccessMessage={setSuccessMessage}      // new
-    setShowSuccessPopup={setShowSuccessPopup}  // new
-    setRequestButton={setRequestButton}        // new
-/>
+                    {(boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow') ? (
+                        <ReworkerTypeBasedhide
+                            data={boardFetch}
+                            page={0}
+                            perPage={10}
+                            totalRows={boardFetch.length}
+                            loading={false}
+                            setPage={() => { }}
+                            setPerPage={() => { }}
+                            handleQtyChange={handleQtyChange}
+                            doneButton={doneButton}
+                            setdoneButton={setdoneButton}
+                            setBoardFetch={setBoardFetch}
+                            fetchData={fetchData}
+                            setSuccessMessage={setSuccessMessage}
+                            setShowSuccessPopup={setShowSuccessPopup}
+                            setRequestButton={setRequestButton}
+                            setSubmitButton={setSubmitButton}
+                        />
+                    ) : (
+                        <>
+                            <LoadingOverlay loading={loading} />
+
+                            <ReworkerTable
+                                data={boardFetch}
+                                page={0}
+                                perPage={10}
+                                totalRows={boardFetch.length}
+                                loading={false}
+                                setPage={() => { }}
+                                setPerPage={() => { }}
+                                handleQtyChange={handleQtyChange}
+                                doneButton={doneButton}
+                                setdoneButton={setdoneButton}
+                                setBoardFetch={setBoardFetch}
+                                fetchData={fetchData}
+                                setSuccessMessage={setSuccessMessage}
+                                setShowSuccessPopup={setShowSuccessPopup}
+                                setRequestButton={setRequestButton}
+                                setSubmitButton={setSubmitButton}
+
+                            />
+                        </>
+                    )}
+
 
                     <div className="ReworkerButton9">
 
                         {
-                            filteredData.length > 0 &&
-                            (filteredData[0].is_ptlrequest == 2) && (
+                            boardFetch.length > 0 &&
+                            (boardFetch[0].is_ptlrequest == 2) && (
                                 <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
                             )
                         }
+                        {
+                            boardFetch.length > 0 &&
+                            (boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow') && (
+                                <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
+                            )
+                        }
+                        {/* {requestButton &&
+                            boardFetch.length > 0 &&
+                            (boardFetch[0].is_ptlrequest === null || boardFetch[0].is_ptlrequest === "0") && boardFetch[0]?.type !== 'Soldring' && boardFetch[0]?.type !== 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow' && (
+                                <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
+                            )
+                        } */}
+
                         {requestButton &&
-                            filteredData.length > 0 &&
-                            (filteredData[0].is_ptlrequest === null || filteredData[0].is_ptlrequest === "0") && (
+                            boardFetch.length > 0 &&
+                            (
+                                (
+                                    (boardFetch[0].is_ptlrequest === null || boardFetch[0].is_ptlrequest === "0") &&
+                                    boardFetch[0]?.type !== 'Soldring' &&
+                                    boardFetch[0]?.type !== 'Desoldring'
+                                ) ||
+                                boardFetch[0]?.type === 'Track change' ||
+                                boardFetch[0]?.type === 'Reflow'
+                            ) && (
                                 <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
                             )
                         }
-                      {filteredData.some(item => item.checkSubmit === "1") && (
-    <button className='ComCssSubmitButton' onClick={handleSubmit}>
-        Submit
-    </button>
-)}
 
+                        {boardFetch.some(item => item.checkSubmit === "1") && (
+                            <button className='ComCssSubmitButton' onClick={handleSubmit}>
+                                Submit
+                            </button>
+                        )}
 
+                        {submitButton && boardFetch.some(item => item.checkSubmit !== "1") && (
+                            <button className='ComCssSubmitButton' onClick={handleSubmit}>
+                                Submit
+                            </button>
+                        )}
                         {clearButton && (
                             <button className='ComCssClearButton' onClick={handleClear}>Clear</button>
                         )}

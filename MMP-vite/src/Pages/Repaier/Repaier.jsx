@@ -7,6 +7,7 @@ import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLStore } from '../../Services/Services_09';
 import { FaTimesCircle } from "react-icons/fa";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 
 const Repaier = () => {
@@ -34,6 +35,7 @@ const Repaier = () => {
     const [formErrors, setFormErrors] = useState({});
     const [table1Data, setTable1Data] = useState([]);
     const [table2Data, setTable2Data] = useState([]);
+    const [table3Data, setTable3Data] = useState([]);
     const [tableData, setTableData] = useState([]);
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(1);
@@ -45,6 +47,7 @@ const Repaier = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isFrozen, setIsFrozen] = useState(false);
+    const [suiData, setSuiData] = useState([]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -63,8 +66,11 @@ const Repaier = () => {
                 ? value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 11) // allow only letters & numbers
                 : value
         }));
+
+        console.log("formData", formData)
     };
 
+    console.log("formData", formData)
 
 
 
@@ -76,125 +82,135 @@ const Repaier = () => {
         setFormData(newData);
     };
     const valiDate = () => {
-  const errors = {};
-  let isValid = true;
+        const errors = {};
+        let isValid = true;
 
-  if (!formData.type) {
-      errors.type = "Please Select Type";
-      isValid = false;
-  }
+        if (!formData.type) {
+            errors.type = "Please Select Type";
+            isValid = false;
+        }
 
-  if (!formData.productname) {
-      errors.productname = "Please Select Product Name";
-      isValid = false;
-  }
+        if (!formData.productname) {
+            errors.productname = "Please Select Product Name";
+            isValid = false;
+        }
 
-  if (!formData.type) {
-      errors.type = "Please Enter Type";   // 🔴 overrides previous type error
-      isValid = false;
-  }
+        if (!formData.type) {
+            errors.type = "Please Enter Type";   // 🔴 overrides previous type error
+            isValid = false;
+        }
 
-  if (!formData.boardserialnumber?.trim()) {
-      errors.boardserialnumber = "Enter Module Serial Number";
-      isValid = false;
-  } else if (formData.boardserialnumber.length !== 11) {
-      errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
-      isValid = false;
-  }
-
- 
-
-  if (
-      ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
-      !formData.repairercomments
-  ) {
-      errors.repairercomments = "Please enter Comments";
-      isValid = false;
-  }
-
-  setFormErrors(errors);
-  return isValid;
-};
-
-const addValiDate = () => {
-  const errors = {};
-  let isValid = true;
-
-  if (!formData.type) {
-      errors.type = "Please Select Type";
-      isValid = false;
-  }
-
-  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
-      if (!formData.partcode) {
-          errors.partcode = "Please Enter Partcode";
-          isValid = false;
-      }
-  }
-
-  if (!formData.productname) {
-      errors.productname = "Please Enter Product Name";
-      isValid = false;
-  }
+        if (!formData.boardserialnumber?.trim()) {
+            errors.boardserialnumber = "Enter Module Serial Number";
+            isValid = false;
+        } else if (formData.boardserialnumber.length !== 11) {
+            errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+            isValid = false;
+        }
 
 
 
-  if (!formData.boardserialnumber?.trim()) {
-      errors.boardserialnumber = "Enter Module Serial Number";
-      isValid = false;
-  } else if (formData.boardserialnumber.length !== 11) {
-      errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
-      isValid = false;
-  }
+        if (
+            ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
+            !formData.repairercomments
+        ) {
+            errors.repairercomments = "Please enter Comments";
+            isValid = false;
+        }
 
-  if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
-      if (!formData.pickingqty) {
-          errors.pickingqty = "Please Enter Picking Qty";
-          isValid = false;
-      }
-  }
+        if (
+            ["ThermalGEL"].includes(formData.type) &&
+            !formData.tgquantity
+        ) {
+            errors.tgquantity = "Please enter Quantity";
+            isValid = false;
+        }
 
-  if (
-      ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
-      !formData.repairercomments
-  ) {
-      errors.repairercomments = "Please enter Comments";
-      isValid = false;
-  }
+        setFormErrors(errors);
+        return isValid;
+    };
 
-  setFormErrors(errors);
-  return isValid;
-};
+    const addValiDate = () => {
+        const errors = {};
+        let isValid = true;
+
+        if (!formData.type) {
+            errors.type = "Please Select Type";
+            isValid = false;
+        }
+
+        if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
+            if (!formData.partcode) {
+                errors.partcode = "Please Enter Partcode";
+                isValid = false;
+            }
+        }
+
+        if (!formData.productname) {
+            errors.productname = "Please Enter Product Name";
+            isValid = false;
+        }
 
 
-   const handleSubmit = (e) => {
-    e.preventDefault();
-    const userName = sessionStorage.getItem("userName") || "System";
-    let updatedFormData;
 
-    if (showTable) {
-        updatedFormData = tableData.map((row) => {
-            const { productfamily, productgroup,SUINo,Quantity, ...rest } = row; // remove both
-            return {
+        if (!formData.boardserialnumber?.trim()) {
+            errors.boardserialnumber = "Enter Module Serial Number";
+            isValid = false;
+        } else if (formData.boardserialnumber.length !== 11) {
+            errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+            isValid = false;
+        }
+
+        if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
+            if (!formData.pickingqty) {
+                errors.pickingqty = "Please Enter Picking Qty";
+                isValid = false;
+            }
+        }
+
+        if (
+            ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
+            !formData.repairercomments
+        ) {
+            errors.repairercomments = "Please enter Comments";
+            isValid = false;
+        }
+
+        setFormErrors(errors);
+        return isValid;
+    };
+
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+            setLoading(true);
+
+        const userName = sessionStorage.getItem("userName") || "System";
+        let updatedFormData;
+
+        if (showTable) {
+            updatedFormData = tableData.map((row) => {
+                const { productfamily, productgroup, SUINo, Quantity, ...rest } = row; // remove both
+                return {
+                    ...rest,
+                    createdby: userName,
+                    modifiedby: userName,
+                    repairername: userName
+                };
+            });
+        } else {
+            if (!valiDate()) return;
+            const { productfamily, productgroup, SUINo, Quantity, quantity, ...rest } = formData; // remove both
+
+            updatedFormData = {
                 ...rest,
                 createdby: userName,
                 modifiedby: userName,
                 repairername: userName
             };
-        });
-    } else {
-         if (!valiDate()) return;
-            const { productfamily, productgroup,SUINo,Quantity, ...rest } = formData; // remove both
-        
-        updatedFormData = {
-            ...rest,
-            createdby: userName,
-            modifiedby: userName,
-            repairername: userName
-        };
-    }
+        }
 
-    savePTLRepaier(updatedFormData)
+        savePTLRepaier(updatedFormData)
             .then((response) => {
                 // console.log("RESPONSE:", response);
                 if (response.status === 200 && response.data) {
@@ -218,7 +234,9 @@ const addValiDate = () => {
                 const errMsg = error?.response?.data?.message || "Network error, please try again";
                 setErrorMessage(errMsg);
                 setShowErrorPopup(true);
-            });
+            }) .finally(() => {
+    setLoading(false);
+});
     };
 
 
@@ -230,9 +248,11 @@ const addValiDate = () => {
         try {
             const response = await fetchproductPtl();
             if (response.status === 200) {
-                const { table1, table2 } = response.data;
+                const { table1, table2, table3 } = response.data;
                 setTable1Data(table1);
                 setTable2Data(table2);
+                setTable3Data(table3);
+
             } else {
                 console.error("Failed to fetch data");
             }
@@ -240,7 +260,7 @@ const addValiDate = () => {
             console.error("Error fetching data:", error);
         }
     };
-    // console.log("setTable1Data", table2Data);
+    // console.log("setTable1Data", table3Data);
 
     const productOptions = table1Data.map(item => ({
         label: item.productname,
@@ -255,6 +275,11 @@ const addValiDate = () => {
         partdescription: item.partdescription,
         racklocation: item.racklocation,
         availableqty: item.quantity
+    }));
+
+    const suiNoOptions = table3Data.map(item => ({
+        label: `${item.suiNo}`,
+        value: item.suiNo,
     }));
 
     const handleAddClick = () => {
@@ -311,15 +336,31 @@ const addValiDate = () => {
             SUINo: "",
             Quantity: ""
         });
-          setExtraFields({
-    productGroup: "",
-    productFamily: ""
-  });
+        setExtraFields({
+            productGroup: "",
+            productFamily: ""
+        });
         setFormErrors({});
         setTableData([]);
         setShowTable(false);
         setIsFrozen(false);
     }
+
+    //   useEffect(() => {
+    //     if (formData.SUINo) {
+    //         handleSearchClick(formData.SUINo);
+    //     }
+    // }, [formData.SUINo]);
+
+    const suiDataFilter = () => {
+        const suiNoOptions = tableData.map(item => ({
+            label: `${item.suiNo}`,
+            value: item.suiNo,
+        }));
+
+
+    }
+    console.log("tableda", suiData)
 
     return (
         <div className='ComCssContainer'>
@@ -334,19 +375,32 @@ const addValiDate = () => {
                     formErrors={formErrors} // ✅ Pass this prop
                     handlePoChange={handlePoChange}
                     productOptions={productOptions}
+                    suiNoOptions={suiNoOptions}
                     setFormData={setFormData}
                     partOptions={partOptions}
                     isFrozen={isFrozen}
                     setExtraFields={setExtraFields}
                     extraFields={extraFields}
+                    setSuiData={setSuiData}
+                    setTableData={setTableData}
+                    setShowTable={setShowTable}
+                    setFormErrors={setFormErrors}
 
                 />
                 <div className="ComCssButton9">
-                    {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") ? (
+                    {/* {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") ? (
                         <button className='ComCssSubmitButton' onClick={handleAddClick}>ADD</button>
                     ) : (
                         <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
+                    )} */}
+                    {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") && (
+                        <button className='ComCssSubmitButton' onClick={handleAddClick}>ADD</button>
                     )}
+
+                    {(formData.type !== "SUI" && formData.type !== "Rework" && formData.type !== "RND" && formData.type !== "BGA") && (
+                        <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
+                    )}
+
                     <button className='ComCssClearButton' onClick={handleClear}> Clear </button>
                 </div>
 
@@ -354,6 +408,7 @@ const addValiDate = () => {
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>ADD Board</h5>
+                                <LoadingOverlay loading={loading} />
 
                     <RepaierAddTable
                         data={tableData}

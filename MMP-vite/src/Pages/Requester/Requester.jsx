@@ -5,17 +5,17 @@ import RequesterDefaultTable from "../../components/Requester/RequesterDefaultTa
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchRequesterDetail, fetchRequesterSearch } from "../../components/Requester/RequesterActions.js";
-
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { saveGRN } from '../../Services/Services_09.js';
 import { checkAvailable, downloadRequester, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, saveRequester } from '../../Services/Services-Rc.js';
 import { ContactSupportOutlined } from '@mui/icons-material';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const Requester = () => {
     const [formData, setFormData] = useState({
         requestFor: null,
         requesterType: "",
-        orderType: null,
+        orderType: "",
         productName: null,
         partCode: null,
         availableQty: "",
@@ -28,7 +28,6 @@ const Requester = () => {
         compatibilityPartCode: "",
         faultySerialNumber: "",
         faultyUnitModuleSerialNo: ""
-
     });
 
     const [requestType, setRequestType] = useState([])
@@ -46,7 +45,7 @@ const Requester = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [downloadDone, setDownloadDone] = useState(false);
     const [requesterDeatil, setRequesterDetail] = useState([]);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(0);
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
@@ -129,10 +128,10 @@ const Requester = () => {
             errors.requestFor = " Select requestFor";
             isValid = false;
         }
-        if (!formData.orderType) {
-            errors.orderType = " Select orderType";
-            isValid = false;
-        }
+        // if (!formData.orderType) {
+        //     errors.orderType = " Select orderType";
+        //     isValid = false;
+        // }
         if (!formData.requesterType) {
             errors.requesterType = " Select requesterType";
             isValid = false;
@@ -173,18 +172,22 @@ const Requester = () => {
             isValid = false;
         }
         if (compatability.length >= 1 && !formData.compatibilityPartCode) {
-            errors.compatibilityPartCode = " Select compatibilityPartCode";
+            errors.compatibilityPartCode = " Enter compatibilityPartCode";
             isValid = false;
         }
-        if (formData.requesterType === "Submodule" && !formData.faultySerialNumber) {
-            errors.faultySerialNumber = " Select faultySerialNumber";
+   const type1 = formData.requesterType?.value || formData.requesterType;
+if (type1 === "Submodule" && !formData.faultyUnitModuleSerialNo) {            errors.faultySerialNumber = " Enter faultySerialNumber";
             isValid = false;
         }
-        if (formData.requesterType === "Submodule" && !formData.faultyUnitModuleSerialNo) {
-            errors.faultyUnitModuleSerialNo = "Select faultyUnitModuleSerialNo";
-            isValid = false;
-        }
-        
+        // if (formData.requesterType?.value === "Submodule" || formData.requesterType === "Submodule" && !formData.faultyUnitModuleSerialNo) {
+
+          const type = formData.requesterType?.value || formData.requesterType;
+if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
+    errors.faultyUnitModuleSerialNo = "Enter faultyUnitModuleSerialNo";
+    isValid = false;
+}
+
+
         setFormErrors(errors);
         return isValid;
     };
@@ -200,23 +203,22 @@ const Requester = () => {
         }
     }, [userId]);
 
-    // useEffect(() => {
-    //     if (formData?.orderType) {
-    //         fetchProductPartcode(userId, formData?.orderType?.value || formData?.orderType);
-    //     }
 
-    // }, [userId, formData?.orderType])
 
     useEffect(() => {
-    const orderTypeValue =
-        formData?.orderType?.value || formData?.orderType || 
-        (formData.requestFor?.value === "Material Request" ? "Repair" : null);
+        const orderTypeValue =
+            formData?.orderType?.value ||
+            formData?.orderType ||
+            (formData?.requestFor?.value === "Material Request" ? "Repair" : null);
 
-    if (orderTypeValue) {
-        fetchProductPartcode(userId, orderTypeValue);
-    }
-}, [userId, formData?.orderType, formData?.requestFor]);
+        //   const requesterType = formData?.requesterType;
+        const requesterType = formData?.requesterType?.value || formData?.requesterType
 
+
+        if (orderTypeValue && requesterType) {
+            fetchProductPartcode(userId, orderTypeValue, requesterType);
+        }
+    }, [userId, formData?.orderType, formData?.requestFor, formData?.requesterType]);
 
     // console.log("formData.partCode", formData.availableQty);
     useEffect(() => {
@@ -259,9 +261,10 @@ const Requester = () => {
 
 
     //Fetchpartcode and productname 
-    const fetchProductPartcode = async (userId, orderType) => {
+    const fetchProductPartcode = async (userId, orderType, requesterType) => {
         try {
-            const response = await fetchProductAndPartcode(userId, orderType);
+            setLoading(true)
+            const response = await fetchProductAndPartcode(userId, orderType, requesterType);
             const data = response.data;
             // console.log("Fetched Requester Types:", data)
             setPproductandPartcode(data)
@@ -269,6 +272,8 @@ const Requester = () => {
             // console.log("Requester Types:", data);
         } catch (error) {
             console.error("Error fetching requester types:", error);
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -347,13 +352,16 @@ const Requester = () => {
 
         setTableData(prev => [...prev, {
             ...formData,
+            orderType: formData.orderType,
             productName: formData.productName.productname,
             partCode: formData.partCode.partcode,
-            partDescription: formData.partCode.partdescription
+            partDescription: formData.partCode.partdescription,
+            requestFor: formData.requestFor.value,      // keep the value
+            requesterType: formData.requesterType.value // keep the value
         }]);
         setIsFrozen(true);
         setFormData(prev => ({
-            RecevingTicketNo: "",
+            // RecevingTicketNo: "",
             requestFor: formData.requestFor,
             requesterType: formData.requesterType,
             orderType: formData.orderType,
@@ -426,6 +434,7 @@ const Requester = () => {
     // };
 
     const handleSubmit = async () => {
+        setLoading(true)
         const partcodeQtyMap = tableData.map(item => {
             if (item.compatibilityPartCode) {
                 return {
@@ -467,7 +476,7 @@ const Requester = () => {
                         fetchRequester()
                         // formClear();
                         setFormData({
-                                    requestFor: null, 
+                            requestFor: null,
                         })
                         // console.log("formdata after submit", formData)
                         // if (typeof handleClear === "function") handleClear();
@@ -483,24 +492,38 @@ const Requester = () => {
                     const errMsg = error?.response?.data?.message || "Network error, please try again";
                     setErrorMessage(errMsg);
                     setShowErrorPopup(true);
+                }).finally(() => {
+                    setLoading(false);
                 });
         }
     };
 
     const fetchRequester = () => {
         const userId = sessionStorage.getItem("userName") || "System";
-fetchRequesterDetail(page -1, perPage, userId, setRequesterDetail, setTotalRows);
+        fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
 
         // fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
         // setHiddenButton("closed");
     }
 
-    const fetchfindSearch = (page, size, search) => {
-        // console.log("searchfetch", search);
-        // setLoading(true)
-        const userId = sessionStorage.getItem("userName") || "System";
-        fetchRequesterSearch(page, userId, perPage, setRequesterDetail, search, setTotalRows);
+    // const fetchfindSearch = (page, size, search) => {
+    //     setLoading(true)
+    //     const userId = sessionStorage.getItem("userName") || "System";
+    //     fetchRequesterSearch(page, userId, perPage, setRequesterDetail, search, setTotalRows);
 
+    // };
+
+
+    const fetchfindSearch = async (page, size, search) => {
+        setLoading(true);
+        try {
+            const userId = sessionStorage.getItem("userName") || "System";
+            await fetchRequesterSearch(page, userId, perPage, search, setRequesterDetail, setTotalRows);
+        } catch (error) {
+            console.error("Error fetching requester:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const useDebounce = (value, delay) => {
@@ -515,20 +538,27 @@ fetchRequesterDetail(page -1, perPage, userId, setRequesterDetail, setTotalRows)
     const debouncedSearch = useDebounce(searchText, 500);
 
     useEffect(() => {
+        
         fetchData(page, perPage, debouncedSearch);
     }, [page, perPage, debouncedSearch]);
 
 
-    const fetchData = (page = 0, size = 10, search = "") => {
-        // console.log("searchfetch", search);
-        if (search && search.trim() !== "") {
-            fetchfindSearch(page, size, search);
-        }
-        // else if (isFilterActive) {
-        //     fetchFilterResult();
-        // }
-        else {
-            fetchRequester(page, size)
+    const fetchData = async (page = 0, size = 10, search = "") => {
+        setLoading(true); // start loader
+        try {
+            if (search && search.trim() !== "") {
+                await fetchfindSearch(page, size, search);
+            }
+            // else if (isFilterActive) {
+            //     fetchFilterResult();
+            // }
+            else {
+                await fetchRequester(page, size)
+            }
+        } catch (err) {
+            console.error("Error fetching putaway data:", err);
+        } finally {
+            setLoading(false); // stop loader after API finishes
         }
     };
     const exportToExcel = (search = "") => {
@@ -653,6 +683,8 @@ fetchRequesterDetail(page -1, perPage, userId, setRequesterDetail, setTotalRows)
                         )}
                     </div>
                 </div>
+                <LoadingOverlay loading={loading} />
+
                 <RequesterDefaultTable
                     data={requesterDeatil}
                     page={page}

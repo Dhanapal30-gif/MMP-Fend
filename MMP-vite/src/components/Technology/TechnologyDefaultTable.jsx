@@ -15,33 +15,44 @@ const TechnologyDefaultTable = ({
   setSelectedRows,
   onEdit,
 }) => {
-      const columns = generateColumns({
-        fields: [
-          "Edit",
-          "sui",
+  const columns = generateColumns({
+    fields: [
+      "Edit",
+      "sui",
       "partcode",
       "partdescription",
       "racklocation",
       "availableqty",
       "req_qty"
-    
-        ],
-        // onEdit,
-        selectedRows,
-        // handleSelect,
-        // handleSelectAll,
-        // data: processedData,
-        customCellRenderers: {
-          Edit: (row) => (
-            <button className="edit-button" onClick={() => onEdit(row)}>
-              <FaEdit />
-            </button>
-          ),
-        },
-        // customLabels,
-      });
+
+    ],
+    customConfig: {
+      sui: { label: "SUI" },
+      partcode: { label: "partCode" },
+      partdescription: { label: "Board Serial Number", }, // ✅ this works
+      racklocation: { label: "ReackLocation" },
+      availableqty: { label: "Available Qty" },
+      req_qty: { label: "Requested Qty" },
+
+
+
+    },
+    // onEdit,
+    selectedRows,
+    // handleSelect,
+    // handleSelectAll,
+    // data: processedData,
+    customCellRenderers: {
+      Edit: (row) => (
+        <button className="edit-button" onClick={() => onEdit(row)}>
+          <FaEdit />
+        </button>
+      ),
+    },
+    // customLabels,
+  });
   return (
-<div>
+    <div>
       <CommonDataTable
         columns={columns}
         data={data}
@@ -52,7 +63,7 @@ const TechnologyDefaultTable = ({
         onPageChange={setPage}
         onPerPageChange={setPerPage}
       />
-    </div>  )
+    </div>)
 }
 
 export default TechnologyDefaultTable

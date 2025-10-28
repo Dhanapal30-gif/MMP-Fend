@@ -24,6 +24,7 @@ const ReworkerTextFiled7 = ({ formData, setFormData, isFrozen,
     const getOptionObj = (value, options) => {
         return options.find((opt) => opt.value === value) || null;
     };
+    console.log("formData",formData)
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>

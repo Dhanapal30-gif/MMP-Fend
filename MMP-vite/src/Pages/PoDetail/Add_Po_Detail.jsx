@@ -58,6 +58,17 @@ const Add_Po_Detail = () => {
     ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", partdiscription: ""
   })
 
+  const [table1Page, setTable1Page] = useState(1);
+  const [table1PerPage, setTable1PerPage] = useState(10);
+  const [table1TotalRows, setTable1TotalRows] = useState(0);
+
+
+
+  const handleTable1PageChange = (table1Page) => setTable1Page(table1Page);
+  const handleTable1PerRowsChange = (newPerPage, page) => setTable1PerPage(newPerPage);
+
+
+
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -128,22 +139,22 @@ const Add_Po_Detail = () => {
     />
   );
   const fetchVendotMaster = async () => {
-  setLoading(true);
-  try {
-    const response = await getVenodtMaster();
+    setLoading(true);
+    try {
+      const response = await getVenodtMaster();
 
-    // Filter out items where vendorName is null/undefined
-    const cleanedData = (response.data || []).filter(
-      item => item.vendorName != null && item.vendorName !== ""
-    );
+      // Filter out items where vendorName is null/undefined
+      const cleanedData = (response.data || []).filter(
+        item => item.vendorName != null && item.vendorName !== ""
+      );
 
-    setVendorMaster(cleanedData);
-  } catch (error) {
-    console.error("Error fetching vendors", error);
-  } finally {
-    setLoading(false);
-  }
-};
+      setVendorMaster(cleanedData);
+    } catch (error) {
+      console.error("Error fetching vendors", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const fetchCurrencyMaster = async () => {
@@ -196,7 +207,7 @@ const Add_Po_Detail = () => {
     } else {
       fetchPoDetail(page, perPage);
       setSelectedRows([]);
-    
+
     }
   }
 
@@ -231,7 +242,7 @@ const Add_Po_Detail = () => {
   }, [formData.totalvalue, formData.ccf]);
 
   const formClear = () => {
-    setHandleAdd(true); 
+    setHandleAdd(true);
     setIsFrozen(false);
     setShowTable(false);
     setHandleUpdateButton(false);
@@ -373,12 +384,12 @@ const Add_Po_Detail = () => {
       setSelectedRows([]);
       setDeletButton(false);
       setHandleSubmitButton(true);
-            setHandleAdd(true)
+      setHandleAdd(true)
 
     }
   };
 
- 
+
   const handleRowSelect = (rowKey) => {
     setHandleUpdateButton(false);
     setHandleAdd(false);
@@ -395,12 +406,12 @@ const Add_Po_Detail = () => {
         setDeletButton(false);
         setHandleSubmitButton(true);
         setHandleUpdateButton(false);
-                setHandleAdd(true)
+        setHandleAdd(true)
 
       } else {
         setDeletButton(true);
         setHandleSubmitButton(false);
-        
+
       }
       return updatedRows;
     });
@@ -408,7 +419,7 @@ const Add_Po_Detail = () => {
   const Defaultcolumn = [
     {
       name: (
-        <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+        <div style={{ textAlign: 'center', marginLeft: '10px' }}>
           <label>Select</label>
           <br />
           <input type="checkbox" onChange={handleSelectAll}
@@ -523,11 +534,11 @@ const Add_Po_Detail = () => {
 
     if (newData.length === 0) {
       setShowTable(false);
- setFormData({
-      ordertype: "", potool: "", ponumber: "", podate: "",
-      currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
-      ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", postatus: "", ordertype: "", partdiscription: "", UOM: ""
-    })    
+      setFormData({
+        ordertype: "", potool: "", ponumber: "", podate: "",
+        currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
+        ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", postatus: "", ordertype: "", partdiscription: "", UOM: ""
+      })
       setIsFrozen(false);
     }
   };
@@ -588,24 +599,24 @@ const Add_Po_Detail = () => {
   }
 
   const handleSubmit = (e) => {
+    setLoading(true);
     e.preventDefault();
     const createdby = sessionStorage.getItem("userName") || "System";
-    const modifiedby = sessionStorage.getItem("userName") || "System";
+    const updatedby = sessionStorage.getItem("userName") || "System";
     const updatedFormData = tableData.map((row) => ({
       ...row,
       createdby,
-      modifiedby,
+      updatedby,
     }));
     savePoDetail(updatedFormData)
       .then((response) => {
         setSuccessMessage(response.data.message);
         setShowSuccessPopup(true);
-        fetchPoDetail(page, perPage);
+                fetchPoDetail(page, perPage);
         setShowTable(false);
         setTableData([]);
         formClear();
-        // fetchProduct(page, perPage);
-        //setPage(1);
+
       })
       .catch((error) => {
         if (error.response) {
@@ -620,7 +631,9 @@ const Add_Po_Detail = () => {
           setErrorMessage("Network error, please try again");
           setShowErrorPopup(true);
         }
-      });
+      }).finally(() => {
+            setLoading(false); // always stop loader
+        });
   };
 
   const handleEdit = (row) => {
@@ -868,9 +881,9 @@ const Add_Po_Detail = () => {
             <Autocomplete
               disabled={isFrozen}
               options={vendorMaster}
-                            ListboxComponent={DropdownCom}
+              ListboxComponent={DropdownCom}
 
-              getOptionLabel={(option) => option.vendorName || ""} // ensure it's a string
+              getOptionLabel={(option) => option.vendorName || ""}
               value={vendorMaster.find(item => item.vendorName === formData.vendorname) || null}
               onChange={(event, newValue) => {
                 if (newValue) {
@@ -1031,25 +1044,27 @@ const Add_Po_Detail = () => {
         </div>
         <div className='ComCssButton9'>
           {handleAdd && <button className='ComCssAddButton' onClick={handleAddClick} >ADD</button>}
-          {handleUpdateButton && <button className='ComCssUpdateButton'  onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
-          {deletButton && <button className='ComCssDeleteButton'  onClick={onDeleteClick}   >Delete</button>}
+          {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+          {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
           <button className='ComCssClearButton' onClick={formClear}>Clear</button>
         </div>
 
       </div>
       {showTable && (
         <div className='ComCssTable'>
-          <h5 className='prodcutTableName'>ADD PoDeatil</h5>
+          <h5 className='ComCssTableName'>ADD PO</h5>
           <DataTable
             columns={column}
             data={tableData}
             pagination
-            paginationServer
+            // paginationServer
             progressPending={loading}
-            paginationTotalRows={totalRows}
-            onChangeRowsPerPage={handlePerRowsChange}
-            onChangePage={handlePageChange}
-            paginationPerPage={perPage}
+            paginationTotalRows={tableData.length}
+            onChangeRowsPerPage={handleTable1PerRowsChange}
+            onChangePage={handleTable1PageChange}
+            // paginationCurrentPage={table1Page}      // <-- controlled current page
+
+            paginationPerPage={table1PerPage}
             paginationRowsPerPageOptions={[10, 20, 30, 50]}
             paginationComponentOptions={{
               rowsPerPageText: 'Rows per page:',
@@ -1089,7 +1104,7 @@ const Add_Po_Detail = () => {
           </button>
 
           <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-            
+
             <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />

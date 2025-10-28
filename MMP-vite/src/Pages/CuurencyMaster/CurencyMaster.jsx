@@ -280,7 +280,7 @@ const CurencyMaster = () => {
         {
             name: (
                 <div style={{ textAlign: 'center', }}>
-                    <label>Delete All</label>
+                    <label>Select All</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
                         checked={selectedRows.length === curencyMster.length && curencyMster.length > 0}

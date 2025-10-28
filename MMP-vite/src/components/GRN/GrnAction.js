@@ -4,6 +4,7 @@ export const fetchPendingGrn = (setData, setShowErrorPopup) => {
   fetchGrnPendingDetail()
     .then((response) => {
       setData(response.data);
+      console.log("GRN",response.data)
     })
     .catch((error) => {
     //   const msg = error?.response?.data?.message || "Error fetching data";

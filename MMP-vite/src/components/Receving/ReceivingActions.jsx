@@ -20,20 +20,47 @@ export const fetchPoDeatil=(setData)=>{
 
 }
 
+// export const fetchReceving = (setDataCallback, setTotalRows, page = 1, size = 10) => {
+//   fetchRec(page - 1, size)
+//     .then((response) => {
+//       if (response?.data?.content) {
+//         setDataCallback(response.data.content);
+//         setTotalRows(response.data.totalElements || 0);
+//       } else {
+//         console.warn("No content found in response:", response.data);
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching receiving data:", error);
+//        setData([]);
+//     setTotalRows(0);
+//           throw error; // propagate so caller knows API didn't finish
+
+//     });
+// };
+
+
 export const fetchReceving = (setDataCallback, setTotalRows, page = 1, size = 10) => {
-  fetchRec(page - 1, size)
+  // return the promise so the caller can await it
+  return fetchRec(page - 1, size)
     .then((response) => {
       if (response?.data?.content) {
         setDataCallback(response.data.content);
         setTotalRows(response.data.totalElements || 0);
       } else {
+        setDataCallback([]);
+        setTotalRows(0);
         console.warn("No content found in response:", response.data);
       }
     })
     .catch((error) => {
       console.error("Error fetching receiving data:", error);
+      setDataCallback([]);
+      setTotalRows(0);
+      throw error; // propagate error
     });
 };
+
 
 // recvingAction.js
 export const fetchfind = (setDataCallback, setTotalRows, page = 1, size = 10, search = "") => {
@@ -47,8 +74,9 @@ export const fetchfind = (setDataCallback, setTotalRows, page = 1, size = 10, se
       }
     })
     .catch((error) => {
-      console.error("Error fetching receiving data:", error);
-      throw error; // important to propagate
+      setData([]);
+    setTotalRows(0);
+    throw error; // propagate so caller knows API didn't finish
     });
 };
 

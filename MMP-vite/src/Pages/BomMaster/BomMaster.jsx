@@ -425,13 +425,13 @@ const BomMaster = () => {
         { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "60px" },
         ,
         {
-            name: "Partcode",
+            name: "PartCode",
             selector: row => row.partcode,
             sortable: true,
             width: `${calculateColumnWidth(bomMaster, 'partcode')}px`
         },
         {
-            name: "partDescription",
+            name: "Part Description",
             selector: row => row.partdescription,
             wrap: true,
             // width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
@@ -851,7 +851,7 @@ const BomMaster = () => {
             </div>
             <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (
-                    <h5 className='ComCssTableName'>BOM Master Detail</h5>
+                    <h5 className='ComCssTableName'>BOM Master Details ✅</h5>
                 )}
 
                 {showUploadTable && !showBomTable && (

@@ -10,6 +10,7 @@ import { RecevingTable, ColumnTable } from '../../components/Receving/RecevingTa
 import { GlobalStyles } from '@mui/material';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import * as XLSX from "xlsx";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 import { FaFileExcel } from "react-icons/fa";
 
@@ -54,7 +55,7 @@ const Receving = () => {
     );
   };
 
-//receving ticket no fetching
+  //receving ticket no fetching
   // useEffect(() => {
   //   fetchRecevingData((ticketNo) => {
   //     setRecTicketNo(ticketNo);
@@ -89,20 +90,26 @@ const Receving = () => {
     );
     filteredDetail.forEach((row, index) => {
       if (!row.recevingQty) {
-        errors[`recevingQty-${index}`] = "Please Enter RecevingQty";
-        isValid = false;
-      }
-      if (!row.totalValue) {
-        errors[`totalValue-${index}`] = "Please Enter TotalValue";
-        isValid = false;
-      }
-      if (!row.exp_date) {
-        if (!row.expdateapplicable === "yes") {
-          errors[`exp_date-${index}`] = "Please Enter Expiry Date";
-          isValid = false;
+        // errors[`recevingQty-${index}`] = "Please Enter RecevingQty";
+        errors[`recevingQty-${row.ponumber}-${row.partcode}`] = "Please Enter RecevingQty";
 
-        }
+        isValid = false;
       }
+
+      if (!row.totalValue) {
+        // errors[`totalValue-${index}`] = "Please Enter TotalValue";
+        const key = `${row.ponumber}-${row.partcode}`;
+        errors[`totalValue-${key}`] = "Please Enter TotalValue";
+        isValid = false;
+      }
+
+      if (row.expdateapplicable?.toLowerCase() === "yes" && !row.exp_date) {
+        const key = `${row.ponumber}-${row.partcode}`;
+        errors[`exp_date-${key}`] = "Please Enter Expiry Date";
+        isValid = false;
+      }
+
+
     });
     setFormErrors(errors);
     return isValid;
@@ -143,78 +150,6 @@ const Receving = () => {
   }));
 
 
-  // const handleAction = (e) => {
-  //   e.preventDefault();
-
-  //   if (!valiDate()) return;
-
-  //   if (selectedRows.length === 0) {
-  //     setErrorMessage("Please select at least one item before submitting.");
-  //     setShowErrorPopup(true);
-  //     return;
-  //   }
-
-  //   const selectedKeys = new Set(selectedRows); // selectedRows = ["P001-IT01", "P001-IT02"]
-  //   const filteredData = finalData.filter((row) =>
-  //     selectedKeys.has(`${row.ponumber}-${row.partcode}`)
-  //   );
-
-  //   if (filteredData.length === 0) {
-  //     setErrorMessage("Selected data not matching.");
-  //     setShowErrorPopup(true);
-  //     return;
-  //   }
-
-  //   const username = sessionStorage.getItem("userName") || "System";
-  //   const updatedFormData = filteredData.map((row) => ({
-  //     ...row,
-  //     createdby: username,
-  //     updatedby: username,
-  //   }));
-
-
-  //   const updatedYTFormData = handleEdit.map((row) => ({
-  //     ...row,
-  //     updatedby: username,
-  //   }));
-
-  //   //  Choose correct API based on button type
-  //   const apiCall = submitButton
-  //     ? recevingDetail
-  //     : updateButton
-  //     ? updateRecDeatil
-  //     : null;
-
-  //   if (!apiCall) {
-  //     setErrorMessage("No action specified (Submit or Update).");
-  //     setShowErrorPopup(true);
-  //     return;
-  //   }
-
-  //   apiCall(updatedFormData, updatedYTFormData)
-  //     .then((response) => {
-  //       setSuccessMessage(response.data.message);
-  //       setShowSuccessPopup(true);
-  //       setShowRecevingTable(false);
-  //       setPoDetail([]);
-  //       setFormData({});
-
-  //       // ✅ Regenerate new ticket after save
-  //       fetchRecevingData((ticketNo) => {
-  //         setRecTicketNo(ticketNo);
-  //         setFormData((prev) => ({
-  //           ...prev,
-  //           recevingTicketNo: ticketNo,
-  //         }));
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       const message =
-  //         error?.response?.data?.message || "Network error, please try again";
-  //       setErrorMessage(message);
-  //       setShowErrorPopup(true);
-  //     });
-  // };
   const handleAction = (e) => {
     e.preventDefault();
 
@@ -335,11 +270,15 @@ const Receving = () => {
 
   const fetchFindData = async (page = 1, size = 10, search = "") => {
     setLoading(true); // loader start
+      // await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
     try {
       if (search && search.trim() !== "") {
         await fetchfind(setRecevingData, setTotalRows, page, size, search);
       } else {
         await fetchReceving(setRecevingData, setTotalRows, page, size);
+        // await new Promise((resolve) => setTimeout(resolve, 190));
+
       }
     } catch (error) {
       console.error(error);
@@ -580,6 +519,8 @@ const Receving = () => {
 
           </div>
         )}
+        <LoadingOverlay loading={loading} />
+
         <ColumnTable
           recevingData={recevingData}
           selectedRows={selectedRows}

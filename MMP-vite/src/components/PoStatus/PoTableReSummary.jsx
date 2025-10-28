@@ -33,6 +33,17 @@ const PoTableReSummary = ({
       "recevingQty",
       "GRNQty"
     ],
+    customConfig: {
+      ponumber: { label: "PO Number" },
+      postingdate: { label: "Posting Date", },
+      partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      recevingTicketNo: { label: "Receving TicketNo" },
+      recevingQty: { label: "Receving Qty" },
+      GRNQty: { label: "GRN Qty" },
+      GRDate: { label: "GRN Date" },
+      GRNo: { label: "GRN No" },
+    },
     selectedRows,
     handleGRNQtyChange,
     onEdit,

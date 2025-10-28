@@ -89,15 +89,32 @@ const PutawayRetProcessTable = ({
 
             "location",
             "Batchcode",
-            
+            "createdBy"
+
         ],
+        customConfig: {
+            Rec_ticket_no: { label: "Returning TicketNo" },
+            RequesterType: { label: "Requester Type", },
+            Partcode: { label: "PartCode" },
+            Partdescription: { label: "Part Description" },
+            ReturningQty: { label: "Returning Qty" },
+            Approved_Qty: { label: "Approved Qty" },
+            putQty: { label: "PUT Qty" },
+            location: { label: "Location" },
+            Batchcode: { label: "BatchCode" },
+              createdBy: { label: "Created By" },
+        },
         selectedRows: selectedRows1,
         handleSelect: handleSelect1,
         handleSelectAll: handleSelectAll1,
         customCellRenderers: {
             location: (row) => {
                 if (!row.location) return "";
-                const parts = row.location.split(",");
+                const value = Array.isArray(row.location)
+                    ? row.location.join(",")
+                    : String(row.location);
+
+                const parts = value.split(",");
                 return (
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         {parts.map((loc, i) => (
@@ -106,27 +123,38 @@ const PutawayRetProcessTable = ({
                     </div>
                 );
             },
+            // location: (row) => {
+            //     if (!row.location) return "";
+            //     const parts = row.location.split(",");
+            //     return (
+            //         <div style={{ display: "flex", flexDirection: "column" }}>
+            //             {parts.map((loc, i) => (
+            //                 <span key={i}>{loc.trim()}</span>
+            //             ))}
+            //         </div>
+            //     );
+            // },
 
-                putQty: (row) => {
-  const isEdit = !!row.putQtyDetails; // true → Edit Qty
-  return (
-    <Button
-      variant="outlined"
-      size="small"
-      onClick={() => handleOpen(row)}
-      sx={{
-        color: "white",
-        backgroundColor: isEdit ? "brown" : "#1bd0a6ff",  // brown for edit, green for add
-        borderColor: isEdit ? "brown" : "green",
-        "&:hover": {
-          backgroundColor: isEdit ? "#8B4513" : "#3ef43eff"
-        }
-      }}
-    >
-      {isEdit ? "Edit Qty" : "Add Qty"}
-    </Button>
-  );
-},
+            putQty: (row) => {
+                const isEdit = !!row.putQtyDetails; // true → Edit Qty
+                return (
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleOpen(row)}
+                        sx={{
+                            color: "white",
+                            backgroundColor: isEdit ? "brown" : "#1bd0a6ff",  // brown for edit, green for add
+                            borderColor: isEdit ? "brown" : "green",
+                            "&:hover": {
+                                backgroundColor: isEdit ? "#8B4513" : "#3ef43eff"
+                            }
+                        }}
+                    >
+                        {isEdit ? "Edit Qty" : "Add Qty"}
+                    </Button>
+                );
+            },
 
         }
     });
@@ -148,20 +176,20 @@ const PutawayRetProcessTable = ({
             {/* ✅ Popup with Table */}
             <Dialog
                 open={open}
-onClose={(event, reason) => {
-        // Only close on Cancel button, ignore backdrop click or escape
-        if (reason === "backdropClick" || reason === "escapeKeyDown") {
-            return;
-        }
-        setOpen(false);
-    }}
-    disableEscapeKeyDown // optionalmaxWidth={false} 
-      maxWidth={false}     
+                onClose={(event, reason) => {
+                    // Only close on Cancel button, ignore backdrop click or escape
+                    if (reason === "backdropClick" || reason === "escapeKeyDown") {
+                        return;
+                    }
+                    setOpen(false);
+                }}
+                disableEscapeKeyDown // optionalmaxWidth={false} 
+                maxWidth={false}
 
                 fullWidth
                 PaperProps={{
                     sx: {
-                         width: 900,   
+                        width: 900,
                         border: '3px solid', // border width required
                         borderImage: 'linear-gradient(to bottom, #d27c19ff 50%, #afee39ff 50%) 1', // top 50% blue, bottom 50% green
                         borderRadius: 3,              // rounded corners

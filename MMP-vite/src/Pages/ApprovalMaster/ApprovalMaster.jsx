@@ -25,7 +25,7 @@ const ApprovalMaster = () => {
     const [approvalMaster, setApprovalMaster] = useState([]);
     const [searchText, setSearchText] = useState("");
     const [showApprovalTable, setShowApprovalTable] = useState(true);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [showUploadTable, setShowUploadTable] = useState(false);
     const [loading, setLoading] = useState(false);
     const [totalRows, setTotalRows] = useState(0);
@@ -181,9 +181,10 @@ const ApprovalMaster = () => {
     const fetchApprovalMaster = () => {
         fetchApproval()
             .then(response => {
-                setApprovalMaster(response.data.data || []);
-                setTotalRows(response.data.toatlElements || 0);
-                // console.log("fetchCurrency", response.data.data);
+                const data = response.data.data || [];
+                setApprovalMaster(data);
+                setTotalRows(data.length); // ✅ use data.length, not approvalMaster.length
+                console.log("fetchCurrency", data.length);
             });
 
     }
@@ -290,7 +291,7 @@ const ApprovalMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+                <div style={{ textAlign: 'center', marginLeft: '10px' }}>
                     <label>Select</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
@@ -939,57 +940,57 @@ const ApprovalMaster = () => {
                         className="react-datatable"
                         //conditionalRowStyles={rowHighlightStyle}
                         customStyles={{
-                            headRow: {
-                                style: {
-                                    background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    minHeight: "50px",
-                                },
-                            },
-                            rows: {
-                                style: {
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    alignItems: "center", // Centers content vertically
-                                    fontFamily: "Arial, Helvetica, sans-serif",
-                                },
-                            },
-                            cells: {
-                                style: {
-                                    padding: "5px",  // Removed invalid negative padding
-                                    //textAlign: "center",
-                                    justifyContent: "center",  // Centers header text
-                                    whiteSpace: 'pre-wrap', // wrap text
-                                    wordBreak: 'break-word', // allow breaking words
-                                },
-                            },
-                            headCells: {
-                                style: {
-                                    display: "flex",
-                                    justifyContent: "center",  // Centers header text
-                                    alignItems: "left",
-                                    textAlign: "left",
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                },
-                            },
-                            pagination: {
-                                style: {
-                                    border: "1px solid #ddd",
-                                    backgroundColor: "#f9f9f9",
-                                    color: "#333",
-                                    minHeight: "35px",
-                                    padding: "5px",
-                                    fontSize: "12px",
-                                    fontWeight: "bolder",
-                                    display: "flex",
-                                    justifyContent: "flex-end", // Corrected
-                                    alignItems: "center", // Corrected
-                                },
-                            },
+                            // headRow: {
+                            //     style: {
+                            //         background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                            //         color: "white",
+                            //         fontWeight: "bold",
+                            //         fontSize: "14px",
+                            //         textAlign: "center",
+                            //         minHeight: "50px",
+                            //     },
+                            // },
+                            // rows: {
+                            //     style: {
+                            //         fontSize: "14px",
+                            //         textAlign: "center",
+                            //         alignItems: "center", // Centers content vertically
+                            //         fontFamily: "Arial, Helvetica, sans-serif",
+                            //     },
+                            // },
+                            // cells: {
+                            //     style: {
+                            //         padding: "5px",  // Removed invalid negative padding
+                            //         //textAlign: "center",
+                            //         justifyContent: "center",  // Centers header text
+                            //         whiteSpace: 'pre-wrap', // wrap text
+                            //         wordBreak: 'break-word', // allow breaking words
+                            //     },
+                            // },
+                            // headCells: {
+                            //     style: {
+                            //         display: "flex",
+                            //         justifyContent: "center",  // Centers header text
+                            //         alignItems: "left",
+                            //         textAlign: "left",
+                            //         whiteSpace: 'pre-wrap',
+                            //         wordBreak: 'break-word',
+                            //     },
+                            // },
+                            // pagination: {
+                            //     style: {
+                            //         border: "1px solid #ddd",
+                            //         backgroundColor: "#f9f9f9",
+                            //         color: "#333",
+                            //         minHeight: "35px",
+                            //         padding: "5px",
+                            //         fontSize: "12px",
+                            //         fontWeight: "bolder",
+                            //         display: "flex",
+                            //         justifyContent: "flex-end", // Corrected
+                            //         alignItems: "center", // Corrected
+                            //     },
+                            // },
                         }}
                     />
                 )}

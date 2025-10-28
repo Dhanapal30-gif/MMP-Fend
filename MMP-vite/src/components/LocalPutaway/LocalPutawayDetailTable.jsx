@@ -12,7 +12,7 @@ const formatDateArray = (arr) => {
 const fields = ["partcode", "partdescription", "racklocation", "putawayqty", "createdby", "createddate"];
 
 const customConfig = {
-  partcode: { label: "Part Code" ,width: "170px",},
+  partcode: { label: "Part Code" ,width: "10px",},
   partdescription: { label: "Part Description", width: "379px" },
   racklocation: { label: "Rack Location", width: "150px" },
   putawayqty: { label: "Putaway Qty", width: "130px" },
@@ -29,7 +29,7 @@ const LocalPutawayDetailTable =
   setPage,
   setPerPage,
 }) => {
-      console.log("data",data)
+      // console.log("data",data)
 
   const processedData = React.useMemo(() => {
     return data.map((item) => ({

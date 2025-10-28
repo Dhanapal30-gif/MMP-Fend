@@ -77,14 +77,7 @@ const HeaderComponents = () => {
   };
 
   const [notifications, setNotifications] = useState([
-    "Have receving ticket RE0000789",
-    "Have GRN ticket RE0000789",
-    "Have Putaway ticket RE0000789",
-    "Have Isuuance ticket RE0000789",
-    "Have receving ticket RE0000789",
-    "Have GRN ticket RE0000789",
-    "Have Putaway ticket RE0000789",
-    "Have Isuuance ticket RE0000789",
+
   ]);
   const handleRemove = (index) => {
     setNotifications((prev) => prev.filter((_, i) => i !== index));
@@ -100,16 +93,16 @@ const HeaderComponents = () => {
 
   // console.log("allowedScreens", sessionStorage.getItem("allowedScreens"))
 
-const isScreenAllowed = (screenName) => {
-  const allowedScreens = JSON.parse(sessionStorage.getItem("allowedScreens") || "[]");
-  // console.log("Allowed Screens from sessionStorage:", allowedScreens);
-  // console.log("Checking screenName:", screenName);
+  const isScreenAllowed = (screenName) => {
+    const allowedScreens = JSON.parse(sessionStorage.getItem("allowedScreens") || "[]");
+    // console.log("Allowed Screens from sessionStorage:", allowedScreens);
+    // console.log("Checking screenName:", screenName);
 
-  const result = allowedScreens.includes(screenName);
-  // console.log("isScreenAllowed Result:", result);
+    const result = allowedScreens.includes(screenName);
+    // console.log("isScreenAllowed Result:", result);
 
-  return result;
-};
+    return result;
+  };
 
   // console.log("userRole", userRole)
   //   console.log("isScreenAllowed", isScreenAllowed("userDetail"))
@@ -299,16 +292,15 @@ const isScreenAllowed = (screenName) => {
                   )}
                 </li>
 
-                {/* Dashboard Dropdown */}
                 <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
                   <span className="nav-link">
-                    <FaChartPie className="nav-icon" /> Dashboard <FaChevronDown className="dropdown-icon" />
+                    <FaFileAlt className="nav-icon" /> Stock <FaChevronDown className="dropdown-icon" />
                   </span>
                   {servicesDropdown && (
                     <ul className="dropdown-menu">
-                      {/* <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
-                    <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li> */}
+                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/stockTransfer" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Transfer</Link></li>)}
+                      {/* {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)} */}
 
                     </ul>
                   )}
@@ -330,15 +322,17 @@ const isScreenAllowed = (screenName) => {
                     </ul>
                   )}
                 </li>
-                  <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
+
+                {/* Dashboard Dropdown */}
+                <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
 
                   <span className="nav-link">
-                    <FaFileAlt className="nav-icon" /> Stock <FaChevronDown className="dropdown-icon" />
+                    <FaChartPie className="nav-icon" /> Dashboard <FaChevronDown className="dropdown-icon" />
                   </span>
                   {servicesDropdown && (
                     <ul className="dropdown-menu">
-                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/stockTransfer" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Transfer</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
+                      {/* <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
+                    <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li> */}
 
                     </ul>
                   )}

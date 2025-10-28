@@ -5,32 +5,33 @@ import { TextField } from "@mui/material";
 import { saveDoneRequest, savePickequest } from '../../Services/Services_09';
 import CryptoJS from "crypto-js";
 
-         
+
 const fields = [
     "requestTicketNo",
-              "requesterType",
-              "requestFor",
-              "orderType",
-              "productName",
-              "productGroup",
-              "productFamily",
-              "partCode",
-              "partDescription",
-              "UOM",
-              "typeOfComponents",
-              "componanetUsage",
-              "compatibilityPartcode",
-              "requestQty",
-              "approved1Qty",
-              "approved2Qty",
-              "faultySerialNo",
-              "faultyUnitModuleSerialNo"
+    "requesterType",
+    "requestFor",
+    "orderType",
+    "productName",
+    "productGroup",
+    "productFamily",
+    "partCode",
+    "partDescription",
+    "UOM",
+    "typeOfComponents",
+    "componanetUsage",
+    "compatibilityPartcode",
+    "requestQty",
+    "approved1Qty",
+    "approved2Qty",
+    "faultySerialNo",
+    "faultyUnitModuleSerialNo",
+    "status"
 ];
 
 const customConfig = {
     requestTicketNo: { label: "Request TicketNo" },
     requesterType: { label: "RequesterType" },
-    requestFor:{ label: "Request For" },
+    requestFor: { label: "Request For" },
     orderType: { label: "Order Type" },
     productName: { label: "Product Name" },
     productGroup: { label: "Product Group" },
@@ -41,7 +42,7 @@ const customConfig = {
     typeOfComponents: { label: "TypeOf Components" },
     componanetUsage: { label: "ComponanetUsage" },
     compatibilityPartcode: { label: "Compatibility Partcode" },
-        requestQty: { label: "Request Qty" },
+    requestQty: { label: "Request Qty" },
     approved1Qty: { label: "Approved1Qty" },
     approved2Qty: { label: "Approved2Qty" },
     faultySerialNo: { label: "Faulty SerialNo" },
@@ -49,21 +50,21 @@ const customConfig = {
 
 };
 
-       
+
 const RequesterDefaultTable = ({
-  data = [],
-  page,
-  perPage,
-  totalRows,
-  loading,
-  setPage,
-  setPerPage,
-  handleQtyChange,
-  formData,
-  pickButton,
-  setpickButton,
-  setSuccessMessage,
-  setShowSuccessPopup
+    data = [],
+    page,
+    perPage,
+    totalRows,
+    loading,
+    setPage,
+    setPerPage,
+    handleQtyChange,
+    formData,
+    pickButton,
+    setpickButton,
+    setSuccessMessage,
+    setShowSuccessPopup
 }) => {
 
     //  const columns = generateColumns({
@@ -86,41 +87,44 @@ const RequesterDefaultTable = ({
     //           "approved2Qty",
     //           "faultySerialNo",
     //           "faultyUnitModuleSerialNo"
-        
-    //         ]
-            
-        
-    //       })   
-   // Generate columns and prepend Cancel column manually
-           const columns = React.useMemo(() => {
-  return generateColumns({ fields, customConfig });
-}, [fields, customConfig]);
 
-            // Flatten {label, value} objects
-            const normalizedData = React.useMemo(() => {
-                return data.map(row => {
-                    const newRow = { ...row };
-                    Object.keys(newRow).forEach(key => {
-                        if (typeof newRow[key] === "object" && newRow[key] !== null) {
-                            newRow[key] = newRow[key].label ?? JSON.stringify(newRow[key]);
-                        }
-                    });
-                    return newRow;
-                });
-            }, [data]);   
-            
- 
-  return (
-<CommonDataTable
-      columns={columns}
-      data={data}
-      page={page}
-      perPage={perPage}
-      totalRows={totalRows}
-      loading={loading}
-      onPageChange={setPage}
-      onRowsPerPageChange={setPerPage}
-    />    )
+    //         ]
+
+
+    //       })   
+    // Generate columns and prepend Cancel column manually
+    const columns = React.useMemo(() => {
+        return generateColumns({ fields, customConfig });
+    }, [fields, customConfig]);
+
+    // Flatten {label, value} objects
+    const normalizedData = React.useMemo(() => {
+        return data.map(row => {
+            const newRow = { ...row };
+            Object.keys(newRow).forEach(key => {
+                if (typeof newRow[key] === "object" && newRow[key] !== null) {
+                    newRow[key] = newRow[key].label ?? JSON.stringify(newRow[key]);
+                }
+            });
+            return newRow;
+        });
+    }, [data]);
+
+
+    return (
+        <CommonDataTable
+            columns={columns}
+            data={data}
+            page={page}
+            pagination
+            paginationServer
+            perPage={perPage}
+            totalRows={totalRows}
+            loading={loading}
+            onPageChange={setPage}
+            onPerPageChange={setPerPage}
+
+        />)
 }
 
 export default RequesterDefaultTable

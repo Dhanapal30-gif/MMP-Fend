@@ -203,7 +203,7 @@ const ProductFamilyMaster = () => {
     {
       name: (
         <div style={{ textAlign: 'center', }}>
-          <label>Delete All</label>
+          <label> Select All</label>
           <br />
           <input type="checkbox" onChange={handleSelectAll}
             checked={selectedRows.length === productMaster.length && productMaster.length > 0}
@@ -721,7 +721,7 @@ const ProductFamilyMaster = () => {
 
       <div className='ComCssTable'>
         {showProductTable && !showUploadTable && (
-          <h5 className='ComCssTableName'>Product Detail</h5>
+          <h5 className='ComCssTableName'>Product Details ✅</h5>
         )}
         {showUploadTable && !showProductTable && (
           <h5 className='ComCssTableName'>Upload product Detail</h5>

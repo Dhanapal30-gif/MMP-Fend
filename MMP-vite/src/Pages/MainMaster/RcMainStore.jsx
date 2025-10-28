@@ -10,6 +10,7 @@ import { FaEdit } from "react-icons/fa";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const RcMainStore = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -385,7 +386,7 @@ const RcMainStore = () => {
     { name: "Edit", selector: row => (<button className="edit-button" onClick={() => handleEdit(row)}><FaEdit /></button>), width: "79px" },
     ,
     {
-      name: "Partcode",
+      name: "PartCode",
       selector: row => row.partcode,
       sortable: true,
       width: `${calculateColumnWidth(rcStoreData, 'partcode')}px`
@@ -397,7 +398,7 @@ const RcMainStore = () => {
       width: `${calculateColumnWidth(rcStoreData, 'partdescription')}px`
     },
     {
-      name: "Rohs-status",
+      name: "Rohs Status",
       selector: row => row.rohsstatus,
       width: `${calculateColumnWidth(rcStoreData, 'rohsstatus')}px`
     },
@@ -440,7 +441,7 @@ const RcMainStore = () => {
       width: `${calculateColumnWidth(rcStoreData, 'AFO')}px`
     },
     {
-      name: "ComponentUsage",
+      name: "Component Usage",
       selector: row => row.componentUsage,
       width: `${calculateColumnWidth(rcStoreData, 'ComponentUsage')}px`
     },
@@ -475,12 +476,12 @@ const RcMainStore = () => {
       width: `${calculateColumnWidth(rcStoreData, 'BG')}px`
     },
     {
-      name: (<div>Expdate <br />Applicable</div>),
+      name: (<div>Exp-date <br />Applicable</div>),
       selector: row => row.expdateapplicable,
       width: `${calculateColumnWidth(rcStoreData, 'expdateapplicable')}px`
     },
     {
-      name: "Shelflife",
+      name: "Shelf Life",
       selector: row => row.shelflife,
       width: `${calculateColumnWidth(rcStoreData, 'shelflife')}px`
     }
@@ -1036,7 +1037,7 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
 
       <div className='ComCssTable'>
         {showRcTable && !showUploadTable && (
-          <h5 className='ComCssTableName'>RCStore Detail</h5>
+          <h5 className='ComCssTableName'>RCStore Details</h5>
         )}
         {showUploadTable && !showRcTable && (
           <h5 className='ComCssTableName'>Upload Master deatil</h5>
@@ -1059,6 +1060,9 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
           </div>
         </div>
         {showRcTable && !showUploadTable && (
+          <>
+                          <LoadingOverlay loading={loading} />
+          
           <DataTable
             columns={column}
             data={rcStoreData}
@@ -1136,7 +1140,7 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
             className="react-datatable"
             // conditionalRowStyles={rowHighlightStyle}
           />
-          
+          </>
         )}
 
         {showUploadTable && !showRcTable && (

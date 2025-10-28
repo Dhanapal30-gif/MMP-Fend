@@ -117,7 +117,7 @@ export const PutawayReturningProcessDetail = (ticketNo, setData, setTotalRows) =
 };
 
 export const fetchPutawayAllDetailSearch = (page, size,search ="", setData, setTotalRows) => {
-  fetchPutawayAllSearch(page - 1, size,search)
+  fetchPutawayAllSearch(page, size,search)
     .then((response) => {
       if (response?.data?.content) {
         setData(response.data.content)

@@ -22,7 +22,7 @@ const Issuance = () => {
     const [pickTicketData, setPickTicketData] = useState([]);
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(0);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [formErrors, setFormErrors] = useState({});
     const [tableData, setTableData] = useState([]);
     const [selectedGrnRows, setSelectedGrnRows] = useState([]);
@@ -269,6 +269,10 @@ if(field==="issueTicket" && value){
                         setFormData={setFormData}
                         setTableData={setTableData}
                         handleGRNQtyChange={handleGRNQtyChange}
+                        setSuccessMessage={setSuccessMessage}
+                        setShowSuccessPopup={setShowSuccessPopup}
+                        setShowErrorPopup={setShowErrorPopup}
+                        setErrorMessage={setErrorMessage}
                         // selectedGrnRows={selectedGrnRows}   // <-- current selection
                         // setSelectedGrnRows={setSelectedGrnRows} // <-- setter function
                         // handleApproverChange={handleGRNQtyChange} // qty/comment change handler

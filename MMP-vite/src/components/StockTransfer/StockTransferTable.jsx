@@ -14,16 +14,17 @@ const StockTransferTable = ({
     setPage,
     setPerPage,
 }) => {
-const fields = [
-    "RTN",
-    "TransferType",
-    "OrderType",
-    "Partcode",
-    "TransferQty",
-    "Inventory_BoxNo",
-    "RecordStatus"
+    const fields = [
+        "RTN",
+        "TransferType",
+        "OrderType",
+        "Partcode",
+        "TransferQty",
+        "Inventory_BoxNo",
+        "RecordStatus"
 
-];
+    ];
+   
     // Generate columns and prepend Cancel column manually
     const columns = React.useMemo(() => {
         return generateColumns({ fields });
@@ -45,15 +46,17 @@ const fields = [
 
     return (
         <CommonDataTable
-    columns={columns}
-    data={normalizedData} // ✅ flattened
-    page={page}
-    perPage={perPage} // ✅ 10
-    totalRows={totalRows} // total rows from backend
-    loading={loading}
-    onPageChange={setPage}
-    onRowsPerPageChange={setPerPage}
-/>
-)
+            columns={columns}
+            data={normalizedData} // ✅ flattened
+            page={page}
+            pagination
+            paginationServer
+            perPage={perPage} // ✅ 10
+            totalRows={totalRows} // total rows from backend
+            loading={loading}
+            onPageChange={setPage}
+            onPerPageChange={setPerPage}
+        />
+    )
 }
 export default StockTransferTable

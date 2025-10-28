@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import LocalndindividualReportCom from "../../components/LocalndindividualReport/LocalndindividualReportCom";
 import LocalReportIndiviualTable from "../../components/LocalndindividualReport/LocalReportIndiviualTable";
-import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
-
 import { FaFileExcel } from "react-icons/fa";
-import CustomDialog from "../../components/Com_Component/CustomDialog";
-import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { downloadIndiviualReport, downloadLocalIndiviualReportFilter, downloadLocalIndiviualReportSearch, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, } from '../../Services/Services_09';
 import "./Localindivual.css";
 import { downloadSearchProduct } from '../../Services/Services';
@@ -141,6 +138,7 @@ const LocalndindividualReport = () => {
     };
 
     const fetchfindSearch = (userId, page = 1, size = 10, search = "") => {
+        setLoading(true)
         getindiviualDetailFind(page - 1, size, userId, search)
             .then((response) => {
                 if (response?.data?.content) {
@@ -152,7 +150,9 @@ const LocalndindividualReport = () => {
             })
             .catch((error) => {
                 console.error("Error fetching search data:", error);
-            });
+            }).finally(() => {
+            setLoading(false); // always stop loader
+        });
     };
 
     const handleFilter = (e) => {
@@ -164,6 +164,7 @@ const LocalndindividualReport = () => {
 
     };
     const fetchFilterResult = () => {
+        setLoading(true)
         getindiviualDetailFilter(page - 1, perPage, userId, formData)
             .then((response) => {
                 if (response?.data?.content) {
@@ -173,6 +174,8 @@ const LocalndindividualReport = () => {
             })
             .catch((error) => {
                 console.error("Error in filter API:", error);
+            }).finally(() => {
+                setLoading(false); // always stop loader
             });
     };
 
@@ -193,13 +196,13 @@ const LocalndindividualReport = () => {
         setDownloadProgress(null);
         setLoading(true);
         let apiCall;  // Declare here
-       // const apiCall = search?.trim() !== "" ? downloadSearchProduct : downloadLocalIndiviual;
+        // const apiCall = search?.trim() !== "" ? downloadSearchProduct : downloadLocalIndiviual;
         if (search?.trim() !== "") {
-            apiCall = () => downloadLocalIndiviualReportSearch(search,userId);
-        } 
+            apiCall = () => downloadLocalIndiviualReportSearch(search, userId);
+        }
         else if (isFilterActive) {
-            apiCall = () => downloadLocalIndiviualReportFilter(formData,userId);
-        } 
+            apiCall = () => downloadLocalIndiviualReportFilter(formData, userId);
+        }
         else {
             apiCall = () => downloadIndiviualReport(userId);
         }
@@ -282,6 +285,7 @@ const LocalndindividualReport = () => {
                         )}
                     </div>
                 </div>
+                <LoadingOverlay loading={loading} />
 
                 <LocalReportIndiviualTable
                     data={indiviualReport}

@@ -44,7 +44,7 @@ const GRNDefaultTable = ({
 
   const columns = generateColumns({
     fields: [
-      "edit",
+      "EDIT",
       "recevingTicketNo",
       "ponumber",
       "vendorname",
@@ -68,13 +68,34 @@ const GRNDefaultTable = ({
       "GRNComment",
 
     ],
+    customConfig: {
+            recevingTicketNo: { label: "Receving TicketNo" },
+            ponumber: { label: "PoNumber", },
+            vendorname: { label: "Vendor Name" },
+    postingdate: { label: "Posting Date",  }, 
+            partcode: { label: "PartCode" },
+            partdescription: { label: "Part Description" },
+            invoiceNo: { label: "Invoice No" },
+            invoiceDate: { label: "Invoice Date" },
+            receivingDate: { label: "Receiving Date" },
+            recevingQty: { label: "Receving Qty" },
+            orderqty: { label: "order Qty" },
+              openOrderQty: { label: "OpenOrder Qty" },
+            totalValue: { label: "Total Value" },
+            totalValueEuro: { label: "Total Value Euro" },
+            unitprice: { label: "UnitPrice" },
+            GRNo: { label: "GRN Number" },
+            GRDate: { label: "GRN Date" }
+
+
+        },
     // onEdit,
     selectedRows,
     handleSelect,
     handleSelectAll,
     data: processedData,
     customCellRenderers: {
-      edit: (row) => (
+      EDIT: (row) => (
         <button className="edit-button" onClick={() => onEdit(row)}>
           <FaEdit />
         </button>
@@ -89,6 +110,8 @@ const GRNDefaultTable = ({
         columns={columns}
         data={processedData}
         loading={loading}
+        pagination
+        paginationServer
         page={page}
         perPage={perPage}
         totalRows={totalRows}
