@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CreateAccount from "../UserAuthentication/CreateAccount/CreateAccount";
 import { FaEdit } from "react-icons/fa";
-import { FaFileExcel } from "react-icons/fa";
-import CustomDialog from "../../components/Com_Component/CustomDialog";
-import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import { ThemeProvider } from '@mui/material/styles';
-import ComTextFiled from '../../components/Com_Component/ComTextFiled'; // adjust path if needed
-import TextFiledTheme from '../../components/Com_Component/TextFiledTheme'; // adjust path if needed
-import { Autocomplete, TextField } from "@mui/material";
 import { fetchPTLBoard, fetchRoleScreen, fetchUserDetail, savePTLSubmit, saveRole, saveScreenAsign, updateRole } from '../../Services/Services_09';
-import { tr } from 'date-fns/locale';
-import { fetchScreenName, fetchUserRole } from '../../Services/Services';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns'; // make sure this import is correct
 import { useNavigate } from "react-router-dom";
@@ -35,12 +26,12 @@ const UserDetail = () => {
 
     const [roleAndScreen, setRoleAndScreenName] = useState([]);
     const [totalRows, setTotalRows] = useState(0);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [searchText, setSearchText] = useState("");
     const [page, setPage] = useState(1);
-    const [onEdit,setOnEdit]=useState(false)
+    const [onEdit, setOnEdit] = useState(false)
     const fields = [
-        "edit",
+        "User_Edit",
         "userId",
         "userName",
         "userRole",
@@ -50,17 +41,16 @@ const UserDetail = () => {
         "productGroup",
         "requestType",
         "requesterType",
-
-
     ];
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const customConfig = {
-        userId: { label: "userId", width: "120px" },
+
+        userId: { label: "USERID", width: "120px" },
         userName: { label: "User Name", width: "120px" },
         userRole: { label: "User Role", width: "120px" },
         emailAddress: { label: "Email Address", width: "120px" },
-        password: { label: "password", width: "120px" },
+        password: { label: "Password", width: "120px" },
         phoneNumber: { label: "Phone Number", width: "120px" },
         productGroup: { label: "Product Group", width: "120px" },
         requestType: { label: "Request Type", width: "120px" },
@@ -74,30 +64,30 @@ const UserDetail = () => {
         },
     };
 
-const decodePassword = (encoded) => {
-  if (!encoded) return "";
-  try {
-    return atob(encoded); // base64 decode
-  } catch (e) {
-    console.error("Decode failed:", e);
-    return encoded; // fallback
-  }
-};
+    const decodePassword = (encoded) => {
+        if (!encoded) return "";
+        try {
+            return atob(encoded); // base64 decode
+        } catch (e) {
+            console.error("Decode failed:", e);
+            return encoded; // fallback
+        }
+    };
 
 
 
     const handleEditClick = (row) => {
-          const decodedPwd = decodePassword(row.password);
+        const decodedPwd = decodePassword(row.password);
 
-navigate("/createAccount", { state: { formData: row, isEdit: true } });
+        navigate("/createAccount", { state: { formData: row, isEdit: true } });
         setEditFormData({
             userId: row.userId,
             userName: row.userName,
             emailAddress: row.emailAddress,
             phoneNumber: row.phoneNumber,
-    password: decodedPwd, // <- always decoded now
+            password: decodedPwd, // <- always decoded now
             userRole: row.userRole,
-            
+
             userRole: Array.isArray(row.userRole)
                 ? row.userRole
                 : (row.userRole ? row.userRole.split(",") : []), // 👈 use split to make array
@@ -127,7 +117,7 @@ navigate("/createAccount", { state: { formData: row, isEdit: true } });
                 fields,
                 customConfig,
                 customCellRenderers: {
-                    edit: (row) => (
+                    User_Edit: (row) => (
                         <button className="edit-button" onClick={() => handleEditClick(row)}>
                             <FaEdit />
                         </button>

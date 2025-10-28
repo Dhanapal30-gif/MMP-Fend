@@ -241,7 +241,7 @@ await fetchRoleAndScreen();
 
 
     const fields = [
-        "edit",
+        "Role_Edit",
         "userrole",
         "screenName",
 
@@ -274,7 +274,7 @@ await fetchRoleAndScreen();
       fields,
       customConfig,
       customCellRenderers: {
-        edit: (row) => (
+        Role_Edit: (row) => (
           <button className="edit-button" onClick={() => handleEditClick(row)}>
             <FaEdit />
           </button>

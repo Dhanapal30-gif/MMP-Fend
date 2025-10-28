@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import CommonDataTable from '../../components/Com_Component/CommonDataTable';
+import CommonAddDataTable from '../../components/Com_Component/CommonAddDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns';
 import { fetchOpenReportFDetail } from '../../Services/Services-Rc';
 import './OpenReport.css';
 
-const OpenReport = ({ page, perPage, totalRows, loading, setPage, setPerPage }) => {
+const OpenReport = ({ page, totalRows, loading, setPage,  }) => {
 
     const [openReportDetail, setOpenReportDetail] = useState([]);
     const [totals, setTotals] = useState({ totalOngoing: 0, totalOpen: 0 });
+const [perPage, setPerPage] = useState(10); // ✅ must exist
 
     const columns = generateColumns({
         fields: ["ProductName", "Ongoing", "Open"],
@@ -38,7 +39,7 @@ const OpenReport = ({ page, perPage, totalRows, loading, setPage, setPerPage }) 
                 <strong>Total Ongoing:</strong> {totals.totalOngoing} &nbsp;&nbsp;
                 <strong>Total Open:</strong> {totals.totalOpen}
             </div>
-            <CommonDataTable
+            <CommonAddDataTable
                 columns={columns}
                 data={openReportDetail}
                 page={page}
@@ -46,7 +47,7 @@ const OpenReport = ({ page, perPage, totalRows, loading, setPage, setPerPage }) 
                 totalRows={totalRows}
                 loading={loading}
                 onPageChange={setPage}
-                onRowsPerPageChange={setPerPage}
+  onPerPageChange={setPerPage} // ✅ must be a function
             />
         </div>
     );

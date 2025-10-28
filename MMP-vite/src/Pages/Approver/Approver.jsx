@@ -4,6 +4,8 @@ import ApproverTextFiled from "../../components/Approver/ApproverTextFiled";
 import { fetchApproverTicket, fetchApproverTicketDetails, saveApproverTickets, saveAReturningpproverTickets } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
+import { tr } from 'date-fns/locale';
+import { ownerDocument } from '@mui/material';
 
 const Approver = () => {
 
@@ -19,11 +21,11 @@ const Approver = () => {
     const [requesterId, setRequesterId] = useState([]);
     const [approverTicketsL1, setApproverTicketsL1] = useState([]);
     const [approverTicketsL2, setApproverTicketsL2] = useState([]);
-        const [approverReturningTicketsL1, setApproverReturningTicketsL1] = useState([]);
-            const [approverReturningTicketsL2, setApproverReturningTicketsL2] = useState([]);
-        const [showTable, setShowTable] = useState(false);
+    const [approverReturningTicketsL1, setApproverReturningTicketsL1] = useState([]);
+    const [approverReturningTicketsL2, setApproverReturningTicketsL2] = useState([]);
+    const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(0);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [formErrors, setFormErrors] = useState({});
@@ -36,8 +38,10 @@ const Approver = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [requesterApproveButton, setRequesterApproveButton]= useState(false);
-    const [returningApproveButton, setReturningApproveButton]= useState(false);
+    const [requesterApproveButton, setRequesterApproveButton] = useState(false);
+    const [returningApproveButton, setReturningApproveButton] = useState(false);
+        const [rejectComment, setRejecComment] = useState(false)
+
     useEffect(() => {
 
         fetchApproverTicktes(userId);   // pass it here
@@ -73,16 +77,23 @@ const Approver = () => {
                     const response = await fetchApproverTicketDetails(formData.rec_ticket_no);
                     const data = response.data;
                     setApproveTicketDetail(data);
-         if (data[0]?.rec_ticket_no?.startsWith("RTN")) {
-                setReturningApproveButton(true);
-                                setRequesterApproveButton(false);
+                    // setSelectedGrnRows(data.map(row => row.selectedId));
+                    setSelectedGrnRows(
+                        data
+                            .filter(row => row.selectedId)           // only rows with a valid selectedId
+                            .map(row => row.selectedId)
+                    );
+                    setTotalRows(data.length)
+                    if (data[0]?.rec_ticket_no?.startsWith("RTN")) {
+                        setReturningApproveButton(true);
+                        setRequesterApproveButton(false);
 
-            } else {
-                setRequesterApproveButton(true);
-                                setReturningApproveButton(false);
+                    } else {
+                        setRequesterApproveButton(true);
+                        setReturningApproveButton(false);
 
-            }             setShowTable(true);
-                    setSelectedGrnRows([])
+                    } setShowTable(true);
+                    // setSelectedGrnRows([])
                 } catch (error) {
                     console.error("Error fetching requester types:", error);
                 }
@@ -100,40 +111,76 @@ const Approver = () => {
     //         )
     //     );
     // };
-// const handleGRNQtyChange = (selectedid, field, value) => {
-//   setApproveTicketDetail((prev) =>
-//     prev.map((item) =>
-//       item.selectedId === selectedid ? { ...item, [field]: value } : item
-//     )
-//   );
-// };
+    // const handleGRNQtyChange = (selectedid, field, value) => {
+    //   setApproveTicketDetail((prev) =>
+    //     prev.map((item) =>
+    //       item.selectedId === selectedid ? { ...item, [field]: value } : item
+    //     )
+    //   );
+    // };
 
-const handleGRNQtyChange = (selectedId, field, value) => {
-  setApproveTicketDetail(prev =>
-    prev.map(row =>
-      row.selectedId === selectedId ? { ...row, [field]: value } : row
-    )
-  );
-};
+    const handleGRNQtyChange = (selectedId, field, value) => {
+        setApproveTicketDetail(prev =>
+            prev.map(row =>
+                row.selectedId === selectedId ? { ...row, [field]: value } : row
+            )
+        );
+    };
+
+
+    // const valiDate = (selectedData) => {
+    //     const errors = {};
+    //     let isValid = true;
+
+    //     selectedData.forEach((row) => {
+    //         const qtyField = row.ApprovedL1Qty !== undefined ? "ApprovedL1Qty" : "ApprovedL2Qty";
+    //         if (!row[qtyField] || row[qtyField] === 0) {
+    //             errors[`${qtyField}${row.selectedId}`] = "Enter quantity";
+    //             isValid = false;
+    //         }
+    //     });
+
+    //     setFormErrors(errors);
+    //     return isValid;
+    // };
 
 
     const valiDate = (selectedData) => {
-  const errors = {};
-  let isValid = true;
+        const errors = {};
+        let isValid = true;
 
-  selectedData.forEach((row) => {
-    const qtyField = row.ApprovedL1Qty !== undefined ? "ApprovedL1Qty" : "ApprovedL2Qty";
-    if (!row[qtyField] || row[qtyField] === 0) {
-      errors[`${qtyField}${row.selectedId}`] = "Enter quantity";
-      isValid = false;
+        selectedData.forEach((row) => {
+            const qtyField = row.ApprovedL1Qty !== undefined ? "ApprovedL1Qty" : "ApprovedL2Qty";
+            if (!row[qtyField] || row[qtyField] === 0) {
+                errors[`${qtyField}${row.selectedId}`] = "Enter quantity";
+                isValid = false;
+            }
+            setErrorMessage("Enter Qty")
+            setShowErrorPopup(true)
+        });
+
+        if (rejectComment) {
+    selectedData.forEach((row) => {
+        const commentField = "Comment"; // match your row field
+        if (!row[commentField] || row[commentField].trim() === "") {
+            errors[`${commentField}${row.selectedId}`] = "Enter comment";
+            isValid = false;
+        }
+    });
+    
+    if (!isValid) {
+        setErrorMessage("Enter comment");
+        setShowErrorPopup(true);
     }
-  });
+}
 
-  setFormErrors(errors);
-  return isValid;
-};
+        // if(rejectComment){
+        //     const rejectComm=re=ownerDocu
+        // }
 
-
+        setFormErrors(errors);
+        return isValid;
+    };
 
     const handleSubmit = async () => {
         try {
@@ -145,15 +192,17 @@ const handleGRNQtyChange = (selectedId, field, value) => {
             }
 
             const selectedData = approveTicketDetail.filter(row =>
-                selectedGrnRows.includes(row.selectedid) // or row.id
+                selectedGrnRows.includes(row.selectedId) // or row.id
             );
-                    if (!valiDate(selectedData)) return;
 
-console.log("Selected Data:", selectedData);
+            // if (!valiDate(selectedData)) return;
+    if (!valiDate()) return;
+
+            console.log("Selected Data:", selectedData);
             const payload = selectedData.map(row => ({
                 requestTicketNo: row.rec_ticket_no,
                 partCode: row.partcode,
-               
+
                 approved1_qty: row.ApprovedL1Qty || 0,
                 approved2_qty: row.ApprovedL2Qty || 0,
                 Comment: row.Comment || "",
@@ -180,7 +229,7 @@ console.log("Selected Data:", selectedData);
 
 
     const handleReturningApprove = async () => {
-try {
+        try {
             if (selectedGrnRows.length === 0) {
                 setErrorMessage("Please select at least one row before submitting!")
                 setShowErrorPopup(true)
@@ -188,9 +237,9 @@ try {
             }
 
             const selectedData = approveTicketDetail.filter(row =>
-                selectedGrnRows.includes(row.selectedid) 
+                selectedGrnRows.includes(row.selectedId)
             );
-                    if (!valiDate(selectedData)) return;
+            if (!valiDate(selectedData)) return;
 
             const payload = selectedData.map(row => ({
                 returningTicketNo: row.rec_ticket_no,
@@ -218,42 +267,43 @@ try {
             console.error("Error submitting data:", error);
         }
     }
-    
+
+
     const handleReject = async () => {
+        setRejecComment(true)
         try {
             if (selectedGrnRows.length === 0) {
-                // alert("Please select at least one row before submitting!");
                 setErrorMessage("Please select at least one row before submitting!")
                 setShowErrorPopup(true)
                 return;
             }
+            const selectedData = approveTicketDetail.filter(row =>
+                selectedGrnRows.includes(row.selectedId));
 
-            // const selectedData = approveTicketDetail.filter(row =>
-            //     selectedGrnRows.includes(row.selectedid) // or row.id
-            // );
-              const selectedData = approveTicketDetail.filter(row =>
-    selectedGrnRows.includes(row.selectedId)
-);
-
-
-// console.log("Selected Data:", selectedData);
+            console.log("Selected Data:", selectedData);
             const payload = selectedData.map(row => ({
-                     requestTicketNo: row.rec_ticket_no,
+                requestTicketNo: row.rec_ticket_no,
                 partCode: row.partcode,
-                recordstatus:"MSC00005",
+                recordstatus: "MSC00005",
             }));
 
             console.log("Payload to send:", payload);
 
             await saveApproverTickets(payload);
-            alert("rejected successfully!");
+            // alert("rejected successfully!");
+            setSuccessMessage("rejected successfully!")
+            setShowSuccessPopup(true)
             setShowTable(false)
 
             setTableData([])
+            fetchApproverTicktes(userId);
+
         } catch (error) {
             console.error("Error submitting data:", error);
         }
     };
+
+    console.log("Selected GRN Rows:", selectedGrnRows);
 
     return (
         <div className='ComCssContainer'>
@@ -266,8 +316,8 @@ try {
                     approverTicketsL1={approverTicketsL1}
                     handleChange={handleChange}
                     approverTicketsL2={approverTicketsL2}
-            approverReturningTicketsL1={approverReturningTicketsL1}
-                            approverReturningTicketsL2={approverReturningTicketsL2}
+                    approverReturningTicketsL1={approverReturningTicketsL1}
+                    approverReturningTicketsL2={approverReturningTicketsL2}
 
                 />
             </div>
@@ -290,38 +340,41 @@ try {
                         selectedGrnRows={selectedGrnRows}   // <-- current selection
                         setSelectedGrnRows={setSelectedGrnRows} // <-- setter function
                         handleApproverChange={handleGRNQtyChange} // qty/comment change handler
-                                            formErrors={formErrors}
+                        formErrors={formErrors}
+                        setErrorMessage={setErrorMessage}
+                        setShowErrorPopup={setShowErrorPopup}
+                        rejectComment={rejectComment}
 
                     />
                     <div className="ComCssButton9">
-                        {requesterApproveButton &&  <button className='ComCssSubmitButton' onClick={handleSubmit} >Approve</button>}
+                        {requesterApproveButton && <button className='ComCssSubmitButton' onClick={handleSubmit} >Approve</button>}
                         {returningApproveButton && <button onClick={handleReturningApprove} >Approve</button>}
                         {/* <button className='ComCssSubmitButton' onClick={handleSubmit}  >Approve</button> */}
-                        <button className='ComCssDeleteButton'  onClick={handleReject}>Reject</button>
+                        <button className='ComCssDeleteButton' onClick={handleReject}>Reject</button>
 
                     </div>
                 </div>
             )}
 
             <CustomDialog
-                            open={showSuccessPopup}
-                            onClose={() => setShowSuccessPopup(false)}
-                            title="Success"
-                            message={successMessage}
-                            severity="success"
-                            color="primary"
-                        />
-                        <CustomDialog
-                            open={showErrorPopup}
-                            onClose={() => setShowErrorPopup(false)}
-                            title="Error"
-                            message={errorMessage}
-                            severity="error"
-                            color="secondary"
-                        />
+                open={showSuccessPopup}
+                onClose={() => setShowSuccessPopup(false)}
+                title="Success"
+                message={successMessage}
+                severity="success"
+                color="primary"
+            />
+            <CustomDialog
+                open={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="Error"
+                message={errorMessage}
+                severity="error"
+                color="secondary"
+            />
         </div>
 
-        
+
     )
 }
 

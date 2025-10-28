@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import StockTransferTextFile from "../../components/StockTransfer/StockTransferTextFile";
 import StockTransferTable from "../../components/StockTransfer/StockTransferTable";
-import RequesterDefaultTable from "../../components/Requester/RequesterDefaultTable";
+import StockRc_DHLAddTable from "../../components/StockTransfer/StockRc_DHLAddTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchRequesterDetail, fetchRequesterSearch } from "../../components/Requester/RequesterActions.js";
@@ -14,8 +14,9 @@ import { ContactSupportOutlined } from '@mui/icons-material';
 const StockTransfer = () => {
 
     const [formData, setFormData] = useState({
-        ordertype: "",         // For Order Type dropdown
-        partcode: "",  // For Transfer Partcode dropdown
+        ordertype: "",
+        partcode: "",
+        boxNumber: "",
     });
 
     const userId = sessionStorage.getItem("userId");
@@ -34,7 +35,8 @@ const StockTransfer = () => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [downloadDone, setDownloadDone] = useState(false);
-    const [ stockTransferDetail,setStockTransferDetail]= useState([]);
+
+    const [stockTransferDetail, setStockTransferDetail] = useState([]);
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -76,6 +78,18 @@ const StockTransfer = () => {
             errors.partcode = "select partcode";
             isValid = false;
         }
+        if (formData.transfertype === 'DHL-RC') {
+            if (!formData.trnasferQty) {
+                errors.trnasferQty = "Enter Trnasfer Qty";
+                isValid = false;
+            }
+        }
+        if (formData.transfertype === 'DHL-RC') {
+            if (!formData.comment) {
+                errors.comment = "Enter comment";
+                isValid = false;
+            }
+        }
         setFormErrors(errors);
         return isValid;
     };
@@ -109,14 +123,14 @@ const StockTransfer = () => {
         }
     };
 
-const fetchAll = (page = 1, perPage = 10, search = "") => {
-    if (search && search.trim() !== "") {
-        // Uncomment when search API is ready
-        // fetchStockSearch(page, perPage, search, setPutawayDetail, setTotalRows);
-    } else {
-        fetchStockAll(page, perPage);
-    }
-};
+    const fetchAll = (page = 1, perPage = 10, search = "") => {
+        if (search && search.trim() !== "") {
+            // Uncomment when search API is ready
+            // fetchStockSearch(page, perPage, search, setPutawayDetail, setTotalRows);
+        } else {
+            fetchStockAll(page, perPage);
+        }
+    };
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -130,45 +144,151 @@ const fetchAll = (page = 1, perPage = 10, search = "") => {
     const debouncedSearch = useDebounce(searchText, 500); // delay in ms
 
     useEffect(() => {
-    
-            fetchAll(page, perPage, debouncedSearch);
-    
-        }, [page, perPage, debouncedSearch]);
-    
 
-        const fetchStockAll = (page, size) => {
-    fetchStockTransferAll(page, size)
-        .then((response) => {
-            if (response?.data?.content) {
-                setStockTransferDetail(response.data.content); // use correct state setter
-                setTotalRows(response.data.totalElements || 0);
-            } else {
-                console.warn("No content found in response:", response.data);
-            }
+        fetchAll(page, perPage, debouncedSearch);
+
+    }, [page, perPage, debouncedSearch]);
+
+
+    const fetchStockAll = (page, size) => {
+        fetchStockTransferAll(page, size)
+            .then((response) => {
+                if (response?.data?.content) {
+                    setStockTransferDetail(response.data.content); // use correct state setter
+                    setTotalRows(response.data.totalElements || 0);
+                } else {
+                    console.warn("No content found in response:", response.data);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching stock data:", error);
+            });
+    };
+
+    const [boxNumber, setBoxNumber] = useState("MN-05-2025-378");
+
+    const handleAdd = () => {
+
+        if (!valiDate()) return;
+
+
+        const currentPartCode = typeof formData.partcode === "object"
+            ? formData.partcode.partcode || formData.partcode.label
+            : formData.partcode;
+
+        const currentBoxNumber = formData.boxNumber;
+
+        const isDuplicateInBox = tableData.some(item =>
+            item.iventooryBoxNumber === currentBoxNumber &&
+            (typeof item.partcode === "object"
+                ? item.partcode.partcode || item.partcode.label
+                : item.partcode) === currentPartCode
+        );
+
+        if (isDuplicateInBox) {
+            setErrorMessage(`Partcode "${currentPartCode}" already added in Box ${currentBoxNumber}`);
+            setShowErrorPopup(true);
+            return;
+        }
+
+        const newRow = {
+            ...formData,
+            iventooryBoxNumber: currentBoxNumber,
+            _id: Date.now() + Math.random()  // unique key
+        };
+
+        setTableData(prev => [...prev, newRow]);
+    };
+
+
+    useEffect(() => {
+        if (tableData.length > 0) {
+            setShowTable(true);
+        }
+    }, [tableData]);
+    const defaultBoxNumber = "MN-05-2025-378"; // initial default
+
+    const handleClear = () => {
+
+        setFormData({
+            ordertype: "",
+            transfertype: "",
+            partcode: "",
+            trnasferQty: "",
+            boxNumber: defaultBoxNumber,
+            comment: "",
         })
-        .catch((error) => {
-            console.error("Error fetching stock data:", error);
-        });
-};
 
+    }
+    const handleCancel = () =>{
+        setTableData([]);
+        setShowTable(false)
+
+    }
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
                     <p>Stock Transfer</p>
                 </div>
+                <div className='ComCssButton9'>
+                    {(formData.transfertype === 'DHL-RC') && (
+                        <button
+                            style={{ backgroundColor: 'orange', marginTop: "-50px" }}
+                            onClick={() => {
+                                const parts = boxNumber.split("-");
+                                const prefix = parts.slice(0, 3).join("-");
+                                const number = parseInt(parts[3] || "0") + 1;
+                                const newBoxNumber = `${prefix}-${number}`;
+                                setBoxNumber(newBoxNumber);
+                                handleChange("boxNumber", newBoxNumber); // <-- sync with formData
+                            }}
+                        >
+                            AddBox
+                        </button>
+                    )}
+
+                </div>
                 <StockTransferTextFile
                     formData={formData}
                     handleChange={handleChange}
                     formErrors={formErrors}
                     trnasferPrtcode={trnasferPrtcode}
+                    boxNumber={boxNumber}
                 />
+
                 <div className="ReworkerButton9">
-                    <button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>
-                    <button className='ComCssClearButton'  >Clear</button>
+                    {(formData.transfertype === 'DHL-RC') && (<button className='ComCssSubmitButton' onClick={handleAdd} >ADD</button>)}
+
+                    {(formData.transfertype !== 'DHL-RC') && (<button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>)}
+                    <button className='ComCssClearButton' onClick={handleClear} >Clear</button>
                 </div>
 
             </div>
+            {showTable && (
+                <div className='ComCssTable'>
+                    <h5 className='ComCssTableName'>ADD Board</h5>
+
+                    <StockRc_DHLAddTable
+                        data={tableData}
+                        page={page}
+                        perPage={perPage}
+                        totalRows={tableData.length}
+                        loading={false}
+                        setPage={setPage}
+                        setShowTable={setShowTable}
+                        setPerPage={setPerPage}
+                        setFormData={setFormData}
+                        setIsFrozen={setIsFrozen}
+                        setTableData={setTableData}
+                    />
+                    <div className="ComCssButton9">
+                        <button className='ComCssSubmitButton'  >Submit</button>
+                        <button className='ComCssDeleteButton' onClick={handleCancel}  >Cancel</button>
+
+                    </div>
+                </div>
+            )}
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Requested Tickets</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>

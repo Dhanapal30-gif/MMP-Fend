@@ -9,7 +9,8 @@ const StockTransferTextFile = ({
     formData,
     handleChange,
     trnasferPrtcode,
-    formErrors
+    formErrors,
+    boxNumber
 }) => {
     const statusOptions = [
         { label: "Open", value: "Open" },
@@ -97,6 +98,38 @@ const StockTransferTextFile = ({
                             }} />
                     )}
                 />
+                {(formData.transfertype === 'DHL-RC') && (
+                    <ComTextFiled
+                        label="Trnasfer Qty"
+                        name="trnasferQty"
+                        value={formData.trnasferQty || ""}
+                        type="number"
+                        onChange={(e) => handleChange("trnasferQty", e.target.value)}
+                        error={Boolean(formErrors?.trnasferQty)}
+                        helperText={formErrors?.trnasferQty || ""}
+                    />
+                )}
+                {(formData.transfertype === 'DHL-RC') && (
+
+                    <ComTextFiled
+                        label="Inventory box number"
+                        name="iventooryBoxNumber"
+                        value={boxNumber || ""}
+                        onChange={(e) => setBoxNumber(e.target.value)}
+                    />
+
+                )}
+
+                {(formData.transfertype === 'DHL-RC') && (
+                    <ComTextFiled
+                        label="Comment"
+                        name="Comment"
+                        value={formData.comment || ""}
+                        onChange={(e) => handleChange("comment", e.target.value)}
+                        error={Boolean(formErrors?.comment)}
+                        helperText={formErrors?.comment || ""}
+                    />
+                )}
             </ThemeProvider>
         </div>
     )

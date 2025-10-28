@@ -2,10 +2,10 @@
 import React from "react";
 import { TextField } from "@mui/material";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
-import CommonDataTable from "../../components/Com_Component/CommonDataTable";
+import CommonAddDataTable from "../../components/Com_Component/CommonAddDataTable";
 
 const GRNTable = ({
-  data=[],
+  data = [],
   page,
   perPage,
   totalRows,
@@ -18,88 +18,105 @@ const GRNTable = ({
   setSelectedRows,
   onEdit,
   handleGRNQtyChange,
-    formErrors, 
-
+  formErrors,
+  setFormErrors
 }) => {
 
   // Function to handle select all rows
-const handleGrnSelectAll=(e)=>{
-  if(e.target.checked){
-    setSelectedGrnRows(data.map((row)=>row.id));
-  }
-  else{
-    setSelectedGrnRows([])
-  }
-};
+  const handleGrnSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedGrnRows(data.map((row) => row.id));
+    }
+    else {
+      setSelectedGrnRows([])
+    }
+  };
 
-
-const handleGrnSelect = (rowkey) => {
-  setSelectedGrnRows((prevSelectedRows) => {
-    const isRowSelected = prevSelectedRows.includes(rowkey);
-    const updatedRows = isRowSelected
-      ? prevSelectedRows.filter((key) => key !== rowkey)
-      : [...prevSelectedRows, rowkey];
-    return updatedRows;
-  });
-};
+  const handleGrnSelect = (rowkey) => {
+    setSelectedGrnRows((prevSelectedRows) => {
+      const isRowSelected = prevSelectedRows.includes(rowkey);
+      const updatedRows = isRowSelected
+        ? prevSelectedRows.filter((key) => key !== rowkey)
+        : [...prevSelectedRows, rowkey];
+      return updatedRows;
+    });
+  };
 
   const columns = generateColumns({
     fields: [
-       "recevingTicketNo", "ponumber", "vendorname", "postingdate",
+      "recevingTicketNo", "ponumber", "vendorname", "postingdate",
       "partcode", "partdescription", "UOM", "TYC", "invoiceNo",
       "invoiceDate", "receivingDate", "recevingQty", "orderqty",
-      "unitprice", "GRNQty","Comment"
+      "unitprice", "GRNQty", "Comment"
     ],
-     
     onEdit,
     showEdit: false,
-    selectedRows:selectedGrnRows,
-    handleSelect:handleGrnSelect,
-    handleSelectAll:handleGrnSelectAll,
-  data, 
+    selectedRows: selectedGrnRows,
+    handleSelect: handleGrnSelect,
+    handleSelectAll: handleGrnSelectAll,
+    data,
     customConfig: {
       recevingTicketNo: { label: "Ticket No", width: "140px" },
-      Comment: { label: "Comment", width: "270px",height:"70px"}
+      Comment: { label: "Comment", width: "270px", height: "70px" }
     },
- customCellRenderers: {
-  GRNQty: (row) => (
-    
-    <TextField
-      type="number"
-      placeholder="GRN Qty"
-      value={row.GRNQty || ""}
-      
-      onChange={(e) => handleGRNQtyChange(row.selectedid, "GRNQty", e.target.value)}
-    error={!!formErrors?.[`GRNQty_${row.selectedid}`]} 
-    helperText={formErrors?.[`GRNQty_${row.selectedid}`] || ""}
-      className="invoice-input"
-    />
-  ),
-  Comment: (row) => (
-    <TextField
-      placeholder="Enter Comment"
-      value={row.Comment || ""}
-      onChange={(e) => handleGRNQtyChange(row.selectedid, "Comment", e.target.value)}
-      
-      className="invoice-input"
-    />
-  ),
-}
+    customCellRenderers: {
+      GRNQty: (row) => (
 
+        // <TextField
+        //   type="number"
+        //   placeholder="GRN Qty"
+        //   value={row.GRNQty || ""}
+        //   onChange={(e) => handleGRNQtyChange(row.selectedid, "GRNQty", e.target.value)}
+        //   error={!!formErrors?.[`GRNQty_${row.selectedid}`]}
+        //   helperText={formErrors?.[`GRNQty_${row.selectedid}`] || ""}
+        //   className="invoice-input"
+        // />
+        <TextField
+  type="number"
+  placeholder="GRN Qty"
+  value={row.GRNQty || ""}
+  onChange={(e) => {
+    const value = Number(e.target.value);
+    const max = Number(row.recevingQty || 0);
+
+    if (value <= max) {
+      handleGRNQtyChange(row.selectedid, "GRNQty", value);
+      // Clear any previous error
+      setFormErrors(prev => ({ ...prev, [`GRNQty_${row.selectedid}`]: "" }));
+    } else {
+      // Show error if exceeds
+      setFormErrors(prev => ({ ...prev, [`GRNQty_${row.selectedid}`]: `Cannot exceed ${max}` }));
+    }
+  }}
+  error={!!formErrors?.[`GRNQty_${row.selectedid}`]}
+  helperText={formErrors?.[`GRNQty_${row.selectedid}`] || ""}
+  className="invoice-input"
+/>
+
+      ),
+      Comment: (row) => (
+        <TextField
+          placeholder="Enter Comment"
+          value={row.Comment || ""}
+          onChange={(e) => handleGRNQtyChange(row.selectedid, "Comment", e.target.value)}
+
+          className="invoice-input"
+        />
+      ),
+    }
   });
 
   return (
-    
-    <CommonDataTable
-  columns={columns}
-  data={data}
-  loading={loading}
-  page={page}
-  perPage={perPage}
-  totalRows={totalRows}
-  onPageChange={setPage}
-  onPerPageChange={setPerPage}
-/>
+    <CommonAddDataTable
+      columns={columns}
+      data={data}
+      loading={loading}
+      page={page}
+      perPage={perPage}
+      totalRows={totalRows}
+      onPageChange={setPage}
+      onPerPageChange={setPerPage}
+    />
 
   );
 };

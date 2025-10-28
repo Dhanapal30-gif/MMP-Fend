@@ -20,7 +20,7 @@
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    margin-top: 10px;                
+    /* margin-top: 10px;                 */
     white-space: nowrap;      /* Prevent text wrapping */
 }
 
@@ -37,3 +37,11 @@
     transform: scale(1.30);    
 
 }
+
+
+/* @media (min-width: 1024px) and (max-width: 1159px) {
+.ReworkerButton9 button {
+        margin-top: -50px;                
+
+}
+} */

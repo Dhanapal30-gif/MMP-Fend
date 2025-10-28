@@ -11,7 +11,7 @@ import { FaEdit } from "react-icons/fa";
 
 export const RecevingTable = ({ formData, poDetail, handleFieldChange, formErrors, selectedRows, setSelectedRows }) => {
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [loading, setLoading] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -32,7 +32,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
     };
 
     // /const getRowKey = (row) => `${row.ponumber}-${row.partcode}`;
-    const getRowKey = (row) => `${String(row.ponumber)}-${String(row.partcode)}`;
+    const getRowKey = (row) => `${row.ponumber}-${row.partcode}`;
     const allKeys = paginatedData.map(getRowKey);
     const allSelected = allKeys.every((key) => selectedRows.includes(key));
     const handleSelectAll = (e) => {
@@ -54,6 +54,32 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             setSelectedRows((prev) => prev.filter((k) => k !== key));
         }
     };
+useEffect(() => {
+    const updatedData = poDetail.map((row, index) => {
+        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        if (
+            expApplicable === "no" &&
+            row.shelflife &&
+            !row.exp_date &&
+            !row.expiryAutoSet
+        ) {
+            const today = new Date();
+            const expiry = new Date(today);
+            expiry.setMonth(expiry.getMonth() + parseInt(row.shelflife, 10));
+            expiry.setDate(0);
+            return {
+                ...row,
+                exp_date: expiry.toISOString().split("T")[0],
+                expiryAutoSet: true,
+            };
+        }
+        return row;
+    });
+
+    // Update poDetail state
+    updatedData.forEach((row, idx) => handleFieldChange(idx, "exp_date", row.exp_date));
+    updatedData.forEach((row, idx) => handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet));
+}, [poDetail]);
 
     const Defaultcolumn = [
         {
@@ -137,28 +163,35 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                     type="number"
                     name="recevingQty"
                     value={row.recevingQty || ""}
-                    error={Boolean(formErrors[`recevingQty-${index}`])}
-                    helperText={formErrors[`recevingQty-${index}`]}
+                    error={Boolean(formErrors[`recevingQty-${row.ponumber}-${row.partcode}`])}
+                    helperText={formErrors[`recevingQty-${row.ponumber}-${row.partcode}`]}
                     onChange={(e) => {
                         const value = e.target.value;
-                        handleFieldChange(index, 'recevingQty', value);
+                        const key = `${row.ponumber}-${row.partcode}`;
+                        const idx = poDetail.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                        if (idx === -1) return;
+
+                        handleFieldChange(idx, 'recevingQty', value);
+
                         if (Number(value) > Number(row.orderqty)) {
                             setErrorMessage("Receving Qty cannot be more than Order Qty");
                             setShowErrorPopup(true);
-                            // Reset the field
-                            handleFieldChange(index, 'recevingQty', "");
+                            handleFieldChange(idx, 'recevingQty', ""); // reset
                             return;
                         }
-                        if (formErrors[`recevingQty-${index}`] && Number(value) > 0) {
+
+                        // Remove error if corrected
+                        if (formErrors[`recevingQty-${key}`] && Number(value) > 0) {
                             setFormErrors((prev) => {
                                 const newErrors = { ...prev };
-                                delete newErrors[`recevingQty-${index}`];
+                                delete newErrors[`recevingQty-${key}`];
                                 return newErrors;
                             });
                         }
                     }}
                     className="invoice-input"
                 />
+
             ),
         }
         ,
@@ -167,31 +200,35 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             cell: (row, index) => (
                 <TextField
                     variant="outlined"
-                    placeholder="totalValue"
+                    placeholder="Total Value"
                     name="totalValue"
                     value={row.totalValue || ""}
-                    type="text" // Use text to fully control input
-                    inputProps={{
-                        inputMode: "decimal", // only numeric keyboard on mobile
-                        pattern: "^[0-9]*\\.?[0-9]*$" // optional decimal
-                    }}
+                    type="text"
                     onChange={(e) => {
                         const value = e.target.value;
+                        const key = `${row.ponumber}-${row.partcode}`; // stable unique key
+                        const idx = poDetail.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                        if (idx === -1) return;
 
-                        // Allow only digits and decimal point
-                        if (!/^\d*\.?\d*$/.test(value)) return;
+                        // allow empty or partial decimal inputs
+                        if (/^\d*\.?\d*$/.test(value) || value === "") {
+                            handleFieldChange(idx, 'totalValue', value);
 
-                        const total = parseFloat(value) || 0;
-                        const ccf = parseFloat(row.ccf) || 1;
-                        const euro = total * ccf;
-
-                        handleFieldChange(index, 'totalValue', value);
-                        handleFieldChange(index, 'totalValueEuro', euro.toFixed(2));
+                            // Only update Euro if valid number
+                            const total = parseFloat(value);
+                            if (!isNaN(total)) {
+                                const ccf = parseFloat(poDetail[idx].ccf) || 1;
+                                handleFieldChange(idx, 'totalValueEuro', (total * ccf).toFixed(2));
+                            } else {
+                                handleFieldChange(idx, 'totalValueEuro', '');
+                            }
+                        }
                     }}
-                    error={Boolean(formErrors[`totalValue-${index}`])}
-                    helperText={formErrors[`totalValue-${index}`]}
+                    error={Boolean(formErrors[`totalValue-${row.ponumber}-${row.partcode}`])}
+                    helperText={formErrors[`totalValue-${row.ponumber}-${row.partcode}`]}
                     className="invoice-input"
                 />
+
 
             ),
         }
@@ -203,61 +240,47 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
         }
         ,
         {
-            name: "Expiry Date",
-            cell: (row, index) => {
-                const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
-                const isDisabled = expApplicable === "notapplicable";
+    name: "Expiry Date",
+    cell: (row) => {
+        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        const isDisabled = expApplicable === "notapplicable";
 
-                // Auto set expiry if expApplicable === "no"
-                if (
-                    expApplicable === "no" &&
-                    row.shelflife &&
-                    !row.exp_date &&
-                    !row.expiryAutoSet
-                ) {
-                    const today = new Date();
-                    const expiry = new Date(today);
-                    expiry.setMonth(expiry.getMonth() + parseInt(row.shelflife, 10));
-                    expiry.setDate(0); // Last day of the previous month
-                    const formatted = expiry.toISOString().split("T")[0];
-                    setTimeout(() => {
-                        handleFieldChange(index, "exp_date", formatted);
-                        handleFieldChange(index, "expiryAutoSet", true); // ✅ Mark as set
-                    }, 0);
-                }
-
-                // console.log("expApplicable:", expApplicable);
-
-                // Calculate min date (2 months after receivingDate)
-                const receiving = new Date(formData.receivingDate);
-                let minExpiryDate = "";
-
-                if (!isNaN(receiving)) {
-                    const minDate = new Date(receiving);
-                    minDate.setMonth(minDate.getMonth() + 2);
-                    minDate.setDate(1);
-                    minExpiryDate = minDate.toISOString().split("T")[0];
-                }
-
-                return (
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        value={row.exp_date ? row.exp_date.slice(0, 10) : ""}
-                        onChange={(e) => {
-                            if (expApplicable === "yes") {
-                                handleFieldChange(index, "exp_date", e.target.value);
-                            }
-                        }}
-                        disabled={isDisabled}
-                        className="invoice-input"
-                        inputProps={{
-                            min: expApplicable === "yes" ? minExpiryDate : undefined,
-                        }}
-                    />
-                );
-            }
+        // Calculate min date (2 months after receivingDate)
+        let minExpiryDate = "";
+        const receiving = new Date(formData.receivingDate);
+        if (!isNaN(receiving)) {
+            const minDate = new Date(receiving);
+            minDate.setMonth(minDate.getMonth() + 2);
+            minDate.setDate(1);
+            minExpiryDate = minDate.toISOString().split("T")[0];
         }
+
+        return (
+            <TextField
+  type="date"
+  variant="outlined"
+  value={row.exp_date || ""}
+  onChange={(e) => {
+    if (expApplicable === "yes") {
+      const key = `${row.ponumber}-${row.partcode}`;
+      const idx = poDetail.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+      if (idx === -1) return;
+      handleFieldChange(idx, "exp_date", e.target.value);
+    }
+  }}
+  disabled={isDisabled}
+  className="invoice-input"
+  error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
+  helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
+  inputProps={{
+    min: expApplicable === "yes" ? minExpiryDate : undefined,
+  }}
+/>
+
+        );
+    }
+}
+
 
     ]
 

@@ -1,10 +1,11 @@
+
 import React from 'react'
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns';
 import { TextField } from "@mui/material";
 import { saveDoneRequest } from '../../Services/Services_09';
 
-const ReworkerTable = ({
+const ReworkerTypeBasedhide = ({
     data = [],
     page,
     perPage,
@@ -25,16 +26,10 @@ const ReworkerTable = ({
 
     const columns = generateColumns({
         fields: [
+            "type",
             "productname",
             "boardserialnumber",
-            "partcode",
-            "partdescription",
-            "racklocation",
             "Repaier commnent",
-            "availableqty",
-            "RequestedQty",
-            "pickingqty",
-            "pickedqty",
             "Submit",
             "Repairer Name"
 
@@ -42,13 +37,7 @@ const ReworkerTable = ({
         customConfig: {
             productname: { label: "Product Name" },
             boardserialnumber: { label: "Board Serial Number" },
-            partcode: { label: "partCode" },
-            partdescription: { label: "Part Description" },
-            racklocation: { label: "ReackLocation" },
-            availableqty: { label: "Available Qty" },
-            RequestedQty: { label: "Requested Qty" },
-            pickingqty: { label: "Picking Qty" },
-            pickedqty: { label: "picked Qty" },
+            type: { label: "Reworker Type" },
 
 
         },
@@ -56,20 +45,17 @@ const ReworkerTable = ({
         customCellRenderers: {
             pickingqty: (row) => (
                 <TextField
-  type="number"
-  value={row.pickingqty || ""}
-  onChange={(e) => {
-    const inputValue = e.target.value; // keep as string for empty handling
-    const max = Number(row.availableqty || 0);
-    if (inputValue === "") {
-      handleQtyChange(row.id, ""); // allow clearing input
-    } else if (Number(inputValue) <= max) {
-      handleQtyChange(row.id, Number(inputValue));
-    }
-  }}
-  className="invoice-input"
-/>
-
+                    type="number"
+                    value={row.pickingqty || ""}
+                    onChange={(e) => {
+                        const inputValue = Number(e.target.value);
+                        const max = Number(row.availableqty || 0);
+                        if (inputValue <= max) {
+                            handleQtyChange(row.selectedid, inputValue);
+                        }
+                    }}
+                    className="invoice-input"
+                />
             ),
             // Submit: (row) => (
             //     <div className="ReworkerButton9">
@@ -130,7 +116,6 @@ const handleDone = (id) => {
                 setSuccessMessage(message || "Saved successfully");
                 setShowSuccessPopup(true);
                 setSubmitButton(true)
-
                 // Update only the clicked row
                 setBoardFetch(prev =>
                     prev.map(row =>
@@ -157,4 +142,4 @@ const handleDone = (id) => {
         />)
 }
 
-export default ReworkerTable
+export default ReworkerTypeBasedhide

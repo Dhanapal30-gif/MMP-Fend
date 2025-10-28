@@ -3,8 +3,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import ComTextFiled from '../Com_Component/ComTextFiled'; // adjust path if needed
 import TextFiledTheme from '../Com_Component/TextFiledTheme'; // adjust path if needed
 import { Autocomplete, TextField } from "@mui/material";
+import { fetchSearchSuiNo } from '../../Services/Services-Rc';
 
-const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, isFrozen, partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
+const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, setExtraFields, setFormData, isFrozen, partOptions, suiNoOptions, handleChange, productOptions, handlePoChange, setTableData, setShowTable, formErrors }) => {
     const RepaierType = [
         { label: "SUI", value: "SUI" },
         { label: "Rework", value: "Rework" },
@@ -20,6 +21,34 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
     const getOptionObj = (value, options) => {
         return options.find((opt) => opt.value === value) || null;
     };
+
+    const handleSearchSuiNo = (sui) => {
+        if (!formData.boardserialnumber?.trim() || formData.boardserialnumber.length !== 11) {
+            setFormErrors({
+                boardserialnumber: !formData.boardserialnumber?.trim()
+                    ? "Enter Module Serial Number"
+                    : "Module Serial Number must be exactly 11 characters"
+            });
+            setShowTable(false);
+            return;
+        }
+
+        fetchSearchSuiNo(sui)
+            .then((res) => {
+                // Merge each response row with current formData fields
+                const mergedRows = res.data.table1.map(row => ({
+                    ...formData,  // productname, productfamily, productgroup, etc.
+                    ...row        // partcode, quantity, etc.
+                }));
+
+                setTableData(mergedRows);
+                setSuiData(res.data);
+                setShowTable(true);
+            })
+            .catch(err => console.error(err));
+    };
+
+
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
@@ -53,7 +82,7 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                         <TextField {...params} label="Product Name"
                             variant="outlined" size="small"
                             error={Boolean(formErrors?.productname)}
-                    helperText={formErrors?.productname || ""}
+                            helperText={formErrors?.productname || ""}
                         />
                     )}
                 />
@@ -106,17 +135,17 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                     disabled={isFrozen}
                     renderInput={(params) => (
 
-                        <TextField {...params} label="Type"
-                         error={Boolean(formErrors?.type)}
-                    helperText={formErrors?.type || ""}
-                     variant="outlined" size="small" />
+                        <TextField {...params} label="Reworker Type"
+                            error={Boolean(formErrors?.type)}
+                            helperText={formErrors?.type || ""}
+                            variant="outlined" size="small" />
 
                     )}
                 />
-                
+
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") && (
                     <>
-                        
+
                         <Autocomplete
                             options={partOptions}
                             getOptionLabel={(option) => option.label || ""}
@@ -147,8 +176,8 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                             name="partdescription"
                             value={formData.partdescription}
                             onChange={handleChange}
-                            // error={Boolean(formErrors?.partdescription)}
-                            // helperText={formErrors?.partdescription || ""}
+                        // error={Boolean(formErrors?.partdescription)}
+                        // helperText={formErrors?.partdescription || ""}
                         />
 
                         <ComTextFiled
@@ -175,6 +204,57 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                         />
                     </>
                 )}
+
+                {formData.type === "SUI" && (
+                    // <>
+                    //     <ComTextFiled
+                    //         label="SUI No"
+                    //         name="SUINo"
+                    //         value={extraFields.SUINo}
+                    //         onChange={(e) =>
+                    //             setExtraFields(prev => ({
+                    //                 ...prev,
+                    //                 SUINo: e.target.value
+                    //             }))
+                    //         }
+                    //         // error={formErrors?.SUINo}
+                    //         // helperText={formErrors?.SUINo || ""}
+                    //     />
+
+                    // </>
+                    <Autocomplete
+                        options={suiNoOptions}
+                        getOptionLabel={(option) => option.label || ""}
+                        value={suiNoOptions.find(opt => opt.value === formData.SUINo) || null}
+                        onChange={(e, newValue) => {
+                            const sui = newValue?.value || "";
+                            setFormData(prev => ({ ...prev, SUINo: sui }));
+                            if (sui) handleSearchSuiNo(sui); // ✅ trigger directly
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="SUINo"
+                                variant="outlined"
+                                size="small"
+                                error={Boolean(formErrors?.SUINo)}
+                                helperText={formErrors?.SUINo || ""}
+                            />
+                        )}
+                    />
+                )}
+                {formData.type === "ThermalGEL" && (
+                    <>
+                        <ComTextFiled
+                            label="Quantity"
+                            name="tgquantity"
+                            value={formData.tgquantity}
+                            onChange={handleChange}
+                            error={formErrors?.tgquantity}
+                            helperText={formErrors?.tgquantity || ""}
+                        />
+                    </>
+                )}
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "Soldring" || formData.type === "Desoldring"
                     || formData.type === "Trackchange" || formData.type === "Reflow" || formData.type === "BGA" || formData.type === "ThermalGEL" || formData.type === "Swap") && (
                         <>
@@ -190,36 +270,6 @@ const RepaierTextfile = ({ formData, extraFields, setExtraFields, setFormData, i
                             />
                         </>
                     )}
-                {formData.type === "SUI" && (
-                    <>
-                        <ComTextFiled
-                            label="SUI No"
-                            name="SUINo"
-                            value={extraFields.SUINo}
-                            onChange={(e) =>
-                                setExtraFields(prev => ({
-                                    ...prev,
-                                    SUINo: e.target.value
-                                }))
-                            }
-                            // error={formErrors?.SUINo}
-                            // helperText={formErrors?.SUINo || ""}
-                        />
-
-                    </>
-                )}
-                {formData.type === "ThermalGEL" && (
-                    <>
-                        <ComTextFiled
-                            label="Quantity"
-                            name="tgquantity"
-                            value={formData.tgquantity}
-                            onChange={handleChange}
-                            error={formErrors?.tgquantity}
-                            helperText={formErrors?.tgquantity || ""}
-                        />
-                    </>
-                )}
             </ThemeProvider>
         </div>
     )

@@ -5,8 +5,9 @@ import { TextField } from "@mui/material";
 import { saveDoneRequest, savePickequest } from '../../Services/Services_09';
 import CryptoJS from "crypto-js";
 import { FaEdit } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 
-const PutawayDefaultTable =({
+const PutawayDefaultTable = ({
   data = [],
   page,
   perPage,
@@ -17,61 +18,119 @@ const PutawayDefaultTable =({
   handleQtyChange,
   formData,
   pickButton,
-    onEdit,
+  onEdit,
   setpickButton,
   setSuccessMessage,
-  setShowSuccessPopup
+  setShowSuccessPopup,
+  onDelete
 }) => {
 
-     const columns = generateColumns({
-  fields: [
-    "Putaway_Edit",
-    "recevingTicketNo",
-    "partcode",
-    "partdescription",
-    "UOM",
-    "location",
-    "ponumber",
-    "poDate",
-    "vendorname",
-    "postingdate",
-    "recevingQty",
-    "GRNQty",
-    "putqty",
-    "GRNo",
-    "GRNQty",
-    "Status",
-    "createdon"
-  ],
-  customCellRenderers: {
-   Putaway_Edit: (row) => (
-      <div style={{ textAlign: "left",marginLeft:"39%", width: "89%" }}>
-        <button
-          className="edit-button"
-          onClick={() => onEdit(row)}
-          style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
-        >
-          <FaEdit />
-          
-        </button>
-      </div>
-    ),
-  },
-});
+  const columns = generateColumns({
+    fields: [
+      "Putaway_Delete",
+      "recevingTicketNo",
+      "partcode",
+      "partdescription",
+      "UOM",
+      "location",
+      "ponumber",
+      "poDate",
+      "vendorname",
+      "postingdate",
+      "GRDate",
+      "recevingQty",
+      "GRNQty",
+      "putqty",
+      "GRNo",
+      "Status",
+    ],
+    customConfig: {
+      recevingTicketNo: { label: "Receving TicketNo" },
+      location: { label: "Location", },
+      partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      ponumber: { label: "PO Number" },
+      poDate: { label: "PO Date" },
+      vendorname: { label: "Vendor Name" },
+      postingdate: { label: "Postin Date" },
+      recevingQty: { label: "Receving Qty" },
+      GRNQty: { label: "GRN Qty" },
+      putqty: { label: "PUT Qty" },
+      GRNo: { label: "GRN No" },
+      Status: { label: "Status" },
+      createdon: { label: "Create Don" },
+    },
+    customCellRenderers: {
+      // Putaway_Edit: (row) => (
+      //   <div style={{ textAlign: "left", marginLeft: "39%", width: "89%" }}>
+      //     <button
+      //       className="edit-button"
+      //       onClick={() => onEdit(row)}
+      //       style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
+      //     >
+      //       <FaEdit />
 
-          
-           
+      //     </button>
+      //   </div>
+      // ),
+      Putaway_Delete: (row) => (
+  <div style={{ textAlign: "left", marginLeft: "39%", width: "89%" }}>
+    <button
+      className="delete-button"
+            onClick={() => onDelete(row.recevingTicketNo)} // send ticketNo
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        // gap: "4px",
+        background: "#e31216ff",  // red for delete
+        color: "#fff",
+        border: "none",
+        padding: "5px 7px",
+        borderRadius: "7px",
+        cursor: "pointer",
+        transition: "0.3s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "#50e748ff")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "#e31216ff")}
+    >
+      <FaTrash />
+    </button>
+  </div>
+),
+    },
+  });
+
+
+  const handlePageChange = (page) => {
+    setPage(page);
+  };
+
+  const handlePerRowsChange = (newPerPage, page) => {
+    setPerPage(newPerPage);
+    setPage(page);
+  };
   return (
-<CommonDataTable
+    <CommonDataTable
       columns={columns}
       data={data}
+      loading={loading}
+      pagination
+      paginationServer
       page={page}
       perPage={perPage}
       totalRows={totalRows}
-      loading={loading}
       onPageChange={setPage}
-      onRowsPerPageChange={setPerPage}
-    />  )
+      onPerPageChange={setPerPage}
+    //   loading={loading}
+    //    onChangePage={setPage}
+    //             onChangeRowsPerPage={setPerPage}
+    //    onPageChange={handlePageChange} // ✅ Correct prop
+    // onRowsPerPageChange={handlePerRowsChange}
+    />
+
+
+
+  )
 }
 
 export default PutawayDefaultTable

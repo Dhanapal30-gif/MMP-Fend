@@ -38,6 +38,7 @@ import Approver from './Pages/Approver/Approver';
 import Issuance from './Pages/Issuance/Issuance';
 import Returning from './Pages/Returning/Returning';
 import StockTransfer from './Pages/StockTransfer/StockTransfer';
+import NotificationList from './components/Notification/NotificationList';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -123,6 +124,8 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className='App'>
         {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />}
+
+<NotificationList/>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/createAccount" element={<CreateAccount />} />
@@ -169,6 +172,7 @@ function App() {
 
 
         </Routes>
+
       </div>
     </ThemeProvider>
   )

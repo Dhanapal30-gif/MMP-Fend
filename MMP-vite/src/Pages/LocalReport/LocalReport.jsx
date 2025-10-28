@@ -19,23 +19,12 @@ const LocalReport = () => {
     });
 
     const [formErrors, setFormErrors] = useState({});
-    const [tableData, setTableData] = useState([]);
-    const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [ptlRequestData, setPtlRequestData] = useState([]);
-    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [showErrorPopup, setShowErrorPopup] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [requestButton, setRequestButton] = useState(true);
     const [isFrozen, setIsFrozen] = useState(false);
-    const [submitButton, setSubmitButton] = useState(true);
-    const [clearButton, setClearButton] = useState(false);
     const [searchText, setSearchText] = useState("");
-    const [indiviualReport, setIndiviualReport] = useState([])
     const [isFilterActive, setIsFilterActive] = useState(false);
     const [repaierReworkerData, setRepaierReworkerData] = useState([]);
     const [localReportData, setLocalReportData] = useState([]);
@@ -137,6 +126,7 @@ const LocalReport = () => {
         else {
             fetchLocalReport(page, size)
         }
+
     };
 
     const fetchLocalReport = (page = 1, size = 10) => {
@@ -172,7 +162,9 @@ const LocalReport = () => {
             })
             .catch((error) => {
                 console.error("Error fetching search data:", error);
-            });
+            }).finally(() => {
+            setLoading(false); // always stop loader
+        });
     };
 
     // console.log("formData", formData);
@@ -186,6 +178,7 @@ const LocalReport = () => {
 
     };
     const fetchFilterResult = () => {
+        setLoading(true)
         getLocalReportDetailFilter(page - 1, perPage, formData)
             .then((response) => {
                 if (response?.data?.content) {
@@ -195,7 +188,9 @@ const LocalReport = () => {
             })
             .catch((error) => {
                 console.error("Error in filter API:", error);
-            });
+            }).finally(() => {
+            setLoading(false); // always stop loader
+        });
     };
 
     const Clear = () => {

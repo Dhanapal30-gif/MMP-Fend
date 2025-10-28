@@ -10,9 +10,8 @@ import GRNPendingTable from "../../components/GRN/GRNPendingTable";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { deleteRecDetail, saveGRN, updateGRNDetail } from '../../Services/Services_09.js';
 import { FaFileExcel, FaBars } from "react-icons/fa";
-import { FaEdit } from "react-icons/fa";
-import { green } from '@mui/material/colors';
 import { FaTimesCircle } from "react-icons/fa";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const GRN = () => {
     const [formData, setFormData] = useState({ ponumber: "", partcode: "", recevingTicketNo: "", grnNumber: "", grnDate: "" });
@@ -268,17 +267,35 @@ const GRN = () => {
         )
     );
 
-    const fetchFindData = (page = 1, size = 10, search = "") => {
-        if (isPendingView) return; //  Prevent any API call in pending mode
+    // const fetchFindData = (page = 1, size = 10, search = "") => {
+    //     if (isPendingView) return; //  Prevent any API call in pending mode
+    //     setLoading(true)
 
-        // console.log("searchfetch", search);
+    //     // console.log("searchfetch", search);
 
+    //     if (search && search.trim() !== "") {
+    //         fetchfind(setGRNCloseData, setTotalCloseRows, page, size, search);
+    //     } else {
+    //         fetchGRNDetail(setGRNCloseData, setTotalCloseRows, page, size);
+    //     }
+    //     setLoading(false)
+    // };
+const fetchFindData = async (page = 1, size = 10, search = "") => {
+    if (isPendingView) return; 
+    setLoading(true);
+
+    try {
         if (search && search.trim() !== "") {
-            fetchfind(setGRNCloseData, setTotalCloseRows, page, size, search);
+            await fetchfind(setGRNCloseData, setTotalCloseRows, page, size, search);
         } else {
-            fetchGRNDetail(setGRNCloseData, setTotalCloseRows, page, size);
+            await fetchGRNDetail(setGRNCloseData, setTotalCloseRows, page, size);
         }
-    };
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setLoading(false); // stops loader after API finishes
+    }
+};
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -480,6 +497,7 @@ const GRN = () => {
                 </div>
 
                 {isPendingView ? (
+                    
                     <GRNPendingTable
                         data={grnPendding()}
                         page={pagePen}
@@ -493,6 +511,9 @@ const GRN = () => {
 
                     />
                 ) : (
+                      <>
+                                    <LoadingOverlay loading={loading} />
+                    
                     <GRNDefaultTable
                         data={filteredGRNclose}
                         page={pageClose}
@@ -507,7 +528,7 @@ const GRN = () => {
                         isEditMode={isEditMode}
 
                     />
-
+</>
                 )}
                 
             </div>

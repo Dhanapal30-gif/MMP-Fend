@@ -45,7 +45,7 @@ const PTLTable = ({
   const columns = generateColumns({
     fields: [
       // "select",
-      "edit",
+      "Edit",
       "partcode",
       "partdescription",
       "rohsstatus",
@@ -89,7 +89,7 @@ const PTLTable = ({
   </div>
 ),
 
-      edit: (row) => (
+      Edit: (row) => (
         <button className="edit-button" onClick={() => onEdit(row)}>
           <FaEdit />
         </button>

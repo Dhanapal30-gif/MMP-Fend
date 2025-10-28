@@ -195,19 +195,28 @@ const fetchUserRoleData = async (userRole) => {
                         error={Boolean(formErrors.userId)}
                         helperText={formErrors.userId}
                         size='small'
-                        sx={{
-                            input: { color: 'white' },
-                            label: { color: 'white' },
-                            '& label.Mui-focused': { color: 'white' },
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': { borderColor: 'white' },
-                                '&:hover fieldset': { borderColor: '#ddd' },
-                                '&.Mui-focused fieldset': { borderColor: 'white' },
-                            },
-                            '& .MuiFormHelperText-root': {
-                                color: 'white', // helper text color
-                            }
-                        }}
+                         sx={{
+    input: {
+      color: 'white',
+      backgroundColor: 'transparent',
+      userSelect: 'none',
+      WebkitBoxShadow: '0 0 0 1000px transparent inset', // removes blue autofill
+      WebkitTextFillColor: 'white', // keep text white
+    },
+    label: { color: 'white' },
+    '& label.Mui-focused': { color: 'white' },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: 'white' },
+      '&:hover fieldset': { borderColor: '#ddd' },
+      '&.Mui-focused fieldset': { borderColor: 'white' },
+    },
+    '& input:-webkit-autofill': {
+      WebkitBoxShadow: '0 0 0 1000px transparent inset !important',
+      WebkitTextFillColor: 'white !important',
+      transition: 'background-color 9999s ease-in-out 0s',
+    },
+    '& .MuiFormHelperText-root': { color: 'white' },
+  }}
                     />
                     <TextField
                         label="password"
@@ -221,19 +230,41 @@ const fetchUserRoleData = async (userRole) => {
                         helperText={formErrors.password}
                         margin="normal"
                         size='small'
-                        sx={{
-                            input: { color: 'white' },
-                            label: { color: 'white' },
-                            '& label.Mui-focused': { color: 'white' },
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': { borderColor: 'white' },
-                                '&:hover fieldset': { borderColor: '#ddd' },
-                                '&.Mui-focused fieldset': { borderColor: 'white' },
-                            },
-                            '& .MuiFormHelperText-root': {
-                                color: 'white', // helper text color
-                            }
-                        }}
+                        // sx={{
+                        //     input: { color: 'white' },
+                        //     label: { color: 'white' },
+                        //     '& label.Mui-focused': { color: 'white' },
+                        //     '& .MuiOutlinedInput-root': {
+                        //         '& fieldset': { borderColor: 'white' },
+                        //         '&:hover fieldset': { borderColor: '#ddd' },
+                        //         '&.Mui-focused fieldset': { borderColor: 'white' },
+                        //     },
+                        //     '& .MuiFormHelperText-root': {
+                        //         color: 'white', // helper text color
+                        //     }
+                        // }}
+                         sx={{
+    input: {
+      color: 'white',
+      backgroundColor: 'transparent',
+      userSelect: 'none',
+      WebkitBoxShadow: '0 0 0 1000px transparent inset', // removes blue autofill
+      WebkitTextFillColor: 'white', // keep text white
+    },
+    label: { color: 'white' },
+    '& label.Mui-focused': { color: 'white' },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: 'white' },
+      '&:hover fieldset': { borderColor: '#ddd' },
+      '&.Mui-focused fieldset': { borderColor: 'white' },
+    },
+    '& input:-webkit-autofill': {
+      WebkitBoxShadow: '0 0 0 1000px transparent inset !important',
+      WebkitTextFillColor: 'white !important',
+      transition: 'background-color 9999s ease-in-out 0s',
+    },
+    '& .MuiFormHelperText-root': { color: 'white' },
+  }}
                     />
                     <Button
                         type="submit"

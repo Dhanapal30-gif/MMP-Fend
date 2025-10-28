@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, TextField } from "@mui/material";
-import CommonDataTable from "../../components/Com_Component/CommonDataTable";
+import CommonAddDataTable from "../../components/Com_Component/CommonAddDataTable";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
 import { saveIssueBatchcodeQty } from "../../Services/Services-Rc";
 
@@ -18,7 +18,11 @@ const IssuanceShowTable =  ({
     formErrors,
     handleGRNQtyChange,
 
-    handleSaveQty
+    handleSaveQty,
+    setShowErrorPopup,
+    setErrorMessage,
+    setShowSuccessPopup,
+    setSuccessMessage
 }) => {
 
    const [open, setOpen] = useState(false);
@@ -47,7 +51,9 @@ const IssuanceShowTable =  ({
 const handleSave = async () => {
   const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
   if (!hasQty) {
-    alert("Please enter quantity for at least one location!");
+    // alert("Please enter quantity for at least one location!");
+    setErrorMessage("Please enter quantity for at least one location!")
+    setShowErrorPopup(true)
     return;
   }
 
@@ -63,7 +69,10 @@ const handleSave = async () => {
   console.log("Payload to send:", payload);
              try {
     await saveIssueBatchcodeQty(payload); // API call
-    alert("Submitted successfully!");
+    // alert("Submitted successfully!");
+    setSuccessMessage("Submitted successfully!")
+    setShowSuccessPopup(true)
+    
     setOpen(false);
   } catch (error) {
     console.error("Error submitting payload:", error);
@@ -109,6 +118,26 @@ const handleSave = async () => {
         "Comment",
         "recordstatus"
     ],
+    customConfig: {
+      rec_ticket_no: { label: "Request TicketNo" },
+      requestertype: { label: "Requester Type", },
+      partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      productname: { label: "Product Name" },
+      productgroup: { label: "Product Group" },
+      productfamily: { label: "Product Family" },
+      componentType: { label: "Component Type" },
+      compatabilitypartcode: { label: "Compatability PartCode" },
+      req_qty: { label: "Req Qty" },
+      batchCode: { label: "BatchCode" },
+      location: { label: "Location" },
+      putQty: { label: "PUT Qty" },
+
+      allocatedQty: { label: "Allocated Qty" },
+      approvedQty: { label: "Approved Qty" },
+      Comment: { label: "Comment" },
+      recordstatus: { label: "Status" },
+    },
     customCellRenderers: {
         location: (row) => {
             if (!row.location) return "";
@@ -169,16 +198,21 @@ const handleSave = async () => {
 
   return (
     <>
-       <CommonDataTable
+       <CommonAddDataTable
                 columns={columns}
                 data={normalizedData}
                 progressPending={loading}
-                pagination
-                paginationServer
-                paginationTotalRows={totalRows}
-                paginationPerPage={perPage}
-                onChangePage={setPage}
-                onChangeRowsPerPage={setPerPage}
+                // pagination
+                // paginationServer
+                // paginationTotalRows={totalRows}
+                 totalRows={totalRows}
+                // paginationPerPage={perPage}
+                 page={page}
+                perPage={perPage}
+                // onChangePage={setPage}
+                // onChangeRowsPerPage={setPerPage}
+                onPageChange={setPage}
+                onPerPageChange={setPerPage}
             />
 
             {/* ✅ Popup with Table */}
@@ -258,7 +292,9 @@ const handleSave = async () => {
       
       // Don't allow more than allocatedQty
       if (numVal > batch.allocatedQty) {
-        alert(`Cannot exceed allocated qty (${batch.allocatedQty}) for this batch`);
+        // alert(`Cannot exceed allocated qty (${batch.allocatedQty}) for this batch`);
+        setErrorMessage(`Cannot exceed allocated qty (${batch.allocatedQty}) for this batch`)
+        setShowErrorPopup(true);
         return;
       }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CommonDataTable from '../../components/Com_Component/CommonDataTable';
+import CommonAddDataTable from '../../components/Com_Component/CommonAddDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns';
 import {
     TextField,
@@ -28,6 +28,8 @@ const PutawayProcessTable = ({
     setSelectedRows1,
     formErrors,
     handleGRNQtyChange,
+    setErrorMessage,
+    setShowErrorPopup
 }) => {
     const [open, setOpen] = useState(false);
     const [activeRow, setActiveRow] = useState(null);
@@ -49,7 +51,8 @@ const PutawayProcessTable = ({
         // check if at least one location has a qty
         const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
         if (!hasQty) {
-            alert("Please enter quantity for at least one location!");
+            setErrorMessage("Please enter quantity for at least one location!");
+            setShowErrorPopup(true)
             return;
         }
 
@@ -57,6 +60,14 @@ const PutawayProcessTable = ({
         setOpen(false);
     };
 
+    const handlePageChange = (page) => {
+        setPage(page);
+    };
+
+    const handlePerRowsChange = (newPerPage, page) => {
+        setPerPage(newPerPage);
+        setPage(page);
+    };
 
     const handleSelectAll1 = (e) => {
         if (e.target.checked) {
@@ -92,86 +103,118 @@ const PutawayProcessTable = ({
             "GRNo",
             "GRNQty",
             "Status",
-            "createdon",
-            "showDetail"
+            // "createdon",
+            // "showDetail"
         ],
+         customConfig: {
+      recevingTicketNo: { label: "Receving TicketNo" },
+      location: { label: "Location", },
+      partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      ponumber: { label: "PO Number" },
+      poDate: { label: "PO Date" },
+      vendorname: { label: "Vendor Name" },
+      postingdate: { label: "Postin Date" },
+      recevingQty: { label: "Receving Qty" },
+      GRNQty: { label: "GRN Qty" },
+      putqty: { label: "PUT Qty" },
+      GRNo: { label: "GRN No" },
+      Status: { label: "Status" },
+    //   createdon: { label: "Create Don" },
+    },
         selectedRows: selectedRows1,
         handleSelect: handleSelect1,
         handleSelectAll: handleSelectAll1,
         customCellRenderers: {
-            location: (row) => {
-                if (!row.location) return "";
-                const parts = row.location.split(",");
-                return (
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        {parts.map((loc, i) => (
-                            <span key={i}>{loc.trim()}</span>
-                        ))}
-                    </div>
-                );
-            },
+                Status: (row) => row.Status || "Pending",
 
-                // putQty: (row) => (
-                //     <Button variant="outlined" size="small" onClick={() => handleOpen(row)}>
-                //         {row.putQtyDetails ? "Edit Qty" : "Add Qty"}
-                //     </Button>
-                // ),
+             location: (row) => {
+  if (!row.location) return "";
+  const value = Array.isArray(row.location)
+    ? row.location.join(",")
+    : String(row.location);
 
-                putQty: (row) => {
-  const isEdit = !!row.putQtyDetails; // true → Edit Qty
+  const parts = value.split(",");
   return (
-    <Button
-      variant="outlined"
-      size="small"
-      onClick={() => handleOpen(row)}
-      sx={{
-        color: "white",
-        backgroundColor: isEdit ? "brown" : "#1bd0a6ff",  // brown for edit, green for add
-        borderColor: isEdit ? "brown" : "green",
-        "&:hover": {
-          backgroundColor: isEdit ? "#8B4513" : "#3ef43eff"
-        }
-      }}
-    >
-      {isEdit ? "Edit Qty" : "Add Qty"}
-    </Button>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {parts.map((loc, i) => (
+        <span key={i}>{loc.trim()}</span>
+      ))}
+    </div>
   );
 },
+            // location: (row) => {
+            //     if (!row.location) return "";
+            //     const parts = row.location.split(",");
+            //     return (
+            //         <div style={{ display: "flex", flexDirection: "column" }}>
+            //             {parts.map((loc, i) => (
+            //                 <span key={i}>{loc.trim()}</span>
+            //             ))}
+            //         </div>
+            //     );
+            // },
+
+            // putQty: (row) => (
+            //     <Button variant="outlined" size="small" onClick={() => handleOpen(row)}>
+            //         {row.putQtyDetails ? "Edit Qty" : "Add Qty"}
+            //     </Button>
+            // ),
+
+            putQty: (row) => {
+                const isEdit = !!row.putQtyDetails; // true → Edit Qty
+                return (
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleOpen(row)}
+                        sx={{
+                            color: "white",
+                            backgroundColor: isEdit ? "brown" : "#1bd0a6ff",  // brown for edit, green for add
+                            borderColor: isEdit ? "brown" : "green",
+                            "&:hover": {
+                                backgroundColor: isEdit ? "#8B4513" : "#3ef43eff"
+                            }
+                        }}
+                    >
+                        {isEdit ? "Edit Qty" : "Add Qty"}
+                    </Button>
+                );
+            },
 
         }
     });
 
     return (
         <>
-            <CommonDataTable
+            <CommonAddDataTable
                 columns={columns}
                 data={data}
                 progressPending={loading}
-                pagination
-                paginationServer
-                paginationTotalRows={totalRows}
-                paginationPerPage={perPage}
-                onChangePage={setPage}
-                onChangeRowsPerPage={setPerPage}
+                totalRows={totalRows}
+                page={page}
+                perPage={perPage}
+                onPageChange={setPage}
+                onPerPageChange={setPerPage}
             />
 
             {/* ✅ Popup with Table */}
             <Dialog
                 open={open}
-onClose={(event, reason) => {
-        // Only close on Cancel button, ignore backdrop click or escape
-        if (reason === "backdropClick" || reason === "escapeKeyDown") {
-            return;
-        }
-        setOpen(false);
-    }}
-    disableEscapeKeyDown // optionalmaxWidth={false} 
-      maxWidth={false}     
+                onClose={(event, reason) => {
+                    // Only close on Cancel button, ignore backdrop click or escape
+                    if (reason === "backdropClick" || reason === "escapeKeyDown") {
+                        return;
+                    }
+                    setOpen(false);
+                }}
+                disableEscapeKeyDown // optionalmaxWidth={false} 
+                maxWidth={false}
 
                 fullWidth
                 PaperProps={{
                     sx: {
-                         width: 900,   
+                        width: 900,
                         border: '3px solid', // border width required
                         borderImage: 'linear-gradient(to bottom, #d27c19ff 50%, #afee39ff 50%) 1', // top 50% blue, bottom 50% green
                         borderRadius: 3,              // rounded corners
@@ -195,7 +238,7 @@ onClose={(event, reason) => {
                 >
                     <span>Partcode: {activeRow?.partcode}</span>
                     <span>Good Qty: {activeRow?.GRNQty}</span>
-                    <span>BatchCode: {activeRow?.postingdate}</span>
+                    <span>BatchCode: {activeRow?.rcbatchcode}</span>
                     <span>Put Qty: {activeRow?.Allowed_putqty}</span>
 
                 </DialogTitle>
@@ -238,7 +281,8 @@ onClose={(event, reason) => {
                                                             // check individual value doesn't exceed GRNQty
                                                             const numVal = val === "" ? 0 : Number(val);
                                                             if (numVal > activeRow?.Allowed_putqty) {
-                                                                alert(`Value cannot exceed Allowed_putqty (${activeRow?.Allowed_putqty})`);
+                                                                setErrorMessage(`Value cannot exceed Allowed_putqty (${activeRow?.Allowed_putqty})`);
+                                                                setShowErrorPopup(true)
                                                                 return;
                                                             }
 

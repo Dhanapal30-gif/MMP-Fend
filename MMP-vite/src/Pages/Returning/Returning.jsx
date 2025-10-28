@@ -17,7 +17,9 @@ const Returning = () => {
         returningType: "",
         returnQty: ""
     });
+
     const userId = sessionStorage.getItem("userId");
+    
     const [formErrors, setFormErrors] = useState({});
     const [returningData, setReturningData] = useState([]);
     const [showTable, setShowTable] = useState(false);

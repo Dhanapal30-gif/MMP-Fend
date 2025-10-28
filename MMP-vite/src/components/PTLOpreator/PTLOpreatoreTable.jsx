@@ -4,6 +4,7 @@ import { generateColumns } from '../../components/Com_Component/generateColumns'
 import { TextField } from "@mui/material";
 import { saveDoneRequest, savePickequest } from '../../Services/Services_09';
 import CryptoJS from "crypto-js";
+import { WidthFull } from '@mui/icons-material';
 
 const PTLOpreatoreTable = ({
   data = [],
@@ -39,8 +40,23 @@ const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
       "repairername",
       "reworkername"
 
-    ]
-    ,
+    ],
+     customConfig: {
+            type: { label: "Reworker Type" },
+            productname: { label: "Product Name", },
+            partcode: { label: "partCode" },
+    boardserialnumber: { label: "Board Serial Number",  }, // ✅ this works
+            racklocation: { label: "ReackLocation" },
+            availableqty: { label: "Available Qty" },
+            RequestedQty: { label: "Requested Qty" },
+            pickingqty: { label: "Picking Qty" },
+            pickedqty: { label: "Picked Qty" },
+            repairername: { label: "Repairer Name" },
+            reworkername: { label: "Reworker Name" },
+
+
+        },
+    
     customCellRenderers: {
   pickingqty: (formData) => (
     <TextField
@@ -138,6 +154,9 @@ const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
       loading={loading}
       onPageChange={setPage}
       onRowsPerPageChange={setPerPage}
+      customStyles={{
+    table: { style: { tableLayout: "auto" } }, // ensures only the wide column expands
+  }}
     />
   )
 }

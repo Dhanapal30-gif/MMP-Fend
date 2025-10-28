@@ -37,7 +37,7 @@ const RepaierAddTable = ({
         repairercomments: "",
         SUINo: "",
         Quantity: "",
-        repaierName: ""
+        // repaierName: ""
       })
     setShowTable(false);
     setIsFrozen(false)
@@ -76,6 +76,16 @@ const RepaierAddTable = ({
         "availableqty",
         "pickingqty"
       ],
+      customConfig: {
+        productname: { label: "Product Name" },
+        boardserialnumber: { label: "Board Serial Number" },
+        type: { label: "Reworker Type" },
+        partcode: { label: "PartCode" },
+        partdescription: { label: "Part Description" },
+        racklocation: { label: "ReackLocation" },
+        availableqty: { label: "Available Qty" },
+        pickingqty: { label: "Pickin Qqty" },
+      },
     }),
   ];
 

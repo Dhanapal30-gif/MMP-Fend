@@ -33,28 +33,28 @@ const PoTable = ({
   };
 
 
-const handleSelectAll = (e) => {
-  if (e.target.checked) {
-    setSelectedRows(data.map((row) => row.id)); // ✅ use selectedid
-  } else {
-    setSelectedRows([]);
-  }
-};
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedRows(data.map((row) => row.id)); // ✅ use selectedid
+    } else {
+      setSelectedRows([]);
+    }
+  };
 
-// const handleSelect = (rowId, checked) => {
-//   if (checked) {
-//     setSelectedRows((prev) => [...prev, rowId]);
-//   } else {
-//     setSelectedRows((prev) => prev.filter((id) => id !== rowId));
-//   }
-// };
+  // const handleSelect = (rowId, checked) => {
+  //   if (checked) {
+  //     setSelectedRows((prev) => [...prev, rowId]);
+  //   } else {
+  //     setSelectedRows((prev) => prev.filter((id) => id !== rowId));
+  //   }
+  // };
 
-const handleSelect = (poid, isChecked) => {
-  setSelectedRows((prev) => {
-    if (isChecked) return [...prev, poid];
-    return prev.filter((id) => id !== poid);
-  });
-};
+  const handleSelect = (poid, isChecked) => {
+    setSelectedRows((prev) => {
+      if (isChecked) return [...prev, poid];
+      return prev.filter((id) => id !== poid);
+    });
+  };
 
   const columns = generateColumns({
     fields: [
@@ -67,6 +67,16 @@ const handleSelect = (poid, isChecked) => {
       "GRNQty",
       "postatus"
     ],
+    customConfig: {
+      ponumber: { label: "PO Number" },
+      postingdate: { label: "Posting Date", },
+      partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      orderqty: { label: "Order Qty" },
+      recevingQty: { label: "Receving Qty" },
+      GRNQty: { label: "GRN Qty" },
+      postatus: { label: "Po Status" },
+    },
     selectedRows,
     handlePoChange,
     onEdit,
@@ -85,14 +95,13 @@ const handleSelect = (poid, isChecked) => {
                 handlePoChange(row.Poid, "postatus", newValue?.value || "")
               }
               renderInput={(params) => (
-                <TextField {...params} variant="outlined" size="small" 
-                error={!!formErrors[`postatus${row.Poid}`]}           // ✅ correct key
-      helperText={formErrors[`postatus${row.Poid}`] || ""} // ✅ display message
+                <TextField {...params} variant="outlined" size="small"
+                  error={!!formErrors[`postatus${row.Poid}`]}           // ✅ correct key
+                  helperText={formErrors[`postatus${row.Poid}`] || ""} // ✅ display message
                 />
               )}
               className="invoice-input"
             />
-
           );
         } else {
           return row.postatus;
@@ -106,6 +115,8 @@ const handleSelect = (poid, isChecked) => {
       columns={columns}
       data={data}
       loading={loading}
+      pagination
+      paginationServer
       page={page}
       perPage={perPage}
       totalRows={totalRows}

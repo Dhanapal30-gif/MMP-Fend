@@ -26,7 +26,7 @@ const PoStatus = () => {
     const [triggerFetch, setTriggerFetch] = useState(false); 
 
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);

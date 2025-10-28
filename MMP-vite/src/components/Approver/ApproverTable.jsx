@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { TextField } from "@mui/material";
-import CommonDataTable from "../../components/Com_Component/CommonDataTable";
+import { setRef, TextField } from "@mui/material";
+import CommonAddDataTable from "../../components/Com_Component/CommonAddDataTable";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
 
 const allFields = [
@@ -20,11 +20,11 @@ const allFields = [
   "allocatedQty",
   "ApprovedL1Qty",
   "ApprovedL2Qty",
+  "faultySerialNumber",
   "Comment",
-  "recordstatus"
+  "recordstatus",
 ];
 
-// 🔹 hide these for Returning-L1
 const hideForReturning = [
   "productname",
   "productgroup",
@@ -56,7 +56,8 @@ const customConfig = {
   ApprovedL1Qty: { label: "Approved Qty L1" },
   ApprovedL2Qty: { label: "Approved Qty L2" },
   Comment: { label: "Comment", width: "250px" },
-  recordstatus: { label: "Status" }
+  recordstatus: { label: "Status" },
+  faultySerialNumber: { label: "Faulty Serial Number" },
 };
 
 const ApproverTable = ({
@@ -70,85 +71,125 @@ const ApproverTable = ({
   setSelectedGrnRows,
   selectedGrnRows,
   handleApproverChange,
-  formErrors = {}
+  formErrors = {},
+  setErrorMessage,
+  setShowErrorPopup,
+  rejectComment
 }) => {
-  // 🔑 decide fields dynamically
   const visibleFields = useMemo(() => {
     if (!data || data.length === 0) return allFields;
     const ticketNo = data[0]?.rec_ticket_no ?? "";
-     if (ticketNo.startsWith("RTN")) {
-    return allFields.filter(f => !hideForReturning.includes(f));
-  }
-
+    if (ticketNo.startsWith("RTN")) {
+      return allFields.filter((f) => !hideForReturning.includes(f));
+    }
     return allFields;
   }, [data]);
 
-  // normalize batches
   const normalizedData = useMemo(() => {
     return data.map((row) => ({
       ...row,
       batchCode: row.batches?.map((b) => b.batchCode).join(", "),
       location: row.batches?.map((b) => b.location).join(", "),
-      allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", ")
+      allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", "),
     }));
   }, [data]);
 
-  // select all
   const handleGrnSelectAll = (e) => {
-    setSelectedGrnRows(e.target.checked ? data.map((row) => row.id) : []);
+    setSelectedGrnRows(e.target.checked ? data.map((row) => row.selectedId) : []);
   };
 
-  // select single
-  const handleGrnSelect = (rowId) => {
+  const handleGrnSelect = (rowSelectedId) => {
     setSelectedGrnRows((prev) =>
-      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+      prev.includes(rowSelectedId)
+        ? prev.filter((id) => id !== rowSelectedId)
+        : [...prev, rowSelectedId]
     );
   };
 
-  // generate columns
   const columns = useMemo(() => {
-    const qtyField = data.some((r) => r.ApprovedL1Qty !== undefined)
-      ? "ApprovedL1Qty"
-      : "ApprovedL2Qty";
-
     return generateColumns({
-      fields: visibleFields, // ✅ use dynamic fields
-      customConfig,          // ✅ use your config
+      fields: visibleFields,
+      customConfig,
       selectedRows: selectedGrnRows,
       handleSelect: handleGrnSelect,
       handleSelectAll: handleGrnSelectAll,
       customCellRenderers: {
-        [qtyField]: (row) => (
-          <TextField
-            type="number"
-            placeholder="Qty"
-            value={row[qtyField] ?? ""}
-            onChange={(e) => {
-              let val = Number(e.target.value);
-              if (val > row.TotalAvailableQty) val = row.TotalAvailableQty;
-              handleApproverChange(row.selectedId, qtyField, val);
-            }}
-            error={!!formErrors?.[`${qtyField}${row.selectedId}`]}
-            helperText={formErrors?.[`${qtyField}${row.selectedId}`] || ""}
-            className="invoice-input"
-          />
-        ),
-        Comment: (row) => (
-          <TextField
-            placeholder="Enter Comment"
-            value={row.Comment || ""}
-            onChange={(e) =>
-              handleApproverChange(row.selectedId, "Comment", e.target.value)
-            }
-            className="invoice-input"
-          />
-        )
-      }
+        ApprovedL1Qty: (row) => {
+          if (row.ApprovedL1Qty !== undefined && row.ApprovedL2Qty === undefined) {
+            return (
+              <TextField
+                type="number"
+                value={row.ApprovedL1Qty ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && Number(val) > row.TotalAvailableQty) {
+                    // alert("Entered quantity exceeds available quantity!");
+                   
+                   setErrorMessage("Entered quantity exceeds available quantity!")
+                   setShowErrorPopup(true)
+                    return;
+                  }
+                  handleApproverChange(row.selectedId, "ApprovedL1Qty", val);
+                }}
+                className="invoice-input"
+                
+              />
+            );
+          }
+          if (row.ApprovedL1Qty !== undefined && row.ApprovedL2Qty !== undefined) {
+            return (
+              <TextField
+                type="number"
+                value={row.ApprovedL1Qty ?? ""}
+                InputProps={{ readOnly: true }}
+                className="invoice-input"
+              />
+            );
+          }
+          return null;
+        },
+
+        ApprovedL2Qty: (row) => {
+          if (row.ApprovedL1Qty !== undefined && row.ApprovedL2Qty !== undefined) {
+            return (
+              <TextField
+                type="number"
+                value={row.ApprovedL2Qty ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val !== "" && Number(val) > row.TotalAvailableQty) {
+                    // alert("Entered quantity exceeds available quantity!");
+                   setErrorMessage("Entered quantity exceeds available quantity!")
+                   setShowErrorPopup(true)
+                    return;
+                  }
+                  handleApproverChange(row.selectedId, "ApprovedL2Qty", val);
+                }}
+                className="invoice-input"
+              />
+            );
+          }
+          return null; // hide if L2 doesn't exist
+        },
+        
+        Comment: (row) => {
+  if (!rejectComment) return null; // don't show comment if rejectComment is false
+  return (
+    <TextField
+      placeholder="Enter Comment"
+      value={row.Comment ?? ""}
+      onChange={(e) => handleApproverChange(row.selectedId, "Comment", e.target.value)}
+      className="invoice-input"
+    />
+  );
+},
+
+      },
     });
   }, [data, selectedGrnRows, formErrors, visibleFields]);
 
   return (
-    <CommonDataTable
+    <CommonAddDataTable
       columns={columns}
       data={normalizedData}
       page={page}
@@ -156,7 +197,7 @@ const ApproverTable = ({
       totalRows={totalRows}
       loading={loading}
       onPageChange={setPage}
-      onRowsPerPageChange={setPerPage}
+      onPerPageChange={setPerPage}
     />
   );
 };

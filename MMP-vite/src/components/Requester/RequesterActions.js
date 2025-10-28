@@ -19,21 +19,37 @@ export const fetchRequesterDetail = (page,userId, size, setData, setTotalRows) =
 }
 
 
-export const fetchRequesterSearch = (page,userId, size, setData,search , setTotalRows) => {
-          console.log("searchfetch", search);
+// export const fetchRequesterSearch = (page,userId, size, setData,search , setTotalRows) => {
+//           console.log("searchfetch", search);
 
-    fetchSearchRequester(page, size,userId,search )
-    .then((response) => {
-      if (response?.data?.content) {
-        setData(response.data.content)
-        setTotalRows(response.data.totalElements || 0);
+//     fetchSearchRequester(page, size,userId,search )
+//     .then((response) => {
+//       if (response?.data?.content) {
+//         setData(response.data.content)
+//         setTotalRows(response.data.totalElements || 0);
 
-      }
-      else {
-        console.warn("No content found in response:", response.data);
-      }
-    }).catch((error) => {
-      console.error("Error fetching receiving data:", error);
-    });
+//       }
+//       else {
+//         console.warn("No content found in response:", response.data);
+//       }
+//     }).catch((error) => {
+//       console.error("Error fetching receiving data:", error);
+//     });
 
-}
+// }
+
+export const fetchRequesterSearch = (page, userId, size, search, setData, setTotalRows) => {
+    return fetchSearchRequester(page, size, userId, search)
+        .then((response) => {
+            if (response?.data?.content) {
+                setData(response.data.content);
+                setTotalRows(response.data.totalElements || 0);
+            } else {
+                console.warn("No content found in response:", response.data);
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching receiving data:", error);
+            throw error;
+        });
+};
