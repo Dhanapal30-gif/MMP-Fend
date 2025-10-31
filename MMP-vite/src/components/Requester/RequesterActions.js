@@ -1,8 +1,8 @@
 import { fetchRequestDetail, fetchSearchRequester } from "../../Services/Services-Rc";
 import { fetchPutaway } from "../../Services/Services_09";
 
-export const fetchRequesterDetail = (page,userId, size, setData, setTotalRows) => {
-  fetchRequestDetail(page, size,userId)
+export const fetchRequesterDetail = (page,userId, perPage, setData, setTotalRows) => {
+  fetchRequestDetail(page, perPage,userId)
     .then((response) => {
       if (response?.data?.content) {
         setData(response.data.content)

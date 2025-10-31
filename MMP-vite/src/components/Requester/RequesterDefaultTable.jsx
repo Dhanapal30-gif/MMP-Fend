@@ -121,7 +121,9 @@ const RequesterDefaultTable = ({
             perPage={perPage}
             totalRows={totalRows}
             loading={loading}
-            onPageChange={setPage}
+            // onPageChange={setPage}
+              onPageChange={(p) => setPage(p - 1)}   // <-- subtract 1
+
             onPerPageChange={setPerPage}
 
         />)

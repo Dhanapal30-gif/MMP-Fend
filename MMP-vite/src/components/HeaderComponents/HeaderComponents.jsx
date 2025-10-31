@@ -264,6 +264,7 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Repair")) && (<li><Link to="/repaier" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Repaier</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Reworker")) && (<li><Link to="/reworker" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Reworker</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("PTL Operator")) && (<li><Link to="/PTLOpreator" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTLOpreator</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("PTL Request")) && (<li><Link to="/ptlRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTL Request</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Local Putaway")) && (<li><Link to="/localPutaway" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Putaway</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Technology")) && (<li><Link to="/technology" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Technology</Link></li>)}
 

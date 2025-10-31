@@ -76,10 +76,13 @@ const ApprovalMaster = () => {
             errors.approver1 = "please select approver1";
             isVlaid = false;
         }
+        if (!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" || formData.requesttype==="PTL Request")) {
+
         if (!formData.approver2 || formData.approver2.length === 0) {
             errors.approver2 = "please select approver2";
             isVlaid = false;
         }
+    }
         if (formData.requesttype == "Material Request") {
             if (formData.issuancetype === "DTL") {
                 if (!formData.issuancetype) {
@@ -117,13 +120,14 @@ const ApprovalMaster = () => {
         }
         if (formData.requesttype == "Material Request") {
             if (formData.issuancetype === "DTL") {
-
                 if (!formData.approver2 || formData.approver2.length === 0) {
                     errors.approver2 = "Please select product group";
                     isVlaid = false;
                 }
             }
         }
+
+       
         setFormErrors(errors);
         return isVlaid;
     }
@@ -209,7 +213,9 @@ const ApprovalMaster = () => {
             approver1: (formData.approver1 || []).map(g => g?.approver1 || g).join(","),
             approver2: (formData.approver2 || []).map(g => g?.approver2 || g).join(",")
         };
-
+if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
+    delete updatedFormData.approver2;
+  }
         saveApprovalMaster(updatedFormData)
             .then((response) => {
                 const data = response.data;
@@ -592,6 +598,7 @@ const ApprovalMaster = () => {
                 setHandleSubmitButton(true);
                 setHandleUpdateButton(false);
                 setHandleUploadButton(false);
+                fetchApprovalMaster();
             }).catch((error) => {
                 setLoading(false);
                 if (error.response) {
@@ -679,6 +686,7 @@ const ApprovalMaster = () => {
         }
     };
 
+    console.log("formData", formData)
     return (
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
@@ -694,7 +702,7 @@ const ApprovalMaster = () => {
                     <ThemeProvider theme={TextFiledTheme}>
 
                         <Autocomplete
-                            options={["Material Request", "Scrap Request", "Stock Transfer Request", "Material Request Projects"]}
+                            options={["Material Request", "Scrap Request", "Stock Transfer Request", "Material Request Projects","Stock Transfer ","Returning","PTL Request"]}
                             getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                             value={formData.requesttype || []}
                             onChange={(event, newValue) => {
@@ -720,7 +728,7 @@ const ApprovalMaster = () => {
                                 />
                             )}
                         />
-                        {formData.requesttype === "Material Request" && (
+                        {formData.requesttype === "Material Request" || formData.requesttype==="Returning" && (
                             <Autocomplete
                                 options={["DTL", "PTL"]}
                                 getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
@@ -859,6 +867,8 @@ const ApprovalMaster = () => {
                                 />
                             )}
                         />
+                        {/* {formData.requesttype !== "Returning"  && formData.issuancetype !== "PTL" && ( */}
+{!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" ||formData.requesttype==="PTL Request") && (
 
                         <Autocomplete
                             multiple
@@ -877,7 +887,7 @@ const ApprovalMaster = () => {
                                     className='ProductTexfiled-textfield '
                                 />
                             )}
-                        />
+                        /> )}
                     </ThemeProvider>
                 </div>
                 <div className='ComCssButton9'>

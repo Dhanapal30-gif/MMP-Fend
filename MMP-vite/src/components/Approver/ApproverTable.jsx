@@ -23,6 +23,8 @@ const allFields = [
   "faultySerialNumber",
   "Comment",
   "recordstatus",
+    "ComponentUsage",
+
 ];
 
 const hideForReturning = [
@@ -36,7 +38,27 @@ const hideForReturning = [
   "location",
   "allocatedQty",
   "UOM",
+  
 ];
+
+
+const hideForPTL = [
+  "productname",
+  "productgroup",
+  "productfamily",
+  "componentType",
+  "compatabilitypartcode",
+  "req_qty",
+  "batchCode",
+  "location",
+  "allocatedQty",
+  "UOM",
+  // "ApprovedL1Qty",
+  "ApprovedL2Qty",
+  "faultySerialNumber",
+  "Comment",
+];
+
 
 const customConfig = {
   rec_ticket_no: { label: "Rec Ticket No" },
@@ -58,6 +80,8 @@ const customConfig = {
   Comment: { label: "Comment", width: "250px" },
   recordstatus: { label: "Status" },
   faultySerialNumber: { label: "Faulty Serial Number" },
+  ComponentUsage:{label:"Component Usage"},
+  recordstatus:{label:"Record Status"}
 };
 
 const ApproverTable = ({
@@ -82,29 +106,38 @@ const ApproverTable = ({
     if (ticketNo.startsWith("RTN")) {
       return allFields.filter((f) => !hideForReturning.includes(f));
     }
+    else if (ticketNo.startsWith("PTL")) {
+      return allFields.filter((f)=>!hideForPTL.includes(f));
+    }
     return allFields;
   }, [data]);
 
   const normalizedData = useMemo(() => {
     return data.map((row) => ({
       ...row,
+          id: row.selectedId, // <-- add this for the table
       batchCode: row.batches?.map((b) => b.batchCode).join(", "),
       location: row.batches?.map((b) => b.location).join(", "),
       allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", "),
     }));
   }, [data]);
 
-  const handleGrnSelectAll = (e) => {
-    setSelectedGrnRows(e.target.checked ? data.map((row) => row.selectedId) : []);
-  };
+ const handleGrnSelectAll = () => {
+  if (selectedGrnRows.length === normalizedData.length) {
+    setSelectedGrnRows([]); // unselect all
+  } else {
+    setSelectedGrnRows(normalizedData.map((row) => row.id)); // select all
+  }
+};
 
   const handleGrnSelect = (rowSelectedId) => {
-    setSelectedGrnRows((prev) =>
-      prev.includes(rowSelectedId)
-        ? prev.filter((id) => id !== rowSelectedId)
-        : [...prev, rowSelectedId]
-    );
-  };
+  setSelectedGrnRows((prev) =>
+    prev.includes(rowSelectedId)
+      ? prev.filter((id) => id !== rowSelectedId)
+      : [...prev, rowSelectedId]
+  );
+};
+
 
   const columns = useMemo(() => {
     return generateColumns({
@@ -122,17 +155,14 @@ const ApproverTable = ({
                 value={row.ApprovedL1Qty ?? ""}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val !== "" && Number(val) > row.TotalAvailableQty) {
-                    // alert("Entered quantity exceeds available quantity!");
-                   
-                   setErrorMessage("Entered quantity exceeds available quantity!")
+                  if (val !== "" && Number(val) > row.TotalAvailableQty) {                   
+                   setErrorMessage("Entered quantity exceeds Req quantity!")
                    setShowErrorPopup(true)
                     return;
                   }
                   handleApproverChange(row.selectedId, "ApprovedL1Qty", val);
                 }}
                 className="invoice-input"
-                
               />
             );
           }

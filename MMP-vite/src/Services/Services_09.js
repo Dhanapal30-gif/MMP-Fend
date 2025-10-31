@@ -337,3 +337,23 @@ export const fetchUserDetail = () => axios.get(fetchUser);
 
 const updateUser= `${url}/userAuth/updateUserDetail`
 export const updateUserDetail = (formData) => axios.put(updateUser, formData);
+
+
+const Get_PTLPartcode = `${url}/RcMain/getPTLPartcodeList`;
+export const getPTLPartcode = () => axios.get(Get_PTLPartcode);
+
+const savePTLRequestList = `${url}/PTLOpreator/savePtlRequester`
+export const savePTLOpreatorRequest = (formData) => axios.post(savePTLRequestList, formData);
+
+
+const savePtlApproverTicket = `${url}/ApproverConController/savePtlApproverTicket`
+export const savePtlApproverTickets = (payload) => axios.put(savePtlApproverTicket, payload);
+
+
+const savePtlDeliverStataus = `${url}/IssuacneCon/savePtlDeliverStataus`
+export const savePtlDeliver = (submitData) => axios.post(savePtlDeliverStataus, submitData);
+
+
+const savePtlIssueStataus = `${url}/IssuacneCon/savePtlDeliverStataus`
+export const savePtlIssue = (submitData) => axios.post(savePtlIssueStataus, submitData);
+

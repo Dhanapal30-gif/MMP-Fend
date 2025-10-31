@@ -39,6 +39,7 @@ import Issuance from './Pages/Issuance/Issuance';
 import Returning from './Pages/Returning/Returning';
 import StockTransfer from './Pages/StockTransfer/StockTransfer';
 import NotificationList from './components/Notification/NotificationList';
+import PTLRequest from './Pages/PTLOpreatorRequest/PTLRequest';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -82,7 +83,8 @@ function App() {
       { name: "Approver", path: "/approver" },
       { name: "Issuance", path: "/issuance" },
       { name: "Returning", path: "/returning" },
-      { name: "StockTransfer", path: "/stockTransfer" }
+      { name: "StockTransfer", path: "/stockTransfer" },
+      { name: "PTL Request", path: "/ptlRequest" }
 
 
     ];
@@ -159,6 +161,7 @@ function App() {
           <Route path='/issuance' element={<Issuance />} />
           <Route path='/returning' element={<Returning />} />
           <Route path='/stockTransfer' element={<StockTransfer />} />
+          <Route path='/ptlRequest' element={<PTLRequest />} />
 
           <Route
             path="/receving"
