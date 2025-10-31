@@ -13,7 +13,10 @@ const IssuanceTextFiled = ({
     handlePutawayChange,
     requestTicketList,
     deliverTicketList,
-    issueTicketList
+    issueTicketList,
+    ptlTicketList,
+    ptlDeliveryTicketList,
+    ptlIssueTicketList
 }) => {
 
     const TransferType = [
@@ -44,13 +47,15 @@ console.log("delivertivketlist",deliverTicketList)
                     )}
                 />
 <Autocomplete
-  options={requestTicketList || []}
+   options={formData.category === "DTL" ? requestTicketList : ptlTicketList || []}
   getOptionLabel={(option) => option.rec_ticket_no || ""}
-  value={requestTicketList.find(opt => opt.rec_ticket_no === formData.requestedTicket) || null}
+  value={(formData.category === "DTL" ? requestTicketList : ptlTicketList)?.find(
+    (opt) => opt.rec_ticket_no === formData.requestedTicket
+  ) || null}
   onChange={(e, newValue) => {
     handleChange("requestedTicket", newValue ? newValue.rec_ticket_no : null);
 
-    // reset others
+    // reset dependent tickets
     handleChange("deliverTicket", null);
     handleChange("issueTicket", null);
   }}
@@ -63,9 +68,11 @@ console.log("delivertivketlist",deliverTicketList)
 />
 
 <Autocomplete
-  options={deliverTicketList || []}
+    options={formData.category === "DTL" ? deliverTicketList : ptlDeliveryTicketList || []}
   getOptionLabel={(option) => option.rec_ticket_no || ""}
-  value={deliverTicketList.find(opt => opt.rec_ticket_no === formData.deliverTicket) || null}
+  value={(formData.category === "DTL" ? deliverTicketList : ptlDeliveryTicketList)?.find(
+    (opt) => opt.rec_ticket_no === formData.deliverTicket
+  ) || null}
   onChange={(e, newValue) => {
     handleChange("deliverTicket", newValue ? newValue.rec_ticket_no : null);
 
@@ -83,9 +90,11 @@ console.log("delivertivketlist",deliverTicketList)
 />
 
 <Autocomplete
-  options={issueTicketList || []}
+  options={formData.category === "DTL" ? issueTicketList : ptlIssueTicketList || []}
   getOptionLabel={(option) => option.rec_ticket_no || ""}
-  value={issueTicketList.find(opt => opt.rec_ticket_no === formData.issueTicket) || null}
+  value={(formData.category === "DTL" ? issueTicketList : ptlIssueTicketList)?.find(
+    (opt) => opt.rec_ticket_no === formData.issueTicket
+  ) || null}
   onChange={(e, newValue) => {
     handleChange("issueTicket", newValue ? newValue.rec_ticket_no : null);
 

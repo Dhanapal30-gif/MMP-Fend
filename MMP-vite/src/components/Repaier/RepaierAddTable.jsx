@@ -99,7 +99,9 @@ const RepaierAddTable = ({
       totalRows={totalRows}
       loading={loading}
       onPageChange={setPage}
-      onRowsPerPageChange={setPerPage}
+      // onRowsPerPageChange={setPerPage}
+                      onPerPageChange={setPerPage}
+
     />
   );
 };

@@ -96,7 +96,9 @@ const cancelColumn = {
             totalRows={totalRows}
             loading={loading}
             onPageChange={setPage}
-            onRowsPerPageChange={setPerPage}
+            // onRowsPerPageChange={setPerPage}
+                            onPerPageChange={setPerPage}
+
         />
     );
 };

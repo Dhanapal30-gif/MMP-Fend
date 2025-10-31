@@ -219,3 +219,13 @@ const Delete_Putaway = `${url}/Putaway/deletePutaway`; // Base URL
 export const deletePutawayTicket = (ticketNo) => {
   return axios.delete(`${Delete_Putaway}?recingticketno=${ticketNo}`);
 };
+
+
+const saveIssueStataus = `${url}/IssuacneCon/saveIssueStataus`
+export const saveIssue = (submitData) => axios.post(saveIssueStataus, submitData);
+
+
+const saveIssuePtlStataus = `${url}/IssuacneCon/savePtlIssueStataus`
+export const savePtlIssue = (submitData) => axios.post(saveIssuePtlStataus, submitData);
+
+

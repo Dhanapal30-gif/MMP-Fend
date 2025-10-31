@@ -9,10 +9,11 @@ const ApproverTextFiled = ({
     approverTicketsL1,
     approverTicketsL2,
     approverReturningTicketsL1,
-    approverReturningTicketsL2
+    approverReturningTicketsL2,
+    ptlRequesterTickets
 }) => {
 
-    const allTickets = approverTicketsL1.concat(approverTicketsL2).concat(approverReturningTicketsL1).concat(approverReturningTicketsL2) || [];
+    const allTickets = approverTicketsL1.concat(approverTicketsL2).concat(approverReturningTicketsL1).concat(approverReturningTicketsL2).concat(ptlRequesterTickets) || [];
 
     // Filter options based on any selected value
     const filteredTickets = allTickets.filter(item => 

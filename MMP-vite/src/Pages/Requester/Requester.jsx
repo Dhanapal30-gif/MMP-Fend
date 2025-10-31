@@ -312,7 +312,7 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
             setLoading(true);
             const response = await checkAvailable(partcodeQtyMap);
             // console.log("Availability response:", response.data);
-            if (response.data?.success === false && response.data.insufficientParts?.length > 0) {
+if (response.data?.success === false && response.data.insufficientParts?.length > 0) {
                 // Extract all failing partCodes
                 const partCodes = response.data.insufficientParts
                     .map(item => `${item.partCode} (${item.error})`) // include error message
@@ -320,6 +320,7 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
 
                 setErrorMessage(partCodes);
                 setShowErrorPopup(true);
+                return false; 
             }
             setcheck(true);
             return true;
@@ -393,7 +394,6 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
                     productName: prev.productName,
                     productGroup: prev.productName?.productgroup || "",
                     productFamily: prev.productFamily || prev.productName?.productfamily || "",
-
                     partCode: null, partDescription: null, requestQty: "", compatibilityPartCode: "", faultySerialNumber: "",
                     faultyUnitModuleSerialNo: "", requestercomments: "",
                 };
@@ -414,9 +414,9 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
         }
     }, [tableData]);
 
-    useEffect(() => {
-        fetchRequester();
-    }, [page, perPage]);
+    // useEffect(() => {
+    //     fetchRequester();
+    // }, [page, perPage]);
 
     const cancelTableData = () => {
         setTableData([]);
@@ -449,10 +449,7 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
             }
         });
 
-        // console.log("check:", check);
-
         const availability = await checkAvilability(partcodeQtyMap);
-        // console.log("availability result:", availability);
         const userName = sessionStorage.getItem("userName") || "System";
 
         if (availability === true) {
@@ -502,8 +499,6 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
         const userId = sessionStorage.getItem("userName") || "System";
         fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
 
-        // fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
-        // setHiddenButton("closed");
     }
 
     // const fetchfindSearch = (page, size, search) => {
@@ -518,7 +513,7 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
         setLoading(true);
         try {
             const userId = sessionStorage.getItem("userName") || "System";
-            await fetchRequesterSearch(page, userId, perPage, search, setRequesterDetail, setTotalRows);
+            await fetchRequesterSearch(page, userId, size, search, setRequesterDetail, setTotalRows);
         } catch (error) {
             console.error("Error fetching requester:", error);
         } finally {
@@ -538,22 +533,21 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
     const debouncedSearch = useDebounce(searchText, 500);
 
     useEffect(() => {
-        
         fetchData(page, perPage, debouncedSearch);
     }, [page, perPage, debouncedSearch]);
 
 
-    const fetchData = async (page = 0, size = 10, search = "") => {
+    const fetchData = async (page, perPage , search = "") => {
         setLoading(true); // start loader
         try {
             if (search && search.trim() !== "") {
-                await fetchfindSearch(page, size, search);
+                await fetchfindSearch(page, perPage, search);
             }
             // else if (isFilterActive) {
             //     fetchFilterResult();
             // }
             else {
-                await fetchRequester(page, size)
+                await fetchRequester()
             }
         } catch (err) {
             console.error("Error fetching putaway data:", err);

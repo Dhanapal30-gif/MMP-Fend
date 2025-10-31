@@ -431,6 +431,8 @@ console.log("editFormData",editFormData)
                   : formData.userRole.filter((r) => r !== role);
                 setFormData({ ...formData, userRole: updatedRoles });
               }}
+                            sx={{ '& .MuiSvgIcon-root': { fontSize: 13 } }} // checkbox size if needed
+
             />
           }
           label={role}

@@ -370,8 +370,8 @@ const PutawayStockTransferTable = ({
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={handleClear}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave}>Save</Button>
+                    <Button sx={{fontSize: '13px'}} onClick={handleClear}>Cancel</Button>
+                    <Button variant="contained" sx={{fontSize: '13px'}} onClick={handleSave}>Save</Button>
                 </DialogActions>
             </Dialog>
         </>

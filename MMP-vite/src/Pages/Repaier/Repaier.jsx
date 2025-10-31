@@ -311,12 +311,12 @@ const Repaier = () => {
         }));
     };
 
-
     useEffect(() => {
         if (tableData.length > 0) {
             setShowTable(true);
         }
     }, [tableData]);
+    
     // console.log("showTable:", showTable);
     // console.log("tableData:", tableData);
 
@@ -360,7 +360,7 @@ const Repaier = () => {
 
 
     }
-    console.log("tableda", suiData)
+    // console.log("tableda", suiData)
 
     return (
         <div className='ComCssContainer'>

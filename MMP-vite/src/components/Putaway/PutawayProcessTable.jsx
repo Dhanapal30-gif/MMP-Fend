@@ -248,8 +248,8 @@ const PutawayProcessTable = ({
                         <Table size="small" stickyHeader>
                             <TableHead>
                                 <TableRow sx={{ bgcolor: '#e3f2fd' }}>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2' }}>Location</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2' }}>Quantity</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Location</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Quantity</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -323,8 +323,8 @@ const PutawayProcessTable = ({
                     </TableContainer>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSave}>Save</Button>
+                    <Button  sx={{fontSize: '13px'}} onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button variant="contained"  sx={{fontSize: '13px'}}onClick={handleSave}>Save</Button>
                 </DialogActions>
             </Dialog>
 
