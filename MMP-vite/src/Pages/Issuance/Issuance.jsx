@@ -6,6 +6,7 @@ import { fetchIssueTicketList, fetchpickTicketDetails, saveDeliver, saveIssue, s
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const Issuance = () => {
 
@@ -13,7 +14,9 @@ const Issuance = () => {
         approverL1TicketL1: "",
         requestedTicket: "",
         deliverTicket: "",
-        issueTicket: ""
+        Comments: "",
+        issueTicket: "",
+        newSerialNumber: ""
     });
 
 
@@ -39,11 +42,11 @@ const Issuance = () => {
     const [hidePutButton, setHidePutButton] = useState(false)
     const [hideDeliverButton, setHideDeliverButton] = useState(false)
     const [hideIssueButton, setHideIssueButton] = useState(false)
-
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        console.log("formdat", formData)
+        // console.log("formdat", formData)
 
         // if (field === "category" && value === "DTL") {
         //     fetchRequestedTickets(value);
@@ -53,23 +56,20 @@ const Issuance = () => {
         }
 
         if (field === "requestedTicket" && value) {
-            console.log("value", field)
+            // console.log("value", field)
             fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
             setHideDeliverButton(false);
-
         }
         if (field === "deliverTicket" && value) {
-            console.log("value", field)
+            // console.log("value", field)
             fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
             setHideDeliverButton(true);
-
         }
         if (field === "issueTicket" && value) {
-            console.log("value", field)
             fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
@@ -89,25 +89,22 @@ const Issuance = () => {
         // }
     };
 
-
-
     const fetchRequestedTickets = async (category) => {
+
         try {
             const response = await fetchIssueTicketList(category);
             const data = response.data;
-            console.log("Approver Types:", response.data);
+            // console.log("Approver Types:", response.data);
             setRequestedTicketList(response.data.requestedTicketList || []);
             setDeliverTicketList(response.data.deliverTicketList || []);
             setIssueTicketList(response.data.issueTicketList || []);
             setPtlTicketList(response.data.ptlTicketList || []);
             setPtlDeliveryTicketList(response.data.ptlDeliveryTicketList || []);
             setPtlIssueTicketList(response.data.ptlIssueTicketList || []);
-            // console.log("delivertivketlist",response.data.requestedTicketList)
-
-            // console.log("setRequestedTicketList", requestTicketList);
         } catch (error) {
             console.error("Error fetching requester types:", error);
         }
+
     };
 
     const handleGRNQtyChange = (rowId, field, value) => {
@@ -118,12 +115,13 @@ const Issuance = () => {
         );
     };
     const fetchPickTicketDetail = async (ticketNo) => {
+        setLoading(true);
         if (!ticketNo) return;
 
         try {
             const response = await fetchpickTicketDetails(ticketNo);
             const data = response.data;
-            console.log("Pick ticket details:", data);
+            // console.log("Pick ticket details:", data);
             setPickTicketData(data || []);
             // set state here if needed
             setShowTable(true);
@@ -151,21 +149,36 @@ const Issuance = () => {
 
             setColourCode(colour);
 
-            console.log("setisUserActiveFetch", isUserActive)
-            console.log("setColourCodeFetch", colourCode)
+            // console.log("setisUserActiveFetch", isUserActive)
+            // console.log("setColourCodeFetch", colourCode)
 
         } catch (error) {
             console.error("Error fetching requester types:", error);
         }
+        finally {
+            setLoading(false); // <-- make sure loading is turned off
+        }
     };
     const handlePut = (e) => {
         e.preventDefault();
-
+        setLoading(true);
+        let ticketno = pickTicketData[0]?.rec_ticket_no; // ✅ assign from first row
         const submitData = pickTicketData.flatMap(row => {
-            if (row.batchesQty && row.batchesQty.length > 0) {
-                return row.batchesQty.map(bq => ({
+            // if (row.batchesQty && row.batchesQty.length > 0) {
+            //     return row.batchesQty.map(bq => ({
+            //         Location: bq.location,
+            //         Product_Qty: bq.savedQty,
+            //         Product_Code: row.partcode,
+            //         Product_Name: row.partdescription,
+            //         ticketno: row.rec_ticket_no,
+            //         savePickIssuance: "issuance"
+            //     }));
+            // }
+            //batches mean coming from backend
+            if (row.batches && row.batches.length > 0) {
+                return row.batches.map(bq => ({
                     Location: bq.location,
-                    Product_Qty: bq.savedQty,
+                    Product_Qty: bq.allocatedQty,
                     Product_Code: row.partcode,
                     Product_Name: row.partdescription,
                     ticketno: row.rec_ticket_no,
@@ -188,25 +201,24 @@ const Issuance = () => {
                     const colour = match[1]; // green, blue, etc.
                     setColourCode(colour);
                     setIsUserActive(true); // set here
-                    fetchRequestedTickets("DTL")
+                    if (ticketno?.startsWith("PTL")) {
+                        fetchRequestedTickets("PTL");
+                    } else {
+                        fetchRequestedTickets("DTL");
+                    }
                     setHideDeliverButton(true)
                     setHidePutButton(false)
                     // isPutButtonHidden(false)
                 } else {
                     setIsUserActive(false);
                 }
-                //     // fetchRequestedTickets(category);
-                //  //   setSubmittedIds(prev => [...prev, ...newSelectedRows]);
-                //     handleSuccessCommon({
-                //         response,
-                //         setSuccessMessage,
-                //         setShowSuccessPopup,
-                //     });
             })
 
             .catch((error) => {
                 alert(error.response?.data?.message || "Something went wrong!");
 
+            }).finally(() => {
+                setLoading(false);
             });
     };
 
@@ -247,7 +259,20 @@ const Issuance = () => {
 
     const handleDliver = (e) => {
         e.preventDefault();
+        setLoading(true);
         let ticketno;
+        // Check all rows have qty entered
+        const allRowsHaveQty = pickTicketData.every(row => {
+            if (!row.batchesQty || row.batchesQty.length === 0) return false;
+            return true;
+            //  return row.batchesQty.every(bq => Number(bq.qty || 0) > 0);
+        });
+
+        if (!allRowsHaveQty) {
+            setErrorMessage("Please enter quantity for all rows before delivering!");
+            setShowErrorPopup(true);
+            return;
+        }
 
         const submitData = pickTicketData.flatMap(row => {
             if (row.batchesQty && row.batchesQty.length > 0) {
@@ -262,7 +287,7 @@ const Issuance = () => {
                     // alert(response.data.message);
                     setSuccessMessage(response.data.message);
                     setShowSuccessPopup(true)
-                    fetchRequestedTickets("DTL");
+                    fetchRequestedTickets("PTL");
                     setHideDeliverButton(false);
                     setHidePutButton(false);
                     setHideIssueButton(true);
@@ -283,41 +308,110 @@ const Issuance = () => {
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
+                }).finally(() => {
+                    setLoading(false); // <-- fixed .finally usage
                 });
         }
     };
 
+    // const handleIssue = (e) => {
+    //     e.preventDefault();
+    //     let recTicketNo;
+    //     const submitData = pickTicketData.flatMap(row => {
+    //         if (row.batchesQty && row.batchesQty.length > 0) {
+    //             return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no }));
+    //         }
+    //         recTicketNo = row.rec_ticket_no;
+    //         return [{ recTicketNo: row.rec_ticket_no }];
+    //     });
+
+    //     if (recTicketNo && recTicketNo.startsWith("PTL")) {
+    //         savePtlIssue(submitData)
+    //             .then((response) => {
+    //                 // alert(response.data.message);
+    //                 setSuccessMessage(response.data.message);
+    //                 setShowSuccessPopup(true)
+    //                 fetchRequestedTickets("PTL");
+    //                 setHideDeliverButton(false);
+    //                 setHidePutButton(false);
+    //                 setHideIssueButton(true);
+    //                 setPickTicketData([]);
+    //                 setShowTable(false);
+
+    //             })
+    //             .catch((error) => {
+    //                 alert(error.response?.data?.message || "Something went wrong!");
+    //             });
+    //     } else {
+    //         const submitDataWithExtras = submitData.map(item => ({
+    //             ...item,
+    //             nsn: formData.newSerialNumber,
+    //             issued_comments: formData.Comments
+    //         }));
+    //         saveIssue(submitDataWithExtras)
+    //             .then((response) => {
+    //                 // alert(response.data.message);
+    //                 setSuccessMessage(response.data.message);
+    //                 setShowSuccessPopup(true);
+    //                 fetchRequestedTickets("DTL");
+    //                 setHideDeliverButton(false);
+    //                 setHidePutButton(false);
+    //                 setHideIssueButton(true);
+    //                 setPickTicketData([]);
+    //                 setShowTable(false);
+    //                 w
+    //             })
+    //             .catch((error) => {
+    //                 alert(error.response?.data?.message || "Something went wrong!");
+    //             });
+    //     }
+    // };
+
+
     const handleIssue = (e) => {
         e.preventDefault();
+        setLoading(true);
         let recTicketNo;
         const submitData = pickTicketData.flatMap(row => {
             if (row.batchesQty && row.batchesQty.length > 0) {
-                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no }));
+                return row.batchesQty.map(bq => ({
+                    recTicketNo: row.rec_ticket_no,
+                    partCode: row.partCode,
+                    batchCode: bq.batchCode,
+                    issue_qty: bq.savedQty,
+                    location: bq.location
+                }));
             }
             recTicketNo = row.rec_ticket_no;
-            return [{ recTicketNo: row.rec_ticket_no }];
+            return [{
+                recTicketNo: row.rec_ticket_no,
+                partCode: row.partCode
+            }];
         });
 
         if (recTicketNo && recTicketNo.startsWith("PTL")) {
             savePtlIssue(submitData)
                 .then((response) => {
-                    // alert(response.data.message);
                     setSuccessMessage(response.data.message);
-                    setShowSuccessPopup(true)
-                    fetchRequestedTickets("DTL");
+                    setShowSuccessPopup(true);
+                    fetchRequestedTickets("PTL");
                     setHideDeliverButton(false);
                     setHidePutButton(false);
                     setHideIssueButton(true);
                     setPickTicketData([]);
-
+                    setShowTable(false);
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
                 });
         } else {
-            saveIssue(submitData)
+            const submitDataWithExtras = submitData.map(item => ({
+                ...item,
+                nsn: formData.newSerialNumber,
+                issued_comments: formData.Comments
+            }));
+            saveIssue(submitDataWithExtras)
                 .then((response) => {
-                    // alert(response.data.message);
                     setSuccessMessage(response.data.message);
                     setShowSuccessPopup(true);
                     fetchRequestedTickets("DTL");
@@ -326,15 +420,14 @@ const Issuance = () => {
                     setHideIssueButton(true);
                     setPickTicketData([]);
                     setShowTable(false);
-w
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
+                }).finally(() => {
+                    setLoading(false); // <-- fixed .finally usage
                 });
         }
     };
-
-
 
     return (
         <div className='ComCssContainer'>
@@ -364,11 +457,14 @@ w
                         page={page}
                         perPage={perPage}
                         totalRows={tableData.length}
-                        loading={false}
+                        // loading={false}
+                        loading={loading}
+
                         setPage={setPage}
                         setShowTable={setShowTable}
                         setPerPage={setPerPage}
                         setFormData={setFormData}
+                        formData={formData}
                         setTableData={setTableData}
                         handleGRNQtyChange={handleGRNQtyChange}
                         setSuccessMessage={setSuccessMessage}
@@ -376,6 +472,9 @@ w
                         setShowErrorPopup={setShowErrorPopup}
                         setErrorMessage={setErrorMessage}
                         formErrors={formErrors}
+                        fetchPickTicketDetail={fetchPickTicketDetail}
+                        ticketNo={formData.issueTicket || formData.deliverTicket || formData.requestedTicket}
+
                     />
                     {isUserActive && (
                         <p>

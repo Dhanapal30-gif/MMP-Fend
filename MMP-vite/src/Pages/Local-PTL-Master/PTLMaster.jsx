@@ -38,7 +38,7 @@ const PTLMaster = () => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
-    console.log("formData", formData);
+    // console.log("formData", formData);
 
 
     const valiDate = () => {
@@ -109,7 +109,7 @@ const PTLMaster = () => {
     }, [page, perPage, debouncedSearch])
 
     const fetchData = (page = 1, size = 10, search = "") => {
-        console.log("searchfetch", search);
+        // console.log("searchfetch", search);
         if (search && search.trim() !== "") {
               fetchfindSearch(page, size, search);
 
@@ -184,7 +184,7 @@ const PTLMaster = () => {
         setIsEditMode(false);
         setFormErrors({});
     }
-    console.log("setLocalStore", localStore);
+    // console.log("setLocalStore", localStore);
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>

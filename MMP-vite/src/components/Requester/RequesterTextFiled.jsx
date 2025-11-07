@@ -64,7 +64,9 @@ const RequesterTextFiled = ({
             .map(item => ({
                 partcode: item.partcode,
                 partdescription: item.partdescription,
-                productname: item.productname
+                productname: item.productname,
+                componentType: item.componentType
+
             }));
     }, [formData.productName, productandPartcode]);
 
@@ -106,8 +108,8 @@ const RequesterTextFiled = ({
                         // getOptionLabel={(option) => option.label}
                         // onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
                         value={orderTypeOption.find(o => o.value === formData.orderType) || null}
-    getOptionLabel={(option) => option.label}
-    onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
+                        getOptionLabel={(option) => option.label}
+                        onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
                         renderInput={(params) => (
                             <TextField {...params}
                                 error={Boolean(formErrors?.orderType)}
@@ -198,7 +200,15 @@ const RequesterTextFiled = ({
                     value={formData.partCode || null} // must be object
                     getOptionLabel={(option) => option.partcode || ""}
                     isOptionEqualToValue={(option, value) => option?.partcode === value?.partcode}
-                    onChange={(e, newValue) => handleChange("partCode", newValue || null)}
+                    // onChange={(e, newValue) => handleChange("partCode", newValue || null)}
+                     onChange={(e, newValue) => {
+        handleChange("partCode", newValue || null);
+
+        // Set the read-only fields based on selected part
+        handleChange("componentType", newValue?.componentType || "");
+        handleChange("uom", newValue?.UOM || "");
+        handleChange("typeOfComponent", newValue?.["Type Of Component"] || "");
+    }}
                     renderInput={(params) => <TextField {...params}
                         error={Boolean(formErrors?.partCode)}
                         helperText={formErrors?.partCode || ""}
@@ -217,22 +227,22 @@ const RequesterTextFiled = ({
                 />
                 <ComTextFiled
                     label="UOM"
-                    name="uom"
-                    value={formData.uom || ""}
+                    name="UOM"
+                    value={formData.UOM || ""}
                     InputProps={{ readOnly: true }}
                     InputLabelProps={{ shrink: true }}
                 />
                 <ComTextFiled
                     label="Type Of Component"
-                    name="typeOfComponent"
-                    value={formData.typeOfComponent || ""}
+                    name="TYC"
+                    value={formData.TYC || ""}
                     InputProps={{ readOnly: true }}
                     InputLabelProps={{ shrink: true }}
                 />
                 <ComTextFiled
                     label="Component Usage"
-                    name="componentUsage"
-                    value={formData.componentUsage || ""}
+                    name="componentType"
+                    value={formData.componentType || ""}
                     InputProps={{ readOnly: true }}
                     InputLabelProps={{ shrink: true }}
                 />

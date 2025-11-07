@@ -70,7 +70,7 @@ const Repaier = () => {
         console.log("formData", formData)
     };
 
-    console.log("formData", formData)
+    // console.log("formData", formData)
 
 
 

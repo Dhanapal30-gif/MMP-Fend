@@ -14,13 +14,13 @@ import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const GRN = () => {
-    const [formData, setFormData] = useState({ ponumber: "", partcode: "", recevingTicketNo: "", grnNumber: "", grnDate: "" });
+    const [formData, setFormData] = useState({ ponumber: "", partcode: "",receivingDate: "",  recevingTicketNo: "", grnNumber: "", grnDate: "" });
     const [GRNPen, setGRNPen] = useState([]);
     const [groupedData, setGroupedData] = useState([]);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [selectedRows, setSelectedRows] = useState([]);
-        const [selectedGrnRows, setSelectedGrnRows] = useState([]);
+    const [selectedGrnRows, setSelectedGrnRows] = useState([]);
     const [data, setData] = useState([]);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
@@ -49,6 +49,9 @@ const GRN = () => {
 
     const handleGrnChange = (e) => {
         const { name, value } = e.target;
+
+        
+   
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -280,22 +283,22 @@ const GRN = () => {
     //     }
     //     setLoading(false)
     // };
-const fetchFindData = async (page = 1, size = 10, search = "") => {
-    if (isPendingView) return; 
-    setLoading(true);
+    const fetchFindData = async (page = 1, size = 10, search = "") => {
+        if (isPendingView) return;
+        setLoading(true);
 
-    try {
-        if (search && search.trim() !== "") {
-            await fetchfind(setGRNCloseData, setTotalCloseRows, page, size, search);
-        } else {
-            await fetchGRNDetail(setGRNCloseData, setTotalCloseRows, page, size);
+        try {
+            if (search && search.trim() !== "") {
+                await fetchfind(setGRNCloseData, setTotalCloseRows, page, size, search);
+            } else {
+                await fetchGRNDetail(setGRNCloseData, setTotalCloseRows, page, size);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false); // stops loader after API finishes
         }
-    } catch (err) {
-        console.error(err);
-    } finally {
-        setLoading(false); // stops loader after API finishes
-    }
-};
+    };
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -364,7 +367,7 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
         try {
             setConfirmDelete(false);
             // console.log("Selected rows to delete:", selectedRows); 
-            const res = await deleteRecDetail(selectedRows); 
+            const res = await deleteRecDetail(selectedRows);
             setSuccessMessage(res.data.message || "Deleted successfully");
             setShowSuccessPopup(true);
             setSelectedRows([]);
@@ -380,7 +383,7 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
     };
     return (
         <div className='ComCssContainer'>
-                    {/* <div className='body_Background'> */}
+            {/* <div className='body_Background'> */}
 
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
@@ -410,23 +413,23 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
                             editingRowId={editingRowId}
                         />
                         <div className='ComCssButton9'>
-                                {!isEditMode && (
-                                    <button className='ComCssSubmitButton' onClick={handleGrnAction}>
-                                        Submit
-                                    </button>
-                                )}
+                            {!isEditMode && (
+                                <button className='ComCssSubmitButton' onClick={handleGrnAction}>
+                                    Submit
+                                </button>
+                            )}
 
-                                {isEditMode && (
-                                    <button className='ComCssUpdateButton' onClick={handleGrnAction}>
-                                        Update
-                                    </button>
-                                )}
-                                <button className='ComCssClearButton' onClick={formClear}>Clear</button> 
+                            {isEditMode && (
+                                <button className='ComCssUpdateButton' onClick={handleGrnAction}>
+                                    Update
+                                </button>
+                            )}
+                            <button className='ComCssClearButton' onClick={formClear}>Clear</button>
                         </div>
                     </div>
-                    
+
                 </div>
-                
+
             )}
 
             <div className='ComCssTable'>
@@ -454,7 +457,7 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
                                 className="comCloseIcon"
                                 onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
                                 onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                                style={{ cursor: "pointer",fontSize: "49px"   , transition: "transform 0.2s" }}
+                                style={{ cursor: "pointer", fontSize: "49px", transition: "transform 0.2s" }}
                             />
                         )}
 
@@ -462,7 +465,7 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
                         {showMenu && (
                             <div className='ComCssButtonMenu'>
                                 <button className="ComCssExportButton" onClick={() => exportToExcel(searchText)}>
-                                <FaFileExcel />    Export
+                                    <FaFileExcel />    Export
                                 </button>
                                 {!isPendingView && (
                                     <button
@@ -475,7 +478,7 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
 
                             </div>
                         )}
-                        
+
                     </div>
 
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
@@ -497,7 +500,7 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
                 </div>
 
                 {isPendingView ? (
-                    
+
                     <GRNPendingTable
                         data={grnPendding()}
                         page={pagePen}
@@ -511,26 +514,26 @@ const fetchFindData = async (page = 1, size = 10, search = "") => {
 
                     />
                 ) : (
-                      <>
-                                    <LoadingOverlay loading={loading} />
-                    
-                    <GRNDefaultTable
-                        data={filteredGRNclose}
-                        page={pageClose}
-                        perPage={perPageClose}
-                        totalRows={totalCloseRows}
-                        loading={loading}
-                        setPage={setPageClose}
-                        setPerPage={setPerPageClose}
-                        selectedRows={selectedRows}
-                        setSelectedRows={setSelectedRows}
-                        onEdit={handleEditClick}
-                        isEditMode={isEditMode}
+                    <>
+                        <LoadingOverlay loading={loading} />
 
-                    />
-</>
+                        <GRNDefaultTable
+                            data={filteredGRNclose}
+                            page={pageClose}
+                            perPage={perPageClose}
+                            totalRows={totalCloseRows}
+                            loading={loading}
+                            setPage={setPageClose}
+                            setPerPage={setPerPageClose}
+                            selectedRows={selectedRows}
+                            setSelectedRows={setSelectedRows}
+                            onEdit={handleEditClick}
+                            isEditMode={isEditMode}
+
+                        />
+                    </>
                 )}
-                
+
             </div>
             <CustomDialog
                 open={showSuccessPopup}

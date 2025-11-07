@@ -4,7 +4,7 @@ export const fetchPendingGrn = (setData, setShowErrorPopup) => {
   fetchGrnPendingDetail()
     .then((response) => {
       setData(response.data);
-      console.log("GRN",response.data)
+      // console.log("GRN",response.data)
     })
     .catch((error) => {
     //   const msg = error?.response?.data?.message || "Error fetching data";
@@ -45,7 +45,7 @@ export const fetchfind = (setDataCallback, setTotalRows, page = 1, size = 10,sea
 
 
 export const download = (search = "") => {
-    console.log("searchTeaxt", search)
+    // console.log("searchTeaxt", search)
     //setLoading(true);
     if (search && search.trim() !== "") {
           // setLoading(true);
@@ -120,11 +120,11 @@ export const fetchfindPo = (setDataCallback, setTotalRows, ponumber, onSuccess) 
 };
 
 export const deleteRec = async () => {
-      console.log("Selected rows to delete:", selectedRows); // ✅ Add this
+      // console.log("Selected rows to delete:", selectedRows); // ✅ Add this
 
   try {
     setConfirmDelete(false);
-    console.log("Selected rows to delete:", selectedRows); // ✅ Add this
+    // console.log("Selected rows to delete:", selectedRows); // ✅ Add this
 
     const res = await deleteRecDetail(selectedRows); // selectedDeleteRows must be array or ID(s)
 

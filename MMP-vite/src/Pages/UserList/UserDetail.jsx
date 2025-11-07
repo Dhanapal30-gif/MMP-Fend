@@ -38,6 +38,7 @@ const UserDetail = () => {
         "emailAddress",
         "password",
         "phoneNumber",
+        "productname",
         "productGroup",
         "requestType",
         "requesterType",
@@ -52,6 +53,7 @@ const UserDetail = () => {
         emailAddress: { label: "Email Address", width: "120px" },
         password: { label: "Password", width: "120px" },
         phoneNumber: { label: "Phone Number", width: "120px" },
+        productname: { label: "Product Name", width: "120px" },
         productGroup: { label: "Product Group", width: "120px" },
         requestType: { label: "Request Type", width: "120px" },
         requesterType: { label: "Requester Type", width: "120px" },
@@ -64,69 +66,117 @@ const UserDetail = () => {
         },
     };
 
+    // const decodePassword = (encoded) => {
+    //     if (!encoded) return "";
+    //     try {
+    //         return atob(encoded); // base64 decode
+    //     } catch (e) {
+    //         console.error("Decode failed:", e);
+    //         return encoded; // fallback
+    //     }
+    // };
+
+
+
     const decodePassword = (encoded) => {
-        if (!encoded) return "";
-        try {
-            return atob(encoded); // base64 decode
-        } catch (e) {
-            console.error("Decode failed:", e);
-            return encoded; // fallback
-        }
+    if (!encoded) return "";
+    try {
+        return atob(encoded);
+    } catch {
+        return encoded; // fallback
+    }
+};
+
+const handleEditClick = (row) => {
+    // Safely decode password if it is a string
+    const decodedPwd = typeof row.password === 'string' ? atob(row.password) : '';
+
+    // Convert comma-separated strings to arrays only if they are strings
+    const toArray = (val) => (typeof val === 'string' ? val.split(',') : Array.isArray(val) ? val : []);
+
+    // Prepare form data
+    const formData = {
+        ...row,
+        password: decodedPwd,
+        userRole: toArray(row.userRole),
+        requesterType: toArray(row.requesterType),
+        requestType: toArray(row.requestType),
+        productGroup: toArray(row.productGroup),
+        productname: toArray(row.productname),
     };
 
+    setEditFormData(formData);
+    navigate("/createAccount", { state: { formData, isEdit: true } });
+};
 
+    // const handleEditClick = (row) => {
+    //      const decodedPwd = decodePassword(row.password);
+    // // const decodedPwd = row.password ? atob(row.password) : "";
 
-    const handleEditClick = (row) => {
-        const decodedPwd = decodePassword(row.password);
+    //     navigate("/createAccount", { state: { formData: row, isEdit: true } });
+    //     setEditFormData({
+    //         userId: row.userId,
+    //         userName: row.userName,
+    //         emailAddress: row.emailAddress,
+    //         phoneNumber: row.phoneNumber,
+    //     password: decodePassword(row.password), // safely decode
+    //         userRole: row.userRole,
 
-        navigate("/createAccount", { state: { formData: row, isEdit: true } });
-        setEditFormData({
-            userId: row.userId,
-            userName: row.userName,
-            emailAddress: row.emailAddress,
-            phoneNumber: row.phoneNumber,
-            password: decodedPwd, // <- always decoded now
-            userRole: row.userRole,
+    //         userRole: Array.isArray(row.userRole)
+    //             ? row.userRole
+    //             : (row.userRole ? row.userRole.split(",") : []), // 👈 use split to make array
 
-            userRole: Array.isArray(row.userRole)
-                ? row.userRole
-                : (row.userRole ? row.userRole.split(",") : []), // 👈 use split to make array
+    //         requesterType: Array.isArray(row.requesterType)
+    //             ? row.requesterType
+    //             : (row.requesterType ? row.requesterType.split(",") : []),
 
-            requesterType: Array.isArray(row.requesterType)
-                ? row.requesterType
-                : (row.requesterType ? row.requesterType.split(",") : []),
+    //         requestType: Array.isArray(row.requestType)
+    //             ? row.requestType
+    //             : (row.requestType ? row.requestType.split(",") : []),
 
-            requestType: Array.isArray(row.requestType)
-                ? row.requestType
-                : (row.requestType ? row.requestType.split(",") : []),
+    //         productGroup: Array.isArray(row.productGroup)
+    //             ? row.productGroup
+    //             : (row.productGroup ? row.productGroup.split(",") : []),
 
-            productGroup: Array.isArray(row.productGroup)
-                ? row.productGroup
-                : (row.productGroup ? row.productGroup.split(",") : []),
-
-            productname: Array.isArray(row.productname)
-                ? row.productname
-                : (row.productname ? row.productname.split(",") : []),
-        });
-    };
+    //         productname: Array.isArray(row.productname)
+    //             ? row.productname
+    //             : (row.productname ? row.productname.split(",") : []),
+    //     });
+    // };
 
     console.log("fromData", editFormdata)
-    const columns = React.useMemo(
-        () =>
-            generateColumns({
-                fields,
-                customConfig,
-                customCellRenderers: {
-                    User_Edit: (row) => (
-                        <button className="edit-button" onClick={() => handleEditClick(row)}>
-                            <FaEdit />
-                        </button>
-                    ),
-                },
-            }),
-        [fields, customConfig, handleEditClick]
-    );
+    // const columns = React.useMemo(
+    //     () =>
+    //         generateColumns({
+    //             fields,
+    //             customConfig,
+    //             customCellRenderers: {
+    //                 User_Edit: (row) => (
+    //                     <button className="edit-button" onClick={() => handleEditClick(row)}>
+    //                         <FaEdit />
+    //                     </button>
+    //                 ),
+    //             },
+    //         }),
+    //     [fields, customConfig, handleEditClick]
+    // );
 
+const columns = React.useMemo(
+  () =>
+    generateColumns({
+      fields,
+      customConfig,
+      customCellRenderers: {
+        User_Edit: (row) => (
+          <button className="edit-button" onClick={() => handleEditClick(row)}>
+            <FaEdit />
+          </button>
+        ),
+        productname: (row) => (row.productname ? row.productname.join(", ") : ""),
+      },
+    }),
+  [fields, customConfig, handleEditClick]
+);
 
     useEffect(() => {
         fetchUser();
@@ -136,11 +186,6 @@ const UserDetail = () => {
     const fetchUser = async () => {
         try {
             const response = await fetchUserDetail(); // your API call
-            //  if (response && response.data) {
-            //      const tableData = (response.data?.data || []).map(item => ({
-            //          userrole: item.userrole || "-",
-            //          screenName: (item.screenNameSelect || []).join(", ") || "-"
-            //      }));
             setRoleAndScreenName(response.data);
             setTotalRows(response.data.length);
 

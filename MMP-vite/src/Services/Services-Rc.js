@@ -3,14 +3,14 @@ import { url } from '../app.config';
 
 
 const fetchPutawayPendingDetail = `${url}/Putaway/fetchPutawayPending`
-export const fetchPutawayPending = (page = 0, size = 10) => {
-  return axios.get(fetchPutawayPendingDetail, { params: { page, size }, });
+export const fetchPutawayPending = (page = 0, size = 10, search) => {
+  return axios.get(fetchPutawayPendingDetail, { params: { page, size, search }, });
 }
 
 
 const fetchPutawayPartiallyDetail = `${url}/Putaway/fetchPutawayPartially`
-export const fetchPutawayPartially = (page = 0, size = 10) => {
-  return axios.get(fetchPutawayPartiallyDetail, { params: { page, size }, });
+export const fetchPutawayPartially = (page = 0, size = 10, search) => {
+  return axios.get(fetchPutawayPartiallyDetail, { params: { page, size, search }, });
 }
 
 const fetchPutawayAllDetail = `${url}/Putaway/fetchPutawayAll`
@@ -46,9 +46,9 @@ export const fetchRequesterType = (userId) => {
 };
 
 const fetchProductPartcode = `${url}/RequesterCon/fetchproductAndPartcode`
-export const fetchProductAndPartcode = (userId, orderType,requesterType) => {
+export const fetchProductAndPartcode = (userId, orderType, requesterType) => {
   return axios.get(fetchProductPartcode, {
-    params: { userId, orderType,requesterType }   // ✅ pass userId as query param
+    params: { userId, orderType, requesterType }   // ✅ pass userId as query param
   });
 };
 
@@ -70,7 +70,6 @@ export const saveRequester = (formData) => axios.post(requester, formData);
 
 
 const fetchRequestTicketDetail = `${url}/RequesterCon/fetchRequesterDetail`;
-
 export const fetchRequestDetail = (page, userId, size) => {
   return axios.get(fetchRequestTicketDetail, {
     params: { page, size, userId }, // ✅ Pass userId as query param
@@ -203,14 +202,14 @@ export const savePutawayStockTransferRequest = (formData) => axios.put(savePutSt
 const fetchReworkerBoard = `${url}/repaierCon/fetchBoard`;
 export const fetchSearchBoard = (search = "") => {
   return axios.get(fetchReworkerBoard, {
-    params: {  search },
+    params: { search },
   });
 };
 
 const fetchSuiNo = `${url}/repaierCon/fetchSui`;
 export const fetchSearchSuiNo = (suiNo = "") => {
   return axios.get(fetchSuiNo, {
-    params: {  suiNo },
+    params: { suiNo },
   });
 };
 
@@ -228,4 +227,19 @@ export const saveIssue = (submitData) => axios.post(saveIssueStataus, submitData
 const saveIssuePtlStataus = `${url}/IssuacneCon/savePtlIssueStataus`
 export const savePtlIssue = (submitData) => axios.post(saveIssuePtlStataus, submitData);
 
+const Get_DownloadputawayDetail = `${url}/Putaway/donwloadPutawayAll`;
+export const downloadPutawayAll = (search) =>
+  axios.get(Get_DownloadputawayDetail, {
+    responseType: "blob",
+    params: { search }
+  });
 
+const Get_DownloadputawayClosed = `${url}/Putaway/donwloadPutawayAll`;
+export const downloadPutaway = (search, putawaystatus) =>
+  axios.get(Get_DownloadputawayClosed, {
+    responseType: "blob",
+    params: { search, putawaystatus }
+  });
+
+const saveStockApproverTicket = `${url}/ApproverConController/saveStockApprove`
+export const saveStockApproverTickets = (payload) => axios.put(saveStockApproverTicket, payload);
