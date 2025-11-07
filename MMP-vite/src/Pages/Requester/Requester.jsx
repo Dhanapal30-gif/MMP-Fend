@@ -468,7 +468,6 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
                         setShowSuccessPopup(true);
                         setTableData([]);
                         setShowTable(false);
-
                         setIsFrozen(false);
                         fetchRequester()
                         // formClear();
@@ -478,28 +477,32 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
                         // console.log("formdata after submit", formData)
                         // if (typeof handleClear === "function") handleClear();
                     } else {
-                        setErrorMessage(response.data?.message || "Unknown error");
-                        setShowErrorPopup(true);
-                        setTableData([]);
-                        setShowTable(false);
-                    }
-                })
-                .catch((error) => {
-                    // console.log("ERROR:", error);
-                    const errMsg = error?.response?.data?.message || "Network error, please try again";
-                    setErrorMessage(errMsg);
-                    setShowErrorPopup(true);
-                }).finally(() => {
-                    setLoading(false);
-                });
+            setErrorMessage(response.data?.message);
+            setShowErrorPopup(true);
+            setTableData([]);
+            setShowTable(false);
+        }
+    })
+    .catch((error) => {
+        const errMsg = error?.response?.data?.message;
+        if (errMsg) {
+            setErrorMessage(errMsg);
+            setShowErrorPopup(true);
+        }
+    })
+    .finally(() => {
+        setLoading(false);
+    });
         }
     };
 
-    const fetchRequester = () => {
-        const userId = sessionStorage.getItem("userName") || "System";
-        fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
+   const fetchRequester = () => {
+    setLoading(true);
+    const userId = sessionStorage.getItem("userName") || "System";
 
-    }
+    fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows)
+      .finally(() => setLoading(false)); // ensures loading is turned off after promise settles
+}
 
     // const fetchfindSearch = (page, size, search) => {
     //     setLoading(true)

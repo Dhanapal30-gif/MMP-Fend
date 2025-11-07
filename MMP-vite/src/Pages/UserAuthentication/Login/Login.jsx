@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import "./Login.css";
-import { TextField, Button, colors } from "@mui/material";
+import { TextField, Button, IconButton, InputAdornment,colors } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { LoginUser } from "../../../Services/Services";
 import { fetchScreens } from "../../../Services/Services_09";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../../components/Com_Component/TextFiledTheme';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const Login = () => {
     const navigate = useNavigate();
     const [screen,setScreen]=useState([]);
+      const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         userId: "",
         password: ""
@@ -170,6 +172,9 @@ const fetchUserRoleData = async (userRole) => {
         setLoading(false);
     }
 };
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+
     return (
         <div className="loginBacground">
             <div className="bubble"></div>
@@ -219,53 +224,50 @@ const fetchUserRoleData = async (userRole) => {
   }}
                     />
                     <TextField
-                        label="password"
-                        variant="outlined"
-                        fullWidth
-                        type="text"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        error={Boolean(formErrors.password)}
-                        helperText={formErrors.password}
-                        margin="normal"
-                        size='small'
-                        // sx={{
-                        //     input: { color: 'white' },
-                        //     label: { color: 'white' },
-                        //     '& label.Mui-focused': { color: 'white' },
-                        //     '& .MuiOutlinedInput-root': {
-                        //         '& fieldset': { borderColor: 'white' },
-                        //         '&:hover fieldset': { borderColor: '#ddd' },
-                        //         '&.Mui-focused fieldset': { borderColor: 'white' },
-                        //     },
-                        //     '& .MuiFormHelperText-root': {
-                        //         color: 'white', // helper text color
-                        //     }
-                        // }}
-                         sx={{
-    input: {
-      color: 'white',
-      backgroundColor: 'transparent',
-      userSelect: 'none',
-      WebkitBoxShadow: '0 0 0 1000px transparent inset', // removes blue autofill
-      WebkitTextFillColor: 'white', // keep text white
-    },
-    label: { color: 'white' },
-    '& label.Mui-focused': { color: 'white' },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: 'white' },
-      '&:hover fieldset': { borderColor: '#ddd' },
-      '&.Mui-focused fieldset': { borderColor: 'white' },
-    },
-    '& input:-webkit-autofill': {
-      WebkitBoxShadow: '0 0 0 1000px transparent inset !important',
-      WebkitTextFillColor: 'white !important',
-      transition: 'background-color 9999s ease-in-out 0s',
-    },
-    '& .MuiFormHelperText-root': { color: 'white' },
-  }}
-                    />
+      label="Password"
+      variant="outlined"
+      fullWidth
+      type={showPassword ? 'text' : 'password'} // show dots if false
+      name="password"
+      value={formData.password}
+      onChange={handleChange}
+      error={Boolean(formErrors.password)}
+      helperText={formErrors.password}
+      margin="normal"
+      size="small"
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton onClick={handleClickShowPassword} edge="end"
+            sx={{ color: 'white' }}>
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+      sx={{
+        input: {
+          color: 'white',
+          backgroundColor: 'transparent',
+          userSelect: 'none',
+          WebkitBoxShadow: '0 0 0 1000px transparent inset', 
+          WebkitTextFillColor: 'white',
+        },
+        label: { color: 'white' },
+        '& label.Mui-focused': { color: 'white' },
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': { borderColor: 'white' },
+          '&:hover fieldset': { borderColor: '#ddd' },
+          '&.Mui-focused fieldset': { borderColor: 'white' },
+        },
+        '& input:-webkit-autofill': {
+          WebkitBoxShadow: '0 0 0 1000px transparent inset !important',
+          WebkitTextFillColor: 'white !important',
+          transition: 'background-color 9999s ease-in-out 0s',
+        },
+        '& .MuiFormHelperText-root': { color: 'white' },
+      }}
+    />
                     <Button
                         type="submit"
                         variant="contained"

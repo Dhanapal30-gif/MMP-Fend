@@ -23,7 +23,7 @@ const PoStatus = () => {
     })
 
     const [poData, setPoData] = useState([]);
-    const [triggerFetch, setTriggerFetch] = useState(false); 
+    const [triggerFetch, setTriggerFetch] = useState(false);
 
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
@@ -58,21 +58,21 @@ const PoStatus = () => {
     };
     const [formErrors, setFormErrors] = useState({});
 
- const valiDate = () => {
+    const valiDate = () => {
         const errors = {};
         let isValid = true;
 
-       
+
         selectedRows.forEach((id) => {
-    const poid = Number(id.split("_")[0]); // extract numeric Poid
-    const item = filteredData.find((d) => d.Poid === poid);
-    if (item && (!item.postatus || item.postatus === "")) {
-        errors[`postatus${item.Poid}`] = "Enter postatus";
-        isValid = false;
-    } else if (!item) {
-        console.log("Row not found for Poid:", poid);
-    }
-});
+            const poid = Number(id.split("_")[0]); // extract numeric Poid
+            const item = filteredData.find((d) => d.Poid === poid);
+            if (item && (!item.postatus || item.postatus === "")) {
+                errors[`postatus${item.Poid}`] = "Enter postatus";
+                isValid = false;
+            } else if (!item) {
+                console.log("Row not found for Poid:", poid);
+            }
+        });
 
 
         setFormErrors(errors);
@@ -84,52 +84,52 @@ const PoStatus = () => {
         partDescriptionOptions: [],
     });
 
-   useEffect(() => {
-  if (searchText) return;
+    useEffect(() => {
+        if (searchText) return;
 
-  const loadPoStatusData = () => {
-    const { year, status, ponumber, partcode } = formData;
+        const loadPoStatusData = () => {
+            const { year, status, ponumber, partcode } = formData;
 
-    if (year || status || ponumber || partcode) {
-      setLoading(true);
-      fetchPoStatusData((data) => {
-        const responseData = data?.content || [];
+            if (year || status || ponumber || partcode) {
+                setLoading(true);
+                fetchPoStatusData((data) => {
+                    const responseData = data?.content || [];
 
-        setPoData(
-          responseData.map((item, index) => ({
-            ...item,
-            id: `${item.Poid}_${index}`,
-          }))
-        );
+                    setPoData(
+                        responseData.map((item, index) => ({
+                            ...item,
+                            id: `${item.Poid}_${index}`,
+                        }))
+                    );
 
-        setTotalRows(data?.totalElements || 0);
-        setPerPage(data?.size || 10);
+                    setTotalRows(data?.totalElements || 0);
+                    setPerPage(data?.size || 10);
 
-        const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
-          .filter(Boolean)
-          .map((val) => ({ label: val, value: val }));
+                    const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
+                        .filter(Boolean)
+                        .map((val) => ({ label: val, value: val }));
 
-        const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
-          .filter(Boolean)
-          .map((val) => ({ label: val, value: val }));
+                    const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
+                        .filter(Boolean)
+                        .map((val) => ({ label: val, value: val }));
 
-        const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
-          .filter(Boolean)
-          .map((val) => ({ label: val, value: val }));
+                    const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
+                        .filter(Boolean)
+                        .map((val) => ({ label: val, value: val }));
 
-        setPoDropdownOptions({
-          ponumberOptions,
-          partcodeOptions,
-          partDescriptionOptions
-        });
+                    setPoDropdownOptions({
+                        ponumberOptions,
+                        partcodeOptions,
+                        partDescriptionOptions
+                    });
 
-        setLoading(false);
-      }, year, status, ponumber, partcode, page - 1, perPage);
-    }
-  };
+                    setLoading(false);
+                }, year, status, ponumber, partcode, page - 1, perPage);
+            }
+        };
 
-  loadPoStatusData(); // ✅ Call here
-}, [formData, page, perPage]);
+        loadPoStatusData(); // ✅ Call here
+    }, [formData, page, perPage]);
 
 
     const filteredData = poData.filter((item) =>
@@ -147,57 +147,57 @@ const PoStatus = () => {
 
     useEffect(() => {
         if (searchText) {
-            setPage(1); 
+            setPage(1);
         }
     }, [searchText]);
 
     useEffect(() => {
-        setPage(1);           
-        setTriggerFetch(p => !p); 
+        setPage(1);
+        setTriggerFetch(p => !p);
     }, [formData, searchText]);
 
 
-    useEffect(() => {
-        console.log("PO Dropdown Options:", poData);
-    }, [poData]);
-    console.log("selectedRows", selectedRows);
+    // useEffect(() => {
+    //     console.log("PO Dropdown Options:", poData);
+    // }, [poData]);
+    // console.log("selectedRows", selectedRows);
 
-   const handleSubmit = async () => {
-            if (!valiDate()) return;
+    const handleSubmit = async () => {
+        if (!valiDate()) return;
 
-  if (selectedRows.length === 0) {
-    setErrorMessage("Select at least one row");
-    setShowErrorPopup(true);
-    return;
-  }
-  const selectedPoStatusData = poData
-    .filter(row => selectedRows.includes(row.id))
-    .map(row => ({
-      ...row,
-      id: row.id?.split("_")[0]  // keep only numeric ID
-    }));
+        if (selectedRows.length === 0) {
+            setErrorMessage("Select at least one row");
+            setShowErrorPopup(true);
+            return;
+        }
+        const selectedPoStatusData = poData
+            .filter(row => selectedRows.includes(row.id))
+            .map(row => ({
+                ...row,
+                id: row.id?.split("_")[0]  // keep only numeric ID
+            }));
 
-  try {
-    for (const row of selectedPoStatusData) {
-      await savePoStataus(row.id, row);  // ✅ Send with ID in URL
+        try {
+            for (const row of selectedPoStatusData) {
+                await savePoStataus(row.id, row);  // ✅ Send with ID in URL
+            }
+            setSuccessMessage("Data submitted successfully!");
+            setShowSuccessPopup(true);
+            setSelectedRows([]);
+            loadPoStatusData(); // 🔁 Reload updated data
+
+        } catch (error) {
+            // console.error("Submit error", error);
+            setErrorMessage("Failed to submit data.");
+            setShowErrorPopup(true);
+        }
+    };
+
+    const formClear = () => {
+        setSelectedRows([]);
+        setFormErrors({});
+
     }
-    setSuccessMessage("Data submitted successfully!");
-    setShowSuccessPopup(true);
-    setSelectedRows([]); 
-    loadPoStatusData(); // 🔁 Reload updated data
-
-  } catch (error) {
-    console.error("Submit error", error);
-    setErrorMessage("Failed to submit data.");
-    setShowErrorPopup(true);
-  }
-};
-
- const formClear =()=>{
-    setSelectedRows([]);
-    setFormErrors({});
-
-  }
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -254,7 +254,7 @@ const PoStatus = () => {
                         </button>
 
                     )}
-                     <button className='ComCssClearButton' onClick={formClear}>Clear</button>
+                    <button className='ComCssClearButton' onClick={formClear}>Clear</button>
 
                 </div>
             </div>
@@ -293,21 +293,21 @@ const PoStatus = () => {
 
             </div>
             <CustomDialog
-                            open={showSuccessPopup}
-                            onClose={() => setShowSuccessPopup(false)}
-                            title="Success"
-                            message={successMessage}
-                            severity="success"
-                            color="primary"
-                        />
-                        <CustomDialog
-                            open={showErrorPopup}
-                            onClose={() => setShowErrorPopup(false)}
-                            title="Error"
-                            message={errorMessage}
-                            severity="error"
-                            color="secondary"
-                        />
+                open={showSuccessPopup}
+                onClose={() => setShowSuccessPopup(false)}
+                title="Success"
+                message={successMessage}
+                severity="success"
+                color="primary"
+            />
+            <CustomDialog
+                open={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="Error"
+                message={errorMessage}
+                severity="error"
+                color="secondary"
+            />
         </div>
     );
 };

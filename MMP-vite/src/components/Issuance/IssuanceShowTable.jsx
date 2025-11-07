@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, TextField } from "@mui/material";
 import CommonAddDataTable from "../../components/Com_Component/CommonAddDataTable";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
-import { saveIssueBatchcodeQty } from "../../Services/Services-Rc";
+import { fetchpickTicketDetails, saveIssueBatchcodeQty } from "../../Services/Services-Rc";
 
 
 const IssuanceShowTable = ({
@@ -21,17 +21,25 @@ const IssuanceShowTable = ({
   setShowErrorPopup,
   setErrorMessage,
   setShowSuccessPopup,
-  setSuccessMessage
+  setSuccessMessage,
+  formData,
+  setFormData,
+  fetchPickTicketDetail,
+  ticketNo
 }) => {
 
   const [open, setOpen] = useState(false);
   const [activeRow, setActiveRow] = useState(null);
   const [locationQty, setLocationQty] = useState({}); // {loc1: 5, loc2: 3}
+  const [issuedComments, setIssuedComments] = useState({}); // {loc1: 5, loc2: 3}
+  const [nsn, setNSN] = useState({}); // {loc1: 5, loc2: 3}
 
   const handleOpen = (row) => {
     setActiveRow(row);
 
     const init = {};
+    const initComments = {};
+    const initNSN = {};
 
     // If savedQty exists, use it as default, else empty string
     row.batches.forEach(batch => {
@@ -39,23 +47,37 @@ const IssuanceShowTable = ({
         bq => bq.batchCode === batch.batchCode && bq.location === batch.location
       );
       init[batch.location] = savedBatch ? savedBatch.savedQty : "";
+      initComments[batch.location] = savedBatch ? savedBatch.issued_comments : "";
+      initNSN[batch.location] = savedBatch ? savedBatch.nsn : "";
     });
 
     setLocationQty(init);
     // setActiveRow(prev => ({ ...row, batchesQty: [] }));
+    setIssuedComments(initComments); // new state
+    setNSN(initNSN);                 // new state
+    setFormData(prev => ({ ...prev, Comments: row.batchesQty?.[0]?.issued_comments, newSerialNumber: row.batchesQty?.[0]?.nsn || "" }));
+
     setOpen(true);
   };
 
 
-
   const handleSave = async () => {
     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
+    if (activeRow?.requestertype === "Submodule") {
+      const hasSerial = formData.newSerialNumber && formData.newSerialNumber.trim() !== "";
+      if (!hasSerial) {
+        setErrorMessage("Please enter New Serial Number!");
+        setShowErrorPopup(true);
+        return;
+      }
+    }
     if (!hasQty) {
       // alert("Please enter quantity for at least one location!");
-      setErrorMessage("Please enter quantity for at least one location!")
+      setErrorMessage("Please enter quantity for location!")
       setShowErrorPopup(true)
       return;
     }
+
 
     // Prepare payload
     const payload = Object.keys(locationQty).map(loc => ({
@@ -63,7 +85,12 @@ const IssuanceShowTable = ({
       issueqty: Number(locationQty[loc] || 0),
       batchcode: activeRow?.batches?.find(b => b.location === loc)?.batchCode || "",
       partcode: activeRow?.partcode || "",
-      rtn: activeRow?.rec_ticket_no || ""  // <-- added here
+      issued_comments: formData.Comments,
+      nsn: formData.newSerialNumber,
+      rtn: activeRow?.rec_ticket_no || "", // <-- added here
+      createdby: sessionStorage.getItem("userId") || "System",
+      updatedby: sessionStorage.getItem("userId") || "System"
+
     }));
 
     console.log("Payload to send:", payload);
@@ -72,7 +99,8 @@ const IssuanceShowTable = ({
       // alert("Submitted successfully!");
       setSuccessMessage("Submitted successfully!")
       setShowSuccessPopup(true)
-
+      // fetchPickTicketDetail();
+      fetchPickTicketDetail(activeRow?.rec_ticket_no);
       setOpen(false);
     } catch (error) {
       console.error("Error submitting payload:", error);
@@ -194,81 +222,6 @@ const IssuanceShowTable = ({
         );
       },
 
-
-      //  const columns = generateColumns({
-      //     fields: [
-
-      //         "rec_ticket_no",
-      //         "requestertype",
-      //         "productname",
-      //         "productgroup",
-      //         "productfamily",
-      //         "partcode",
-      //         "partdescription",
-      //         "UOM",
-      //         "componentType",
-      //         "compatabilitypartcode",
-      //         "req_qty",
-      //         "batchCode",
-      //         "location",
-      //         "putQty",
-      //         "allocatedQty",
-      //         "approvedQty",
-      //         "Comment",
-      //         "recordstatus"
-      //     ],
-
-      //     customConfig: {
-      //       rec_ticket_no: { label: "Request TicketNo" },
-      //       requestertype: { label: "Requester Type", },
-      //       partcode: { label: "PartCode" },
-      //       partdescription: { label: "Part Description" },
-      //       productname: { label: "Product Name" },
-      //       productgroup: { label: "Product Group" },
-      //       productfamily: { label: "Product Family" },
-      //       componentType: { label: "Component Type" },
-      //       compatabilitypartcode: { label: "Compatability PartCode" },
-      //       req_qty: { label: "Req Qty" },
-      //       batchCode: { label: "BatchCode" },
-      //       location: { label: "Location" },
-      //       putQty: { label: "PUT Qty" },
-      //       allocatedQty: { label: "Allocated Qty" },
-      //       approvedQty: { label: "Approved Qty" },
-      //       Comment: { label: "Comment" },
-      //       recordstatus: { label: "Status" },
-      //     },
-      //     customCellRenderers: {
-      //         location: (row) => {
-      //             if (!row.location) return "";
-      //             const parts = row.location.split(",");
-      //             return (
-      //                 <div style={{ display: "flex", flexDirection: "column" }}>
-      //                     {parts.map((loc, i) => {
-      //                         const trimmedLoc = loc.trim();
-      //                         const isR = trimmedLoc.startsWith("R");
-      //                         return (
-      //                             <span
-      //                                 key={i}
-      //                                 style={{
-      //                                     backgroundColor: isR ? "inherit" : "saddlebrown",
-      //                                     color: isR ? "inherit" : "white",
-      //                                     padding: "2px 4px",
-      //                                     borderRadius: "3px",
-      //                                     marginBottom: "2px",
-      //                                     display: "inline-block"
-      //                                 }}
-      //                             >
-      //                                 {trimmedLoc}
-      //                             </span>
-      //                         );
-      //                     })}
-      //                 </div>
-      //             );
-      //         },
-      // productname: (row) => (row.requestertype === "PTL" ? null : row.productname),
-      //     productgroup: (row) => (row.requestertype === "PTL" ? null : row.productgroup),
-      //     productfamily: (row) => (row.requestertype === "PTL" ? null : row.productfamily),
-      //     partdescription: (row) => (row.requestertype === "PTL" ? null : row.partdescription),
       putQty: (row) => {
         const hasDefaultQty = row.batchesQty?.some(bq => bq.savedQty > 0);
         return (
@@ -304,20 +257,13 @@ const IssuanceShowTable = ({
         columns={columns}
         data={normalizedData}
         progressPending={loading}
-        // pagination
-        // paginationServer
-        // paginationTotalRows={totalRows}
         totalRows={totalRows}
-        // paginationPerPage={perPage}
         page={page}
         perPage={perPage}
-        // onChangePage={setPage}
-        // onChangeRowsPerPage={setPerPage}
         onPageChange={setPage}
         onPerPageChange={setPerPage}
       />
 
-      {/* ✅ Popup with Table */}
       <Dialog
         open={open}
         onClose={(event, reason) => {
@@ -332,8 +278,8 @@ const IssuanceShowTable = ({
         fullWidth
         PaperProps={{
           sx: {
-            width: 900,       // custom width in px
-
+            // width: 1200,       // custom width in px
+            width: activeRow?.requestertype === "Submodule" ? 1200 : 970, // dynamic width
             border: '3px solid', // border width required
             borderImage: 'linear-gradient(to bottom, #d27c19ff 50%, #afee39ff 50%) 1', // top 50% blue, bottom 50% green
             borderRadius: 3,              // rounded corners
@@ -356,7 +302,47 @@ const IssuanceShowTable = ({
           }}
         >
           <span>Partcode: {activeRow?.partcode}</span>
-          <span>Issue</span>
+          <span>
+            {activeRow?.requestertype === "Submodule" && (
+              <label style={{ display: 'flex', flexDirection: 'column', fontSize: '12px', fontWeight: 'bold', color: 'yellow', marginTop: '-5px' }}>
+                New Serial Number
+                <input
+                  type="text"
+                  name="newSerialNumber"
+                  placeholder="New Serial Number"
+                  value={formData.newSerialNumber || ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, newSerialNumber: e.target.value }))}
+                  style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-3px", border: '1px solid #ccc', width: '250px' }}
+                />
+              </label>
+            )}
+          </span>
+          {/* <span>Issue</span> */}
+          {/* <span>
+            <TableCell>
+              <input
+                type="text"
+                name="Comments"
+                placeholder="Comments"
+                  value={formData.Comments || ""} // <-- use formData or a dedicated state
+                onChange={(e) => setFormData(prev => ({ ...prev, Comments: e.target.value }))}
+                style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-19px", border: '1px solid #ccc', width: '250px' }}
+              />
+            </TableCell>
+          </span> */}
+          <span>
+            <label style={{ display: 'flex', flexDirection: 'column', fontSize: '12px', fontWeight: 'bold', color: 'yellow', marginTop: '-5px' }}>
+              Comments
+              <input
+                type="text"
+                name="Comments"
+                placeholder="Comments"
+                value={formData.Comments || ""}
+                onChange={(e) => setFormData(prev => ({ ...prev, Comments: e.target.value }))}
+                style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-2px", border: '1px solid #ccc', width: '250px' }}
+              />
+            </label>
+          </span>
 
           <span>Approved Qty: {activeRow?.approvedQty}</span>
 
@@ -367,11 +353,16 @@ const IssuanceShowTable = ({
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#e3f2fd' }}>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2',fontSize: '13px', width: '15%' }}>Location</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2',fontSize: '13px', width: '15%' }}>Quantity</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2',fontSize: '13px', width: '15%' }}>Issue Qty</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2',fontSize: '13px', width: '15%' }}>Available Qty</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2',fontSize: '13px', width: '15%' }}>BatchCode</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', padding: '5px', width: '15%' }}>Location</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Quantity</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Issue Qty</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Available Qty</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>BatchCode</TableCell>
+                  {/* {activeRow?.requestertype === "Submodule" && (
+                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>New Serial Number</TableCell>
+                  )}
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }} >Comments</TableCell> */}
+
                 </TableRow>
               </TableHead>
 
@@ -416,6 +407,26 @@ const IssuanceShowTable = ({
                       <TableCell>{batch.allocatedQty}</TableCell>
                       <TableCell>{batch.AvailableQty}</TableCell>
                       <TableCell>{batch.batchCode}</TableCell>
+                      {/* {activeRow?.requestertype === "Submodule" && (
+                        <TableCell>
+                          <input
+                            type="text"
+                            name="newSerialNumber"
+                            placeholder="New Serial Number"
+                            onChange={(e) => setFormData(prev => ({ ...prev, newSerialNumber: e.target.value }))}
+                            style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "7px", border: '1px solid #ccc', width: '100%' }}
+                          />
+                        </TableCell>
+                      )} */}
+                      {/* <TableCell>
+                        <input
+                          type="text"
+                          name="Comments"
+                          placeholder="Comments"
+                          onChange={(e) => setFormData(prev => ({ ...prev, Comments: e.target.value }))}
+                          style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "7px", border: '1px solid #ccc', width: '100%' }}
+                        />
+                      </TableCell> */}
                     </TableRow>
                   );
                 })}
@@ -425,12 +436,10 @@ const IssuanceShowTable = ({
         </DialogContent>
 
         <DialogActions>
-          <Button sx={{fontSize: '13px'}} onClick={() => setOpen(false)} >Cancel</Button>
-          <Button variant="contained" sx={{fontSize: '13px'}} onClick={handleSave}>Save</Button>
+          <Button sx={{ fontSize: '13px' }} onClick={() => setOpen(false)} >Cancel</Button>
+          <Button variant="contained" sx={{ fontSize: '13px' }} onClick={handleSave}>Save</Button>
         </DialogActions>
       </Dialog>
-
-
     </>
   );
 };

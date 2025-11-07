@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import ApproverTextFiled from "../../components/Approver/ApproverTextFiled";
-import { fetchApproverTicket, fetchApproverTicketDetails, saveApproverTickets, saveAReturningpproverTickets } from '../../Services/Services-Rc';
+import { fetchApproverTicket, fetchApproverTicketDetails, saveApproverTickets, saveAReturningpproverTickets, saveStockApproverTickets } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { tr } from 'date-fns/locale';
@@ -22,6 +22,9 @@ const Approver = () => {
     const [approverReturningTicketsL1, setApproverReturningTicketsL1] = useState([]);
     const [approverReturningTicketsL2, setApproverReturningTicketsL2] = useState([]);
     const [ptlRequesterTickets, setPtlRequesterTickets] = useState([]);
+    const [stockTransferTicketsL1, setStockTransferTicketsL1] = useState([]);
+    const [stockTransferTicketsL2, setStockTransferTicketsL2] = useState([]);
+
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(0);
     const [perPage, setPerPage] = useState(10);
@@ -38,6 +41,7 @@ const Approver = () => {
     const [requesterApproveButton, setRequesterApproveButton] = useState(false);
     const [returningApproveButton, setReturningApproveButton] = useState(false);
     const [ptlRequestApproveButton, setPtlRequestApproveButton] = useState(false);
+    const [stockRequestApproveButton, setStockRequestApproveButton] = useState(false);
     const [rejectComment, setRejecComment] = useState(false)
 
     useEffect(() => {
@@ -51,12 +55,14 @@ const Approver = () => {
         try {
             const response = await fetchApproverTicket(userId);
             const data = response.data;
-            console.log("Approver Types:", response.data);
+            // console.log("Approver Types:", response.data);
             setApproverTicketsL1(response.data.approverL1Tickets || []);
             setApproverTicketsL2(response.data.approverL2Tickets || []);
             setApproverReturningTicketsL1(response.data.returningApproverL1Tickets || []);
             setApproverReturningTicketsL2(response.data.returningApproverL2Tickets || []);
             setPtlRequesterTickets(response.data.ptlOpreatorTicket || []);
+            setStockTransferTicketsL1(response.data.l1StockTickets || []);
+            setStockTransferTicketsL2(response.data.l2StockTickets || []);
 
         } catch (error) {
             console.error("Error fetching requester types:", error);
@@ -78,8 +84,16 @@ const Approver = () => {
                         setReturningApproveButton(true);
                         setRequesterApproveButton(false);
                         setPtlRequestApproveButton(false);
+                        setStockRequestApproveButton(false);
                     } else if (data[0]?.rec_ticket_no?.startsWith("PTL")) {
                         setPtlRequestApproveButton(true)
+                        setReturningApproveButton(false);
+                        setRequesterApproveButton(false);
+                        setStockRequestApproveButton(false);
+
+                    } else if (data[0]?.rec_ticket_no?.startsWith("INV")) {
+                        setStockRequestApproveButton(true)
+                        setPtlRequestApproveButton(false)
                         setReturningApproveButton(false);
                         setRequesterApproveButton(false);
                     }
@@ -87,6 +101,8 @@ const Approver = () => {
                         setRequesterApproveButton(true);
                         setReturningApproveButton(false);
                         setPtlRequestApproveButton(false);
+                        setStockRequestApproveButton(false);
+
                     } setShowTable(true);
                     // setSelectedGrnRows([])
                 } catch (error) {
@@ -215,13 +231,13 @@ const Approver = () => {
                 requestTicketNo: row.rec_ticket_no,
                 partCode: row.partcode,
                 approved1_qty: Number(row.ApprovedL1Qty) || 0,
-approved2_qty: Number(row.ApprovedL2Qty) || 0,
-requestQty: Number(row.req_qty) || 0,
+                approved2_qty: Number(row.ApprovedL2Qty) || 0,
+                requestQty: Number(row.req_qty) || 0,
                 Comment: row.Comment || "",
                 createdby: userId,
                 recordstatus: row.recordstatus
             }));
-            console.log("Payload to send:", payload);
+            // console.log("Payload to send:", payload);
             await saveApproverTickets(payload);
             setSuccessMessage("Submitted successfully!")
             setShowSuccessPopup(true)
@@ -235,7 +251,7 @@ requestQty: Number(row.req_qty) || 0,
             fetchApproverTicktes(userId);
         } catch (error) {
             alert(error.response?.data?.message || "Something went wrong!")
-            console.error("Error submitting data:", error);
+            // console.error("Error submitting data:", error);
         } finally {
             setLoading(false); // stop loader in all cases
         }
@@ -264,7 +280,7 @@ requestQty: Number(row.req_qty) || 0,
                 recordstatus: row.recordstatus
             }));
 
-            console.log("Payload to send:", payload);
+            // console.log("Payload to send:", payload);
             await saveAReturningpproverTickets(payload);
             setSuccessMessage("Submitted successfully!")
             setShowSuccessPopup(true)
@@ -277,7 +293,7 @@ requestQty: Number(row.req_qty) || 0,
             fetchApproverTicktes(userId);
         } catch (error) {
             alert(error.response?.data?.message || "Something went wrong!")
-            console.error("Error submitting data:", error);
+            // console.error("Error submitting data:", error);
         } finally {
             setLoading(false); // stop loader in all cases
         }
@@ -318,11 +334,56 @@ requestQty: Number(row.req_qty) || 0,
             fetchApproverTicktes(userId);
         } catch (error) {
             alert(error.response?.data?.message || "Something went wrong!")
-            console.error("Error submitting data:", error);
+            // console.error("Error submitting data:", error);
         } finally {
             setLoading(false); // stop loader in all cases
         }
     }
+
+    const handleStockApprove = async () => {
+        setLoading(true); // start loader
+        try {
+            if (selectedGrnRows.length === 0) {
+                setErrorMessage("Please select at least one row before submitting!")
+                setShowErrorPopup(true)
+                return;
+            }
+            const selectedData = approveTicketDetail.filter(row =>
+                selectedGrnRows.includes(row.selectedId) // or row.id
+            );
+
+            if (!valiDate(selectedData)) return;
+            // console.log("Selected Data:", selectedData);
+            const payload = selectedData.map(row => ({
+                rtn: row.rec_ticket_no,
+                partcode: row.partcode,
+                approved1_qty: Number(row.ApprovedL1Qty) || 0,
+                approved2_qty: Number(row.ApprovedL2Qty) || 0,
+                transferqty: Number(row.req_qty) || 0,
+                Comment: row.Comment || "",
+                createdby: userId,
+                recordstatus: row.recordstatus
+            }));
+            // console.log("Payload to send:", payload);
+            await saveStockApproverTickets(payload);
+            setSuccessMessage("Submitted successfully!")
+            setShowSuccessPopup(true)
+            // alert("Submitted successfully!");
+            setShowTable(false);
+            setTableData([])
+            setFormData({
+                approverL1TicketL1: "",
+                requesterType: ""
+            })
+            fetchApproverTicktes(userId);
+        } catch (error) {
+            alert(error.response?.data?.message || "Something went wrong!")
+            // console.error("Error submitting data:", error);
+        } finally {
+            setLoading(false); // stop loader in all cases
+        }
+    };
+
     const handleReject = async () => {
         setRejecComment(true);
         try {
@@ -337,7 +398,7 @@ requestQty: Number(row.req_qty) || 0,
             );
             const ticketNo = selectedData[0]?.rec_ticket_no || "";
             let payload = [{}]
-            console.log("Selected Data:", selectedData);
+            // console.log("Selected Data:", selectedData);
 
             if (ticketNo.startsWith("PTL")) {
                 payload = selectedData.map(row => ({
@@ -356,7 +417,7 @@ requestQty: Number(row.req_qty) || 0,
 
                 }))
             }
-            console.log("Payload to send:", payload);
+            // console.log("Payload to send:", payload);
 
             if (ticketNo.startsWith("RTN")) {
                 await saveAReturningpproverTickets(payload);
@@ -394,6 +455,9 @@ requestQty: Number(row.req_qty) || 0,
                     approverReturningTicketsL1={approverReturningTicketsL1}
                     approverReturningTicketsL2={approverReturningTicketsL2}
                     ptlRequesterTickets={ptlRequesterTickets}
+                    stockTransferTicketsL1={stockTransferTicketsL1}
+                    stockTransferTicketsL2={stockTransferTicketsL2}
+
                 />
             </div>
 
@@ -422,9 +486,11 @@ requestQty: Number(row.req_qty) || 0,
                         rejectComment={rejectComment}
                     />
                     <div className="ComCssButton9">
-                        {requesterApproveButton && <button className='ComCssSubmitButton' onClick={handleSubmit} >Approve</button>}
-                        {returningApproveButton && <button onClick={handleReturningApprove} >Approve</button>}
-                        {ptlRequestApproveButton && <button onClick={handlePTLApprove} >Approve</button>}
+                        {requesterApproveButton && <button className='ComCssRequesterApproveButton' onClick={handleSubmit} >Approve</button>}
+                        {returningApproveButton && <button className='ComCssReturningApproveButton' onClick={handleReturningApprove} >Approve</button>}
+                        {ptlRequestApproveButton && <button className='ComCssPTLApproveButton' onClick={handlePTLApprove} >Approve</button>}
+                        {stockRequestApproveButton && <button className='ComCssStockApproveButton' onClick={handleStockApprove} >Approve</button>}
+
                         {/* <button className='ComCssSubmitButton' onClick={handleSubmit}  >Approve</button> */}
                         <button className='ComCssDeleteButton' onClick={handleReject}>Reject</button>
                     </div>

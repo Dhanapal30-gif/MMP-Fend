@@ -10,7 +10,7 @@ const StockTransferTextFile = ({
     handleChange,
     trnasferPrtcode,
     formErrors,
-    boxNumber
+    inventory_box_no
 }) => {
     const statusOptions = [
         { label: "Open", value: "Open" },
@@ -21,8 +21,8 @@ const StockTransferTextFile = ({
     ];
     const TransferTypeOption = [
         { label: "Internal Transfer", value: "Internal Transfer" },
+        { label: "RC-DHL", value: "RC-DHL" },
         { label: "DHL-RC", value: "DHL-RC" },
-        { label: "Rc-DHL", value: "Rc-DHL" },
 
     ];
     const OrderTypeOption = [
@@ -98,36 +98,36 @@ const StockTransferTextFile = ({
                             }} />
                     )}
                 />
-                {(formData.transfertype === 'DHL-RC') && (
+                {(formData.transfertype === 'RC-DHL') && (
                     <ComTextFiled
                         label="Trnasfer Qty"
-                        name="trnasferQty"
-                        value={formData.trnasferQty || ""}
+                        name="transferqty"
+                        value={formData.transferqty || ""}
                         type="number"
-                        onChange={(e) => handleChange("trnasferQty", e.target.value)}
-                        error={Boolean(formErrors?.trnasferQty)}
-                        helperText={formErrors?.trnasferQty || ""}
+                        onChange={(e) => handleChange("transferqty", e.target.value)}
+                        error={Boolean(formErrors?.transferqty)}
+                        helperText={formErrors?.transferqty || ""}
                     />
                 )}
-                {(formData.transfertype === 'DHL-RC') && (
+                {(formData.transfertype === 'RC-DHL') && (
 
                     <ComTextFiled
                         label="Inventory box number"
                         name="iventooryBoxNumber"
-                        value={boxNumber || ""}
+                        value={inventory_box_no || ""}
                         onChange={(e) => setBoxNumber(e.target.value)}
                     />
 
                 )}
 
-                {(formData.transfertype === 'DHL-RC') && (
+                {(formData.transfertype === 'RC-DHL') && (
                     <ComTextFiled
                         label="Comment"
-                        name="Comment"
-                        value={formData.comment || ""}
-                        onChange={(e) => handleChange("comment", e.target.value)}
+                        name="comments"
+                        value={formData.comments || ""}
+                        onChange={(e) => handleChange("comments", e.target.value)}
                         error={Boolean(formErrors?.comment)}
-                        helperText={formErrors?.comment || ""}
+                        helperText={formErrors?.comments || ""}
                     />
                 )}
             </ThemeProvider>

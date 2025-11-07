@@ -1,5 +1,5 @@
-import { fetchPutawayAll, fetchPutawayAllSearch, fetchPutawayPartially, fetchPutawayPending, putawayProcess, putawayReturningProcess } from "../../Services/Services-Rc";
-import { fetchPutaway, fetchPutTicket, fetchRec } from "../../Services/Services_09";
+import { downloadPutaway, downloadPutawayAll, fetchPutawayAll, fetchPutawayAllSearch, fetchPutawayPartially, fetchPutawayPending, putawayProcess, putawayReturningProcess } from "../../Services/Services-Rc";
+import { fetchPutaway, fetchPutTicket } from "../../Services/Services_09";
 
 export const fetchPutawayTicket = (setData) => {
   fetchPutTicket()
@@ -11,8 +11,8 @@ export const fetchPutawayTicket = (setData) => {
 
 
 
-export const fetchPutawayDetail = (page, size, setData, setTotalRows) => {
-  fetchPutaway(page, size)
+export const fetchPutawayCloseDetail = (page, size,search, setData, setTotalRows) => {
+  fetchPutaway(page, size,search)
     .then((response) => {
       if (response?.data?.content) {
         setData(response.data.content)
@@ -28,8 +28,8 @@ export const fetchPutawayDetail = (page, size, setData, setTotalRows) => {
 
 }
 
-export const fetchPutawayPendingDetail = (page, size, setData, setTotalRows) => {
-  fetchPutawayPending(page, size)
+export const fetchPutawayPendingDetail = (page, size,search , setData, setTotalRows) => {
+  fetchPutawayPending(page, size,search )
     .then((response) => {
       if (response?.data?.content) {
         setData(response.data.content)
@@ -45,8 +45,8 @@ export const fetchPutawayPendingDetail = (page, size, setData, setTotalRows) => 
 
 }
 
-export const fetchPutawayPartiallyDetail = (page, size, setData, setTotalRows) => {
-  fetchPutawayPartially(page, size)
+export const fetchPutawayPartiallyDetail = (page, size,search, setData, setTotalRows) => {
+  fetchPutawayPartially(page, size,search)
     .then((response) => {
       if (response?.data?.content) {
         setData(response.data.content)
@@ -129,4 +129,58 @@ export const fetchPutawayAllDetailSearch = (page, size,search ="", setData, setT
     .catch((error) => {
       console.error("Error fetching receiving data:", error);
     });
+};
+
+
+
+// export const download = (search = "") => {
+//     // console.log("searchTeaxt", search)
+//     //setLoading(true);
+    
+//       downloadPutawayAll()
+//         .then((response) => {
+//           const url = window.URL.createObjectURL(new Blob([response.data]));
+//           const link = document.createElement("a");
+//           link.href = url;
+//           link.setAttribute("download", "PutawayAll.xlsx");
+//           document.body.appendChild(link);
+//           link.click();
+//           link.remove();
+//         })
+//         .catch((error) => {
+//           console.error("Download failed:", error);
+//         })
+//         .finally(() => {
+//           // setLoading(false);
+//         });
+    
+//   }
+
+// Modified download function
+export const download = ({ hiddenButton, search = "" }) => {
+    let apiCall;
+  // console.log("download called with:", hiddenButton)
+    if (hiddenButton === 'closed') {
+        apiCall = downloadPutaway(search,"closed");
+    }else if (hiddenButton === 'pending') {
+        apiCall = downloadPutaway(search,"pending");
+    }else if(hiddenButton ==="partial"){
+        apiCall = downloadPutaway(search,"partial");
+    } else {
+        apiCall = downloadPutawayAll(search);
+    }
+
+    apiCall
+        .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `Putaway_${hiddenButton ? hiddenButton : "All"}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        })
+        .catch((error) => {
+            console.error("Download failed:", error);
+        });
 };

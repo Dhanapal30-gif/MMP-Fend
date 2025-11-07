@@ -86,14 +86,14 @@ const Returning = () => {
         }
 
     }, [userId, formData?.returningType]);
-    console.log("formData", formData)
+    // console.log("formData", formData)
 
     const fetchReturningPartcode = async (userId, returningType) => {
         try {
             const response = await fetchRetPartcode(userId, returningType);
             const data = response.data;
             setReturningData(data || []);
-            console.log("Fetched Requester Types:", data)
+            // console.log("Fetched Requester Types:", data)
             // console.log("Requester Types:", data);
         } catch (error) {
             console.error("Error fetching requester types:", error);

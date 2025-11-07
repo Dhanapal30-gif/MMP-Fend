@@ -6,19 +6,21 @@ import { FaTimesCircle } from "react-icons/fa";
 
 const fields = [
     "transfertype",
-    "orderType",
+    "ordertype",
     "partcode",
-    "trnasferQty",
-    "iventooryBoxNumber",
+    "transferqty",
+    "inventory_box_no",
+    "comments"
 
 ];
 
 const customConfig = {
     transfertype: { label: "Trcansfer Type" },
-    orderType: { label: "Order Type" },
+    ordertype: { label: "Order Type" },
     partcode: { label: "Part Code" },
-    trnasferQty: { label: "Transfer Qty" },
-    iventooryBoxNumber: { label: "Inventoory Box Number" },
+    transferqty: { label: "Transfer Qty" },
+    inventory_box_no: { label: "Inventory Box Number" },
+    comments: { label: "Comment" },
 };
 
 const StockRc_DHLAddTable = ({
@@ -76,6 +78,20 @@ const StockRc_DHLAddTable = ({
             return newRow;
         });
     }, [data]);
+
+
+//     const normalizedData = React.useMemo(() => {
+//     return data.map(row => {
+//         return {
+//             ...row,
+//             // flatten object values, but keep boxNumber as string
+//             boxNumber: row.boxNumber?.label ?? row.boxNumber ?? ""
+//         };
+//     });
+// }, [data]);
+
+
+    
 
     return (
         <CommonDataTable

@@ -6,6 +6,7 @@ import { generateColumns } from "../../components/Com_Component/generateColumns"
 const allFields = [
   "rec_ticket_no",
   "requestertype",
+  "ordertype",
   "productname",
   "productgroup",
   "productfamily",
@@ -13,7 +14,9 @@ const allFields = [
   "partdescription",
   "UOM",
   "componentType",
+  "ComponentUsage",
   "compatabilitypartcode",
+  "inventory_box_no",
   "req_qty",
   "batchCode",
   "location",
@@ -23,7 +26,10 @@ const allFields = [
   "faultySerialNumber",
   "Comment",
   "recordstatus",
-    "ComponentUsage",
+  "approved_l1",
+  "approved_l1_date",
+  "createdon",
+
 
 ];
 
@@ -38,10 +44,39 @@ const hideForReturning = [
   "location",
   "allocatedQty",
   "UOM",
-  
+  "approved_l1",
+  "approved_l1_date",
+  "inventory_box_no",
+  "createdon",
+  "ordertype"
+
 ];
 
+const hideForRequester = [
+  "approved_l1",
+  "approved_l1_date",
+  "inventory_box_no",
+  "createdon",
+  "ordertype"
+]
+const hideForStock = [
+  "productname",
+  "productgroup",
+  "productfamily",
+  "componentType",
+  "compatabilitypartcode",
 
+  "req_qty",
+  "batchCode",
+  "location",
+  "allocatedQty",
+
+  "faultySerialNumber",
+  "Comment",
+
+
+
+];
 const hideForPTL = [
   "productname",
   "productgroup",
@@ -57,6 +92,11 @@ const hideForPTL = [
   "ApprovedL2Qty",
   "faultySerialNumber",
   "Comment",
+  "approved_l1",
+  "approved_l1_date",
+  "inventory_box_no",
+  "createdon",
+  "ordertype"
 ];
 
 
@@ -80,8 +120,8 @@ const customConfig = {
   Comment: { label: "Comment", width: "250px" },
   recordstatus: { label: "Status" },
   faultySerialNumber: { label: "Faulty Serial Number" },
-  ComponentUsage:{label:"Component Usage"},
-  recordstatus:{label:"Record Status"}
+  ComponentUsage: { label: "Component Usage" },
+  recordstatus: { label: "Status" }
 };
 
 const ApproverTable = ({
@@ -107,7 +147,13 @@ const ApproverTable = ({
       return allFields.filter((f) => !hideForReturning.includes(f));
     }
     else if (ticketNo.startsWith("PTL")) {
-      return allFields.filter((f)=>!hideForPTL.includes(f));
+      return allFields.filter((f) => !hideForPTL.includes(f));
+    }
+    else if (ticketNo.startsWith("4")) {
+      return allFields.filter((f) => !hideForRequester.includes(f));
+    }
+    else if (ticketNo.startsWith("INV")) {
+      return allFields.filter((f) => !hideForStock.includes(f));
     }
     return allFields;
   }, [data]);
@@ -115,28 +161,28 @@ const ApproverTable = ({
   const normalizedData = useMemo(() => {
     return data.map((row) => ({
       ...row,
-          id: row.selectedId, // <-- add this for the table
+      id: row.selectedId, // <-- add this for the table
       batchCode: row.batches?.map((b) => b.batchCode).join(", "),
       location: row.batches?.map((b) => b.location).join(", "),
       allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", "),
     }));
   }, [data]);
 
- const handleGrnSelectAll = () => {
-  if (selectedGrnRows.length === normalizedData.length) {
-    setSelectedGrnRows([]); // unselect all
-  } else {
-    setSelectedGrnRows(normalizedData.map((row) => row.id)); // select all
-  }
-};
+  const handleGrnSelectAll = () => {
+    if (selectedGrnRows.length === normalizedData.length) {
+      setSelectedGrnRows([]); // unselect all
+    } else {
+      setSelectedGrnRows(normalizedData.map((row) => row.id)); // select all
+    }
+  };
 
   const handleGrnSelect = (rowSelectedId) => {
-  setSelectedGrnRows((prev) =>
-    prev.includes(rowSelectedId)
-      ? prev.filter((id) => id !== rowSelectedId)
-      : [...prev, rowSelectedId]
-  );
-};
+    setSelectedGrnRows((prev) =>
+      prev.includes(rowSelectedId)
+        ? prev.filter((id) => id !== rowSelectedId)
+        : [...prev, rowSelectedId]
+    );
+  };
 
 
   const columns = useMemo(() => {
@@ -155,9 +201,9 @@ const ApproverTable = ({
                 value={row.ApprovedL1Qty ?? ""}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val !== "" && Number(val) > row.TotalAvailableQty) {                   
-                   setErrorMessage("Entered quantity exceeds Req quantity!")
-                   setShowErrorPopup(true)
+                  if (val !== "" && Number(val) > row.TotalAvailableQty) {
+                    setErrorMessage("Entered quantity exceeds Req quantity!")
+                    setShowErrorPopup(true)
                     return;
                   }
                   handleApproverChange(row.selectedId, "ApprovedL1Qty", val);
@@ -189,8 +235,8 @@ const ApproverTable = ({
                   const val = e.target.value;
                   if (val !== "" && Number(val) > row.TotalAvailableQty) {
                     // alert("Entered quantity exceeds available quantity!");
-                   setErrorMessage("Entered quantity exceeds available quantity!")
-                   setShowErrorPopup(true)
+                    setErrorMessage("Entered quantity exceeds available quantity!")
+                    setShowErrorPopup(true)
                     return;
                   }
                   handleApproverChange(row.selectedId, "ApprovedL2Qty", val);
@@ -201,18 +247,18 @@ const ApproverTable = ({
           }
           return null; // hide if L2 doesn't exist
         },
-        
+
         Comment: (row) => {
-  if (!rejectComment) return null; // don't show comment if rejectComment is false
-  return (
-    <TextField
-      placeholder="Enter Comment"
-      value={row.Comment ?? ""}
-      onChange={(e) => handleApproverChange(row.selectedId, "Comment", e.target.value)}
-      className="invoice-input"
-    />
-  );
-},
+          if (!rejectComment) return null; // don't show comment if rejectComment is false
+          return (
+            <TextField
+              placeholder="Enter Comment"
+              value={row.Comment ?? ""}
+              onChange={(e) => handleApproverChange(row.selectedId, "Comment", e.target.value)}
+              className="invoice-input"
+            />
+          );
+        },
 
       },
     });

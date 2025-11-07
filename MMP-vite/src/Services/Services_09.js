@@ -101,8 +101,8 @@ export const fetchPutTicket = () => axios.get(Get_RecTick);
 
 
 const fetchPutawayDetail = `${url}/Putaway/fetchPutaway`
-export const fetchPutaway = (page = 0, size = 10) => {
-  return axios.get(fetchPutawayDetail, { params: { page, size }, });
+export const fetchPutaway = (page = 0, size = 10,search) => {
+  return axios.get(fetchPutawayDetail, { params: { page, size,search }, });
 }
 
 
@@ -354,6 +354,19 @@ const savePtlDeliverStataus = `${url}/IssuacneCon/savePtlDeliverStataus`
 export const savePtlDeliver = (submitData) => axios.post(savePtlDeliverStataus, submitData);
 
 
-const savePtlIssueStataus = `${url}/IssuacneCon/savePtlDeliverStataus`
+const savePtlIssueStataus = `${url}/IssuacneCon/savePtlIssueStataus`
 export const savePtlIssue = (submitData) => axios.post(savePtlIssueStataus, submitData);
 
+const fetchPTLRequestTicketDetail = `${url}/PTLOpreator/fetchPTLRequestDetail`;
+export const fetchPTLRequestDetail = (search,page,  size) => {
+  return axios.get(fetchPTLRequestTicketDetail, {
+    params: {search, page, size }, // ✅ Pass userId as query param
+  });
+};
+
+const Get_DownloadPTLRequestSearch = `${url}/PTLOpreator/downloadPTLRequestTable-excel`;
+export const downloadPTLRequest = ( search) =>
+  axios.get(Get_DownloadPTLRequestSearch, {
+    params: {  search },
+    responseType: "blob",
+  });

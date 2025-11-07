@@ -26,7 +26,7 @@ const PutawayTextFiled = ({
 
   const TransferTypeOption = [
     { label: "Internal Transfer", value: "Internal Transfer" },
-    { label: "DHL Transfer", value: "DHL Transfer" },
+    { label: "RC-DHL", value: "RC-DHL" },
 
   ];
 
@@ -36,7 +36,6 @@ const PutawayTextFiled = ({
   //             value: item.partcode
   //         })),
   //         [transferTicketNoList]
-
   //     ); 
 
 

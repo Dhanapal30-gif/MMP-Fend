@@ -53,9 +53,9 @@ const Reworker = () => {
 
     const handleSearchClick = (searchTerm) => {
         // const searchTerm = formData.searchBoardserialNumber; // ✅ get search input value
-        console.log("formData", formData)
+        // console.log("formData", formData)
         if (!searchTerm) {
-            console.warn("Please enter a module serial number.");
+            // console.warn("Please enter a module serial number.");
             setErrorMessage("Please enter a module serial number.");
             setShowErrorPopup(true);
             return;
@@ -76,13 +76,13 @@ const Reworker = () => {
                     fetchData();
                     //   setFormData({ ...formData, ...data[0] });
                 } else {
-                    console.warn("No content found:", data);
+                    // console.warn("No content found:", data);
                     setErrorMessage("No record found for this serial number.");
                     setShowErrorPopup(true);
                 }
             })
             .catch((error) => {
-                console.error("Error fetching board data:", error);
+                // console.error("Error fetching board data:", error);
                 setErrorMessage("Error fetching board details.");
                 setShowErrorPopup(true);
             });
