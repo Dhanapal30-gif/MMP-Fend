@@ -159,8 +159,8 @@ export const saveBomMasterUpload = (formData) => axios.post(save_BomUpload, form
 //   return axios.get(Get_RCStoreFind, { params: { page, size}, })};
 
   const get_BomMaste = `${url}/Bom/fetchBomMaster`;
-export const getBoMaster = (page = 0, size = 10)=>{
-  return axios.get(get_BomMaste, { params: { page, size }, });
+export const getBoMaster = (page = 0, size = 10,search = "")=>{
+  return axios.get(get_BomMaste, { params: { page, size,search: search || undefined }, });
 } 
 
 const update_Bom = `${url}/Bom/updateBom`;

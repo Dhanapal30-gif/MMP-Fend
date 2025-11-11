@@ -6,7 +6,7 @@ import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, TextField } from "@mui/material";
 
-const PutawayTextFiled = ({ formData, setFormData, isFrozen,
+const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
   ptldata, groupOptions, handleInputChange, nameOptions, serialOptions,
   partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
 
@@ -80,6 +80,7 @@ const PutawayTextFiled = ({ formData, setFormData, isFrozen,
           InputProps={{ readOnly: true }}
 
         />
+        {!isEditMode && (
         <ComTextFiled
           label="Available Qty"
           name="availableQuantity"
@@ -88,7 +89,7 @@ const PutawayTextFiled = ({ formData, setFormData, isFrozen,
           InputProps={{ readOnly: true }}
 
         />
-
+)}
         <ComTextFiled
           label="Put Qty"
           name="quantity"

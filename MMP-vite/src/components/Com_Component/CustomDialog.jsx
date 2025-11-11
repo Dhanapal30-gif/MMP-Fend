@@ -67,7 +67,7 @@ const CustomDialog = ({
 
         {/* Animated content */}
         <DialogContent sx={{ p: 2, textAlign: 'center', overflow: 'hidden' }}>
-  <DialogContentText sx={{ fontSize: 15, color: 'text.primary', animation: 'pulse 2s infinite alternate' }}>
+  <DialogContentText sx={{ fontSize: 14, color: 'text.primary', animation: 'pulse 2s infinite alternate' }}>
     {message}
   </DialogContentText>
 </DialogContent>

@@ -11,6 +11,7 @@ import { deleteproduct, downloadProduct, downloadSearchProduct, getProductMaster
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const ProductFamilyMaster = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -94,51 +95,55 @@ const ProductFamilyMaster = () => {
   }, [searchText]);
 
 
- const handleSubmit = async () => {
-  if (!valiDate()) return;
+  const handleSubmit = async () => {
+    if (!valiDate()) return;
 
-  const createdby = sessionStorage.getItem("userName") || "System";
-  const modifiedby = sessionStorage.getItem("userName") || "System";
-  const updatedFormData = { ...formData, createdby, modifiedby };
+    const createdby = sessionStorage.getItem("userName") || "System";
+    const modifiedby = sessionStorage.getItem("userName") || "System";
+    const updatedFormData = { ...formData, createdby, modifiedby };
 
-  try {
-    const response = await saveProductMaster(updatedFormData);
-    setSuccessMessage("Product Updated Successfully");
-    setShowSuccessPopup(true);
-    setFormData({
-      productname: "",
-      productgroup: "",
-      productfamily: "",
-      lineLead: [],
-      recordstatus: "",
-      productEngineer: [],
-    });
+    try {
+      const response = await saveProductMaster(updatedFormData);
+      setSuccessMessage("Product Updated Successfully");
+      setShowSuccessPopup(true);
+      setFormData({
+        productname: "",
+        productgroup: "",
+        productfamily: "",
+        lineLead: [],
+        recordstatus: "",
+        productEngineer: [],
+      });
 
-    // Refresh table
-    fetchProduct(1, perPage); // reset to first page
-    setPage(1);
-  } catch (error) {
-    if (error.response) {
-      const message =
-        error.response.status === 409
-          ? "Product already exists"
-          : "Something went wrong";
-      setErrorMessage(message);
-    } else {
-      setErrorMessage("Network error, please try again");
+      // Refresh table
+      fetchProduct(1, perPage); // reset to first page
+      setPage(1);
+    } catch (error) {
+      if (error.response) {
+        const message =
+          error.response.status === 409
+            ? "Product already exists"
+            : "Something went wrong";
+        setErrorMessage(message);
+      } else {
+        setErrorMessage("Network error, please try again");
+      }
+      setShowErrorPopup(true);
     }
-    setShowErrorPopup(true);
-  }
-};
+  };
 
   //FetchAllproduct
   const fetchProduct = (page = 1, size = 10, search = "") => {
+    setLoading(true);
     getProductMasterData(page - 1, size, search) // Pass as separate arguments
       .then((response) => {
         setProductMaster(response.data.content || []);
         setTotalRows(response.data.totalElements || 0);
       })
-      .catch((error) => console.error("Error fetching data:", error))
+      .catch((error) => {
+        setErrorMessage("Error fetching data");
+        setShowErrorPopup(true);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -386,6 +391,7 @@ const ProductFamilyMaster = () => {
   const handleUpdate = (e, id) => {
     e.preventDefault();
     if (!valiDate()) return;
+    setLoading(true);
     const modifiedby = sessionStorage.getItem("userName") || "System";
     const updatedFormData = {
       ...formData,
@@ -428,6 +434,8 @@ const ProductFamilyMaster = () => {
             setShowErrorPopup(true);
           }
         }
+      }).finally(() => {
+        setLoading(false);
       });
   };
 
@@ -503,7 +511,9 @@ const ProductFamilyMaster = () => {
       setShowProductTable(false);
     };
     reader.onerror = (error) => {
-      console.error("File read error:", error);
+      setErrorMessage("File read error:", error);
+      setShowErrorPopup(true);
+      // console.error("File read error:", error);
     };
   };
 
@@ -513,15 +523,17 @@ const ProductFamilyMaster = () => {
     const errors = [];
     excelUploadData.slice(1).forEach((row) => {
       if (!row.productname || row.productname.trim() === "") {
-        errors.push("Product Name is required");
+        setErrorMessage("Product Name is required");
+        setShowErrorPopup(true);
+        // errors.push("Product Name is required");
       }
     });
 
     if (errors.length > 0) {
-      alert("Product Name is required");
+      setErrorMessage("Product Name is required");
+      setShowErrorPopup(true);
       return;
     }
-
     const createdby = sessionStorage.getItem("userName") || "System";
     const modifiedby = sessionStorage.getItem("userName") || "System";
     const updatedFormData = excelUploadData.map(item => ({
@@ -535,7 +547,7 @@ const ProductFamilyMaster = () => {
         ? item.lineLead.split(',').map(s => s.trim())
         : item.lineLead,
     }));
-
+    setLoading(true);
     // console.log("Final Payload for Bulk Upload:", updatedFormData);
     saveProductsBulk(updatedFormData) // Call bulk API
       .then(() => {
@@ -543,29 +555,32 @@ const ProductFamilyMaster = () => {
         setShowSuccessPopup(true);
         setHandleUploadButton(false);
         setHandleSubmitButton(true);
+        setExcelUploadData([]);
         setShowUploadTable(false);
         fetchProduct();
         setShowProductTable(true);
       })
-        .catch((error) => {
-    // Extract error message from response
-    const message = error.response?.data?.error || "Something went wrong";
+      .catch((error) => {
+        // Extract error message from response
+        const message = error.response?.data?.error || "Something went wrong";
 
-    setErrorMessage(message); // Correctly set error message
-    setShowErrorPopup(true);
+        setErrorMessage(message); // Correctly set error message
+        setShowErrorPopup(true);
 
-    // Extract duplicate product name if present
-    const duplicateName = message.includes(":") ? message.split(": ")[1] : null;
+        // Extract duplicate product name if present
+        const duplicateName = message.includes(":") ? message.split(": ")[1] : null;
 
-    if (duplicateName) {
-      setDuplicateProducts([duplicateName]);
-    } else {
-      setDuplicateProducts([]);
-    }
+        if (duplicateName) {
+          setDuplicateProducts([duplicateName]);
+        } else {
+          setDuplicateProducts([]);
+        }
 
-    setShowUploadTable(true);
-    setShowProductTable(false);
-  });
+        setShowUploadTable(true);
+        setShowProductTable(false);
+      }).finally(() => {
+        setLoading(false);
+      });
     setShowProductTable(true);
   };
   const rowHighlightStyle = [
@@ -595,6 +610,7 @@ const ProductFamilyMaster = () => {
   };
 
   const handleDelete = async () => {
+    setLoading(true);
     try {
       await deleteproduct(selectedRows); // selectedRows should be an array of IDs
       setSuccessMessage("Products deleted successfully")
@@ -606,7 +622,10 @@ const ProductFamilyMaster = () => {
     } catch (error) {
       setErrorMessage("Failed to delete products");
       setShowErrorPopup(true);
+    } finally {
+      setLoading(false);
     }
+
   }
 
   return (
@@ -745,106 +764,112 @@ const ProductFamilyMaster = () => {
         </div>
 
         {showProductTable && !showUploadTable && (
-          <DataTable
-            columns={columns}
-            data={productMaster}
-            pagination
-            paginationServer
-            progressPending={loading}
-            paginationTotalRows={totalRows}
-            onChangeRowsPerPage={handlePerRowsChange}
-            onChangePage={handlePageChange}
-            paginationPerPage={perPage}
-            paginationRowsPerPageOptions={[10, 20, 30, 50]}
-            paginationComponentOptions={{
-              rowsPerPageText: 'Rows per page:',
-              rangeSeparatorText: 'of',
-              noRowsPerPage: false,
-              //selectAllRowsItem: true,
-              //selectAllRowsItemText: 'All',
-            }}
-            highlightOnHover
-            fixedHeader
-            fixedHeaderScrollHeight="500px"
-            className="react-datatable"
-          />
+          <>
+            <LoadingOverlay loading={loading} />
+            <DataTable
+              columns={columns}
+              data={productMaster}
+              pagination
+              paginationServer
+              progressPending={loading}
+              paginationTotalRows={totalRows}
+              onChangeRowsPerPage={handlePerRowsChange}
+              onChangePage={handlePageChange}
+              paginationPerPage={perPage}
+              paginationRowsPerPageOptions={[10, 20, 30, 50]}
+              paginationComponentOptions={{
+                rowsPerPageText: 'Rows per page:',
+                rangeSeparatorText: 'of',
+                noRowsPerPage: false,
+                //selectAllRowsItem: true,
+                //selectAllRowsItemText: 'All',
+              }}
+              highlightOnHover
+              fixedHeader
+              fixedHeaderScrollHeight="500px"
+              className="react-datatable"
+            />
+          </>
         )}
 
         {showUploadTable && !showProductTable && (
-          <DataTable
-            columns={uploadColumn}
-            data={paginatedData}
-            pagination
-            paginationServer
-            progressPending={loading}
-            paginationTotalRows={uploadTotalRows}
-            onChangeRowsPerPage={handlePerRowsChange}
-            onChangePage={handlePageChange}
-            paginationPerPage={10}
-            paginationRowsPerPageOptions={[10, 20, 50]}
-            paginationComponentOptions={{
-              rowsPerPageText: 'Rows per page:',
-              rangeSeparatorText: 'of',
-              noRowsPerPage: false,
-              //selectAllRowsItem: true,
-              //selectAllRowsItemText: 'All',
-            }}
-            highlightOnHover
-            fixedHeader
-            fixedHeaderScrollHeight="400px"
-            className="react-datatable"
-            conditionalRowStyles={rowHighlightStyle}
-            customStyles={{
-              headRow: {
-                style: {
-                  // background: "linear-gradient(to bottom, rgb(159, 13, 162),rgb(82, 179, 187))",
-                  background: "linear-gradient(to right, #701964, #179999)",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  textAlign: "left",
-                  minHeight: "50px",
+          <>
+            <LoadingOverlay loading={loading} />
+            <DataTable
+              columns={uploadColumn}
+              data={paginatedData}
+              pagination
+              paginationServer
+              progressPending={loading}
+              paginationTotalRows={uploadTotalRows}
+              onChangeRowsPerPage={handlePerRowsChange}
+              onChangePage={handlePageChange}
+              paginationPerPage={10}
+              paginationRowsPerPageOptions={[10, 20, 50]}
+              paginationComponentOptions={{
+                rowsPerPageText: 'Rows per page:',
+                rangeSeparatorText: 'of',
+                noRowsPerPage: false,
+                //selectAllRowsItem: true,
+                //selectAllRowsItemText: 'All',
+              }}
+              highlightOnHover
+              fixedHeader
+              fixedHeaderScrollHeight="400px"
+              className="react-datatable"
+              conditionalRowStyles={rowHighlightStyle}
+              customStyles={{
+                headRow: {
+                  style: {
+                    // background: "linear-gradient(to bottom, rgb(159, 13, 162),rgb(82, 179, 187))",
+                    background: "linear-gradient(to right, #701964, #179999)",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    textAlign: "left",
+                    minHeight: "50px",
+                  },
                 },
-              },
-              headCells: {
-                style: {
-                  textAlign: "left",
-                  justifyContent: "flex-start",
-                  fontWeight: "bold",
+                headCells: {
+                  style: {
+                    textAlign: "left",
+                    justifyContent: "flex-start",
+                    fontWeight: "bold",
+                  },
                 },
-              },
-              rows: {
-                style: {
-                  fontSize: "14px",
-                  textAlign: "left",
-                  alignItems: "flex-start",
-                  //  fontFamily: "Arial, Helvetica, sans-serif",
-                  fontFamily: `'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif`,
+                rows: {
+                  style: {
+                    fontSize: "14px",
+                    textAlign: "left",
+                    alignItems: "flex-start",
+                    //  fontFamily: "Arial, Helvetica, sans-serif",
+                    fontFamily: `'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif`,
+                  },
                 },
-              },
-              cells: {
-                style: {
-                  padding: "5px",
-                  textAlign: "left",
-                  justifyContent: "flex-start",
+                cells: {
+                  style: {
+                    padding: "5px",
+                    textAlign: "left",
+                    justifyContent: "flex-start",
+                  },
                 },
-              },
-              pagination: {
-                style: {
-                  border: "1px solid #ddd",
-                  backgroundColor: "#f9f9f9",
-                  color: "#333",
-                  minHeight: "35px",
-                  padding: "5px",
-                  fontSize: "12px",
-                  fontWeight: "bolder",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
+                pagination: {
+                  style: {
+                    border: "1px solid #ddd",
+                    backgroundColor: "#f9f9f9",
+                    color: "#333",
+                    minHeight: "35px",
+                    padding: "5px",
+                    fontSize: "12px",
+                    fontWeight: "bolder",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  },
                 },
-              },
-            }}
-          />
+              }}
+            />
+          </>
         )}
       </div>
       <CustomDialog

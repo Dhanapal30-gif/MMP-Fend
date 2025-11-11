@@ -81,27 +81,27 @@ const PTLOpreator = () => {
         }
     }, [formData.boardserialnumber]);
 
-const handleSubmit = async () => {
-  const payload = filteredData.map(item => ({
-    id: item.id,   // use selectedid if that's your row ID
-  pickingqty: item.availableqty // match backend field
-  }));
+    const handleSubmit = async () => {
+        const payload = filteredData.map(item => ({
+            id: item.id,   // use selectedid if that's your row ID
+            pickingqty: item.availableqty // match backend field
+        }));
 
-//   console.log("payload", payload);
+        //   console.log("payload", payload);
 
-  // send payload to API if needed
-  try {
-    const response = await savePTLSubmit(payload);
-    setSuccessMessage("API success:", response.message)
-    setShowSuccessPopup(true)
-    setShowTable(false)
-    // console.log("API success:", response);
-  } catch (error) {
-    setErrorMessage("Error sending payload:", error)
-    setShowErrorPopup(true)
-    // console.error("Error sending payload:", error);
-  }
-};
+        // send payload to API if needed
+        try {
+            const response = await savePTLSubmit(payload);
+            setSuccessMessage("API success:", response.message)
+            setShowSuccessPopup(true)
+            setShowTable(false)
+            // console.log("API success:", response);
+        } catch (error) {
+            setErrorMessage("Error sending payload:", error)
+            setShowErrorPopup(true)
+            // console.error("Error sending payload:", error);
+        }
+    };
 
 
     return (
@@ -142,8 +142,19 @@ const handleSubmit = async () => {
                             <ComTextFiled
                                 name="SUINo"
                                 value={boardSerialOprion.length}
-                                sx={{ width: 80 }}
+                                sx={{
+                                    width: 80,
+                                    borderRadius: 1,
+                                    '& .MuiInputBase-input': {
+                                        color: 'white',  // input text color
+                                        fontWeight: 'bold',
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: '#09ba64ff',
+                                    },
+                                }}
                             />
+
                         </div>
                     </ThemeProvider>
                 </div>

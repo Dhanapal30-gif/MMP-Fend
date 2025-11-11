@@ -14,6 +14,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const VeendorMaster = () => {
     const [excelUploadData, setExcelUploadData] = useState([]);
@@ -69,7 +70,9 @@ const VeendorMaster = () => {
 
     const handleAccept = (newValue) => {
         if (newValue < podate) {
-            alert("Date must be same as or after PO Date");
+            // alert("Date must be same as or after PO Date");
+            setErrorMessage("Date must be same as or after PO Date")
+            setShowErrorPopup(true);
             setValue(null);
         } else {
             setValue(newValue);
@@ -156,7 +159,9 @@ const VeendorMaster = () => {
         };
 
         reader.onerror = (error) => {
-            console.error("File read error:", error);
+            setErrorMessage("File read error:", error)
+            setShowErrorPopup(true)
+            // console.error("File read error:", error);
         };
     };
 
@@ -257,9 +262,9 @@ const VeendorMaster = () => {
             setHandleSubmitButton(true);
         }
     };
-    useEffect(() => {
-        console.log("setSelectedRows:", selectedRows); // Logs the updated state
-    }, [selectedRows]);
+    // useEffect(() => {
+    //     console.log("setSelectedRows:", selectedRows); // Logs the updated state
+    // }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
         setFormData({ vendorCode: "", vendorName: "", country: "" });
@@ -294,7 +299,7 @@ const VeendorMaster = () => {
     const columns = [
         {
             name: (
-                <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+                <div style={{ textAlign: 'center', marginLeft: '10px' }}>
                     <label>Select</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
@@ -419,7 +424,9 @@ const VeendorMaster = () => {
             const response = await getVenodtMaster();
             setVendorMaster(response.data);
         } catch (error) {
-            console.error("Error fetching vendors", error);
+            setErrorMessage("Error fetching vendors", error);
+            setShowErrorPopup(true)
+            // console.error("Error fetching vendors", error);
         } finally {
             setLoading(false);
         }
@@ -448,9 +455,9 @@ const VeendorMaster = () => {
     const handleUpdate = (e, id) => {
         e.preventDefault();
         if (!valiDate()) return;
-        setIsLoading(true)
+        setLoading(true)
         const modifiedby = sessionStorage.getItem("userName") || "System";
-        console.log("e", e)
+        // console.log("e", e)
         const updateFormData = {
             ...formData,
             id,
@@ -487,7 +494,7 @@ const VeendorMaster = () => {
                     setShowErrorPopup(true);
                 }
             }).finally(() => {
-                setIsLoading(false);
+                setLoading(false);
             });
     }
     const onDeleteClick = () => {
@@ -499,10 +506,11 @@ const VeendorMaster = () => {
         setConfirmDelete(false);
         setSearchText("");
         setDeletButton(false)
-         setHandleSubmitButton(true)   
-        
+        setHandleSubmitButton(true)
+
     };
     const handleDelete = async () => {
+        setLoading(true)
         try {
             await deleteVendor(selectedRows);
             setSuccessMessage("deleted sucessfully");
@@ -510,16 +518,19 @@ const VeendorMaster = () => {
             fetchVendotMaster();
             setHandleSubmitButton(true);
             setDeletButton(false);
+            setConfirmDelete(false)
         } catch (error) {
             setErrorMessage("Delete error:", error);
             setShowErrorPopup(true);
+        }finally{
+            setLoading(false)
         }
     }
 
     const exportToExcel = (searchText = "") => {
         if (searchText && searchText.trim() !== "") {
             if (!Array.isArray(vendorMaster) || filteredVendors.length === 0) {
-                console.warn("No data to export.");
+                // console.warn("No data to export.");
                 return;
             }
             const sheet = XLSX.utils.json_to_sheet(filteredVendors);
@@ -529,7 +540,7 @@ const VeendorMaster = () => {
 
         } else {
             if (!Array.isArray(vendorMaster) || vendorMaster.length === 0) {
-                console.warn("No data to export.");
+                // console.warn("No data to export.");
                 return;
             }
             const sheet = XLSX.utils.json_to_sheet(vendorMaster);
@@ -624,7 +635,7 @@ const VeendorMaster = () => {
                             <button className='ComCssExcelUploadButton' onClick={handleExcelUpload} disabled={isLoading}>Upload </button>
                         )
                     )}
-                    {deletButton && <button className='ComCssDeleteButton'onClick={onDeleteClick}  >Delete</button>}
+                    {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}  >Delete</button>}
                     <button className='ComCssClearButton' onClick={formClear}>Clear</button>
                 </div>
             </div>
@@ -664,106 +675,112 @@ const VeendorMaster = () => {
                 )}
                 {/* Default table */}
                 {showVendorTable && !showUploadTable && (
+                    <>
+                        <LoadingOverlay loading={loading} />
 
-                    <DataTable
-                        columns={columns}
-                        data={paginatedData}
-                        pagination
-                        paginationServer
-                        progressPending={loading}
-                        paginationTotalRows={totalRows}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onChangePage={handlePageChange}
-                        paginationPerPage={perPage}
-                        paginationDefaultPage={page}
-                        paginationRowsPerPageOptions={[10, 20, 30, 50]}
-                        paginationComponentOptions={{
-                            rowsPerPageText: 'Rows per page:',
-                            rangeSeparatorText: 'of',
-                            noRowsPerPage: false,
-                            //selectAllRowsItem: true,
-                            //selectAllRowsItemText: 'All',
-                        }}
-                        highlightOnHover
-                        fixedHeader
-                        fixedHeaderScrollHeight="500px"
-                        className="react-datatable"
-                    />
+                        <DataTable
+                            columns={columns}
+                            data={paginatedData}
+                            pagination
+                            paginationServer
+                            progressPending={loading}
+                            paginationTotalRows={totalRows}
+                            onChangeRowsPerPage={handlePerRowsChange}
+                            onChangePage={handlePageChange}
+                            paginationPerPage={perPage}
+                            paginationDefaultPage={page}
+                            paginationRowsPerPageOptions={[10, 20, 30, 50]}
+                            paginationComponentOptions={{
+                                rowsPerPageText: 'Rows per page:',
+                                rangeSeparatorText: 'of',
+                                noRowsPerPage: false,
+                                //selectAllRowsItem: true,
+                                //selectAllRowsItemText: 'All',
+                            }}
+                            highlightOnHover
+                            fixedHeader
+                            fixedHeaderScrollHeight="500px"
+                            className="react-datatable"
+                        />
+                    </>
 
                 )}
                 {showUploadTable && !showVendorTable && (
-                    <DataTable
-                        columns={uploadColumns}
-                        data={uploadPaginatedData}
-                        pagination
-                        paginationServer
-                        progressPending={loading}
-                        paginationTotalRows={uploadTotalRows}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onChangePage={handlePageChange}
-                        paginationPerPage={10}
-                        paginationRowsPerPageOptions={[5, 10, 15, 20]}
-                        paginationComponentOptions={{
-                            rowsPerPageText: 'Rows per page:',
-                            rangeSeparatorText: 'of',
-                            noRowsPerPage: false,
-                            selectAllRowsItem: true,
-                            selectAllRowsItemText: 'All',
-                        }}
-                        highlightOnHover
-                        fixedHeader
-                        fixedHeaderScrollHeight="400px"
-                        className="react-datatable"
-                        //conditionalRowStyles={rowHighlightStyle}
-                        customStyles={{
-                            headRow: {
-                                style: {
-                                    background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    minHeight: "50px",
+                    <>
+                        <LoadingOverlay loading={loading} />
+                        <DataTable
+                            columns={uploadColumns}
+                            data={uploadPaginatedData}
+                            pagination
+                            paginationServer
+                            progressPending={loading}
+                            paginationTotalRows={uploadTotalRows}
+                            onChangeRowsPerPage={handlePerRowsChange}
+                            onChangePage={handlePageChange}
+                            paginationPerPage={10}
+                            paginationRowsPerPageOptions={[5, 10, 15, 20]}
+                            paginationComponentOptions={{
+                                rowsPerPageText: 'Rows per page:',
+                                rangeSeparatorText: 'of',
+                                noRowsPerPage: false,
+                                selectAllRowsItem: true,
+                                selectAllRowsItemText: 'All',
+                            }}
+                            highlightOnHover
+                            fixedHeader
+                            fixedHeaderScrollHeight="400px"
+                            className="react-datatable"
+                            //conditionalRowStyles={rowHighlightStyle}
+                            customStyles={{
+                                headRow: {
+                                    style: {
+                                        background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: "14px",
+                                        textAlign: "center",
+                                        minHeight: "50px",
+                                    },
                                 },
-                            },
-                            rows: {
-                                style: {
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    alignItems: "center",
-                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                rows: {
+                                    style: {
+                                        fontSize: "14px",
+                                        textAlign: "center",
+                                        alignItems: "center",
+                                        fontFamily: "Arial, Helvetica, sans-serif",
+                                    },
                                 },
-                            },
-                            cells: {
-                                style: {
-                                    padding: "5px",
-                                    justifyContent: "center",
+                                cells: {
+                                    style: {
+                                        padding: "5px",
+                                        justifyContent: "center",
+                                    },
                                 },
-                            },
-                            headCells: {
-                                style: {
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "left",
-                                    textAlign: "left",
+                                headCells: {
+                                    style: {
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "left",
+                                        textAlign: "left",
+                                    },
                                 },
-                            },
-                            pagination: {
-                                style: {
-                                    border: "1px solid #ddd",
-                                    backgroundColor: "#f9f9f9",
-                                    color: "#333",
-                                    minHeight: "35px",
-                                    padding: "5px",
-                                    fontSize: "12px",
-                                    fontWeight: "bolder",
-                                    display: "flex",
-                                    justifyContent: "flex-end",
-                                    alignItems: "center",
+                                pagination: {
+                                    style: {
+                                        border: "1px solid #ddd",
+                                        backgroundColor: "#f9f9f9",
+                                        color: "#333",
+                                        minHeight: "35px",
+                                        padding: "5px",
+                                        fontSize: "12px",
+                                        fontWeight: "bolder",
+                                        display: "flex",
+                                        justifyContent: "flex-end",
+                                        alignItems: "center",
+                                    },
                                 },
-                            },
-                        }}
-                    />
+                            }}
+                        />
+                    </>
                 )}
             </div>
             <CustomDialog

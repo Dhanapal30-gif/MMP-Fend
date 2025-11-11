@@ -99,8 +99,8 @@ const CurencyMaster = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
-        const createdby = sessionStorage.getItem("userName") || "System";
-        const modifiedby = sessionStorage.getItem("userName") || "System";
+        const createdby = sessionStorage.getItem("userId") || "System";
+        const modifiedby = sessionStorage.getItem("userId") || "System";
         const updateFormData = {
             ...formData,
             createdby,
@@ -132,11 +132,11 @@ const CurencyMaster = () => {
         e.preventDefault();
         if (!valiDate()) return;
         //setLoading(true);
-        const updatedby = sessionStorage.getItem('userName') || "System";
+        const modifiedby = sessionStorage.getItem('userId') || "System";
         const updateFormData = {
             ...formData,
             id,
-            updatedby
+            modifiedby
         };
         updateCurrency(id, updateFormData)
             .then((response) => {
@@ -361,7 +361,7 @@ const CurencyMaster = () => {
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Curnecy Master</p>
+                    <p>Currency Master</p>
                 </div>
                 <div className='ProductTexfiled'>
                     <ThemeProvider theme={TextFiledTheme}>
@@ -431,7 +431,7 @@ const CurencyMaster = () => {
             </div>
 
             <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>Curnnecy Detail</h5>
+                <h5 className='ComCssTableName'>Currency Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                     <button className="btn btn-success" onClick={() => exportToExcel(searchText)}>
                         <FaFileExcel /> Export

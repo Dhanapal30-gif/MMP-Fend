@@ -40,6 +40,8 @@ import Returning from './Pages/Returning/Returning';
 import StockTransfer from './Pages/StockTransfer/StockTransfer';
 import NotificationList from './components/Notification/NotificationList';
 import PTLRequest from './Pages/PTLOpreatorRequest/PTLRequest';
+import CompatabilityMaster from './Pages/CompatabilityMaster/CompatabilityMaster';
+import LocalSummaryReport from './Pages/LocalSummaryReport/LocalSummaryReport';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -84,8 +86,9 @@ function App() {
       { name: "Issuance", path: "/issuance" },
       { name: "Returning", path: "/returning" },
       { name: "StockTransfer", path: "/stockTransfer" },
-      { name: "PTL Request", path: "/ptlRequest" }
-
+      { name: "PTL Request", path: "/ptlRequest" },
+      { name: "Compatability Master", path: "/compatabilityMaster" },
+      { name: "LocalSummary Report", path: "/localSummaryReport" }
 
     ];
     try {
@@ -162,6 +165,8 @@ function App() {
           <Route path='/returning' element={<Returning />} />
           <Route path='/stockTransfer' element={<StockTransfer />} />
           <Route path='/ptlRequest' element={<PTLRequest />} />
+          <Route path='/localSummaryReport' element={<LocalSummaryReport />} />
+          <Route path='/compatabilityMaster' element={<CompatabilityMaster />} />
 
           <Route
             path="/receving"

@@ -243,3 +243,15 @@ export const downloadPutaway = (search, putawaystatus) =>
 
 const saveStockApproverTicket = `${url}/ApproverConController/saveStockApprove`
 export const saveStockApproverTickets = (payload) => axios.put(saveStockApproverTicket, payload);
+
+
+const fetchCompatabilityMasterDetail = `${url}/Compatability/fetchRequesterDetail`;
+export const fetchComDetail = (page, size,search) => {
+  return axios.get(fetchCompatabilityMasterDetail, {
+    params: { page, size,search }, // ✅ Pass userId as query param
+  });
+};
+
+const compatability = `${url}/Compatability/saveCompatability`
+export const saveCompatability = (formData) => axios.post(compatability, formData);
+

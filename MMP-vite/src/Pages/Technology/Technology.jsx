@@ -195,6 +195,53 @@ setShowErrorPopup(true);
             rackLocation: "",
         })
     }
+      useEffect(() => {
+            setPage(1);
+        }, [searchText]);
+
+         const filteredData = technologyData.filter(row =>
+        Object.values(row).some(value =>
+            typeof value === "string" && value.toLowerCase().includes(searchText.toLowerCase())
+        )
+    );
+     const paginatedData = filteredData.slice(
+        (page - 1) * perPage,
+        page * perPage
+    );
+     useEffect(() => {
+            setTotalRows(filteredData.length); // important!
+        }, [filteredData]);
+
+const filteredVendors = technologyData.filter(v =>
+        v.sui?.toLowerCase().includes(searchText.toLowerCase()) ||
+        v.partcode?.toLowerCase().includes(searchText.toLowerCase()) ||
+        v.partdescription?.toLowerCase().includes(searchText.toLowerCase()) ||
+        v.racklocation?.toLowerCase().includes(searchText.toLowerCase())
+
+    );
+         const exportToExcel = (searchText = "") => {
+                if (searchText && searchText.trim() !== "") {
+                    if (!Array.isArray(technologyData) || filteredVendors.length === 0) {
+                        // console.warn("No data to export.");
+                        return;
+                    }
+                    const sheet = XLSX.utils.json_to_sheet(filteredVendors);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+                    XLSX.writeFile(workbook, "Technology.xlsx");
+        
+                } else {
+                    if (!Array.isArray(technologyData) || technologyData.length === 0) {
+                        // console.warn("No data to export.");
+                        return;
+                    }
+                    const sheet = XLSX.utils.json_to_sheet(technologyData);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+                    XLSX.writeFile(workbook, "Technology.xlsx");
+                }
+        
+            };
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -206,6 +253,7 @@ setShowErrorPopup(true);
                     < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
                     <button > Excel Format Download </button>
                 </div>
+                
                 <TechnologyTextfIled
                     formData={formData}
                     setFormData={setFormData}
@@ -225,7 +273,7 @@ setShowErrorPopup(true);
             </div>
             {showTable && (
                 <div className='ComCssTable'>
-                    <h5 className='ComCssTableName'>ADD Board</h5>
+                    <h5 className='ComCssTableName'>Technology</h5>
 
                     <TechnologyTable
                         data={tableData}
@@ -247,10 +295,30 @@ setShowErrorPopup(true);
                 </div>
             )}
             <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>ADD Board</h5>
+                <h5 className='ComCssTableName'>Technology</h5>
+ <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                        <button className="btn btn-success" onClick={() => exportToExcel(searchText)}  >
+                            <FaFileExcel /> Export
+                        </button>
 
+                        <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                            <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span
+                                    onClick={() => setSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
+                                    ✖
+                                </span>
+                            )}
+
+                        </div>
+                    
+
+                    </div>
                 <TechnologyDefaultTable
-                    data={technologyData}
+                    data={paginatedData}
                     page={page}
                     perPage={perPage}
                     totalRows={totalRows}

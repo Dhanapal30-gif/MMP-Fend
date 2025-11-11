@@ -21,7 +21,7 @@ const Reworker = () => {
     const [tableData, setTableData] = useState([]);
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [ptlRequestData, setPtlRequestData] = useState([]);
@@ -72,6 +72,7 @@ const Reworker = () => {
                         RequestedQty: item.pickingqty || 0,
                     }));
                     setBoardFetch(fetchBoardDetail);
+                    setTotalRows(fetchBoardDetail.length)
                     //   setBoardFetch(data)
                     fetchData();
                     //   setFormData({ ...formData, ...data[0] });
@@ -97,11 +98,12 @@ const Reworker = () => {
     // };
 
     const handleQtyChange = (id, value) => {
-    const updatedData = boardFetch.map(item =>
-        item.id === id ? { ...item, pickingqty: value } : item
-    );
-    setBoardFetch(updatedData);
-};
+        const updatedData = boardFetch.map(item =>
+            item.id === id ? { ...item, pickingqty: value } : item
+        );
+        setBoardFetch(updatedData);
+    };
+
 
 
     // console.log("boradeedr", boardFetch)
@@ -188,9 +190,9 @@ const Reworker = () => {
     }, []);
 
     // const typeOptions = [...new Set(tableData.map(i => i.type))].map(val => ({ label: val, value: val }));
-const typeOptions = [...new Set(tableData.map(i => i.type).filter(v => v && v.trim() !== ''))]
-  .sort()
-  .map(val => ({ label: val, value: val }));
+    const typeOptions = [...new Set(tableData.map(i => i.type).filter(v => v && v.trim() !== ''))]
+        .sort()
+        .map(val => ({ label: val, value: val }));
 
     const groupOptions = [...new Set(
         tableData.filter(i => i.type === formData.Type).map(i => i.productgroup)
@@ -338,6 +340,7 @@ const typeOptions = [...new Set(tableData.map(i => i.type).filter(v => v && v.tr
                     showErrorPopup={showErrorPopup}
                     setShowErrorPopup={setShowErrorPopup}
                     setErrorMessage={setErrorMessage}
+                    setLoading={setLoading}
                 // formErrors={formErrors} // ✅ Pass this prop
                 // handlePoChange={handlePoChange}
                 // productOptions={productOptions}
@@ -401,12 +404,14 @@ const typeOptions = [...new Set(tableData.map(i => i.type).filter(v => v && v.tr
 
                             <ReworkerTable
                                 data={boardFetch}
-                                page={0}
-                                perPage={10}
-                                totalRows={boardFetch.length}
+                                page={page}
+                                perPage={perPage}
+                                setPerPage={setPerPage}
+                                totalRows={totalRows}
                                 loading={false}
-                                setPage={() => { }}
-                                setPerPage={() => { }}
+                                // setPage={() => { }}
+                                // setPerPage={() => { }}
+                                    setPage={setPage}
                                 handleQtyChange={handleQtyChange}
                                 doneButton={doneButton}
                                 setdoneButton={setdoneButton}

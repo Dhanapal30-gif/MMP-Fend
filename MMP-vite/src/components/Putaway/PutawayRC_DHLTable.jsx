@@ -2,8 +2,6 @@ import React, { useMemo, useState } from "react";
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, TextField } from "@mui/material";
 import CommonAddDataTable from "../../components/Com_Component/CommonAddDataTable";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
-import { fetchpickTicketDetails, saveIssueBatchcodeQty } from "../../Services/Services-Rc";
-
 
 const PutawayRC_DHLTable = ({
     data = [],
@@ -15,158 +13,98 @@ const PutawayRC_DHLTable = ({
     setPerPage,
     setShowErrorPopup,
     setErrorMessage,
-    setShowSuccessPopup,
-    setSuccessMessage,
-    formData,
-    setFormData,
-    fetchPickTicketDetail,
-    ticketNo
+    handleGRNQtyChange,
+    selectedRows1,
+    setSelectedRows1,
 }) => {
 
     const [open, setOpen] = useState(false);
     const [activeRow, setActiveRow] = useState(null);
     const [locationQty, setLocationQty] = useState({}); // {loc1: 5, loc2: 3}
-    const [issuedComments, setIssuedComments] = useState({}); // {loc1: 5, loc2: 3}
-    const [nsn, setNSN] = useState({}); // {loc1: 5, loc2: 3}
 
     const handleOpen = (row) => {
         setActiveRow(row);
-
+        // preload existing values if any
+        const parts = row.location?.split(",") || [];
         const init = {};
-        const initComments = {};
-        const initNSN = {};
-
-        // If savedQty exists, use it as default, else empty string
-        row.batches.forEach(batch => {
-            const savedBatch = row.batchesQty?.find(
-                bq => bq.batchCode === batch.batchCode && bq.location === batch.location
-            );
-            init[batch.location] = savedBatch ? savedBatch.savedQty : "";
-            //   initComments[batch.location] = savedBatch ? savedBatch.issued_comments : "";
-            //   initNSN[batch.location] = savedBatch ? savedBatch.nsn : "";
+        parts.forEach(loc => {
+            init[loc.trim()] = row.putQtyDetails?.[loc.trim()] || "";
         });
-
         setLocationQty(init);
-        // setActiveRow(prev => ({ ...row, batchesQty: [] }));
-        // setIssuedComments(initComments); // new state
-        // setNSN(initNSN);                 // new state
-        // setFormData(prev => ({ ...prev, Comments: row.batchesQty?.[0]?.issued_comments, newSerialNumber: row.batchesQty?.[0]?.nsn || "" }));
-
         setOpen(true);
     };
 
-
-    const handleSave = async () => {
+    const handleSave = () => {
         const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
-        if (activeRow?.requestertype === "Submodule") {
-            const hasSerial = formData.newSerialNumber && formData.newSerialNumber.trim() !== "";
-            if (!hasSerial) {
-                setErrorMessage("Please enter New Serial Number!");
-                setShowErrorPopup(true);
-                return;
-            }
-        }
         if (!hasQty) {
-            // alert("Please enter quantity for at least one location!");
-            setErrorMessage("Please enter quantity for location!")
-            setShowErrorPopup(true)
+            setErrorMessage("Please enter quantity for at least one location!");
+            setShowErrorPopup(true);
             return;
         }
 
-
-        // Prepare payload
-        const payload = Object.keys(locationQty).map(loc => ({
-            location: loc,
-            issueqty: Number(locationQty[loc] || 0),
-            batchcode: activeRow?.batches?.find(b => b.location === loc)?.batchCode || "",
-            partcode: activeRow?.partcode || "",
-            //   issued_comments: formData.Comments,
-            //   nsn: formData.newSerialNumber,
-            rtn: activeRow?.rec_ticket_no || "", // <-- added here
-            createdby: sessionStorage.getItem("userId") || "System",
-            updatedby: sessionStorage.getItem("userId") || "System"
-
-        }));
-
-        console.log("Payload to send:", payload);
-        try {
-            await saveIssueBatchcodeQty(payload); // API call
-            // alert("Submitted successfully!");
-            setSuccessMessage("Submitted successfully!")
-            setShowSuccessPopup(true)
-            // fetchPickTicketDetail();
-            fetchPickTicketDetail(activeRow?.rec_ticket_no);
-            setOpen(false);
-        } catch (error) {
-            console.error("Error submitting payload:", error);
-            alert("Failed to submit. Please try again.");
-        }
-
-        // Call your API here
-        // api.saveLocationQty(payload);
-
+        // update parent
+        handleGRNQtyChange(activeRow.selectedid, "putQtyDetails", locationQty);
+        activeRow.putQtyDetails = { ...locationQty };
         setOpen(false);
     };
 
-
+    const safeData = Array.isArray(data) ? data : [];
 
     const normalizedData = useMemo(() => {
-        return data.map((row) => ({
+        return safeData.map((row, index) => ({
             ...row,
-            batchCode: row.batches?.map((b) => b.batchCode).join(", ") || "",
-            location: row.batches?.map((b) => b.location).join(", ") || "",
-            allocatedQty: row.batches?.map((b) => b.allocatedQty).join(", ") || "",
-            putQty: "", // <-- must exist for column to render
+            id: row.selectedId ?? row.selectedid ?? index, // Use `id`, table expects `id`
+            batchCode: row.batches?.map(b => b.batchCode).join(", ") || "",
+            location: row.batches?.map(b => b.location).join(", ") || "",
+            allocatedQty: row.batches?.map(b => b.allocatedQty).join(", ") || "",
+            putQty: "",
         }));
-    }, [data]);
+    }, [safeData]);
 
-
-
-    // Determine visible fields dynamically
-    const visibleFields = useMemo(() => {
-        if (data.some(row => row.requestertype === "PTL")) {
-            return [
-                "rec_ticket_no",
-                "requestertype",
-                "partcode",
-                "partdescription",
-                "UOM",
-                "componentType",
-                "batchCode",
-                "location",
-                "putQty",
-                "allocatedQty",
-                "approvedQty",
-                // "Comment",
-                "createdby",
-                "createdon",
-                "recordstatus",
-                "approver1"
-            ]; // only fields you want for PTL
+    // SELECT ALL
+    const handleSelectAll1 = (e) => {
+        if (e.target.checked) {
+            setSelectedRows1(normalizedData.map(row => row.id));
         } else {
-            return [
-                "rec_ticket_no",
-                "requestertype",
-                "ordertype",
-                "partcode",
-                "partdescription",
-                "inventory_box_no",
-                "UOM",
-                "componenttype",
-                "approvedQty",
-                "req_qty",
-                "batchCode",
-                "location",
-                "putQty",
-                "allocatedQty",
-                "approvedQty",
-                "recordstatus"
-            ]; // all fields for others
+            setSelectedRows1([]);
         }
-    }, [data]);
+    };
+
+    // SELECT SINGLE ROW
+    const handleSelect1 = (rowId) => {
+        setSelectedRows1(prev => {
+            if (prev.includes(rowId)) {
+                return prev.filter(id => id !== rowId);
+            } else {
+                return [...prev, rowId];
+            }
+        });
+    };
+
+
+    // console.log("selectedRows1:", selectedRows1)
+
 
     const columns = generateColumns({
-        fields: visibleFields,
+        fields: [
+            "rec_ticket_no",
+            "requestertype",
+            "ordertype",
+            "partcode",
+            "partdescription",
+            "inventory_box_no",
+            "UOM",
+            "componenttype",
+            "approvedQty",
+            "req_qty",
+            "batchCode",
+            "location",
+            "putQty",
+            "allocatedQty",
+            "approvedQty",
+            "recordstatus"
+
+        ],
         customConfig: {
             rec_ticket_no: { label: "Request TicketNo" },
             requestertype: { label: "Requester Type" },
@@ -186,6 +124,9 @@ const PutawayRC_DHLTable = ({
             Comment: { label: "Comment" },
             recordstatus: { label: "Status" },
         },
+        selectedRows: selectedRows1,
+        handleSelect: handleSelect1,
+        handleSelectAll: handleSelectAll1,
         customCellRenderers: {
             location: (row) => {
                 if (!row.location) return "";
@@ -216,26 +157,24 @@ const PutawayRC_DHLTable = ({
             },
 
             putQty: (row) => {
+                const isEdit = !!row.putQtyDetails; // true → Edit Qty
+
                 const hasDefaultQty = row.batchesQty?.some(bq => bq.savedQty > 0);
                 return (
-                    // <Button variant="outlined" size="small" onClick={() => handleOpen(row)}>
-                    //     {hasDefaultQty ? "Edit Qty" : "Add Qty"}
-                    // </Button>
-
                     <Button
                         variant="outlined"
                         size="small"
                         onClick={() => handleOpen(row)}
                         sx={{
                             color: "white",
-                            backgroundColor: hasDefaultQty ? "#e96929ff" : "#1bd0a6ff",  // brown for edit, green for add
-                            borderColor: hasDefaultQty ? "brown" : "green",
+                            backgroundColor: isEdit ? "#e96929ff" : "#1bd0a6ff",  // brown for edit, green for add
+                            borderColor: isEdit ? "brown" : "green",
                             "&:hover": {
-                                backgroundColor: hasDefaultQty ? "#8B4513" : "#3ef43eff"
+                                backgroundColor: isEdit ? "#8B4513" : "#3ef43eff"
                             }
                         }}
                     >
-                        {hasDefaultQty ? "Edit Qty" : "Add Qty"}
+                        {isEdit ? "Edit Qty" : "Add Qty"}
                     </Button>
                 );
             }
@@ -255,6 +194,7 @@ const PutawayRC_DHLTable = ({
                 perPage={perPage}
                 onPageChange={setPage}
                 onPerPageChange={setPerPage}
+
             />
 
             <Dialog
@@ -311,11 +251,6 @@ const PutawayRC_DHLTable = ({
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Issue Qty</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Available Qty</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>BatchCode</TableCell>
-                                    {/* {activeRow?.requestertype === "Submodule" && (
-                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>New Serial Number</TableCell>
-                  )}
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }} >Comments</TableCell> */}
-
                                 </TableRow>
                             </TableHead>
 
@@ -343,7 +278,6 @@ const PutawayRC_DHLTable = ({
                                                                 setShowErrorPopup(true);
                                                                 return;
                                                             }
-
                                                             setLocationQty(prev => ({ ...prev, [batch.location]: val }));
                                                         }
                                                     }}
@@ -356,11 +290,9 @@ const PutawayRC_DHLTable = ({
                                                 />
 
                                             </TableCell>
-
                                             <TableCell>{batch.allocatedQty}</TableCell>
                                             <TableCell>{batch.AvailableQty}</TableCell>
                                             <TableCell>{batch.batchCode}</TableCell>
-
                                         </TableRow>
                                     );
                                 })}

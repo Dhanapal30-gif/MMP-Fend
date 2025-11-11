@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import './RcMainStore.css'
-import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, InputLabel } from '@mui/material';
+import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, IconButton, Table, TableBody, TableCell, TableHead, TableRow  } from '@mui/material';
 import { deleteRc, downloadRc, downloadSearchRc, fetchRc, getRcmainMaster, getRcmainMasterFind, saveBulkRcMain, saveMainMaterial, updateRcSrore } from '../../Services/Services';
 import DataTable from "react-data-table-component";
 import * as XLSX from "xlsx";
@@ -11,6 +11,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Add, Remove } from "@mui/icons-material";
 
 const RcMainStore = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -38,6 +39,7 @@ const RcMainStore = () => {
   const [duplicateProducts, setDuplicateProducts] = useState([]);
   const [size, setSize] = useState(10); // Your size control
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [rackRows, setRackRows] = useState([{ racklocation: "" }]);
 
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -77,13 +79,19 @@ const RcMainStore = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
+const handleLocationChange = (index, value) => {
+    const updatedRows = [...rackRows];
+    updatedRows[index].racklocation = value;
+    setRackRows(updatedRows);
+  };
   const formClear = () => {
     setFormData({
       partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '',
       createdby: '', modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '',
       TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
     });
+      setRackRows([{ racklocation: "" }]); 
+
     setFormErrors("");
     setFileInputKey(Date.now());
     setExcelUploadData([]);
@@ -105,10 +113,14 @@ const RcMainStore = () => {
     if (!valiDate()) return;
     const createdby = sessionStorage.getItem("userName") || "System";
     const modifiedby = sessionStorage.getItem("userName") || "System";
+      const racklocationPayload = rackRows.map(row => row.racklocation).filter(Boolean).join(',');
+
     const updatedFormData = {
       ...formData,
       createdby,
       modifiedby,
+          racklocation: racklocationPayload,  // <- updated here
+
     };
 
     // console.log("updatedFormData", updatedFormData);
@@ -205,7 +217,7 @@ const RcMainStore = () => {
       const parsedData = XLSX.utils.sheet_to_json(worksheet);
 
       if (!parsedData || parsedData.length === 0) {
-        setErrorMessage("NNo data found in the uploaded file");
+        setErrorMessage("No data found in the uploaded file");
         setShowErrorPopup(true);
         event.target.value = null;
         exceluploadClear();
@@ -220,7 +232,9 @@ const RcMainStore = () => {
     };
 
     reader.onerror = (error) => {
-      console.error("File read error:", error);
+      // console.error("File read error:", error);
+      setErrorMessage("File read error:", error);
+        setShowErrorPopup(true);
     };
   };
 
@@ -501,11 +515,13 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
 
   const excelUpload = (e) => {
     e.preventDefault();
-
+    
     const errors = [];
     excelUploadData.slice(1).forEach((row) => {
       if (!row.partcode || row.partcode.trim() === "") {
-        errors.push("partcode  is required");
+        setErrorMessage("PartCode is Required");
+        setShowErrorPopup(true);
+        // errors.push("partcode  is required");
       }
     });
 
@@ -523,12 +539,16 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
       modifiedby,
     }))
     // console.log("Final Payload for Bulk Upload:", updatedFormData);
+    setLoading(true)
     saveBulkRcMain(updatedFormData)
       .then(() => {
-        setSuccessMessage("Master data added successfully."); // Set dynamic message
+        setSuccessMessage("Master Data Added Successfully."); // Set dynamic message
         setShowSuccessPopup(true);  // Show popup
         setShowUploadTable(false);
-
+        setShowRcTable(true)
+        setExcelUploadData([]);
+         fetchMainMaster(page, perPage);
+         setSearchText("");
       })
       .catch((error) => {
         if (error.response) {
@@ -550,7 +570,9 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
           setErrorMessage("Network error, please try again");
           setShowErrorPopup(true);
         }
-      });
+      }).finally(()=>{
+        setLoading(false)
+      })
   }
 
   const rowHighlightStyle = [
@@ -592,7 +614,9 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
         // console.log("data.content", data.content)
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        // console.error("Error fetching data:", error);
+         setErrorMessage("Error fetching data:", error);
+      setShowErrorPopup(true);
       })
       .finally(() => {
         setLoading(false);
@@ -610,7 +634,9 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
         // console.log("data.content", data.content)
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        // console.error("Error fetching data:", error);
+          setErrorMessage("Error fetching data:", error);
+      setShowErrorPopup(true);
       })
       .finally(() => {
         setLoading(false);
@@ -658,47 +684,91 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
       setDeletButton(false);
       setHandleSubmitButton(true);
       fetchMainMaster(page, perPage);
+      setConfirmDelete(false)
 
     } catch (error) {
-      console.error("Delete error:", error);
+      // console.error("Delete error:", error);
       setErrorMessage("Delete error: " + (error.message || "Something went wrong"));
       setShowErrorPopup(true);
     }
   };
 
+  // const handleEdit = (row) => {
+  //   setFormData(row); // or whatever sets the data
+  //   formRef.current?.scrollIntoView({ behavior: "smooth" });
+  //   setFormData({
+  //     id: row.id || "",
+  //     partcode: row.partcode || "",
+  //     partdescription: row.partdescription || "",
+  //     rohsstatus: row.rohsstatus || "", racklocation: row.racklocation || "",
+  //     msdstatus: row.msdstatus || "", technology: row.technology || "",
+  //     quantity: row.quantity || "", UOM: row.UOM || "",
+  //     AFO: row.AFO || "", ComponentUsage: row.ComponentUsage || "",
+  //     TYC: row.TYC || "", TLT: row.TLT || "", MOQ: row.MOQ || "",
+  //     TRQty: row.TRQty || "", POSLT: row.POSLT || "",
+  //     BG: row.BG || "", expdateapplicable: row.expdateapplicable || "",
+  //     shelflife: row.shelflife || "",
+
+  //   });
+  //   setHandleSubmitButton(false);
+  //   setHandleUpdateButton(true);
+  //   setHandleUploadButton(false);
+  //   setDeletButton(false);
+  //   setSelectedRows([]);
+  // }
+
+
   const handleEdit = (row) => {
-    setFormData(row); // or whatever sets the data
     formRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    // Convert comma-separated locations into rackRows array
+    const initialRackRows = row.racklocation
+        ? row.racklocation.split(",").map(loc => ({ racklocation: loc }))
+        : [{ racklocation: "" }];
+
+    setRackRows(initialRackRows);
+
     setFormData({
       id: row.id || "",
       partcode: row.partcode || "",
       partdescription: row.partdescription || "",
-      rohsstatus: row.rohsstatus || "", racklocation: row.racklocation || "",
-      msdstatus: row.msdstatus || "", technology: row.technology || "",
-      quantity: row.quantity || "", UOM: row.UOM || "",
-      AFO: row.AFO || "", ComponentUsage: row.ComponentUsage || "",
-      TYC: row.TYC || "", TLT: row.TLT || "", MOQ: row.MOQ || "",
-      TRQty: row.TRQty || "", POSLT: row.POSLT || "",
-      BG: row.BG || "", expdateapplicable: row.expdateapplicable || "",
-      shelflife: row.shelflife || "",
-
+      rohsstatus: row.rohsstatus || "",
+      msdstatus: row.msdstatus || "",
+      technology: row.technology || "",
+      quantity: row.quantity || "",
+      UOM: row.UOM || "",
+      AFO: row.AFO || "",
+      ComponentUsage: row.ComponentUsage || "",
+      TYC: row.TYC || "",
+      TLT: row.TLT || "",
+      MOQ: row.MOQ || "",
+      TRQty: row.TRQty || "",
+      POSLT: row.POSLT || "",
+      BG: row.BG || "",
+      expdateapplicable: row.expdateapplicable || "",
+      shelflife: row.shelflife || ""
     });
+
     setHandleSubmitButton(false);
     setHandleUpdateButton(true);
     setHandleUploadButton(false);
     setDeletButton(false);
     setSelectedRows([]);
-  }
+};
 
   const handleUpdate = (e, id) => {
     e.preventDefault();
     if (!valiDate()) return;
     setLoading(true);
     const modifiedby = sessionStorage.getItem("userName") || "System";
+      const racklocationPayload = rackRows.map(row => row.racklocation).filter(Boolean).join(',');
+
     const updateFormData = {
       ...formData,
       id,
-      modifiedby
+      modifiedby,
+                racklocation: racklocationPayload,  // <- updated here
+
     }
     updateRcSrore(id, updateFormData)
       .then((response) => {
@@ -740,7 +810,9 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
           link.remove();
         })
         .catch((error) => {
-          console.error("Download failed:", error);
+          // console.error("Download failed:", error);
+          setErrorMessage("Download failed:", error);
+          setShowErrorPopup(true);
         })
         .finally(() => {
           setLoading(false);
@@ -766,7 +838,14 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
         });
     }
   };
+  const addRow = () => {
+    setRackRows([...rackRows, { racklocation: "" }]);
+  };
 
+  const removeRow = (index) => {
+    const updatedRows = rackRows.filter((_, i) => i !== index);
+    setRackRows(updatedRows.length ? updatedRows : [{ racklocation: "" }]); // always at least one row
+  };
   return (
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
@@ -955,7 +1034,7 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
               className='ProductTexfiled-textfield '
             />
-            <TextField
+            {/* <TextField
               id="outlined-basic"
               label="Rack Location"
               variant="outlined"
@@ -966,7 +1045,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               //helperText={formErrors.partcode}
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
               className='ProductTexfiled-textfield '
-            />
+            /> */}
+            
             <TextField
               id="outlined-basic"
               label="Quantity"
@@ -1024,6 +1104,50 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
                 className='ProductTexfiled-textfield '
               />
             )}
+            <div   style={{
+    maxHeight: 180,           // scroll after 3 rows
+    overflowY: "auto",        // vertical scroll
+    border: "1px solid #ccc", // full outer border
+    borderRadius: 4,           // optional rounded corners
+    // padding: 8,               // spacing inside the border
+  }}> {/* Adjust height as needed */}
+  <Table stickyHeader>
+    <TableHead>
+      <TableRow>
+        <TableCell>Rack Location</TableCell>
+        <TableCell>
+          <IconButton onClick={addRow} size="small" color="primary">
+            <Add />
+          </IconButton>
+        </TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {rackRows.map((row, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <TextField
+              label="Rack Location"
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={row.racklocation}
+              onChange={(e) => handleLocationChange(index, e.target.value)}
+            />
+          </TableCell>
+          <TableCell>
+            {rackRows.length > 1 && (
+              <IconButton onClick={() => removeRow(index)} size="small" color="error">
+                <Remove />
+              </IconButton>
+            )}
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</div>
+
           </ThemeProvider>
         </div>
         <div className='ComCssButton9'>

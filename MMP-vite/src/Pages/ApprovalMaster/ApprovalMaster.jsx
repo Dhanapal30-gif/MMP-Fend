@@ -137,8 +137,8 @@ const ApprovalMaster = () => {
             label: (
                 <>
                     Others (
-                    <span style={{ fontSize: "12px", color: "red" }}>
-                        Mechanical Assembly, Raw Material, OGI
+                    <span style={{ fontSize: "12px",fontWeight:'bold', color: "red" }}>
+                          ,Mechanical Assembly, Raw Material, OGI
                     </span>
                     )
                 </>

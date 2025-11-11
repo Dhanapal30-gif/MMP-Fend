@@ -11,7 +11,7 @@
     color: white;
     background-color: #20c9c6;          
     height: 30px;
-    padding: 0 16px;           /* Add horizontal padding instead of fixed width */
+    padding: 0 10px;           /* Add horizontal padding instead of fixed width */
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;  
@@ -20,6 +20,7 @@
     justify-content: center;
     align-items: center;
     font-weight: bold;
+    font-size: 14px;
     /* margin-top: 10px;                 */
     white-space: nowrap;      /* Prevent text wrapping */
 }

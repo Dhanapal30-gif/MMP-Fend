@@ -113,6 +113,7 @@ const ReworkerTextFiled = ({
   setShowErrorPopup,
   setBoardFetch,
   handleChange,
+  setLoading
 }) => {
   const [searchTerm, setSearchTerm] = useState(formData.searchBoardserialNumber || '');
 
@@ -120,6 +121,7 @@ const ReworkerTextFiled = ({
   useEffect(() => {
     const handler = setTimeout(() => {
       if (searchTerm && searchTerm.trim() !== '') {
+        setLoading(true);
         fetchSearchBoard(searchTerm)
           .then((response) => {
             const data = response.data;
@@ -134,6 +136,8 @@ const ReworkerTextFiled = ({
           .catch((error) => {
             setErrorMessage("Error fetching board details.");
             setShowErrorPopup(true);
+          }).finally(()=>{
+            setLoading(false);
           });
       }
     }, 300); // 3 seconds

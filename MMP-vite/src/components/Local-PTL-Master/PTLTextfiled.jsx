@@ -2,6 +2,7 @@ import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import ComTextFiled from '../Com_Component/ComTextFiled'; // adjust path if needed
 import TextFiledTheme from '../Com_Component/TextFiledTheme'; // adjust path if needed
+import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, InputLabel } from '@mui/material';
 
 const PTLTextfiled = ({ formData, handleChange, formErrors }) => {
   return (

@@ -219,6 +219,7 @@ const Receving = () => {
     setSuccessMessage(response.data.message);
     setShowSuccessPopup(true);
     setShowErrorPopup(false);
+      fetchPoNumberData(setPonumber);
 
     setShowRecevingTable(false);
     setPoDetail([]);

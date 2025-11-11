@@ -237,7 +237,7 @@ const Add_Po_Detail = () => {
   useEffect(() => {
     const total = parseFloat(formData.totalvalue) || 0;
     const ccf = parseFloat(formData.ccf) || 0;
-    const euro = total * ccf;
+    const euro = total / ccf;
     setFormData((prev) => ({ ...prev, totalvalueeuro: euro.toFixed(2) }));
   }, [formData.totalvalue, formData.ccf]);
 

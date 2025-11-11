@@ -6,6 +6,7 @@ import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../.
 import { downloadLocalMaster, downloadSearchLocalMaster, getLocalkMasterSearch, getLocalMaster, savePTLStore } from '../../Services/Services_09';
 
 import PTLTable from "../../components/Local-PTL-Master/PTLTable";
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const PTLMaster = () => {
 
@@ -61,6 +62,7 @@ const PTLMaster = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
+        setLoading(true);
 
         const createdby = sessionStorage.getItem("userName") || "System";
         const updatedby = sessionStorage.getItem("userName") || "System";
@@ -92,7 +94,9 @@ const PTLMaster = () => {
                     setErrorMessage,
                     setShowErrorPopup,
                 });
-            });
+            }).finally(()=>{
+                setLoading(false);
+            })
     };
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -119,14 +123,20 @@ const PTLMaster = () => {
     }
 
     const fetchPTLDetail = (page = 1, size = 10) => {
+        setLoading(true);
         getLocalMaster(page - 1, size)
             .then((response) => {
                 setLocalStore(response.data.content || []);
                 setTotalRows(response.data.totalElements || 0);
                 // console.log('fetchPodetail', response.data);
-            })
-    }
+            }).catch((error) => {
+      console.error("Error fetching PTL details:", error);
+    })
+    .finally(() => setLoading(false)); // ✅ stop loading after completion
+};
+    
  const fetchfindSearch = ( page = 1, size = 10, search = "") => {
+    setLoading(true);
             getLocalkMasterSearch(page - 1, size,  search)
                 .then((response) => {
                     if (response?.data?.content) {
@@ -138,7 +148,9 @@ const PTLMaster = () => {
                 })
                 .catch((error) => {
                     console.error("Error fetching search data:", error);
-                });
+                }).finally(() =>{
+                    setLoading(false);
+                })
         };
     const handleEdit = (row) => {
         setFormData({ ...row });
@@ -248,6 +260,8 @@ const PTLMaster = () => {
                     </div>
 
                 </div>
+                <LoadingOverlay loading={loading} />
+                
                 <PTLTable
                     data={localStore}
                     page={page}
