@@ -58,7 +58,7 @@ const Requester = () => {
     ];
     const requestTypeOption = [
         { label: "Submodule", value: "Submodule" },
-        { label: "others", value: "others" },
+        { label: "Others", value: "Others" },
         { label: "ThermalGel", value: "ThermalGel" },
     ];
 
@@ -382,31 +382,65 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
 
         // setShowTable(true);
     }
-    const formClear = () => {
-        setFormData(prev => {
-            // console.log("isFrozen in formClear:", isFrozen);
-            if (isFrozen == true) {
-                // preserve frozen fields like productName and productGroup
-                return {
-                    requestFor: formData.requestFor,
-                    requesterType: formData.requesterType,
-                    orderType: formData.orderType,
-                    productName: prev.productName,
-                    productGroup: prev.productName?.productgroup || "",
-                    productFamily: prev.productFamily || prev.productName?.productfamily || "",
-                    partCode: null, partDescription: null, requestQty: "", compatibilityPartCode: "", faultySerialNumber: "",
-                    faultyUnitModuleSerialNo: "", requestercomments: "",
-                };
-            } else {
-                return {
-                    requestFor: null, requesterType: "", orderType: null, productName: null, productGroup: "", partCode: null,
-                    partDescription: null, requestQty: "", compatibilityPartCode: "", faultySerialNumber: "", faultyUnitModuleSerialNo: "", requestercomments: "",
-                };
-            }
-        });
 
-        setFormErrors({});
-    };
+    const formClearFull = () => {
+    setFormData({
+        requestFor: null,
+        requesterType: "",
+        orderType: null,
+        productName: null,
+        productGroup: "",
+        productFamily: "",
+        partCode: null,
+        partDescription: "",
+        requestQty: "",
+        compatibilityPartCode: "",
+        faultySerialNumber: "",
+        faultyUnitModuleSerialNo: "",
+        requestercomments: "",
+    });
+    setFormErrors({});
+};
+
+    const formClear = () => {
+    setFormData(prev => {
+        if (isFrozen) {
+            return {
+                requestFor: prev.requestFor,        // use prev instead of formData
+                requesterType: prev.requesterType,
+                orderType: prev.orderType,
+                productName: prev.productName,
+                productGroup: prev.productName?.productgroup || "",
+                productFamily: prev.productFamily || prev.productName?.productfamily || "",
+                partCode: null,
+                partDescription: null,
+                requestQty: "",
+                compatibilityPartCode: "",
+                faultySerialNumber: "",
+                faultyUnitModuleSerialNo: "",
+                requestercomments: "",
+            };
+        } else {
+            return {
+                requestFor: "",
+                requesterType: "",
+                orderType: "",
+                productName: null,
+                productGroup: "",
+                partCode: null,
+                partDescription: "",
+                requestQty: "",
+                compatibilityPartCode: "",
+                faultySerialNumber: "",
+                faultyUnitModuleSerialNo: "",
+                requestercomments: "",
+            };
+        }
+    });
+
+    setFormErrors({});
+};
+
 
     useEffect(() => {
         if (tableData.length > 0) {
@@ -459,7 +493,7 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
                 createdby: userName,
                 modifiedby: userName,
             }));
-
+                        setIsFrozen(false);
             saveRequester(updatedFormData)
                 .then((response) => {
                     if (response.status === 200 && response.data) {
@@ -469,11 +503,10 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
                         setTableData([]);
                         setShowTable(false);
                         setIsFrozen(false);
+                        console.log("setIsFrozen",isFrozen)
+
                         fetchRequester()
-                        // formClear();
-                        setFormData({
-                            requestFor: null,
-                        })
+formClearFull();                        
                         // console.log("formdata after submit", formData)
                         // if (typeof handleClear === "function") handleClear();
                     } else {
@@ -495,14 +528,22 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
     });
         }
     };
+// useEffect(() => {
+//     console.log("isFrozen changed:", isFrozen);
+// }, [isFrozen]);
 
-   const fetchRequester = () => {
+ const fetchRequester = async () => {
     setLoading(true);
     const userId = sessionStorage.getItem("userName") || "System";
 
-    fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows)
-      .finally(() => setLoading(false)); // ensures loading is turned off after promise settles
-}
+    try {
+        await fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
+    } catch (err) {
+        console.error("Error fetching putaway data:", err);
+    } finally {
+        setLoading(false);
+    }
+};
 
     // const fetchfindSearch = (page, size, search) => {
     //     setLoading(true)

@@ -1,6 +1,7 @@
 import React from 'react';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns';
+import { FaEdit } from "react-icons/fa";
 
 const formatDateArray = (arr) => {
   if (!arr || !Array.isArray(arr) || arr.length < 6) return "";
@@ -9,7 +10,8 @@ const formatDateArray = (arr) => {
   return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
 };
 
-const fields = ["partcode", "partdescription", "racklocation", "putawayqty", "createdby", "createddate"];
+const fields = [  "Edit",
+"partcode", "partdescription", "racklocation", "putawayqty", "createdby", "createddate"];
 
 const customConfig = {
   partcode: { label: "Part Code" ,width: "10px",},
@@ -28,6 +30,7 @@ const LocalPutawayDetailTable =
   loading,
   setPage,
   setPerPage,
+    onEdit,
 }) => {
       // console.log("data",data)
 
@@ -39,8 +42,19 @@ const LocalPutawayDetailTable =
   }, [data]);
 
 
-  const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
-
+  // const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
+const columns = generateColumns({
+    fields,
+    data: processedData,
+    customConfig,
+    customCellRenderers: {
+      Edit: (row) => (
+        <button className="edit-button" onClick={() => onEdit(row)}>
+          <FaEdit />
+        </button>
+      ),
+    },
+  });
   return (
     <CommonDataTable
       columns={columns}

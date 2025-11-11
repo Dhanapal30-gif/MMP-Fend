@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 // import putawayTextFile from "../../components/LocalPutaway/putawayTextFile";
 import LocalPutawayDetailTable from "../../components/LocalPutaway/LocalPutawayDetailTable";
 import PutawayTextFiled from "../../components/LocalPutaway/PutawayTextFiled";
-
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { downloadLocal, downloadSearchLocal, fetchBoardSerialNumber, fetchproductPtl, fetchPTLPutaway, fetchPutaway, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, getLocalMaster, getLocalPutaway, getLocalPutawaySearch, savePTLRepaier, savePTLRequest, savePTLStore, savePutaway, savePutLocation } from '../../Services/Services_09';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+
 const LocalPutaway = () => {
     const [formData, setFormData] = useState({
         partcode: "",
@@ -39,9 +40,9 @@ const LocalPutaway = () => {
     const [isFilterActive, setIsFilterActive] = useState(false);
     const [responseOk, setResponseOk] = useState(false)
     const [putawayTableData, setPutawayTableData] = useState([])
-      const [downloadDone, setDownloadDone] = useState(false);
-      const [downloadProgress, setDownloadProgress] = useState(null);
-    
+    const [downloadDone, setDownloadDone] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
     // console.log("ptldata", ptldata);
     const handlePoChange = (field, value) => {
         setFormData(prev => ({
@@ -111,16 +112,20 @@ const LocalPutaway = () => {
 
     };
     const fetchData = () => {
+        setLoading(true);
         fetchPTLPutaway()
             .then((response) => {
                 setPTLData(response.data);
             })
             .catch((error) => {
                 // console.error("Error fetching receiving data:", error);
+            }).finally(() => {
+                setLoading(false);
             })
     };
 
     const fetchPutawayDetail = (page = 1, size = 10) => {
+        setLoading(true);
         getLocalPutaway(page - 1, size)
             .then((response) => {
                 setPutawayTableData(response.data.content);
@@ -128,10 +133,13 @@ const LocalPutaway = () => {
             })
             .catch((error) => {
                 // console.error("Error fetching receiving data:", error);
+            }).finally(() => {
+                setLoading(false);
             })
     };
 
     const fetchfindSearch = (page = 1, size = 10, search = "") => {
+        setLoading(true);
         getLocalPutawaySearch(page - 1, size, search)
             .then((response) => {
                 if (response?.data?.content) {
@@ -143,24 +151,41 @@ const LocalPutaway = () => {
             })
             .catch((error) => {
                 console.error("Error fetching search data:", error);
-            });
+            }).finally(() => {
+                setLoading(false);
+            })
     };
     // console.log("putawayTable", putawayTableData)
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const modifiedby = sessionStorage.getItem("userName") || "System";
-        const updatedFormData = {
+        setLoading(true);
+        const modifiedby = sessionStorage.getItem("userId") || "System";
+        let updatedFormData;
+        if(isEditMode){
+      const { modifiedby, createddate, modifieddate, ...rest } = formData;
+
+    updatedFormData = {
+        ...rest,    // <- use rest, not formData
+        id: formData.id,
+    };
+        }else{
+         updatedFormData = {
             ...formData,
             modifiedby,
+            createdby: modifiedby,
         };
+    }
         savePutaway(updatedFormData)
             .then((response) => {
                 // fetchMainMaster(page, perPage);
-              setSuccessMessage(response.data.message || "Masterdata Added Successfully");
-    setShowSuccessPopup(true);
-     formClear();
+                setSuccessMessage(response.data.message || "Masterdata Added Successfully");
+                setShowSuccessPopup(true);
+                formClear();
                 setSubmitButton(false);
+                fetchData();
+                fetchPutawayDetailTable();
+                setsearchText("");
             })
             .catch((error) => {
                 if (error.response) {
@@ -172,7 +197,9 @@ const LocalPutaway = () => {
                         setShowErrorPopup(true);
                     }
                 }
-            });
+            }).finally(() => {
+                setLoading(false);
+            })
     }
 
     const handlePut = (e) => {
@@ -190,7 +217,7 @@ const LocalPutaway = () => {
                 // setSuccessMessage("Masterdata Added Successfully")
                 setSubmitButton(true);
                 setPutButton(false)
-               
+
             })
             .catch((error) => {
                 if (error.response) {
@@ -213,6 +240,8 @@ const LocalPutaway = () => {
     }, [formData.quantity]);
 
     const formClear = () => {
+        setSubmitButton(false);
+        setIsEditMode(false);
         setFormData({
             partcode: "",
             partdescription: "",
@@ -225,33 +254,43 @@ const LocalPutaway = () => {
         setDownloadDone(false);
         setDownloadProgress(null);
         setLoading(true);
-    
+
         const apiCall = search?.trim() !== "" ? downloadSearchLocal : downloadLocal;
-    
+
         apiCall(search, {
-          onDownloadProgress: (progressEvent) => {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setDownloadProgress(percent);
-          },
+            onDownloadProgress: (progressEvent) => {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setDownloadProgress(percent);
+            },
         })
-          .then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", "LocalPutaway.xlsx");
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            setDownloadDone(true);
-          })
-          .catch((error) => {
-            console.error("Download failed:", error);
-          })
-          .finally(() => {
-            setLoading(false);
-            setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
-          });
-      };
+            .then((response) => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "LocalPutaway.xlsx");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setDownloadDone(true);
+            })
+            .catch((error) => {
+                console.error("Download failed:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+                setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
+            });
+    };
+
+   const handleEdit = (row) => {
+    setIsEditMode(true);
+    setFormData({
+        ...row,
+        quantity: row.putawayqty, // map column to formData field
+    });
+    setIsEditMode(true);
+};
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -268,6 +307,7 @@ const LocalPutaway = () => {
                     handleInputChange={handleInputChange}
                     isFrozen={isFrozen}
                     formErrors={formErrors}
+                    isEditMode={isEditMode}
 
                 />
                 <div className="ReworkerButton9">
@@ -276,6 +316,12 @@ const LocalPutaway = () => {
                     {submitButton &&
                         <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
                     }
+                     {isEditMode && (
+
+                        <button className='ComCssUpdateButton' onClick={handleSubmit} >
+                            Update
+                        </button>
+                    )}
                     {formData.quantity &&
                         <button className='ComCssUpdateButton' onClick={handlePut}>Put</button>
                     }
@@ -288,19 +334,19 @@ const LocalPutaway = () => {
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Putaway Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                   <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
-                               {loading
-                                 ? downloadProgress !== null
-                                   ? `Downloading... ${downloadProgress}%`
-                                   : "Downloading..."
-                                 : downloadDone
-                                   ? "✅ Done"
-                                   : (
-                                     <>
-                                       <FaFileExcel /> Export
-                                     </>
-                                   )}
-                             </button>
+                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
+                        {loading
+                            ? downloadProgress !== null
+                                ? `Downloading... ${downloadProgress}%`
+                                : "Downloading..."
+                            : downloadDone
+                                ? "✅ Done"
+                                : (
+                                    <>
+                                        <FaFileExcel /> Export
+                                    </>
+                                )}
+                    </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
@@ -314,6 +360,8 @@ const LocalPutaway = () => {
                         )}
                     </div>
                 </div>
+                <LoadingOverlay loading={loading} />
+
                 <LocalPutawayDetailTable
                     data={putawayTableData}
                     page={page}
@@ -322,6 +370,7 @@ const LocalPutaway = () => {
                     loading={loading}
                     setPage={setPage}
                     setPerPage={setPerPage}
+                    onEdit={handleEdit} // 👈 This is the important line
 
                 />
 

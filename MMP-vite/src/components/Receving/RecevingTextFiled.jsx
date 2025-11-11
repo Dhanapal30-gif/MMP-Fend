@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Autocomplete, TextField } from "@mui/material";
 import DropdownCom from '../../components/Com_Component/DropdownCom'
 import { Flag } from 'lucide-react';
+import ComTextFiled from '../../components/Com_Component/ComTextFiled'; // adjust path if needed
 
 export const RecevingTextFiled = ({
   formData,
@@ -10,48 +11,63 @@ export const RecevingTextFiled = ({
   ponumber,
   onSelectPonumber,
   setPoDetail,
-  setShowRecevingTable 
-  
+  setShowRecevingTable
+
 }) => {
-  
+
   return (
-    
-    <Autocomplete
-      options={ponumber || []}
-      ListboxComponent={DropdownCom}
-      getOptionLabel={(option) => (typeof option === "string" ? option : "")}
-      value={formData.ponumber || ""}
-      onChange={(event, newValue) => {
-        const updatedPo = newValue || "";
-        setFormData((prev) => ({
-          ...prev,
-          ponumber: updatedPo,
-          invoiceNo: "",
-          invoiceDate: "",
-          receivingDate: "",
-          rcBactchCode: "",
-        }));
-        if (!updatedPo) {
-          setPoDetail([]);
-          setFormData({});          // ✅ clear detail
-          setShowRecevingTable(false);  // ✅ hide table
-        } else {
-          setShowRecevingTable(true);
-          if (onSelectPonumber) {
-            onSelectPonumber(updatedPo);
+    <>
+      <Autocomplete
+        options={ponumber || []}
+        ListboxComponent={DropdownCom}
+        getOptionLabel={(option) => (typeof option === "string" ? option : "")}
+        value={formData.ponumber || ""}
+        onChange={(event, newValue) => {
+          const updatedPo = newValue || "";
+          setFormData((prev) => ({
+            ...prev,
+            ponumber: updatedPo,
+            invoiceNo: "",
+            invoiceDate: "",
+            receivingDate: "",
+            rcBactchCode: "",
+          }));
+          if (!updatedPo) {
+            setPoDetail([]);
+            setFormData({});          // ✅ clear detail
+            setShowRecevingTable(false);  // ✅ hide table
+          } else {
+            setShowRecevingTable(true);
+            if (onSelectPonumber) {
+              onSelectPonumber(updatedPo);
+            }
           }
-        }
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="PO Number"
-          variant="outlined"
-          error={Boolean(formErrors?.ponumber)}
-          helperText={formErrors?.ponumber}
-        />
-      )}
-    />
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="PO Number"
+            variant="outlined"
+            error={Boolean(formErrors?.ponumber)}
+            helperText={formErrors?.ponumber}
+          />
+        )}
+      />
+      <ComTextFiled
+        value={ponumber.length}
+        sx={{
+          width: 80,
+          borderRadius: 1,
+          '& .MuiInputBase-input': {
+            color: 'white',  // input text color
+            fontWeight: 'bold',
+          },
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: '#09ba64ff',
+          },
+        }}
+      />
+    </>
   );
 };
 
@@ -131,7 +147,7 @@ export const RecevingTextFiled9 = ({ formData, setFormData, formErrors }) => (
   <TextField
     type="date"
     variant="outlined"
-        name="invoiceDate"
+    name="invoiceDate"
 
     value={formData.invoiceDate || ""}
     InputLabelProps={{ shrink: true }}
@@ -152,8 +168,8 @@ export const RecevingTextFiled9 = ({ formData, setFormData, formErrors }) => (
         }));
       }
     }}
-    error={Boolean(formErrors?.invoiceDate)}         
-    helperText={formErrors?.invoiceDate || ""}       
+    error={Boolean(formErrors?.invoiceDate)}
+    helperText={formErrors?.invoiceDate || ""}
   />
 );
 

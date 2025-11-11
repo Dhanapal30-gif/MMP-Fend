@@ -212,7 +212,7 @@ const BomMaster = () => {
         const worksheetData = [
             ["partcode", "partdescription", "productname", "productgroup", "productfamily"]
         ];
-       
+
         const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
         const workbook = XLSX.utils.book_new();
@@ -239,7 +239,7 @@ const BomMaster = () => {
         e.preventDefault();
 
         if (!valiDate()) return;
-                        setLoading(true)
+        setLoading(true)
 
         const createdby = sessionStorage.getItem("userName") || "System";
         const updatedby = sessionStorage.getItem("userName") || "System";
@@ -251,7 +251,7 @@ const BomMaster = () => {
         saveBomMaster(updatedFormData)
             .then((response) => {
                 //alert("Product added Successfully");
-                setSuccessMessage("Product added Successfully");
+                setSuccessMessage("Bom Master Created");
                 setShowSuccessPopup(true);
                 formClear();
             })
@@ -365,12 +365,12 @@ const BomMaster = () => {
 
             // Conditional button states based on updated rows
             if (updatedRows.length === 0) {
-                setDeletButton(false); 
-                setHandleSubmitButton(true); 
+                setDeletButton(false);
+                setHandleSubmitButton(true);
                 setHandleUpdateButton(false);
             } else {
-                setDeletButton(true); 
-                setHandleSubmitButton(false); 
+                setDeletButton(true);
+                setHandleSubmitButton(false);
             }
             return updatedRows;
         });
@@ -404,7 +404,7 @@ const BomMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+                <div style={{ textAlign: 'center', marginLeft: '10px' }}>
                     <label>Select</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
@@ -435,7 +435,7 @@ const BomMaster = () => {
             selector: row => row.partdescription,
             wrap: true,
             // width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
-            width:"250px"
+            width: "250px"
         },
         {
             name: "Product Name",
@@ -478,13 +478,15 @@ const BomMaster = () => {
         fetchProduct();
     }, [])
 
-    const fetchBomMaster = (page = 1, size = 10) => {
-        getBoMaster(page - 1, size)
+    const fetchBomMaster = (page = 1, size = 10,search = "") => {
+        setLoading(true)
+        getBoMaster(page - 1, size,search)
             .then((response) => {
                 setBomMaster(response.data.content || []);
                 setTotalRows(response.data.totalElements || 0);
                 // console.log('fetchBomMaster', response.data);
             })
+        .finally(() => setLoading(false)); // ensure loading is reset
     }
 
     const fetchfind = (page = 1, size = 10, search = "") => {
@@ -510,7 +512,7 @@ const BomMaster = () => {
     const fetchData = (page = 1, size = 10, search = "") => {
         // console.log("searchfetch", search);
         if (search && search.trim() !== "") {
-            fetchfind(page, size, search);
+            fetchBomMaster(page, size, search);
 
         } else {
             fetchBomMaster(page, perPage);
@@ -522,15 +524,16 @@ const BomMaster = () => {
         const errors = [];
         excelUploadData.slice(1).forEach((row) => {
             if (!row.productname || row.productname.trim() === "") {
-                errors.push("Product Name is required");
+                setErrorMessage("Product Name is required");
+                setShowErrorPopup(true);
             }
         });
 
         if (errors.length > 0) {
-            alert("Product Name is required");
+            setErrorMessage("Product Name is required");
+            setShowErrorPopup(true);
             return;
         }
-
         const createdby = sessionStorage.getItem("userName") || "System";
         const updatedby = sessionStorage.getItem("userName") || "System";
         const updatedFormData = excelUploadData.map(item => ({
@@ -631,7 +634,7 @@ const BomMaster = () => {
         if (search && search.trim() !== "") {
 
             setLoading(true);
-            downloadSearchBom(search) 
+            downloadSearchBom(search)
                 .then((response) => {
                     const url = window.URL.createObjectURL(new Blob([response.data]));
                     const link = document.createElement("a");
@@ -676,7 +679,7 @@ const BomMaster = () => {
                 </div>
                 <div className='ComCssUpload'>
                     <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
-                    < button  onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
+                    < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
 
                     <button onClick={handleDownloadExcel}> Excel Download </button>
                 </div>
@@ -686,7 +689,7 @@ const BomMaster = () => {
 
                         <Autocomplete
                             disableListWrap
-                            ListboxComponent={DropdownCom} 
+                            ListboxComponent={DropdownCom}
                             options={storeRc}
                             getOptionLabel={(option) => option.partcode}
                             isOptionEqualToValue={(option, value) => option.partcode === value.partcode}
@@ -731,8 +734,8 @@ const BomMaster = () => {
                         <Autocomplete
                             options={storeRc}
                             // disableListWrap
-                            ListboxComponent={DropdownCom} 
-                            PopperComponent={CustomPopper} 
+                            ListboxComponent={DropdownCom}
+                            PopperComponent={CustomPopper}
                             className='ProductTexfiled-textfield '
                             getOptionLabel={(option) => option.partdescription}
                             isOptionEqualToValue={(option, value) => option.partdescription === value.partdescription}
@@ -845,9 +848,9 @@ const BomMaster = () => {
                     {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.intsysid)}>Update</button>}
                     {handleUploadButton && <button className='ComCssExcelUploadButton' onClick={handleExcelUpload}>Upload</button>}
                     {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
-<button className='ComCssClearButton' onClick={formClear}>
-  Clear
-</button>                </div>
+                    <button className='ComCssClearButton' onClick={formClear}>
+                        Clear
+                    </button>                </div>
             </div>
             <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (
@@ -877,11 +880,11 @@ const BomMaster = () => {
                         </div>
                     </div>
                 )}
-                
-                  <LoadingOverlay loading={loading} />
-                
+
+                <LoadingOverlay loading={loading} />
+
                 {showBomTable && !showUploadTable && (
-                    
+
                     <DataTable
                         columns={column}
                         data={bomMaster}
@@ -900,7 +903,7 @@ const BomMaster = () => {
                             // selectAllRowsItem: true,
                             // selectAllRowsItemText: 'All',
                         }}
-                        fixedHeader    
+                        fixedHeader
                         fixedHeaderScrollHeight="400px"
                         highlightOnHover
                         className="react-datatable"
@@ -927,7 +930,7 @@ const BomMaster = () => {
                             // selectAllRowsItem: true,
                             // selectAllRowsItemText: 'All',
                         }}
-                        fixedHeader   
+                        fixedHeader
                         fixedHeaderScrollHeight="400px"
                         highlightOnHover
                         className="react-datatable"
@@ -954,9 +957,9 @@ const BomMaster = () => {
                             },
                             cells: {
                                 style: {
-                                    padding: "5px",  
+                                    padding: "5px",
                                     //textAlign: "center",
-                                    justifyContent: "center",  
+                                    justifyContent: "center",
                                     whiteSpace: 'pre-wrap', // wrap text
                                     wordBreak: 'break-word', // allow breaking words
                                 },
@@ -981,7 +984,7 @@ const BomMaster = () => {
                                     fontSize: "12px",
                                     fontWeight: "bolder",
                                     display: "flex",
-                                    justifyContent: "flex-end", 
+                                    justifyContent: "flex-end",
                                     alignItems: "center",
                                 },
                             },
@@ -995,7 +998,7 @@ const BomMaster = () => {
                 onClose={() => setShowSuccessPopup(false)}
                 title="Success"
                 message={successMessage}
-                 severity="success"
+                severity="success"
                 color="primary"
             />
             <CustomDialog

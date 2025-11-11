@@ -15,7 +15,10 @@
 body {
   font-family: 'Roboto', sans-serif;
 } */
-
+.comTextFiled{
+  font-family: 'Roboto','Helvetica','sans-serif';
+  
+}
 .COMCssContainer {
   min-height: 100vh;
   /* Prevents shrinking but keeps it scrollable */
@@ -62,6 +65,9 @@ body {
 
 .ComCssSubmitButton {
   background-color: rgb(26, 171, 33) !important;
+}
+.ComCssReworkerRequestButton {
+  background-color: rgba(125, 9, 110, 0.263) !important;
 }
 .ComCssRequesterApproveButton {
   background-color: rgb(26, 171, 33) !important;
@@ -269,6 +275,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
   justify-content: center;
   align-items: center;
   font-weight: bold;
+      font-size: 14px;
   margin-top: 10px;
 
 }

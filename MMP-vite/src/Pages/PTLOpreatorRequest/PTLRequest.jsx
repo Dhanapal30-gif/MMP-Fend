@@ -148,6 +148,7 @@ const PTLRequest = () => {
                     setShowSuccessPopup(true);
                     setTableData([]);
                     setShowTable(false);
+                    fetchRequestDetails()
                     // setIsFrozen(false);
                     // handleClear();
                     // if (typeof handleClear === "function") handleClear();
