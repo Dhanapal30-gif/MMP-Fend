@@ -80,7 +80,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     }}
                     renderInput={(params) => (
                         <TextField {...params} label="Product Name"
-                          className="comTextFiled"
+                            className="comTextFiled"
                             variant="outlined" size="small"
                             error={Boolean(formErrors?.productname)}
                             helperText={formErrors?.productname || ""}
@@ -90,7 +90,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
 
                 <ComTextFiled
                     label="Product Group"
-                      className="comTextFiled"
+                    className="comTextFiled"
                     name="productGroup"
                     InputLabelProps={{ shrink: true }}
                     value={extraFields.productGroup}
@@ -100,7 +100,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
 
                 <ComTextFiled
                     InputLabelProps={{ shrink: true }}
-                      className="comTextFiled"
+                    className="comTextFiled"
                     label="Product Family"
                     name="productFamily"
                     value={extraFields.productFamily}
@@ -125,7 +125,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     disabled={isFrozen}
                     error={Boolean(formErrors?.boardserialnumber)}
                     helperText={formErrors?.boardserialnumber || ""}
-                      className="comTextFiled"
+                    className="comTextFiled"
                 // inputProps={{ maxLength: 11 }}
 
                 />
@@ -139,8 +139,8 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     disabled={isFrozen}
                     renderInput={(params) => (
 
-                        <TextField {...params} label="Reworker Type" 
-                          className="comTextFiled"
+                        <TextField {...params} label="Reworker Type"
+                            className="comTextFiled"
                             error={Boolean(formErrors?.type)}
                             helperText={formErrors?.type || ""}
                             variant="outlined" size="small" />
@@ -153,13 +153,14 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
 
                         <Autocomplete
                             options={partOptions}
-                            value={formData.partcode || null}  // store full object
+                            // value={formData.partcode || null}  // store full object
+                            value={partOptions.find(opt => opt.value === formData.partcode) || null}
                             getOptionLabel={(option) => option.label || ""}
-                            isOptionEqualToValue={(option, value) => option?.value === value?.value}
+                            // isOptionEqualToValue={(option, value) => option?.value === value?.value}
                             onChange={(e, newValue) => {
                                 setFormData(prev => ({
                                     ...prev,
-                                    partcode: newValue || null,
+                                    partcode: newValue?.value || "",
                                     partdescription: newValue?.partdescription || "",
                                     racklocation: newValue?.racklocation || "",
                                     availableqty: newValue?.availableqty || ""
@@ -193,7 +194,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                             name="racklocation"
                             value={formData.racklocation}
                             InputProps={{ readOnly: true }}
-                              className="comTextFiled"
+                            className="comTextFiled"
                         />
 
                         <ComTextFiled
@@ -201,12 +202,12 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                             name="availableqty"
                             value={formData.availableqty}
                             InputProps={{ readOnly: true }}
-                              className="comTextFiled"
+                            className="comTextFiled"
                         />
 
                         <ComTextFiled
                             label="Pickingqty"
-                              className="comTextFiled"
+                            className="comTextFiled"
                             name="pickingqty"
                             value={formData.pickingqty}
                             onChange={handleChange}
@@ -246,7 +247,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                             <TextField
                                 {...params}
                                 label="SUINo"
-                                  className="comTextFiled"
+                                className="comTextFiled"
                                 variant="outlined"
                                 size="small"
                                 error={Boolean(formErrors?.SUINo)}
@@ -259,7 +260,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     <>
                         <ComTextFiled
                             label="Quantity"
-                              className="comTextFiled"
+                            className="comTextFiled"
                             name="tgquantity"
                             value={formData.tgquantity}
                             onChange={handleChange}
@@ -273,7 +274,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                         <>
                             <TextField
                                 label="Comments"
-                                  className="comTextFiled"
+                                className="comTextFiled"
                                 name="repairercomments"
                                 value={formData.repairercomments}
                                 onChange={handleChange}

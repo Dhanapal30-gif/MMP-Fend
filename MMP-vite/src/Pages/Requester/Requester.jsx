@@ -62,6 +62,12 @@ const Requester = () => {
         { label: "ThermalGel", value: "ThermalGel" },
     ];
 
+    useEffect(() => {
+  if ((formData.requestFor?.value || formData.requestFor) === "Material Request") {
+    handleChange("orderType", "Repair");
+  }
+}, [formData.requestFor]);
+
     const availbleqty = compatibilityData?.[0]?.Availbleqty ?? "0";
     const compAvailbleQty = compatibilityData?.[0]?.compatabilityQty ?? "0";
     // console.log("availbleqtrtyy", availbleqty)

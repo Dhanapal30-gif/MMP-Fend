@@ -8,7 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../../components/Com_Component/TextFiledTheme';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-const Login = () => {
+const Login = ({ setUserId }) => {
     const navigate = useNavigate();
     const [screen,setScreen]=useState([]);
       const [showPassword, setShowPassword] = useState(false);
@@ -63,6 +63,7 @@ const handleSubmit = async (e) => {
         sessionStorage.setItem("userRole", JSON.stringify(data.userrole));
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("userName", data.empName);
+        setUserId(data.empId);
 
         // Fetch screens
         const roleStr = sessionStorage.getItem("userRole");

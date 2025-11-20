@@ -155,7 +155,6 @@ const LocalReport = () => {
                 if (response?.data?.content) {
                     setLocalReportData(response.data.content);
                     setTotalRows(response.data.totalElements || 0);
-                    setLoading(false)
                 } else {
                     console.warn("No content found in response:", response.data);
                 }

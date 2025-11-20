@@ -185,7 +185,7 @@ const Repaier = () => {
         e.preventDefault();
             setLoading(true);
 
-        const userName = sessionStorage.getItem("userName") || "System";
+        const userName = sessionStorage.getItem("userId") || "System";
         let updatedFormData;
 
         if (showTable) {
@@ -424,7 +424,12 @@ const Repaier = () => {
                         setTableData={setTableData}
                     />
                     <div className="ComCssButton9">
+                        {tableData.length !=0 &&
+                        <>
                         <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                     <button className='ComCssClearButton' onClick={handleClear}> Cancel </button>
+                      </>
+                         }
 
                     </div>
                 </div>

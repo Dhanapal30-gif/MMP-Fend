@@ -70,6 +70,8 @@ const Reworker = () => {
                         ...item,
                         selectedid: item.id,   // Use unique id from API
                         RequestedQty: item.pickingqty || 0,
+                        // isFrozen: item.is_ptlrequest === "1"  // freeze if API says 1
+                        // type:item.type
                     }));
                     setBoardFetch(fetchBoardDetail);
                     setTotalRows(fetchBoardDetail.length)
@@ -258,6 +260,7 @@ const Reworker = () => {
                     setShowSuccessPopup(true);
                     setRequestButton(false)
                     setdoneButton(true)
+                    setIsFrozen(true);
                     // setTableData([]);
                     // setShowTable(false);
                     // ✅ only call if it exists
@@ -279,10 +282,12 @@ const Reworker = () => {
 
     const handleSubmit = async () => {
         setLoading(true);
+        const reworkername = sessionStorage.getItem("userName")
 
         const payload = boardFetch.map(item => ({
             id: item.id,   // use selectedid if that's your row ID
-            pickingqty: item.availableqty // match backend field
+            pickingqty: item.availableqty, // match backend field
+            reworkername
         }));
 
         try {
@@ -320,6 +325,18 @@ const Reworker = () => {
             boardserialnumber: "",
         });
     }
+
+    const showRequest =
+        requestButton &&
+        boardFetch.length > 0 &&
+        boardFetch[0].is_ptlrequest === "0" &&
+        (
+            ['Trackchange', 'Reflow'].includes(boardFetch[0]?.type) ||
+            !['Soldring', 'Desoldring'].includes(boardFetch[0]?.type)
+        );
+
+    //  console.log("boardFetch.RequestedQty", boardFetch[1]?.RequestedQty);
+
     // console.log("PTL Request Data:", filteredData.is_ptlrequest);
     return (
         <div className='ComCssContainer'>
@@ -379,7 +396,7 @@ const Reworker = () => {
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Board Detail</h5>
 
-                    {(boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow') ? (
+                    {(boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Trackchange' || boardFetch[0]?.type === 'Reflow' || boardFetch[0]?.type === 'ThermalGEL') ? (
                         <ReworkerTypeBasedhide
                             data={boardFetch}
                             page={0}
@@ -411,7 +428,7 @@ const Reworker = () => {
                                 loading={false}
                                 // setPage={() => { }}
                                 // setPerPage={() => { }}
-                                    setPage={setPage}
+                                setPage={setPage}
                                 handleQtyChange={handleQtyChange}
                                 doneButton={doneButton}
                                 setdoneButton={setdoneButton}
@@ -421,6 +438,7 @@ const Reworker = () => {
                                 setShowSuccessPopup={setShowSuccessPopup}
                                 setRequestButton={setRequestButton}
                                 setSubmitButton={setSubmitButton}
+                                isFrozen={isFrozen}
 
                             />
                         </>
@@ -429,25 +447,35 @@ const Reworker = () => {
 
                     <div className="ReworkerButton9">
 
-                        {
+                        {/* {
                             boardFetch.length > 0 &&
                             (boardFetch[0].is_ptlrequest == 2) && (
                                 <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
                             )
                         }
                         {
+                           
+                            (boardFetch[0]?.type === 'Soldring' || boardFetch[0].is_ptlrequest == 2 || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow') ||   boardFetch[0]?.type === 'Rework' && (
+                                <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
+                            )
+                        } */}
+                        {
                             boardFetch.length > 0 &&
-                            (boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow') && (
+                            (
+                                boardFetch[0].is_ptlrequest == 2 ||
+                                ['Soldring', 'SUI', "RND", 'Desoldring', 'Trackchange', 'Reflow', 'Rework', 'ThermalGEL'].includes(boardFetch[0]?.type)
+                            ) && (
                                 <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
                             )
                         }
+
                         {/* {requestButton &&
                             boardFetch.length > 0 &&
                             (boardFetch[0].is_ptlrequest === null || boardFetch[0].is_ptlrequest === "0") && boardFetch[0]?.type !== 'Soldring' && boardFetch[0]?.type !== 'Desoldring' || boardFetch[0]?.type === 'Track change' || boardFetch[0]?.type === 'Reflow' && (
                                 <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
                             )
                         } */}
-
+                        {/* 
                         {requestButton &&
                             boardFetch.length > 0 &&
                             (
@@ -456,12 +484,15 @@ const Reworker = () => {
                                     boardFetch[0]?.type !== 'Soldring' &&
                                     boardFetch[0]?.type !== 'Desoldring'
                                 ) ||
-                                boardFetch[0]?.type === 'Track change' ||
+                                boardFetch[0]?.type === 'Trackchange' ||
                                 boardFetch[0]?.type === 'Reflow'
                             ) && (
                                 <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
                             )
-                        }
+                        } */}
+                        {showRequest && (
+                            <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
+                        )}
 
                         {boardFetch.some(item => item.checkSubmit === "1") && (
                             <button className='ComCssSubmitButton' onClick={handleSubmit}>

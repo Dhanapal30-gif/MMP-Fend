@@ -4,30 +4,27 @@ import { Client } from "@stomp/stompjs";
 import axios from "axios";
 import { url } from "../../app.config";
 
-export default function NotificationList() {
+export default function NotificationList({ userId }) {
   const [list, setList] = useState([]);
 
   const handleClose = (id) => {
     setList((prev) => prev.filter((n) => n.id !== id));
-    axios
-      .put(`${url}/notifications/notification/close`, { ids: [id] })
-      .catch((err) => console.error(err));
+    axios.put(`${url}/notifications/notification/close`, { ids: [id] }).catch(console.error);
   };
 
   const handleCloseAll = () => {
     setList([]);
-    axios
-      .put(`${url}/notifications/notification/close`)
-      .catch((err) => console.error(err));
+    axios.put(`${url}/notifications/notification/close`).catch(console.error);
   };
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("userId");
+    // const userId = sessionStorage.getItem("userId");
+    if (!userId) return;
 
     fetch(`${url}/notifications/repairNotification?userid=${userId}`)
       .then((res) => res.json())
       .then((data) => setList(data))
-      .catch((err) => console.error(err));
+      .catch(console.error);
 
     const stompClient = new Client({
       brokerURL: null,
@@ -36,10 +33,10 @@ export default function NotificationList() {
       debug: (str) => console.log(str),
       onConnect: () => {
         console.log("Connected as user:", userId);
+
         stompClient.subscribe(`/user/queue/notifications`, (msg) => {
           try {
             const data = JSON.parse(msg.body);
-            console.log("Received:", data);
             setList((prev) => [data, ...prev]);
           } catch (err) {
             console.error(err);
@@ -50,7 +47,6 @@ export default function NotificationList() {
     });
 
     stompClient.activate();
-
     return () => stompClient.deactivate();
   }, []);
 
@@ -60,27 +56,30 @@ export default function NotificationList() {
         position: "fixed",
         bottom: 20,
         right: 20,
-        width: 300,
+        width: 320,
         maxHeight: "80vh",
         overflowY: "auto",
         display: "flex",
         flexDirection: "column-reverse",
-        gap: "5px",
+        gap: "10px",
         zIndex: 1000,
+        fontFamily: "Roboto, sans-serif",
       }}
     >
       {list.length > 10 && (
         <div
+          onClick={handleCloseAll}
           style={{
-            padding: 10,
+            padding: 12,
             background: "#d32f2f",
             color: "#fff",
-            borderRadius: 5,
+            borderRadius: 8,
             cursor: "pointer",
             fontWeight: "bold",
             textAlign: "center",
+            boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
+            transition: "0.3s",
           }}
-          onClick={handleCloseAll}
         >
           Close All
         </div>
@@ -90,30 +89,45 @@ export default function NotificationList() {
         <div
           key={n.id}
           style={{
-            padding: 10,
+            padding: 12,
             background: "#1976d2",
             color: "#fff",
-            borderRadius: 5,
+            borderRadius: 12,
+            boxShadow: "0px 4px 12px rgba(0,0,0,0.3)",
             position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            animation: "fadeIn 0.5s",
           }}
         >
-          <strong>Board: {n.boardSerialNumber}</strong>
-          <div>Reworker: {n.reworkerName}</div>
-          <div>End: {n.endDate}</div>
+          <strong style={{ fontSize: 14 }}>Board: {n.boardSerialNumber}</strong>
+          <span style={{ fontSize: 13 }}>Reworker: {n.reworkerName}</span>
+          <span style={{ fontSize: 12, color: "#eee" }}>End: {n.endDate}</span>
           <span
             onClick={() => handleClose(n.id)}
             style={{
               position: "absolute",
-              top: 5,
-              right: 5,
+              top: 6,
+              right: 8,
               cursor: "pointer",
               fontWeight: "bold",
+              fontSize: 16,
             }}
           >
             ✕
           </span>
         </div>
       ))}
+
+      {/* Fade-in animation */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+          }
+        `}
+      </style>
     </div>
   );
 }

@@ -35,6 +35,7 @@ const HeaderComponents = () => {
     const roleStr = sessionStorage.getItem("userRole") || "[]";
     const role = JSON.parse(roleStr); // now it's an array
     const loginStatus = localStorage.getItem("isLoggedIn") === "true";
+    // let userId = sessionStorage.getItem("userId") || localStorage.getItem("userName") || "";
 
     setEmpName(sessionName);
     setUserRole(role);
@@ -47,10 +48,13 @@ const HeaderComponents = () => {
   };
 
   const handleSignOut = () => {
+        // let userId = sessionStorage.getItem("userId") || localStorage.getItem("userName") || "";
+
     sessionStorage.clear();
     localStorage.clear();
     setIsLoggedIn(false);
     navigate("/");
+    // userId=""
   };
 
   const toggleServicesDropdown = () => {
@@ -114,7 +118,9 @@ const HeaderComponents = () => {
         <div className="header7">
           <div class="header-logo-box"></div>
           <div className="logo-section">
-            <p>NOKIA   </p>
+            {/* <p>NOKIA   </p> */}
+              <img src={Imagee} alt="Nokia Logo" className="logo" />
+
             {/* <img src={Imagee} alt="Logo" className="logo" /> */}
             {/* <span className="logo-text">Mat Man Pro</span> */}
             {/* <div class="logo-text">
@@ -319,8 +325,8 @@ const HeaderComponents = () => {
                   {servicesDropdown && (
                     <ul className="dropdown-menu">
                       {(userRole.includes("Admin") || isScreenAllowed("Local & Individual Report")) && (
-                        <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>localnd individual Report</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>local Report</Link></li>)}
+                        <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Indiviual Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("LocalSummary Report")) && (<li><Link to="/localSummaryReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Summary Report</Link></li>)}
 
