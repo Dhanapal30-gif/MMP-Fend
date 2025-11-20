@@ -22,12 +22,10 @@ const fields = [
   "reworkername",
   "recordstatus",
   "createddate",
-  "startdate",
-  "RepairerComponentReqTime",
-  "componentIssueTime",
-  "enddate",
+  // "startdate",
   "ptl_op_st_date",
   "ptl_op_end_date",
+    "enddate",
   "repairercomments",
   ""
 ];
@@ -45,12 +43,9 @@ const customConfig = {
   reworkername: { label: "Reworker Name" },
   recordstatus: { label: "Status" },
   createddate: { label: "Repair Date",width: "170px" },
-  startdate: { label: "Repairer Intime",width: "170px" },
-  RepairerComponentReqTime: { label: "Repairer Component Req Time",width: "170px" },
-  componentIssueTime: { label: "component Issue Time",width: "170px" },
-    ptl_op_st_date: { label: "PTL Opretaor Start ",width: "170px" },
-  ptl_op_end_date: { label: "PTL Opreator Close",width: "170px" },
-
+    createddate: { label: "Repair Intime",width: "170px" },
+  ptl_op_st_date: { label: "Repairer Component Req Time",width: "170px" },
+  ptl_op_end_date: { label: "component Issue Time",width: "170px" },
   enddate: { label: "Reworker Out Time",width: "170px" },
   repairercomments: { label: "Comments" },
 };

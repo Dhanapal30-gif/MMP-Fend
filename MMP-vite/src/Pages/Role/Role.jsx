@@ -97,13 +97,14 @@ const Role = () => {
     const handleCreate = async () => {
         if (!creationvaliDate()) return;
         const createdby = sessionStorage.getItem("userName") || "System";
-        console.log(formData)
+        // console.log(formData)
         const updatedFormData = { ...formData, createdby };
 
         try {
             const response = await saveRole(updatedFormData);
             setSuccessMessage("Product Updated Successfully");
             setShowSuccessPopup(true);
+            // setAddRole(false);
             setFormData({
                 userrole: "",
             });
@@ -202,7 +203,7 @@ const Role = () => {
     const handleSubmit = async () => {
             if (!valiDate()) return; // ✅ validate first
 
-        console.log("formdaata7", formData7);
+        // console.log("formdaata7", formData7);
         const createdby = sessionStorage.getItem("userName") || "System";
 
         const updatedFormData = {
@@ -268,22 +269,57 @@ await fetchRoleAndScreen();
         },
     };
 
-    const columns = React.useMemo(
+//     const columns = React.useMemo(
+//   () =>
+//     generateColumns({
+//       fields,
+//       customConfig,
+//       customCellRenderers: {
+//         Role_Edit: (row) => (
+//           <button className="edit-button" onClick={() => handleEditClick(row)}>
+//             <FaEdit />
+//           </button>
+//         ),
+//         screenNameSelect: (row) => (
+//           <div>
+//             {row.screenNameSelect?.map((screen, i) => (
+//               <div key={i}>{screen}</div>
+//             ))}
+//           </div>
+//         ),
+//       },
+//     }),
+//   [fields, customConfig, handleEditClick]
+// );
+const columns = React.useMemo(
   () =>
     generateColumns({
       fields,
       customConfig,
       customCellRenderers: {
         Role_Edit: (row) => (
-          <button className="edit-button" onClick={() => handleEditClick(row)}>
+          <button className="edit-button" style={{marginLeft:'10px'}} onClick={() => handleEditClick(row)}>
             <FaEdit />
           </button>
         ),
-        screenNameSelect: (row) => (
+        // Render screenName as separate lines
+        screenName: (row) => (
           <div>
-            {row.screenNameSelect?.map((screen, i) => (
-              <div key={i}>{screen}</div>
-            ))}
+            {row.screenName
+              ? row.screenName.split(",").map((item, i) => (
+                  <div key={i}>{item.trim()}</div>
+                ))
+              : "-"}
+          </div>
+        ),
+        // If you have other fields that may have comma-separated values
+        userrole: (row) => (
+          <div>
+            {row.userrole
+              ? row.userrole.split(",").map((item, i) => (
+                  <div key={i}>{item.trim()}</div>
+                ))
+              : "-"}
           </div>
         ),
       },
@@ -307,7 +343,13 @@ await fetchRoleAndScreen();
             .then((response) => {
                 setSuccessMessage(response.data.message);
                 setShowSuccessPopup(true);
-
+ fetchUserRoleData();
+        fetchScreen();
+        fetchRoleAndScreen();
+        setFormData7({
+             asignUserrole: "",
+        screenNameSelect: ""
+        })
             }).catch((error) => {
                 setLoading(false);
                 if (error.response) {
@@ -323,6 +365,18 @@ await fetchRoleAndScreen();
                 setLoading(false);
             });
     }
+
+
+
+    // Filtered data based on search
+const filteredData = roleAndScreen.filter((row) => {
+  const search = searchText.toLowerCase();
+  return (
+    (row.userrole && row.userrole.toLowerCase().includes(search)) ||
+    (row.screenName && row.screenName.toLowerCase().includes(search))
+  );
+});
+
 
     
     return (
@@ -416,20 +470,10 @@ await fetchRoleAndScreen();
             </div>
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Roles & Screens</h5>
-                {/* <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                                <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
-                                    {loading
-                                        ? downloadProgress !== null
-                                            ? `Downloading... ${downloadProgress}%`
-                                            : "Downloading..."
-                                        : downloadDone
-                                            ? "✅ Done"
-                                            : (
-                                                <>
-                                                    <FaFileExcel /> Export
-                                                </>
-                                            )}
-                                </button>
+                <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                               <button className="btn btn-success" onClick={() => exportToExcel(searchText)}  >
+                                                   <FaFileExcel /> Export
+                                               </button>
                                 <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                                     <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                                         onChange={(e) => setSearchText(e.target.value)}
@@ -442,14 +486,14 @@ await fetchRoleAndScreen();
                                         </span>
                                     )}
                                 </div>
-                            </div> */}
+                            </div>
                             
                 <CommonDataTable
                     columns={columns}
-                    data={roleAndScreen}
+                    data={filteredData}
                     page={page}
                     perPage={perPage}
-                    totalRows={totalRows}
+                    totalRows={filteredData.length}
                     loading={loading}
                     onPageChange={setPage}
                     onPerPageChange={setPerPage}

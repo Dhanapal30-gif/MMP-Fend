@@ -73,7 +73,7 @@ const ReworkerTypeBasedhide = ({
     <div className="ReworkerButton9">
         {row.is_done === "0" || row.is_done === null ? (
             <button
-                style={{ backgroundColor: 'blue', color: 'white' }}
+                style={{ backgroundColor: 'blue',marginTop:'10px', color: 'white' }}
                 onClick={() => handleDone(row.id)}
             >
                 Done

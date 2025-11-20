@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-
 import IssuanceTextFiled from "../../components/Issuance/IssuanceTextFiled";
 import IssuanceShowTable from "../../components/Issuance/IssuanceShowTable";
+import IssuanceTable from "../../components/Issuance/IssuanceTable";
 import { fetchIssueTicketList, fetchpickTicketDetails, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { FaFileExcel, FaBars } from "react-icons/fa";
 
 const Issuance = () => {
 
@@ -43,6 +44,9 @@ const Issuance = () => {
     const [hideDeliverButton, setHideDeliverButton] = useState(false)
     const [hideIssueButton, setHideIssueButton] = useState(false)
     const [loading, setLoading] = useState(false);
+    const [totalRows, setTotalRows] = useState(0);
+    const [searchText, setSearchText] = useState("");
+
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -429,6 +433,31 @@ const Issuance = () => {
         }
     };
 
+
+        // const useDebounce = (value, delay) => {
+        //     const [debouncedValue, setDebouncedValue] = useState(value);
+        //     useEffect(() => {
+        //         const handler = setTimeout(() => setDebouncedValue(value), delay);
+        //         return () => clearTimeout(handler);
+        //     }, [value, delay]);
+        //     return debouncedValue;
+        // };
+    
+        // const debouncedSearch = useDebounce(searchText, 500);
+        // useEffect(() => {
+        //     fetchIssueData(page, perPage, debouncedSearch);
+        // }, [page, perPage, debouncedSearch]);
+    
+    //  const fetchIssueData = async (page, perPage , search = "") => {
+    //     setLoading(true); // start loader
+    //     try {
+    //             await fetchfindSearch(page, perPage, search);
+    //     } catch (err) {
+    //         console.error("Error fetching putaway data:", err);
+    //     } finally {
+    //         setLoading(false); // stop loader after API finishes
+    //     }
+    // };
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -459,7 +488,6 @@ const Issuance = () => {
                         totalRows={tableData.length}
                         // loading={false}
                         loading={loading}
-
                         setPage={setPage}
                         setShowTable={setShowTable}
                         setPerPage={setPerPage}
@@ -496,6 +524,36 @@ const Issuance = () => {
                     </div>
                 </div>
             )}
+            <div className='ComCssTable'>
+                <h5 className='ComCssTableName'>Issued Tickets</h5>
+                <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
+                        <FaFileExcel /> Export </button>
+                    <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                        <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                        />
+                        {searchText && (
+                            <span
+                                onClick={() => setSearchText("")}
+                                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
+                                ✖
+                            </span>
+                        )}
+                    </div>
+                </div>
+                                <LoadingOverlay loading={loading} />
+                  <IssuanceTable
+                    // data={requesterDeatil}
+                    page={page}
+                    perPage={perPage}
+                    totalRows={totalRows}
+                    loading={loading}
+                    setPage={setPage}
+                    setPerPage={setPerPage}
+
+                />
+            </div>
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}

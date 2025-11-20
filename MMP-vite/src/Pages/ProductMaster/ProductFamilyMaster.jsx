@@ -97,7 +97,7 @@ const ProductFamilyMaster = () => {
 
   const handleSubmit = async () => {
     if (!valiDate()) return;
-
+    setLoading(true)
     const createdby = sessionStorage.getItem("userName") || "System";
     const modifiedby = sessionStorage.getItem("userName") || "System";
     const updatedFormData = { ...formData, createdby, modifiedby };
@@ -129,6 +129,8 @@ const ProductFamilyMaster = () => {
         setErrorMessage("Network error, please try again");
       }
       setShowErrorPopup(true);
+    }finally{
+      setLoading(false)
     }
   };
 

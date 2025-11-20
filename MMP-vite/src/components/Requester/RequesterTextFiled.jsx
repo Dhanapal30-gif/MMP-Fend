@@ -97,26 +97,45 @@ const RequesterTextFiled = ({
                 />
 
                 {(formData.requestFor?.value || formData.requestFor) !== "Material Request" ? (
+                    // <Autocomplete
+                    //     options={orderTypeOption}
+                    //     readOnly={isFrozen}
+                    //     // value={
+                    //     //     formData.orderType
+                    //     //         ? { label: formData.orderType, value: formData.orderType }
+                    //     //         : null
+                    //     // }
+                    //     // getOptionLabel={(option) => option.label}
+                    //     // onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
+                    //     value={orderTypeOption.find(o => o.value === formData.orderType) || null}
+                    //     getOptionLabel={(option) => option.label}
+                    //     onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
+                    //     renderInput={(params) => (
+                    //         <TextField {...params}
+                    //             error={Boolean(formErrors?.orderType)}
+                    //             helperText={formErrors?.orderType || ""}
+                    //             label="Order Type" variant="outlined" size="small" />
+                    //     )}
+                    // />
                     <Autocomplete
-                        options={orderTypeOption}
-                        readOnly={isFrozen}
-                        // value={
-                        //     formData.orderType
-                        //         ? { label: formData.orderType, value: formData.orderType }
-                        //         : null
-                        // }
-                        // getOptionLabel={(option) => option.label}
-                        // onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
-                        value={orderTypeOption.find(o => o.value === formData.orderType) || null}
-                        getOptionLabel={(option) => option.label}
-                        onChange={(e, newValue) => handleChange("orderType", newValue ? newValue.value : "")}
-                        renderInput={(params) => (
-                            <TextField {...params}
-                                error={Boolean(formErrors?.orderType)}
-                                helperText={formErrors?.orderType || ""}
-                                label="Order Type" variant="outlined" size="small" />
-                        )}
-                    />
+  options={orderTypeOption}
+  readOnly={isFrozen}
+  value={orderTypeOption.find(o => o.value === formData.orderType) || null}
+  onChange={(e, newValue) => {
+    handleChange("orderType", newValue?.value || "");
+  }}
+  getOptionLabel={(option) => option.label}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Order Type"
+      error={!!formErrors?.orderType}
+      helperText={formErrors?.orderType}
+      size="small"
+    />
+  )}
+/>
+
                 ) : (
                     <TextField
                         label="Order Type"

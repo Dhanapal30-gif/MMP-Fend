@@ -18,7 +18,7 @@ const PTLOpreator = () => {
     const [showTable, setShowTable] = useState(false);
     const [submitButton, setSubmitButton] = useState(true);
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [pickButton, setpickButton] = useState(true);
@@ -84,7 +84,8 @@ const PTLOpreator = () => {
     const handleSubmit = async () => {
         const payload = filteredData.map(item => ({
             id: item.id,   // use selectedid if that's your row ID
-            pickingqty: item.availableqty // match backend field
+            pickingqty: item.availableqty, // match backend field
+            partcode:item.partcode
         }));
 
         //   console.log("payload", payload);
@@ -94,6 +95,7 @@ const PTLOpreator = () => {
             const response = await savePTLSubmit(payload);
             setSuccessMessage("API success:", response.message)
             setShowSuccessPopup(true)
+            fetchData();
             setShowTable(false)
             // console.log("API success:", response);
         } catch (error) {
@@ -131,7 +133,7 @@ const PTLOpreator = () => {
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
-                                        label="Product Name"
+                                        label="Module Serial Number"
                                         variant="outlined"
                                         size="small"
                                     />
@@ -164,13 +166,13 @@ const PTLOpreator = () => {
                 <div className='ComCssTable'>
                     <PTLOpreatoreTable
                         data={filteredData}
-                        page={0}
-                        perPage={10}
+                        page={page}
+                        perPage={perPage}
                         totalRows={filteredData.length}
                         loading={false}
                         handleQtyChange={handleQtyChange}
-                        setPage={() => { }}
-                        setPerPage={() => { }}
+                        setPage={setPage}
+                        setPerPage={setPerPage}
                         pickButton={pickButton}
                         setpickButton={setpickButton}
                         setSuccessMessage={setSuccessMessage}

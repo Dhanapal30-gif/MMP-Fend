@@ -46,6 +46,7 @@ function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const [userId, setUserId] = useState(sessionStorage.getItem("userId") || "");
 
   useEffect(() => {
     const role = sessionStorage.getItem('userRole');
@@ -130,9 +131,11 @@ function App() {
       <div className='App'>
         {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />}
 
-<NotificationList/>
+    {userId && <NotificationList userId={userId} />}
+
+{/* <NotificationList/> */}
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Login setUserId={setUserId} />} />
           <Route path="/createAccount" element={<CreateAccount />} />
           <Route path="/home" element={<HomeComponenet />} />
 
@@ -183,6 +186,7 @@ function App() {
 
       </div>
     </ThemeProvider>
+    
   )
 }
 

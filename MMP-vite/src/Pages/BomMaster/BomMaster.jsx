@@ -348,9 +348,9 @@ const BomMaster = () => {
         }
     };
 
-    useEffect(() => {
-        // console.log("selectedRows", selectedRows);
-    }, [selectedRows]);
+    // useEffect(() => {
+    //     console.log("selectedRows", selectedRows);
+    // }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
         setHandleUpdateButton(false);

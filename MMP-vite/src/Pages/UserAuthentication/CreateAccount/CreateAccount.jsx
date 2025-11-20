@@ -9,6 +9,8 @@ import CustomDialog from "../../../components/Com_Component/CustomDialog";
 import { useLocation } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { updateUserDetail } from '../../../Services/Services_09';
+// import Image from "../../assets/Nokia_9-removebg-preview.png";
+
 const CreateAccount = () => {
   const navigate = useNavigate();
   const [storeProduct, setStoreProduct] = useState([]);
@@ -34,29 +36,52 @@ const CreateAccount = () => {
     productGroup: [],
     productname: []
   });
-  
-useEffect(() => {
-  if (isEdit && storeProduct.length > 0) {
-    const availableGroups = [...new Set(storeProduct.map(item => item.productGroup))]; // unique
-    const availableNames = storeProduct.map(item => item.productName);
 
-    setFormData({
-      ...editFormData,
-      userRole: editFormData.userRole || [],
-      requesterType: editFormData.requesterType || [],
-      requestType: editFormData.requestType || [],
-      productGroup: Array.isArray(editFormData.productGroup)
-        ? editFormData.productGroup.filter(pg => availableGroups.includes(pg))
-        : availableGroups.includes(editFormData.productGroup)
-          ? [editFormData.productGroup]
-          : [],
-      productname: editFormData.productname?.filter(pn => availableNames.includes(pn)) || []
-    });
-  }
-}, [isEdit, editFormData, storeProduct]);
+  // useEffect(() => {
+  //   if (isEdit && storeProduct.length > 0) {
+  //     const availableGroups = [...new Set(storeProduct.map(item => item.productGroup))]; // unique
+  //     const availableNames = storeProduct.map(item => item.productName);
+
+  //     setFormData({
+  //       ...editFormData,
+  //       userRole: editFormData.userRole || [],
+  //       requesterType: editFormData.requesterType || [],
+  //       requestType: editFormData.requestType || [],
+  //       productGroup: Array.isArray(editFormData.productGroup)
+  //         ? editFormData.productGroup.filter(pg => availableGroups.includes(pg))
+  //         : availableGroups.includes(editFormData.productGroup)
+  //           ? [editFormData.productGroup]
+  //           : [],
+  //       productname: editFormData.productname?.filter(pn => availableNames.includes(pn)) || []
+  //     });
+  //   }
+  // }, [isEdit, editFormData, storeProduct]);
+  useEffect(() => {
+    if (isEdit && storeProduct.length > 0) {
+      // unique product groups/names from storeProduct
+      const availableGroups = [...new Set(storeProduct.map(item => item.productGroup))];
+      const availableNames = [...new Set(storeProduct.map(item => item.productName))];
+
+      // convert editFormData.productname to strings if needed
+      const editProductNames = editFormData.productname?.map(p =>
+        typeof p === 'object' ? (p.value || p.label || "").trim() : p.trim()
+      ) || [];
+
+      setFormData(prev => ({
+        ...prev,
+        ...editFormData,
+        productGroup: Array.isArray(editFormData.productGroup)
+          ? editFormData.productGroup.map(pg => pg.trim()).filter(pg => availableGroups.includes(pg))
+          : availableGroups.includes(editFormData.productGroup?.trim())
+            ? [editFormData.productGroup.trim()]
+            : [],
+        productname: editProductNames.filter(pn => availableNames.includes(pn))
+      }));
+    }
+  }, [isEdit, editFormData, storeProduct]);
 
 
-console.log("editFormData",editFormData)
+  console.log("editFormData", editFormData)
 
 
   const [userRoleData, setUserRoleData] = useState([]);
@@ -154,7 +179,9 @@ console.log("editFormData",editFormData)
       CreateAccountUser(updatedFormData)
         .then((response) => {
 
-          alert(response.data.message);
+          // alert(response.data.message);
+          setSuccessMessage(response.data.message)
+          setShowSuccessPopup(true)
           navigate("/");
           setFormData({
             userId: '',
@@ -198,7 +225,9 @@ console.log("editFormData",editFormData)
 
       updateUserDetail(updatedFormData)
         .then((response) => {
-          alert(response.data.message);
+          // alert(response.data.message);
+          setSuccessMessage(response.data.message)
+          setShowSuccessPopup(true)
           navigate("/userDetail");
           setFormData({
             userId: '',
@@ -244,7 +273,7 @@ console.log("editFormData",editFormData)
     getProduct()
       .then((response) => {
         setStoreProduct(response.data);
-        console.log("product", response.data);
+        // console.log("product", response.data);
       })
   }
 
@@ -274,14 +303,27 @@ console.log("editFormData",editFormData)
     setProductName(uniqueGroups);  // store in state
   }, [storeProduct]);
 
-  console.log("productname", productName)
+  // console.log("productname", productName)
 
   return (
     <div className="cretaeBackgroundimgae">
       <div className="form-container">
         <div className="cretaeimgaeuyef"></div>
-        {isEdit ? "Edit Account" : "Create Account"} 
-<form onSubmit={isEdit ? handleUpdate : handleSubmit}>
+        {/* <img src={Image} alt="Nokia Logo" className="logo" /> */}
+        {/* {isEdit ? "Edit Account" : "Create Account"} */}
+       <div>
+  {isEdit ? (
+    <>
+      <span style={{ color: 'blue',fontWeight:'bold' }}>Edit  Account</span>
+    </>
+  ) : (
+    <>
+      <span style={{ color: 'blue',fontWeight:'bold' }}>Create Account</span>
+    </>
+  )}
+</div>
+
+        <form onSubmit={isEdit ? handleUpdate : handleSubmit}>
           <div className="form-grid">
             <div className='ProductTexfiled'>
               <ThemeProvider theme={TextFiledTheme}>
@@ -388,7 +430,7 @@ console.log("editFormData",editFormData)
                     )}
                   />
                 )}
-                {(formData.userRole?.includes("Repairer")) && (
+                {/* {(formData.userRole?.includes("Repairer")) && (
 
                   <Autocomplete
                     multiple
@@ -410,40 +452,114 @@ console.log("editFormData",editFormData)
                       />
                     )}
                   />
+                  
+                )} */}
+                {(formData.userRole?.includes("Repairer")) && (
+
+                  <Autocomplete
+                    multiple
+                    options={productName} // array of strings
+                    getOptionLabel={(option) => option || ""} // <-- important!
+                    value={formData.productname || []}
+                    onChange={(event, newValue) =>
+                      setFormData(prev => ({ ...prev, productname: newValue || [] }))
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Product Name"
+                        name="asignUserrole"
+                        error={Boolean(formErrors.productname)}
+                        helperText={formErrors.productname}
+                        variant="outlined"
+                        size="small"
+                      />
+                    )}
+                    sx={{
+                      "& .MuiAutocomplete-tag": {
+                        maxWidth: "100%",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                      },
+                      "& .MuiAutocomplete-inputRoot": {
+                        maxHeight: "120px",
+                        overflowY: "auto",
+                        width: "589px"
+                      }
+                    }}
+                  />
                 )}
+
               </ThemeProvider>
 
             </div>
-{userRoleData.length > 0 && (
-  <div className="form-field" style={{ width: '100%' }}>
-    <FormLabel component="legend">User Role</FormLabel>
-    <FormGroup row>
-      {userRoleData.map((role) => (
-        <FormControlLabel
-          key={role}
-          control={
-            <Checkbox
-              checked={formData.userRole.includes(role)}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                const updatedRoles = checked
-                  ? [...formData.userRole, role]
-                  : formData.userRole.filter((r) => r !== role);
-                setFormData({ ...formData, userRole: updatedRoles });
-              }}
-              sx={{ '& .MuiSvgIcon-root': { fontSize: 13 } }} // checkbox size if needed
+            {/* {userRoleData.length > 0 && (
+              <div className="form-field" style={{ width: '100%' }}>
+                <FormLabel component="legend" sx={{ color: 'blue' }}>User Role</FormLabel>
+                <FormGroup row>
+                  {userRoleData.map((role) => (
+                    <FormControlLabel
+                      key={role}
+                      control={
+                        <Checkbox
+                          checked={formData.userRole.includes(role)}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const updatedRoles = checked
+                              ? [...formData.userRole, role]
+                              : formData.userRole.filter((r) => r !== role);
+                            setFormData({ ...formData, userRole: updatedRoles });
+                          }}
+                          sx={{ '& .MuiSvgIcon-root': { fontSize: 10 } }} // checkbox size if needed
 
-            />
-          }
-          label={role}
-        />
-      ))}
-    </FormGroup>
-    {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
-  </div>
-)}
+                        />
+                      }
+                      label={role}
+                    />
+                  ))}
+                </FormGroup>
+                {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
+              </div>
+            )} */}
 
-            {/* <div className="form-field" style={{ width: '100%' }}>
+            <ThemeProvider theme={TextFiledTheme}>
+
+              {userRoleData.length > 0 && (
+                <Autocomplete
+                  multiple
+                  options={userRoleData} // array of user roles
+                  getOptionLabel={(option) => option || ""}
+                  value={formData.userRole || []}
+                  onChange={(event, newValue) =>
+                    setFormData(prev => ({ ...prev, userRole: newValue || [] }))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="User Role"
+                      error={Boolean(formErrors.userRole)}
+                      helperText={formErrors.userRole}
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                  sx={{
+                    "& .MuiAutocomplete-tag": {
+                      maxWidth: "100%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    },
+                    "& .MuiAutocomplete-inputRoot": {
+                      maxHeight: "120px",
+                      overflowY: "auto",
+                      width: "589px"
+                    }
+                  }}
+                />
+              )}
+
+
+              {/* <div className="form-field" style={{ width: '100%' }}>
               <FormLabel component="legend">User Role</FormLabel>
               <FormGroup row>
                 {userRoleData.map((role) => (
@@ -467,10 +583,48 @@ console.log("editFormData",editFormData)
               </FormGroup>
               {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
             </div> */}
+              {formData.userRole.includes("Requester") && (
+                <Autocomplete
+                  multiple
+                  options={[
+                    "Material Request",
+                    "Scrap Request",
+                    "Stock Transfer Request",
+                    "Material Request Projects"
+                  ]}
+                  getOptionLabel={(option) => option || ""}
+                  value={formData.requesterType || []}
+                  onChange={(event, newValue) =>
+                    setFormData(prev => ({ ...prev, requesterType: newValue || [] }))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Requester Type"
+                      error={Boolean(formErrors.requesterType)}
+                      helperText={formErrors.requesterType}
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                  sx={{
+                    "& .MuiAutocomplete-tag": {
+                      maxWidth: "100%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    },
+                    "& .MuiAutocomplete-inputRoot": {
+                      maxHeight: "120px",
+                      overflowY: "auto",
+                      width: "589px"
+                    }
+                  }}
+                />
+              )}
 
-            {formData.userRole.includes("Requester") && (
+              {/* {formData.userRole.includes("Requester") && (
               <div className="form-field" style={{ width: '100%' }}>
-                <FormLabel component="legend">Requester Type</FormLabel>
+                <FormLabel component="legend" sx={{ color: 'blue' }}>Requester Type</FormLabel>
                 <FormGroup row>
                   {[
                     "Material Request",
@@ -491,6 +645,8 @@ console.log("editFormData",editFormData)
                               : currentList.filter((r) => r !== reqType);
                             setFormData({ ...formData, requesterType: updated });
                           }}
+                          sx={{ '& .MuiSvgIcon-root': { fontSize: 10 } }} // checkbox size if needed
+
                         />
                       }
                       label={reqType}
@@ -499,13 +655,49 @@ console.log("editFormData",editFormData)
                 </FormGroup>
                 {formErrors.requesterType && <p style={{ color: 'red' }}>{formErrors.requesterType}</p>}
               </div>
-            )}
+            )} */}
+              {formData.requesterType?.includes("Material Request") && (
+                <Autocomplete
+                  multiple
+                  options={["Submodule", "others", "ThermalGel"]}
+                  getOptionLabel={(option) => option || ""}
+                  value={formData.requestType || []}
+                  onChange={(event, newValue) =>
+                    setFormData(prev => ({ ...prev, requestType: newValue || [] }))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Request Type"
+                      error={Boolean(formErrors.requestType)}
+                      helperText={formErrors.requestType}
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                  sx={{
+                    "& .MuiAutocomplete-tag": {
+                      maxWidth: "100%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    },
+                    "& .MuiAutocomplete-inputRoot": {
+                      maxHeight: "120px",
+                      overflowY: "auto",
+                      width: "589px"
+                    }
+                  }}
+                />
+              )}
 
-            {formData.requesterType?.includes("Material Request") && (
+
+
+            </ThemeProvider>
+            {/* {formData.requesterType?.includes("Material Request") && (
               <div className="form-field" style={{ width: '100%' }}>
-                <FormLabel component="legend">Request Type</FormLabel>
+                <FormLabel component="legend" sx={{ color: 'blue' }}>Request Type</FormLabel>
                 <FormGroup row>
-                  {["Submodule", "others","ThermalGel"].map((reqType) => (
+                  {["Submodule", "others", "ThermalGel"].map((reqType) => (
                     <FormControlLabel
                       key={reqType}
                       control={
@@ -519,6 +711,8 @@ console.log("editFormData",editFormData)
                               : currentList.filter((r) => r !== reqType);
                             setFormData({ ...formData, requestType: updated });
                           }}
+                          sx={{ '& .MuiSvgIcon-root': { fontSize: 10 } }} // checkbox size if needed
+
                         />
                       }
                       label={reqType}
@@ -529,13 +723,11 @@ console.log("editFormData",editFormData)
                 {formErrors.requestType && <p style={{ color: 'red' }}>{formErrors.requestType}</p>}
 
               </div>
-            )}
+            )} */}
             {(formData.requestType?.includes("Submodule") || formData.requestType?.includes("others")) && (
 
               <div className='ProductTexfiled'>
                 <ThemeProvider theme={TextFiledTheme}>
-
-
                 </ThemeProvider>
               </div>
             )}
@@ -547,21 +739,22 @@ console.log("editFormData",editFormData)
             {isEdit ? "Edit Account" : "Create Account"}
           </Button>
           {isEdit && (
-  <Button
-    variant="contained"
-    color="secondary"
-    style={{ marginTop: "20px" }}
-    onClick={() => navigate("/userDetail")}
-  >
-    Cancel
-  </Button>
-)}
+            <Button
+              variant="contained"
+              color="secondary"
+              style={{ marginTop: "20px" }}
+              onClick={() => navigate("/userDetail")}
+            >
+              Cancel
+            </Button>
+          )}
 
 
           <div style={{ marginTop: '10px' }}>
+            {!isEdit  &&
             <Link to="/" style={{ textDecoration: 'none', color: 'blue' }}>
               Already have an account? Sign in
-            </Link>
+            </Link>  }
           </div>
         </form>
       </div>

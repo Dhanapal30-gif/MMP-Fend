@@ -212,6 +212,7 @@ const PutawayProcessTable = ({
                 maxWidth={false}
 
                 fullWidth
+                
                 PaperProps={{
                     sx: {
                         width: 900,

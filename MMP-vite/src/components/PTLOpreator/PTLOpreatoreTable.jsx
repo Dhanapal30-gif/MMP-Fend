@@ -23,7 +23,7 @@ const PTLOpreatoreTable = ({
 }) => {
 
   const [pickedRows, setPickedRows] = useState([]);
-const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
+  const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
 
   const columns = generateColumns({
     fields: [
@@ -41,52 +41,110 @@ const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
       "reworkername"
 
     ],
-     customConfig: {
-            type: { label: "Reworker Type" },
-            productname: { label: "Product Name", },
-            partcode: { label: "partCode" },
-    boardserialnumber: { label: "Board Serial Number",  }, // ✅ this works
-            racklocation: { label: "ReackLocation" },
-            availableqty: { label: "Available Qty" },
-            RequestedQty: { label: "Requested Qty" },
-            pickingqty: { label: "Picking Qty" },
-            pickedqty: { label: "Picked Qty" },
-            repairername: { label: "Repairer Name" },
-            reworkername: { label: "Reworker Name" },
+    customConfig: {
+      type: { label: "Reworker Type" },
+      productname: { label: "Product Name", },
+      partcode: { label: "partCode" },
+      boardserialnumber: { label: "Board Serial Number", }, // ✅ this works
+      racklocation: { label: "ReackLocation" },
+      availableqty: { label: "Available Qty" },
+      RequestedQty: { label: "Requested Qty" },
+      pickingqty: { label: "Picking Qty" },
+      pickedqty: { label: "Picked Qty" },
+      repairername: { label: "Repairer Name" },
+      reworkername: { label: "Reworker Name" },
 
 
-        },
-    
+    },
+
+    // customCellRenderers: {
+    //   pickingqty: (formData) => (
+    //     <TextField
+    //       type="number"
+    //       value={editedQty[formData.selectedid] ?? formData.pickingqty ?? ""}
+    //       onChange={(e) => {
+    //         const inputValue = Number(e.target.value);
+    //         const max = Number(row.availableqty || 0);
+    //         if (inputValue <= max) {
+    //           setEditedQty(prev => ({ ...prev, [row.selectedid]: inputValue }));
+    //           handleQtyChange(row.selectedid, inputValue); // update main state too if needed
+    //         }
+    //       }}
+    //       inputProps={{
+    //     min: 0,
+    //     max: row.availableqty,
+    //     style: { width: "80px", textAlign: "center" }
+    //   }}
+    //       className="invoice-input"
+    //     />
+    //   ),
+    //   Pick: (row) => (
+    //     <div className="ReworkerButton9">
+    //       {pickButton && (
+    //         pickedRows.includes(row.id) ? (
+    //           <span style={{ color: 'green', fontWeight: 'bold', }}>Done</span>
+    //         ) : (
+    //           <button
+    //             style={{
+    //               backgroundColor: 'blue',
+    //               color: 'white',
+    //               marginTop: '19px'
+    //             }}
+    //             onClick={() =>
+    //               handlePick(
+    //                 editedQty[row.selectedid] ?? row.pickingqty,
+    //                 row.racklocation,
+    //                 row.partcode,
+    //                 row.partdescription,
+    //                 row.id
+    //               )
+    //             }
+    //           >
+    //             Pick
+    //           </button>
+    //         )
+    //       )}
+
+    //     </div>
+
+    //   )
+    // }
     customCellRenderers: {
-  pickingqty: (formData) => (
-    <TextField
-      type="number"
-      value={editedQty[formData.selectedid] ?? formData.pickingqty ?? ""}
-      onChange={(e) => {
-        const inputValue = Number(e.target.value);
-        const max = Number(row.availableqty || 0);
-        if (inputValue <= max) {
-          setEditedQty(prev => ({ ...prev, [row.selectedid]: inputValue }));
-          handleQtyChange(row.selectedid, inputValue); // update main state too if needed
-        }
-      }}
-      className="invoice-input"
-    />
-  ),
+      pickingqty: (row) => (
+        <TextField
+          type="number"
+          value={editedQty[row.selectedid] ?? row.pickingqty ?? ""}
+          onChange={(e) => {
+            const inputValue = Number(e.target.value);
+            const max = Number(row.availableqty || 0);
+            if (inputValue <= max) {
+              setEditedQty(prev => ({ ...prev, [row.selectedid]: inputValue }));
+              handleQtyChange(row.selectedid, inputValue);
+            }
+          }}
+          inputProps={{
+            min: 0,
+            max: row.availableqty,
+            style: { width: "80px", textAlign: "center" }
+          }}
+          className="invoice-input"
+        />
+      ),
       Pick: (row) => (
         <div className="ReworkerButton9">
           {pickButton && (
             pickedRows.includes(row.id) ? (
-              <span style={{ color: 'green', fontWeight: 'bold', marginTop: '15px ' }}>Done</span>
+              <span style={{ color: 'green', fontWeight: 'bold', marginTop: '20px' }}>Done</span>
             ) : (
               <button
                 style={{
                   backgroundColor: 'blue',
-                  color: 'white'
+                  color: 'white',
+                  marginTop: '19px'
                 }}
                 onClick={() =>
                   handlePick(
-                    row.pickingqty,
+                    editedQty[row.selectedid] ?? row.pickingqty,
                     row.racklocation,
                     row.partcode,
                     row.partdescription,
@@ -98,13 +156,12 @@ const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
               </button>
             )
           )}
-         
         </div>
-        
       )
     }
+
   })
-  
+
   const SECRET_KEY = "1234567890123456"; // same as backend
   const handlePick = (pickingqty, racklocation, partcode, partdescription, rowId) => {
     const formData = [{
@@ -153,10 +210,10 @@ const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
       totalRows={totalRows}
       loading={loading}
       onPageChange={setPage}
-      onRowsPerPageChange={setPerPage}
+      onPerPageChange={setPerPage}
       customStyles={{
-    table: { style: { tableLayout: "auto" } }, // ensures only the wide column expands
-  }}
+        table: { style: { tableLayout: "auto" } }, // ensures only the wide column expands
+      }}
     />
   )
 }
