@@ -279,7 +279,7 @@ const CurencyMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: 'center', }}>
+                <div style={{ textAlign: 'center',marginLeft:"4px" }}>
                     <label>Select All</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}

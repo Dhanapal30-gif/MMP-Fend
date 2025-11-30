@@ -18,30 +18,27 @@ const PTLTable = ({
   formErrors,
   formData,
   handleChange,
-  searchText = ""
+  searchText = "",
+  setDeletButton
 }) => {
 
+   const handleSelect = (rowKey) => {
+    setSelectedRows((prevSelectedRows) => {
+        let newSelected;
+        if (prevSelectedRows.includes(rowKey)) {
+            newSelected = prevSelectedRows.filter((key) => key !== rowKey);
+        } else {
+            newSelected = [...prevSelectedRows, rowKey];
+        }
 
-  const handleSelectAll = () => {
-    if (selectedRows.length === data.length) {
-      setSelectedRows([]); // Unselect all
-    } else {
-      setSelectedRows(data); // Select all
-    }
-  };
-
-  const handleSelect = (row) => {
-    setSelectedRows((prev) => {
-      const exists = prev.find((r) => r.partcode === row.partcode);
-      if (exists) {
-        return prev.filter((r) => r.partcode !== row.partcode);
-      } else {
-        return [...prev, row];
-      }
+        // Update delete button based on selection
+        setDeletButton(newSelected.length > 0);
+        // setAddButton(newSelected.length === 0);
+        // setUpdateButton(newSelected.length ===0);
+        // setSelectedRows([]);
+        return newSelected;
     });
-  };
-
-
+};
   const columns = generateColumns({
     fields: [
       // "select",
@@ -62,7 +59,7 @@ const PTLTable = ({
     data,
     selectedRows,
     handleSelect,
-    handleSelectAll,
+    // handleSelectAll,
     onEdit,
 
     customConfig: {

@@ -8,7 +8,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import DropdownCom from '../../components/Com_Component/DropdownCom'
 import Popper from '@mui/material/Popper';
 
-const TechnologyTextfIled = ({ formData, setFormData, isFrozen,
+const TechnologyTextfIled = ({ formData, setFormData, isFrozen,isEdit,
     typeOptions, ReworkerNameOptions, handleInputChange, nameOptions, serialOptions, localMasterPartcode,
     RepaierNameOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
     const BoardStaus = [
@@ -116,12 +116,13 @@ const TechnologyTextfIled = ({ formData, setFormData, isFrozen,
                     value={localMasterPartcode.find(item => item.partcode === formData.partcode)?.rackLocation || ""}
 
                 />
+                {isEdit && (
                 <ComTextFiled
                     label="Availablity Qty"
                     name="availablityQty"
                     value={localMasterPartcode.find(item => item.availbleQty === formData.availbleQty)?.availbleQty || ""}
 
-                />
+                />)}
                 <ComTextFiled
                     label="Req Qty"
                     name="req_qty"

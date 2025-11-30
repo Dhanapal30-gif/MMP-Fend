@@ -42,6 +42,7 @@ import NotificationList from './components/Notification/NotificationList';
 import PTLRequest from './Pages/PTLOpreatorRequest/PTLRequest';
 import CompatabilityMaster from './Pages/CompatabilityMaster/CompatabilityMaster';
 import LocalSummaryReport from './Pages/LocalSummaryReport/LocalSummaryReport';
+import StockReport from './Pages/StockReport/StockReport';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -89,8 +90,8 @@ function App() {
       { name: "StockTransfer", path: "/stockTransfer" },
       { name: "PTL Request", path: "/ptlRequest" },
       { name: "Compatability Master", path: "/compatabilityMaster" },
-      { name: "LocalSummary Report", path: "/localSummaryReport" }
-
+      { name: "LocalSummary Report", path: "/localSummaryReport" },
+      { name: "StockReport", path: "/stockReport" },
     ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -170,6 +171,7 @@ function App() {
           <Route path='/ptlRequest' element={<PTLRequest />} />
           <Route path='/localSummaryReport' element={<LocalSummaryReport />} />
           <Route path='/compatabilityMaster' element={<CompatabilityMaster />} />
+          <Route path='/stockReport' element={<StockReport />} />
 
           <Route
             path="/receving"

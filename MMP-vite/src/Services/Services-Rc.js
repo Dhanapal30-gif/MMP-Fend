@@ -245,8 +245,8 @@ const saveStockApproverTicket = `${url}/ApproverConController/saveStockApprove`
 export const saveStockApproverTickets = (payload) => axios.put(saveStockApproverTicket, payload);
 
 
-const fetchCompatabilityMasterDetail = `${url}/Compatability/fetchRequesterDetail`;
-export const fetchComDetail = (page, size,search) => {
+const fetchCompatabilityMasterDetail = `${url}/Compatability/fetchcompatabiilityDetail`;
+export const fetchComDetail = (page = 0, size = 10,search) => {
   return axios.get(fetchCompatabilityMasterDetail, {
     params: { page, size,search }, // ✅ Pass userId as query param
   });
@@ -255,3 +255,28 @@ export const fetchComDetail = (page, size,search) => {
 const compatability = `${url}/Compatability/saveCompatability`
 export const saveCompatability = (formData) => axios.post(compatability, formData);
 
+
+const Delete_compatability = `${url}/Compatability/DeleteRecord`;  // Base URL without the id
+export const deleteCompatability = (ids,modifiedby) => {
+  const query = ids.map(intsysid => `intsysid=${intsysid}`).join('&');
+  return axios.delete(`${Delete_compatability}?${query}&modifiedby=${modifiedby}`);
+};
+
+
+
+const Delete_LocalMaster = `${url}/LocalMaster/DeleteRecord`;  // Base URL without the id
+export const deleteLocalMaster = (ids,modifiedby) => {
+  const query = ids.map(intsysid => `intsysid=${intsysid}`).join('&');
+   return axios.delete(`${Delete_LocalMaster}?${query}&modifiedby=${modifiedby}`);
+};
+
+const Delete_LocalPutaway = `${url}/localPutawayCon/DeleteRecord`;  // Base URL without the id
+export const deleteLocalPutaway = (ids,modifiedby) => {
+  const query = ids.map(intsysid => `intsysid=${intsysid}`).join('&');
+   return axios.delete(`${Delete_LocalPutaway}?${query}&modifiedby=${modifiedby}`);
+};
+
+const Get_Issuance = `${url}/IssuacneCon/fetchIssueDetail`;
+export const getIssuanceData = (page = 0, size = 10, search = "") => {
+  return axios.get(Get_Issuance, { params: { page, size, search: search || undefined, }, });
+}

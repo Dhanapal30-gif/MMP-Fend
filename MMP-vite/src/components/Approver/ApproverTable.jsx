@@ -98,7 +98,7 @@ const hideForPTL = [
   "createdon",
   "ordertype"
 ];
-
+ 
 
 const customConfig = {
   rec_ticket_no: { label: "Rec Ticket No" },
@@ -118,10 +118,19 @@ const customConfig = {
   ApprovedL1Qty: { label: "Approved Qty L1" },
   ApprovedL2Qty: { label: "Approved Qty L2" },
   Comment: { label: "Comment", width: "250px" },
-  recordstatus: { label: "Status" },
+  // recordstatus: { label: "Status" },
+  recordstatus: {
+  label: "Status",
+  format: (value) => {
+    if (value === "MSC00003") return "l2_pending";
+    if (value === "MSC00001") return "l1_pending";
+    return value;
+  },
+},
+
   faultySerialNumber: { label: "Faulty Serial Number" },
   ComponentUsage: { label: "Component Usage" },
-  recordstatus: { label: "Status" }
+  // recordstatus: { label: "Status" }
 };
 
 const ApproverTable = ({

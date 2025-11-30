@@ -7,6 +7,7 @@ import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { downloadLocal, downloadSearchLocal, fetchBoardSerialNumber, fetchproductPtl, fetchPTLPutaway, fetchPutaway, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, getLocalMaster, getLocalPutaway, getLocalPutawaySearch, savePTLRepaier, savePTLRequest, savePTLStore, savePutaway, savePutLocation } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { deleteLocalPutaway } from '../../Services/Services-Rc';
 
 const LocalPutaway = () => {
     const [formData, setFormData] = useState({
@@ -43,6 +44,10 @@ const LocalPutaway = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [selectedRows,setSelectedRows]=useState([])
+        const [deletButton, setDeletButton] = useState();
+        const [confirmDelete, setConfirmDelete] = useState(false);
+    
     // console.log("ptldata", ptldata);
     const handlePoChange = (field, value) => {
         setFormData(prev => ({
@@ -291,6 +296,38 @@ const LocalPutaway = () => {
     setIsEditMode(true);
 };
 
+
+  const onDeleteClick = () => {
+        setConfirmDelete(true);
+    };
+    // console.log("fpoprmdata",formData)
+
+    const handleCancel = () => {
+        setSelectedRows([]);
+        setConfirmDelete(false);
+        setDeletButton(false);
+        // setHandleSubmitButton(true)
+
+    };
+
+
+    const handleDelete = async () => {
+            setConfirmDelete(false);
+            try {
+                const modifiedby = sessionStorage.getItem("userId");
+                await deleteLocalPutaway(selectedRows,modifiedby);
+                setSuccessMessage("Data successfullly deleted");
+                setShowSuccessPopup(true);
+                setSelectedRows([]);
+                // setHandleSubmitButton(true);
+                setDeletButton(false);
+                fetchData(page, perPage);
+            } catch (error) {
+                setErrorMessage(`Delete error: ${error?.message || error}`);
+                setShowErrorPopup(true);
+            }
+    
+        }
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -325,6 +362,7 @@ const LocalPutaway = () => {
                     {formData.quantity &&
                         <button className='ComCssUpdateButton' onClick={handlePut}>Put</button>
                     }
+                    {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
 
 
                 </div>
@@ -371,7 +409,9 @@ const LocalPutaway = () => {
                     setPage={setPage}
                     setPerPage={setPerPage}
                     onEdit={handleEdit} // 👈 This is the important line
-
+                    selectedRows={selectedRows}
+                    setSelectedRows={setSelectedRows}
+                    setDeletButton={setDeletButton}
                 />
 
             </div>
@@ -391,6 +431,14 @@ const LocalPutaway = () => {
                 severity="error"
                 color="secondary"
             />
+            <CustomDialog
+                            open={confirmDelete}
+                            onClose={handleCancel}
+                            onConfirm={handleDelete}
+                            title="Confirm"
+                            message="Are you sure you want to delete this?"
+                            color="primary"
+                        />
         </div>
     )
 }

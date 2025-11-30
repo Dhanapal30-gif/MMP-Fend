@@ -152,6 +152,12 @@ const handleLocationChange = (index, value) => {
       errors.partcode = "Please Enter partcode";
       isValid = false;
     }
+     const hasRack = rackRows.some(row => row.racklocation && row.racklocation.trim() !== "");
+  if (!hasRack) {
+    errors.racklocation = "Please enter at least one rack location";
+    isValid = false;
+  }
+
     setFormErrors(errors);
     return isValid; // Now it correctly returns false if any field is empty
   };
@@ -1132,7 +1138,9 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               size="small"
               fullWidth
               value={row.racklocation}
-              onChange={(e) => handleLocationChange(index, e.target.value)}
+              onChange={(e) => handleLocationChange(index, e.target.value)} 
+              error={Boolean(formErrors.racklocation)}      
+              helperText={formErrors.racklocation || ""}   
             />
           </TableCell>
           <TableCell>

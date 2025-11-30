@@ -720,7 +720,8 @@ const Add_Po_Detail = () => {
     setConfirmDelete(false);
 
     try {
-      await deletePoDetail(selectedRows);
+      const modifiedby = sessionStorage.getItem("userId");
+      await deletePoDetail(selectedRows,modifiedby);
       setSuccessMessage("Data successfullly deleted");
       setShowSuccessPopup(true);
       setSelectedRows([]);
@@ -729,12 +730,16 @@ const Add_Po_Detail = () => {
       fetchPoDetail(page, perPage);
       setSearchText("");
     } catch (error) {
-      setErrorMessage("delete error", error);
+       const msg = error.response?.data?.message || "Delete error";
+      setErrorMessage(msg);
       setShowErrorPopup(true);
 
     }
   }
 
+  useEffect(()=>{
+    console.log("selectedRows",selectedRows)
+  },[selectedRows])
   const fetchfind = (page = 1, size = 10, search = "") => {
     setLoading(true);
     getPoDetailFind(page - 1, size, search)

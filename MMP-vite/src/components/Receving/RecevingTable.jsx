@@ -447,11 +447,11 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             width: '130px'
         },
         {
-            name: "currnecyCon factor",
+            name: "CCfactor",
             selector: row => row.ccf,
             wrap: true,
             grow: 2,
-            width: '150px'
+            width: '90px'
         },
         {
             name: "Total Value",

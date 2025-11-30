@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CommonAddDataTable from '../../components/Com_Component/CommonAddDataTable';
-import { generateColumns } from '../../components/Com_Component/generateColumns';
+import { genrerateColoumns1 } from '../../components/Com_Component/genrerateColoumns1';
 import {
     TextField,
     Button,
@@ -86,22 +86,22 @@ const PutawayProcessTable = ({
         });
     };
 
-    const columns = generateColumns({
+    const columns = genrerateColoumns1({
         fields: [
             "recevingTicketNo",
             "partcode",
             "partdescription",
             "UOM",
             "recevingQty",
-            "GRNQty",
+            "grnqty",
             "location",
             "putQty",
             "ponumber",
             "poDate",
             "vendorname",
             "postingdate",
-            "GRNo",
-            "GRNQty",
+            "grno",
+            // "grnqty",
             "Status",
             // "createdon",
             // "showDetail"
@@ -116,9 +116,9 @@ const PutawayProcessTable = ({
       vendorname: { label: "Vendor Name" },
       postingdate: { label: "Postin Date" },
       recevingQty: { label: "Receving Qty" },
-      GRNQty: { label: "GRN Qty" },
+      grnqty: { label: "GRN Qty" },
       putqty: { label: "PUT Qty" },
-      GRNo: { label: "GRN No" },
+      grno: { label: "GRN No" },
       Status: { label: "Status" },
     //   createdon: { label: "Create Don" },
     },

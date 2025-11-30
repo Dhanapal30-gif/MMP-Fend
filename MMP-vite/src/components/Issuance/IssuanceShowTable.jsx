@@ -3,6 +3,7 @@ import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Table, Table
 import CommonAddDataTable from "../../components/Com_Component/CommonAddDataTable";
 import { generateColumns } from "../../components/Com_Component/generateColumns";
 import { fetchpickTicketDetails, saveIssueBatchcodeQty } from "../../Services/Services-Rc";
+import { FaPrint } from "react-icons/fa";
 
 
 const IssuanceShowTable = ({
@@ -63,7 +64,8 @@ const IssuanceShowTable = ({
 
   const handleSave = async () => {
     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
-    if (activeRow?.requestertype === "Submodule") {
+    if (activeRow?.requestertype?.toLowerCase() === "submodule") {
+      
       const hasSerial = formData.newSerialNumber && formData.newSerialNumber.trim() !== "";
       if (!hasSerial) {
         setErrorMessage("Please enter New Serial Number!");
@@ -249,10 +251,109 @@ const IssuanceShowTable = ({
 
     }
   });
+const printCleanTable = () => {
+  if (!data || data.length === 0) return;
 
+  // Flatten data for printing
+  const flatData = data.flatMap(row =>
+    row.batches?.map(batch => ({
+      rec_ticket_no: row.rec_ticket_no,
+      requestertype: row.requestertype,
+      productname: row.productname,
+      productgroup: row.productgroup,
+      productfamily: row.productfamily,
+      partcode: row.partcode,
+      partdescription: row.partdescription,
+      UOM: row.UOM,
+      componentType: row.componentType,
+      compatabilitypartcode: row.compatabilitypartcode,
+      req_qty: row.req_qty,
+      batchCode: batch.batchCode,
+      location: batch.location,
+      putQty: batch.putQty || "",
+      allocatedQty: batch.allocatedQty,
+      approvedQty: row.approvedQty,
+      Comment: row.Comments || "",
+      recordstatus: row.recordstatus
+    })) || [row]
+  );
+
+  const allFields = Object.keys(flatData[0]).filter(
+    f => !["putQty", "Comment", "recordstatus", "componentType"].includes(f)
+  );
+
+  const tableHTML = `
+    <html>
+      <head>
+        <title>Print Issuance Table</title>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; font-size: 14px; table-layout: auto; }
+          th, td { border: 1px solid #000; padding: 6px; text-align: left; white-space: nowrap; }
+          th { background: #1976d2; color: white; font-weight: bold; }
+          h3 { text-align: center; margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        <h3>Issuance Report</h3>
+        <table>
+          <thead>
+            <tr>
+              ${allFields.map(f => `<th>${f}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${flatData.map(row => `
+              <tr>
+                ${allFields.map(f => `<td>${row[f] ?? ''}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+
+  const printWindow = window.open('', '', 'width=1600,height=900,scrollbars=yes');
+  printWindow.document.write(tableHTML);
+  printWindow.document.close();
+  printWindow.print();
+};
 
   return (
     <>
+     
+       <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                        <button
+  onClick={printCleanTable}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    padding: "8px 16px",
+    fontSize: "14px",
+    cursor: "pointer",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    transition: "transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out"
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "scale(1.05)";
+    e.currentTarget.style.boxShadow = "0 6px 10px rgba(0,0,0,0.15)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "scale(1)";
+    e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+  }}
+>
+  <FaPrint /> 
+</button>
+
+                       
+                    </div>
       <CommonAddDataTable
         columns={columns}
         data={normalizedData}
@@ -279,7 +380,7 @@ const IssuanceShowTable = ({
         PaperProps={{
           sx: {
             // width: 1200,       // custom width in px
-            width: activeRow?.requestertype === "Submodule" ? 1200 : 970, // dynamic width
+            width: activeRow?.requestertype ?.toLowerCase() === "submodule" ? 1200 : 970, // dynamic width
             border: '3px solid', // border width required
             borderImage: 'linear-gradient(to bottom, #d27c19ff 50%, #afee39ff 50%) 1', // top 50% blue, bottom 50% green
             borderRadius: 3,              // rounded corners
@@ -303,7 +404,8 @@ const IssuanceShowTable = ({
         >
           <span>Partcode: {activeRow?.partcode}</span>
           <span>
-            {activeRow?.requestertype === "Submodule" && (
+            {activeRow?.requestertype?.toLowerCase() === "submodule" && (
+
               <label style={{ display: 'flex', flexDirection: 'column', fontSize: '12px', fontWeight: 'bold', color: 'yellow', marginTop: '-5px' }}>
                 New Serial Number
                 <input
@@ -312,7 +414,7 @@ const IssuanceShowTable = ({
                   placeholder="New Serial Number"
                   value={formData.newSerialNumber || ""}
                   onChange={(e) => setFormData(prev => ({ ...prev, newSerialNumber: e.target.value }))}
-                  style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-3px", border: '1px solid #ccc', width: '250px' }}
+                  style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-1px", border: '1px solid #ccc', width: '250px' }}
                 />
               </label>
             )}
@@ -339,7 +441,7 @@ const IssuanceShowTable = ({
                 placeholder="Comments"
                 value={formData.Comments || ""}
                 onChange={(e) => setFormData(prev => ({ ...prev, Comments: e.target.value }))}
-                style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-2px", border: '1px solid #ccc', width: '250px' }}
+                style={{ padding: '9px', borderRadius: '4px', fontSize: "12px", marginTop: "-1px", border: '1px solid #ccc', width: '250px' }}
               />
             </label>
           </span>
