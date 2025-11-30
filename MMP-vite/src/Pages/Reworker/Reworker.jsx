@@ -439,6 +439,7 @@ const Reworker = () => {
                                 setRequestButton={setRequestButton}
                                 setSubmitButton={setSubmitButton}
                                 isFrozen={isFrozen}
+                                setLoading={setLoading}
 
                             />
                         </>

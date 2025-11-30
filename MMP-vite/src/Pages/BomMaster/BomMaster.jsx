@@ -108,7 +108,7 @@ const BomMaster = () => {
     };
     const debouncedSearch = useDebounce(searchText, 500); // delay in ms
 
-    const handleChange = () => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value })
     };
@@ -253,6 +253,7 @@ const BomMaster = () => {
                 //alert("Product added Successfully");
                 setSuccessMessage("Bom Master Created");
                 setShowSuccessPopup(true);
+                fetchBomMaster()
                 formClear();
             })
             .catch((error) => {
@@ -266,9 +267,6 @@ const BomMaster = () => {
                         setShowErrorPopup(true);
                         setErrorMessage(error.response.status)
                     }
-                } else {
-                    setShowErrorPopup(true);
-                    setErrorMessage("Network error, please try again")
                 }
             })
             .finally(() => {
@@ -353,8 +351,10 @@ const BomMaster = () => {
     // }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
+
         setHandleUpdateButton(false);
         setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
+
         setSelectedRows((prevSelectedRows) => {
             const isRowSelected = prevSelectedRows.includes(rowKey);
 
@@ -375,6 +375,7 @@ const BomMaster = () => {
             return updatedRows;
         });
     };
+
 
     const onDeleteClick = () => {
         setConfirmDelete(true);
@@ -478,15 +479,15 @@ const BomMaster = () => {
         fetchProduct();
     }, [])
 
-    const fetchBomMaster = (page = 1, size = 10,search = "") => {
+    const fetchBomMaster = (page = 1, size = 10, search = "") => {
         setLoading(true)
-        getBoMaster(page - 1, size,search)
+        getBoMaster(page - 1, size, search)
             .then((response) => {
                 setBomMaster(response.data.content || []);
                 setTotalRows(response.data.totalElements || 0);
                 // console.log('fetchBomMaster', response.data);
             })
-        .finally(() => setLoading(false)); // ensure loading is reset
+            .finally(() => setLoading(false)); // ensure loading is reset
     }
 
     const fetchfind = (page = 1, size = 10, search = "") => {
@@ -604,7 +605,7 @@ const BomMaster = () => {
             .then((response) => {
                 setSuccessMessage("BomMaster updated");
                 setShowSuccessPopup(true);
-                fetchBomMaster(page, perPage);
+                fetchBomMaster();
                 formClear();
                 setHandleSubmitButton(true);
                 setHandleUpdateButton(false);
@@ -854,7 +855,7 @@ const BomMaster = () => {
             </div>
             <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (
-                    <h5 className='ComCssTableName'>BOM Master Details ✅</h5>
+                    <h5 className='ComCssTableName'>BOM Master Details </h5>
                 )}
 
                 {showUploadTable && !showBomTable && (
@@ -884,140 +885,144 @@ const BomMaster = () => {
                 <LoadingOverlay loading={loading} />
 
                 {showBomTable && !showUploadTable && (
+                    <>
+                        <LoadingOverlay loading={loading} />
 
-                    <DataTable
-                        columns={column}
-                        data={bomMaster}
-                        pagination
-                        paginationServer
-                        progressPending={loading}
-                        paginationTotalRows={totalRows}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onChangePage={handlePageChange}
-                        paginationPerPage={perPage}
-                        paginationRowsPerPageOptions={[10, 20, 30, 50]}
-                        paginationComponentOptions={{
-                            rowsPerPageText: 'Rows per page:',
-                            rangeSeparatorText: 'of',
-                            noRowsPerPage: false,
-                            // selectAllRowsItem: true,
-                            // selectAllRowsItemText: 'All',
-                        }}
-                        fixedHeader
-                        fixedHeaderScrollHeight="400px"
-                        highlightOnHover
-                        className="react-datatable"
-                    // conditionalRowStyles={rowHighlightStyle}
-                    />
-                )}
-
-                {showUploadTable && !showBomTable && (
-                    <DataTable
-                        columns={uploadColumn}
-                        data={excelUploadData}
-                        pagination
-                        paginationServer
-                        progressPending={loading}
-                        paginationTotalRows={totalRows}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onChangePage={handlePageChange}
-                        paginationPerPage={perPage}
-                        paginationRowsPerPageOptions={[5, 10, 15, 20]}
-                        paginationComponentOptions={{
-                            rowsPerPageText: 'Rows per page:',
-                            rangeSeparatorText: 'of',
-                            noRowsPerPage: false,
-                            // selectAllRowsItem: true,
-                            // selectAllRowsItemText: 'All',
-                        }}
-                        fixedHeader
-                        fixedHeaderScrollHeight="400px"
-                        highlightOnHover
-                        className="react-datatable"
+                        <DataTable
+                            columns={column}
+                            data={bomMaster}
+                            pagination
+                            paginationServer
+                            progressPending={loading}
+                            paginationTotalRows={totalRows}
+                            onChangeRowsPerPage={handlePerRowsChange}
+                            onChangePage={handlePageChange}
+                            paginationPerPage={perPage}
+                            paginationRowsPerPageOptions={[10, 20, 30, 50]}
+                            paginationComponentOptions={{
+                                rowsPerPageText: 'Rows per page:',
+                                rangeSeparatorText: 'of',
+                                noRowsPerPage: false,
+                                // selectAllRowsItem: true,
+                                // selectAllRowsItemText: 'All',
+                            }}
+                            fixedHeader
+                            fixedHeaderScrollHeight="400px"
+                            highlightOnHover
+                            className="react-datatable"
                         // conditionalRowStyles={rowHighlightStyle}
-                        customStyles={{
-                            headRow: {
-                                style: {
-                                    background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                                    color: "white",
-                                    fontWeight: "bold",
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    minHeight: "50px",
-
-                                },
-                            },
-                            rows: {
-                                style: {
-                                    fontSize: "14px",
-                                    textAlign: "center",
-                                    alignItems: "center", // Centers content vertically
-                                    fontFamily: "Arial, Helvetica, sans-serif",
-                                },
-                            },
-                            cells: {
-                                style: {
-                                    padding: "5px",
-                                    //textAlign: "center",
-                                    justifyContent: "center",
-                                    whiteSpace: 'pre-wrap', // wrap text
-                                    wordBreak: 'break-word', // allow breaking words
-                                },
-                            },
-                            headCells: {
-                                style: {
-                                    display: "flex",
-                                    justifyContent: "center",  // Centers header text
-                                    alignItems: "left",
-                                    textAlign: "left",
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                },
-                            },
-                            pagination: {
-                                style: {
-                                    border: "1px solid #ddd",
-                                    backgroundColor: "#f9f9f9",
-                                    color: "#333",
-                                    minHeight: "35px",
-                                    padding: "5px",
-                                    fontSize: "12px",
-                                    fontWeight: "bolder",
-                                    display: "flex",
-                                    justifyContent: "flex-end",
-                                    alignItems: "center",
-                                },
-                            },
-                        }}
-                    />
+                        />
+                        </>
                 )}
 
+                        {showUploadTable && !showBomTable && (
+
+                            <DataTable
+                                columns={uploadColumn}
+                                data={excelUploadData}
+                                pagination
+                                paginationServer
+                                progressPending={loading}
+                                paginationTotalRows={totalRows}
+                                onChangeRowsPerPage={handlePerRowsChange}
+                                onChangePage={handlePageChange}
+                                paginationPerPage={perPage}
+                                paginationRowsPerPageOptions={[5, 10, 15, 20]}
+                                paginationComponentOptions={{
+                                    rowsPerPageText: 'Rows per page:',
+                                    rangeSeparatorText: 'of',
+                                    noRowsPerPage: false,
+                                    // selectAllRowsItem: true,
+                                    // selectAllRowsItemText: 'All',
+                                }}
+                                fixedHeader
+                                fixedHeaderScrollHeight="400px"
+                                highlightOnHover
+                                className="react-datatable"
+                                // conditionalRowStyles={rowHighlightStyle}
+                                customStyles={{
+                                    headRow: {
+                                        style: {
+                                            background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            fontSize: "14px",
+                                            textAlign: "center",
+                                            minHeight: "50px",
+
+                                        },
+                                    },
+                                    rows: {
+                                        style: {
+                                            fontSize: "14px",
+                                            textAlign: "center",
+                                            alignItems: "center", // Centers content vertically
+                                            fontFamily: "Arial, Helvetica, sans-serif",
+                                        },
+                                    },
+                                    cells: {
+                                        style: {
+                                            padding: "5px",
+                                            //textAlign: "center",
+                                            justifyContent: "center",
+                                            whiteSpace: 'pre-wrap', // wrap text
+                                            wordBreak: 'break-word', // allow breaking words
+                                        },
+                                    },
+                                    headCells: {
+                                        style: {
+                                            display: "flex",
+                                            justifyContent: "center",  // Centers header text
+                                            alignItems: "left",
+                                            textAlign: "left",
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                        },
+                                    },
+                                    pagination: {
+                                        style: {
+                                            border: "1px solid #ddd",
+                                            backgroundColor: "#f9f9f9",
+                                            color: "#333",
+                                            minHeight: "35px",
+                                            padding: "5px",
+                                            fontSize: "12px",
+                                            fontWeight: "bolder",
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                            alignItems: "center",
+                                        },
+                                    },
+                                }}
+                            />
+                        )}
+
+                    </div>
+                <CustomDialog
+                    open={showSuccessPopup}
+                    onClose={() => setShowSuccessPopup(false)}
+                    title="Success"
+                    message={successMessage}
+                    severity="success"
+                    color="primary"
+                />
+                <CustomDialog
+                    open={showErrorPopup}
+                    onClose={() => setShowErrorPopup(false)}
+                    title="Error"
+                    message={errorMessage}
+                    severity="error"
+                    color="secondary"
+                />
+                <CustomDialog
+                    open={confirmDelete}
+                    onClose={handleCancel}
+                    onConfirm={handleDelete}
+                    title="Confirm"
+                    message="Are you sure you want to delete this?"
+                    color="primary"
+                />
             </div>
-            <CustomDialog
-                open={showSuccessPopup}
-                onClose={() => setShowSuccessPopup(false)}
-                title="Success"
-                message={successMessage}
-                severity="success"
-                color="primary"
-            />
-            <CustomDialog
-                open={showErrorPopup}
-                onClose={() => setShowErrorPopup(false)}
-                title="Error"
-                message={errorMessage}
-                severity="error"
-                color="secondary"
-            />
-            <CustomDialog
-                open={confirmDelete}
-                onClose={handleCancel}
-                onConfirm={handleDelete}
-                title="Confirm"
-                message="Are you sure you want to delete this?"
-                color="primary"
-            />
-        </div>
-    )
+            )
 }
-export default BomMaster
+            export default BomMaster

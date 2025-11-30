@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TechnologyTextfIled from "../../components/Technology/TechnologyTextfIled";
 import TechnologyTable from "../../components/Technology/TechnologyTable";
 import TechnologyDefaultTable from "../../components/Technology/TechnologyDefaultTable";
-import { FaFileExcel } from "react-icons/fa";
+import { FaFileExcel, FaLeaf } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchproductPtl, fetchRepaier, fetchTechnology, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, getPartcode, savePTLRepaier, savePTLRequest, savePTLStore, saveTechnology } from '../../Services/Services_09';
@@ -42,6 +42,11 @@ const Technology = () => {
     const [localMasterPartcode, setLocalMasterPartcode] = useState([]);
     const [technologyData, setTechnologyData] = useState([])
     const [downloadProgress, setDownloadProgress] = useState(null);
+    const [addButton, setAddButton] = useState(true);
+    const [updateButton, setUpdateButton] = useState(false)
+    const [isEdit,setIsEdit] =useState(true);
+    const [selectedRows, setSelectedRows] = useState([]);
+    
     const handlePoChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -89,6 +94,37 @@ const Technology = () => {
     };
 
     // console.log("formdata", formData)
+
+    const handleUpdate = async () => {
+
+        setUpdateButton(true)
+        setAddButton(false)
+        setLoading(true);
+        try {
+            const userName = sessionStorage.getItem("userId") || "System";
+
+            // Determine if formData is a single object or an array
+            let payload = Array.isArray(formData)
+                ? formData.map((row) => ({ ...row, modifiedby: userName }))
+                : [{ ...formData, modifiedby: userName }];
+
+            const response = await saveTechnology(payload);
+
+            if (response?.status === 200 && response.data) {
+                const { message } = response.data;
+                setSuccessMessage(message || "Saved successfully");
+                setShowSuccessPopup(true);
+                clear();
+                fetchPoDetail();
+            }
+        } catch (error) {
+            const errMsg = error?.response?.data?.message || error.message;
+            setErrorMessage(errMsg);
+            setShowErrorPopup(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -151,11 +187,11 @@ const Technology = () => {
     }
     const handleAddClick = () => {
         if (!valiDate()) return;
-  if (tableData.some(item => item.partcode === formData.partcode)) {
-setErrorMessage("Partcode Already Added")
-setShowErrorPopup(true);
-    return;
-    }
+        if (tableData.some(item => item.partcode === formData.partcode)) {
+            setErrorMessage("Partcode Already Added")
+            setShowErrorPopup(true);
+            return;
+        }
         // console.log("Before adding, tableData:", tableData);
         setTableData(prev => {
             const newData = [...prev, { ...formData }];
@@ -181,11 +217,14 @@ setShowErrorPopup(true);
     }, [tableData]);
     // console.log("showTable:", showTable);
     // console.log("tableData:", tableData);
-    const  clear = () => {
+    const clear = () => {
+        setIsEdit(true)
         setShowTable(false)
         setIsFrozen(false)
         setTableData([])
         setFormErrors("");
+        setAddButton(true)
+        setUpdateButton(false)
         setFormData({
             sui: "",
             partcode: "",
@@ -195,53 +234,78 @@ setShowErrorPopup(true);
             rackLocation: "",
         })
     }
-      useEffect(() => {
-            setPage(1);
-        }, [searchText]);
+    useEffect(() => {
+        setPage(1);
+    }, [searchText]);
 
-         const filteredData = technologyData.filter(row =>
+    const filteredData = technologyData.filter(row =>
         Object.values(row).some(value =>
             typeof value === "string" && value.toLowerCase().includes(searchText.toLowerCase())
         )
     );
-     const paginatedData = filteredData.slice(
+    const paginatedData = filteredData.slice(
         (page - 1) * perPage,
         page * perPage
     );
-     useEffect(() => {
-            setTotalRows(filteredData.length); // important!
-        }, [filteredData]);
+    useEffect(() => {
+        setTotalRows(filteredData.length); // important!
+    }, [filteredData]);
 
-const filteredVendors = technologyData.filter(v =>
+    const filteredVendors = technologyData.filter(v =>
         v.sui?.toLowerCase().includes(searchText.toLowerCase()) ||
         v.partcode?.toLowerCase().includes(searchText.toLowerCase()) ||
         v.partdescription?.toLowerCase().includes(searchText.toLowerCase()) ||
         v.racklocation?.toLowerCase().includes(searchText.toLowerCase())
 
     );
-         const exportToExcel = (searchText = "") => {
-                if (searchText && searchText.trim() !== "") {
-                    if (!Array.isArray(technologyData) || filteredVendors.length === 0) {
-                        // console.warn("No data to export.");
-                        return;
-                    }
-                    const sheet = XLSX.utils.json_to_sheet(filteredVendors);
-                    const workbook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
-                    XLSX.writeFile(workbook, "Technology.xlsx");
-        
-                } else {
-                    if (!Array.isArray(technologyData) || technologyData.length === 0) {
-                        // console.warn("No data to export.");
-                        return;
-                    }
-                    const sheet = XLSX.utils.json_to_sheet(technologyData);
-                    const workbook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
-                    XLSX.writeFile(workbook, "Technology.xlsx");
-                }
-        
-            };
+    const exportToExcel = (searchText = "") => {
+        if (searchText && searchText.trim() !== "") {
+            if (!Array.isArray(technologyData) || filteredVendors.length === 0) {
+                // console.warn("No data to export.");
+                return;
+            }
+            const sheet = XLSX.utils.json_to_sheet(filteredVendors);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+            XLSX.writeFile(workbook, "Technology.xlsx");
+
+        } else {
+            if (!Array.isArray(technologyData) || technologyData.length === 0) {
+                // console.warn("No data to export.");
+                return;
+            }
+            const sheet = XLSX.utils.json_to_sheet(technologyData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+            XLSX.writeFile(workbook, "Technology.xlsx");
+        }
+
+    };
+    const [editingRowId, setEditingRowId] = useState(null);
+
+    const handleEditClick = (row) => {
+        setIsEdit(false)
+        setUpdateButton(true)
+        setAddButton(false)
+        // setHandleUploadButton(false)
+        // setSelectedRows([]);
+        setEditingRowId(row.id);
+
+        setFormData(prev => ({
+            ...prev, // keep previous data if missing in row
+            id: row.id ?? prev.id ?? "",
+            sui: row.sui ?? prev.sui ?? "",
+            partcode: row.partcode ?? prev.partcode ?? "",
+            partdescription: row.partdescription ?? prev.partdescription ?? "",
+            req_qty: row.req_qty ?? prev.req_qty ?? "",
+        }));
+
+        setFormErrors({});
+
+        // setData([{ ...row, selectedid: row.id }]);
+        setTotalRows(1);
+    };
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -253,7 +317,7 @@ const filteredVendors = technologyData.filter(v =>
                     < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
                     <button > Excel Format Download </button>
                 </div>
-                
+
                 <TechnologyTextfIled
                     formData={formData}
                     setFormData={setFormData}
@@ -262,13 +326,20 @@ const filteredVendors = technologyData.filter(v =>
                     formErrors={formErrors}
                     localMasterPartcode={localMasterPartcode}
                     isFrozen={isFrozen}
+                    isEdit={isEdit}
 
                 />
 
                 <div className="ReworkerButton9">
-                    <button className='ComCssSubmitButton' onClick={handleAddClick} >ADD</button>
+                    {addButton &&
+                        <button className='ComCssSubmitButton' onClick={handleAddClick} >ADD</button>
+                    }
                     <button className='ComCssClearButton' onClick={clear}>Clear</button>
+                    {updateButton &&
+                        <button className='ComCssSubmitButton' onClick={handleUpdate} >Update</button>
+                    }
                 </div>
+
 
             </div>
             {showTable && (
@@ -296,27 +367,27 @@ const filteredVendors = technologyData.filter(v =>
             )}
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Technology</h5>
- <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                        <button className="btn btn-success" onClick={() => exportToExcel(searchText)}  >
-                            <FaFileExcel /> Export
-                        </button>
+                <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)}  >
+                        <FaFileExcel /> Export
+                    </button>
 
-                        <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-                            <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
-                                onChange={(e) => setSearchText(e.target.value)}
-                            />
-                            {searchText && (
-                                <span
-                                    onClick={() => setSearchText("")}
-                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
-                                    ✖
-                                </span>
-                            )}
-
-                        </div>
-                    
+                    <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                        <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                        />
+                        {searchText && (
+                            <span
+                                onClick={() => setSearchText("")}
+                                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
+                                ✖
+                            </span>
+                        )}
 
                     </div>
+
+
+                </div>
                 <TechnologyDefaultTable
                     data={paginatedData}
                     page={page}
@@ -325,8 +396,9 @@ const filteredVendors = technologyData.filter(v =>
                     loading={loading}
                     setPage={setPage}
                     setPerPage={setPerPage}
-                // selectedRows={selectedRows}
-                // setSelectedRows={setSelectedRows}
+                    onEdit={handleEditClick}
+                selectedRows={selectedRows}
+                setSelectedRows={setSelectedRows}
 
                 />
             </div>

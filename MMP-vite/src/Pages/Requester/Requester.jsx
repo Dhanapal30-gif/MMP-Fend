@@ -364,7 +364,7 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
             partCode: formData.partCode.partcode,
             partDescription: formData.partCode.partdescription,
             requestFor: formData.requestFor.value,      // keep the value
-            requesterType: formData.requesterType.value // keep the value
+            requesterType: formData.requesterType // keep the value
         }]);
         setIsFrozen(true);
         setFormData(prev => ({

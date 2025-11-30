@@ -74,7 +74,7 @@ const RequesterTextFiled = ({
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
 
-                <Autocomplete
+                {/* <Autocomplete
                     options={userId.toLowerCase() === "admin" ? requesterForOption : requesterType} // ternary
                     readOnly={isFrozen}
                     value={formData.requestFor || null} // null if empty
@@ -94,8 +94,56 @@ const RequesterTextFiled = ({
                             helperText={formErrors?.requestFor || ""}
                             label="Request For" variant="outlined" size="small" />
                     )}
-                />
+                /> */}
 
+                {userId.toLowerCase() === "admin" && (
+                    <Autocomplete
+                        options={requesterForOption} // ternary
+                        readOnly={isFrozen}
+                        value={formData.requestFor || null} // null if empty
+                        getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                        }
+                        // onChange={(e, newValue) => handleChange("requestFor", newValue)}
+                        onChange={(e, newValue) =>
+                            handleChange(
+                                "requestFor",
+                                typeof newValue === "string" ? { label: newValue, value: newValue } : newValue
+                            )
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params}
+                                error={Boolean(formErrors?.requestFor)}
+                                helperText={formErrors?.requestFor || ""}
+                                label="Request For" variant="outlined" size="small" />
+                        )}
+                    />
+                )}
+
+
+                {userId.toLowerCase() !== "admin" && (
+                    <Autocomplete
+                        options={requesterType} // ternary
+                        readOnly={isFrozen}
+                        value={formData.requestFor || null} // null if empty
+                        getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                        }
+                        // onChange={(e, newValue) => handleChange("requestFor", newValue)}
+                        onChange={(e, newValue) =>
+                            handleChange(
+                                "requestFor",
+                                typeof newValue === "string" ? { label: newValue, value: newValue } : newValue
+                            )
+                        }
+                        renderInput={(params) => (
+                            <TextField {...params}
+                                error={Boolean(formErrors?.requestFor)}
+                                helperText={formErrors?.requestFor || ""}
+                                label="Request For" variant="outlined" size="small" />
+                        )}
+                    />
+                )}
                 {(formData.requestFor?.value || formData.requestFor) !== "Material Request" ? (
                     // <Autocomplete
                     //     options={orderTypeOption}
@@ -118,23 +166,23 @@ const RequesterTextFiled = ({
                     //     )}
                     // />
                     <Autocomplete
-  options={orderTypeOption}
-  readOnly={isFrozen}
-  value={orderTypeOption.find(o => o.value === formData.orderType) || null}
-  onChange={(e, newValue) => {
-    handleChange("orderType", newValue?.value || "");
-  }}
-  getOptionLabel={(option) => option.label}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Order Type"
-      error={!!formErrors?.orderType}
-      helperText={formErrors?.orderType}
-      size="small"
-    />
-  )}
-/>
+                        options={orderTypeOption}
+                        readOnly={isFrozen}
+                        value={orderTypeOption.find(o => o.value === formData.orderType) || null}
+                        onChange={(e, newValue) => {
+                            handleChange("orderType", newValue?.value || "");
+                        }}
+                        getOptionLabel={(option) => option.label}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Order Type"
+                                error={!!formErrors?.orderType}
+                                helperText={formErrors?.orderType}
+                                size="small"
+                            />
+                        )}
+                    />
 
                 ) : (
                     <TextField
@@ -147,7 +195,7 @@ const RequesterTextFiled = ({
                     />
                 )}
 
-                <Autocomplete
+                {/* <Autocomplete
                     options={userId.toLowerCase() === "admin" ? requestTypeOption : requestType} // ternary
                     readOnly={isFrozen}
 
@@ -170,8 +218,64 @@ const RequesterTextFiled = ({
                             helperText={formErrors?.requesterType || ""}
                             variant="outlined" size="small" />
                     )}
-                />
+                /> */}
 
+
+                {userId.toLowerCase() === "admin" && (
+                    <Autocomplete
+                        options={requestTypeOption} // ternary
+                        readOnly={isFrozen}
+
+                        value={formData.requesterType || null}
+                        getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                        }
+                        isOptionEqualToValue={(option, value) => option === value}
+                        onChange={(e, newValue) => {
+                            handleChange("requesterType", newValue || "");
+                            handleChange("productName", null);
+                            handleChange("partCode", null);
+                            handleChange("productGroup", "");
+                            handleChange("productFamily", "");
+                        }}
+
+                        renderInput={(params) => (
+                            <TextField {...params} label="Requester Type"
+                                error={Boolean(formErrors?.requesterType)}
+                                helperText={formErrors?.requesterType || ""}
+                                variant="outlined" size="small" />
+                        )}
+                    />
+                )}
+
+
+
+                {userId.toLowerCase() !== "admin" && (
+                    <Autocomplete
+                        options={requestType} // ternary
+                        readOnly={isFrozen}
+
+                        value={formData.requesterType || null}
+                        getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                        }
+                        isOptionEqualToValue={(option, value) => option === value}
+                        onChange={(e, newValue) => {
+                            handleChange("requesterType", newValue || "");
+                            handleChange("productName", null);
+                            handleChange("partCode", null);
+                            handleChange("productGroup", "");
+                            handleChange("productFamily", "");
+                        }}
+
+                        renderInput={(params) => (
+                            <TextField {...params} label="Requester Type"
+                                error={Boolean(formErrors?.requesterType)}
+                                helperText={formErrors?.requesterType || ""}
+                                variant="outlined" size="small" />
+                        )}
+                    />
+                )}
                 <Autocomplete
                     options={uniqueProducts}
                     value={formData.productName || null}
@@ -220,14 +324,14 @@ const RequesterTextFiled = ({
                     getOptionLabel={(option) => option.partcode || ""}
                     isOptionEqualToValue={(option, value) => option?.partcode === value?.partcode}
                     // onChange={(e, newValue) => handleChange("partCode", newValue || null)}
-                     onChange={(e, newValue) => {
-        handleChange("partCode", newValue || null);
+                    onChange={(e, newValue) => {
+                        handleChange("partCode", newValue || null);
 
-        // Set the read-only fields based on selected part
-        handleChange("componentType", newValue?.componentType || "");
-        handleChange("uom", newValue?.UOM || "");
-        handleChange("typeOfComponent", newValue?.["Type Of Component"] || "");
-    }}
+                        // Set the read-only fields based on selected part
+                        handleChange("componentType", newValue?.componentType || "");
+                        handleChange("uom", newValue?.UOM || "");
+                        handleChange("typeOfComponent", newValue?.["Type Of Component"] || "");
+                    }}
                     renderInput={(params) => <TextField {...params}
                         error={Boolean(formErrors?.partCode)}
                         helperText={formErrors?.partCode || ""}
@@ -275,7 +379,7 @@ const RequesterTextFiled = ({
                     helperText={formErrors?.requestQty || ""}
                 />
 
-                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "Submodule") && (
+                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "SubModule") && (
                     <ComTextFiled
                         label="Available Qty"
                         name="availableQty"
@@ -314,7 +418,7 @@ const RequesterTextFiled = ({
                     />
                 )}
 
-                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "Submodule") && (
+                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "SubModule") && (
                     <ComTextFiled
                         label="Faulty Serial Number"
                         name="faultySerialNumber"
@@ -325,7 +429,7 @@ const RequesterTextFiled = ({
                     />
                 )}
 
-                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "Submodule") && (
+                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "SubModule") && (
                     <ComTextFiled
                         label="Faulty Unit Module Serial No"
                         name="faultyUnitModuleSerialNo"

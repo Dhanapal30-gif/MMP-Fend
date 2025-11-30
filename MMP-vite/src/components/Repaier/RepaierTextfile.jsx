@@ -151,7 +151,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "BGA") && (
                     <>
 
-                        <Autocomplete
+                        {/* <Autocomplete
                             options={partOptions}
                             // value={formData.partcode || null}  // store full object
                             value={partOptions.find(opt => opt.value === formData.partcode) || null}
@@ -177,7 +177,50 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                                     helperText={formErrors?.partcode || ""}
                                 />
                             )}
-                        />
+                        /> */}
+<Autocomplete
+    options={partOptions}
+    value={partOptions.find(opt => opt.value === formData.partcode) || null}
+    getOptionLabel={(option) => option.label || ""}
+
+    // ⭐ FIX: STOP auto-scroll to selected item
+    ListboxProps={{
+        style: {
+            scrollBehavior: "auto"
+        },
+        onScroll: (e) => {
+            // prevent MUI from auto-scrolling to selected item
+            e.stopPropagation();
+        }
+    }}
+
+    onOpen={() => {
+        setTimeout(() => {
+            const el = document.querySelector('.MuiAutocomplete-listbox');
+            if (el) el.scrollTop = 0;  // force go to top
+        }, 0);
+    }}
+
+    onChange={(e, newValue) => {
+        setFormData(prev => ({
+            ...prev,
+            partcode: newValue?.value || "",
+            partdescription: newValue?.partdescription || "",
+            racklocation: newValue?.racklocation || "",
+            availableqty: newValue?.availableqty || ""
+        }));
+    }}
+
+    renderInput={(params) => (
+        <TextField
+            {...params}
+            className="comTextFiled"
+            label="Partcode"
+            variant="outlined"
+            size="small"
+        />
+    )}
+/>
 
                         <ComTextFiled
                             label="partdescription"

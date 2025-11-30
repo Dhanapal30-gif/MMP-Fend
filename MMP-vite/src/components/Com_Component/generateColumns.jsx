@@ -164,7 +164,7 @@ export const generateColumns = ({
     const headerLabel = customConfig[field]?.label || field;
 
     // Default width
-    let minWidth = 130;
+    let minWidth = 150;
 
     // Increase width only if header text is long
     if (headerLabel.length > 10) {

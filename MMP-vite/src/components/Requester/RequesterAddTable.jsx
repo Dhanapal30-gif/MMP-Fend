@@ -5,8 +5,9 @@ import { FaTimesCircle } from "react-icons/fa";
 
 const fields = [
     "requestFor",
+       "orderType",
     "requesterType",
-    "orderType",
+ 
     "productName",
     "partCode",
     "partDescription",

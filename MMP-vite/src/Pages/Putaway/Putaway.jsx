@@ -581,7 +581,7 @@ const Putaway = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-
+const [putIds,setPutIds]=useState([])
     const handlePut = (e) => {
         e.preventDefault();
         // if (!valiDate()) return;
@@ -653,6 +653,28 @@ const Putaway = () => {
                 setIsUserActive(true);
 
             })
+    //     saveLEDRequest(submitData)
+    // .then((response) => {
+    //     // Extract color
+    //     const match = response.data.message?.match(/following (\w+) light/);
+    //     if (match) setColourCode(match[1]);
+
+    //     // Extract IDs from message
+    //     const idsMatch = response.data.message?.match(/Put IDs: ([0-9,]+)/);
+    //     if (idsMatch) {
+    //         const putIds = idsMatch[1].split(",").map(Number);
+    //         setPutIds(prev => [...prev, ...putIds]);
+    //     }
+
+    //     setSubmittedIds(prev => [...prev, ...newSelectedRows]);
+
+    //     handleSuccessCommon({
+    //         response,
+    //         setSuccessMessage,
+    //         setShowSuccessPopup,
+    //     });
+    //     setIsUserActive(true);
+    // })
             .catch((error) => {
                 handleErrorCommon({
                     error,
@@ -662,6 +684,7 @@ const Putaway = () => {
             });
     };
 
+    console.log("putIds",putIds)
 
 
     const handleSubmituyuyt = (e) => {
@@ -1130,7 +1153,7 @@ const Putaway = () => {
                         {showMenu && (
                             <div className="ComCssButtonMenu">
                                 <button className='ComCssExportButton' onClick={() => { exportToExcel(hiddenButton, searchText); setShowMenu(false); }}>
-                                    <FaFileExcel /> Dow..d
+                                    <FaFileExcel /> 
                                 </button>
                                 {hiddenButton !== "pending" && (
                                     <button

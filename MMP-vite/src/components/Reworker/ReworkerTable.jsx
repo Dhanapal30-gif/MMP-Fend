@@ -21,7 +21,8 @@ const ReworkerTable = ({
     setdoneButton,
     isFrozen = { isFrozen },
     setBoardFetch,
-    setSubmitButton
+    setSubmitButton,
+    setLoading
 }) => {
 
     const columns = generateColumns({
@@ -125,6 +126,7 @@ const ReworkerTable = ({
 
     const handleDone = (id) => {
         const formData = [{ id }];
+        setLoading(true)
         saveDoneRequest(formData)
             .then((response) => {
                 if (response.status === 200 && response.data) {
@@ -141,18 +143,26 @@ const ReworkerTable = ({
                     );
                 }
             })
-            .catch((error) => console.error(error));
+          .catch((error) => console.error(error))
+.finally(() => {
+    setLoading(false);
+});
     };
 
 
+const paginatedData = React.useMemo(() => {
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    return data.slice(start, end);
+}, [data, page, perPage]);
 
     return (
         <CommonDataTable
             columns={columns}
-            data={data}
+            data={paginatedData}
             page={page}
             perPage={perPage}
-            totalRows={totalRows}
+    totalRows={data.length}  // full count
             loading={loading}
             onPageChange={setPage}       // ✅ correct
             onPerPageChange={setPerPage} // ✅ correct

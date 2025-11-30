@@ -11,6 +11,8 @@ import { FaEdit } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
+import DropdownCom from '../../components/Com_Component/DropdownCom'
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const ApprovalMaster = () => {
     const [formErrors, setFormErrors] = useState({});
@@ -160,6 +162,7 @@ const ApprovalMaster = () => {
         setFileInputKey(Date.now()); // Change key to force re-render
         setSelectedRows([]);
         setDeletButton(false);
+        setFormErrors({})
     }
 
     useEffect(() => {
@@ -268,12 +271,12 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
     };
 
     useEffect(() => {
-        // console.log("selectedRows", selectedRows);
+        console.log("selectedRows", selectedRows);
     }, [selectedRows]);
 
     const handleRowSelect = (rowKey) => {
         setHandleUpdateButton(false);
-        // setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
+        setFormData({ partcode: "", partdescription: "", productname: "", productgroup: "", productfamily: "" });
         setSelectedRows((prevSelectedRows) => {
             const isRowSelected = prevSelectedRows.includes(rowKey);
 
@@ -294,7 +297,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
             return updatedRows;
         });
     };
-    const column = [
+    const column = useMemo(() => [
         {
             name: (
                 <div style={{ textAlign: 'center', marginLeft: '10px' }}>
@@ -353,7 +356,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                 : "", width: `${calculateColumnWidth(approvalMaster, 'Approver2')}`,
             wrap: true,
         }
-    ]
+    ], [approvalMaster,selectedRows]);
 
     const conditionalRowStyles = [
         {
@@ -617,25 +620,56 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                 setLoading(false);
             });
     }
-    const handleEdit = (row) => {
-        setFormData(row);
-        // console.log("Editing Row Data:", row);  // Debugging
-        setFormData({
-            id: row.id || "",
-            requesttype: row.requesttype || "",
-            issuancetype: row.issuancetype || "",
-            componenttype: row.componenttype || "",
-            productgroup: Array.isArray(row.productgroup) ? row.productgroup : [row.productgroup].filter(Boolean),
-            approver1: Array.isArray(row.approver1) ? row.approver1 : [row.approver1].filter(Boolean),
-            approver2: Array.isArray(row.approver2) ? row.approver2 : [row.approver2].filter(Boolean)
-        });
+    // const handleEdit = (row) => {
+    //     setFormData(row);
+    //     // console.log("Editing Row Data:", row);  // Debugging
+    //     setFormData({
+    //         id: row.id || "",
+    //         requesttype: row.requesttype || "",
+    //         issuancetype: row.issuancetype || "",
+    //         componenttype: row.componenttype || "",
+    //         productgroup: Array.isArray(row.productgroup) ? row.productgroup : [row.productgroup].filter(Boolean),
+    //         approver1: Array.isArray(row.approver1) ? row.approver1 : [row.approver1].filter(Boolean),
+    //         approver2: Array.isArray(row.approver2) ? row.approver2 : [row.approver2].filter(Boolean)
+    //     });
 
-        setHandleSubmitButton(false);
-        setHandleUploadButton(false);
-        setHandleUpdateButton(true);
-        setDeletButton(false);
-        setSelectedRows([]);
-    };
+    //     setHandleSubmitButton(false);
+    //     setHandleUploadButton(false);
+    //     setHandleUpdateButton(true);
+    //     setDeletButton(false);
+    //     setSelectedRows([]);
+    // };
+
+   const handleEdit = (row) => {
+    setFormData({
+        id: row.id || "",
+        requesttype: row.requesttype || "",
+        issuancetype: row.issuancetype || "",
+        componenttype: row.componenttype || "",
+        productgroup: row.productgroup
+            ? Array.isArray(row.productgroup)
+                ? row.productgroup
+                : row.productgroup.split(",").map(item => item.trim())
+            : [],
+        approver1: row.approver1
+            ? Array.isArray(row.approver1)
+                ? row.approver1
+                : row.approver1.split(",").map(item => item.trim())
+            : [],
+        approver2: row.approver2
+            ? Array.isArray(row.approver2)
+                ? row.approver2
+                : row.approver2.split(",").map(item => item.trim())
+            : []
+    });
+
+    setHandleSubmitButton(false);
+    setHandleUploadButton(false);
+    setHandleUpdateButton(true);
+    setDeletButton(false);
+    setSelectedRows([]);
+};
+
 
     const filteredData = approvalMaster.filter(row =>
         Object.values(row).some(value =>
@@ -659,10 +693,10 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
         Approval.approver2?.toLowerCase().includes(searchText.toLowerCase())
 
     );
-    const paginatedDataWithIndex = paginatedData.map((row, index) => ({
-        ...row,
-        rowIndex: index
-    }));
+    // const paginatedDataWithIndex = paginatedData.map((row, index) => ({
+    //     ...row,
+    //     rowIndex: index
+    // }));
     const exportToExcel = (searchText = "") => {
         if (searchText && searchText.trim() !== "") {
             if (!Array.isArray(approvalMaster) || filteredApproval.length === 0) {
@@ -686,7 +720,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
         }
     };
 
-    console.log("formData", formData)
+    // console.log("formData", formData)
     return (
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
@@ -702,6 +736,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                     <ThemeProvider theme={TextFiledTheme}>
 
                         <Autocomplete
+                        ListboxComponent={DropdownCom}
                             options={["Material Request", "Scrap Request", "Stock Transfer Request", "Material Request Projects","Stock Transfer ","Returning","PTL Request"]}
                             getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                             value={formData.requesttype || []}
@@ -730,7 +765,8 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         />
                         {formData.requesttype === "Material Request" || formData.requesttype==="Returning" && (
                             <Autocomplete
-                                options={["DTL", "PTL"]}
+                        ListboxComponent={DropdownCom}  
+                            options={["DTL", "PTL"]}
                                 getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                                 value={formData.issuancetype || []}
                                 onChange={(event, newValue) => setFormData({ ...formData, issuancetype: newValue || [] })}
@@ -750,6 +786,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         )}
                         {(formData.requesttype === "Material Request" && formData.issuancetype !== "PTL") && (
                             <Autocomplete
+                        ListboxComponent={DropdownCom}
                                 options={componentOptions}
                                 getOptionLabel={(option) =>
                                     typeof option === "string" ? option : option.value
@@ -788,7 +825,9 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         )}
                         {formData.requesttype == "Material Request" && formData.issuancetype !== "PTL" && (
                             <Autocomplete
-                                multiple
+                            
+                        ListboxComponent={DropdownCom}    
+                            multiple
                                 options={uniqueProductGroup}
                                 getOptionLabel={(option) =>
                                     typeof option === "string" ? option : option.ProductGroup || ""
@@ -814,7 +853,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
 
                                     const updatedData = {
                                         ...formData,
-                                        productgroup: selectedGroupNames, // ✅ send object array as Autocomplete value
+                                        productgroup: selectedGroups, // ✅ send object array as Autocomplete value
                                         approver1: [],
                                         approver2: []
                                     };
@@ -845,11 +884,14 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         )}
 
                         <Autocomplete
+                        ListboxComponent={DropdownCom}
                             multiple
                             options={formData.componenttype === "others" || formData.componenttype === "submodule" ? [] : storeUserId} // ✅ hide dropdown if "others"
                             getOptionLabel={(option) => option}
                             disableClearable={formData.componenttype === "others" || formData.componenttype === "submodule"} // 🔒 don't allow clearing if auto-fetched
                             value={formData.approver1 || []}
+                            //    value={Array.isArray(formData.approver1) ? formData.approver1 : []}  // must be array
+
                             isOptionEqualToValue={(option, value) => option === value}
                             onChange={(event, newValue) => {
                                 if (formData.componenttype !== "others" || formData.componenttype === "submodule") {
@@ -871,6 +913,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
 {!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" ||formData.requesttype==="PTL Request") && (
 
                         <Autocomplete
+                        ListboxComponent={DropdownCom}
                             multiple
                             options={storeUserId}
                             getOptionLabel={(option) => option} // ✅ Ensure it's a string
@@ -925,10 +968,11 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                     </div>
                 )}
                 {showApprovalTable && !showUploadTable && (
+                    <><LoadingOverlay loading={loading} />
                     <DataTable
                         columns={column}
-                        data={paginatedDataWithIndex}
-                        conditionalRowStyles={conditionalRowStyles} // ✅ add this line
+                        data={paginatedData}
+                        // conditionalRowStyles={conditionalRowStyles} // ✅ add this line
                         pagination
                         paginationServer
                         progressPending={loading}
@@ -936,6 +980,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         onChangeRowsPerPage={handlePerRowsChange}
                         onChangePage={handlePageChange}
                         paginationPerPage={perPage}
+                        paginationDefaultPage={page}
                         paginationRowsPerPageOptions={[10, 20, 30, 50]}
                         paginationComponentOptions={{
                             rowsPerPageText: 'Rows per page:',
@@ -1003,6 +1048,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                             // },
                         }}
                     />
+                    </>
                 )}
                 {showUploadTable && !showApprovalTable && (
                     <DataTable
@@ -1069,7 +1115,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                             pagination: {
                                 style: {
                                     border: "1px solid #ddd",
-                                    backgroundColor: "#f9f9f9",
+                                    backgroundColor: "#ddd",
                                     color: "#333",
                                     minHeight: "35px",
                                     padding: "5px",

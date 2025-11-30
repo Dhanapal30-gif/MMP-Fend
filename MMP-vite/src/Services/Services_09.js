@@ -370,3 +370,24 @@ export const downloadPTLRequest = ( search) =>
     params: {  search },
     responseType: "blob",
   });
+
+
+  const Get_DownloadSearchComMaster = `${url}/Compatability/download-excel`;
+export const downloadComMaster = (search) =>
+  axios.get(Get_DownloadSearchComMaster, {
+    params: { search: search || undefined },
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+  const get_StockDetails = `${url}/StockTransferCon/fetchStockDetails`;
+export const getStockDetais = (page = 0, size = 10,search = "") => {
+  return axios.get(get_StockDetails, { params: { page, size,search }, });
+}
+
+
+const Get_DownloadStock = `${url}/StockTransferCon/download-excelSearch`;
+export const downloadStock = (search) =>
+  axios.get(Get_DownloadStock, {
+    params: { search: search || undefined },
+    responseType: "blob", // 👈 essential for binary Excel files
+  });

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import IssuanceTextFiled from "../../components/Issuance/IssuanceTextFiled";
 import IssuanceShowTable from "../../components/Issuance/IssuanceShowTable";
 import IssuanceTable from "../../components/Issuance/IssuanceTable";
-import { fetchIssueTicketList, fetchpickTicketDetails, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
+import { fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
@@ -65,6 +65,7 @@ const Issuance = () => {
             setTableData([]);
             setShowTable(false)
             setHideDeliverButton(false);
+            setHideIssueButton(false)
         }
         if (field === "deliverTicket" && value) {
             // console.log("value", field)
@@ -72,12 +73,14 @@ const Issuance = () => {
             setTableData([]);
             setShowTable(false)
             setHideDeliverButton(true);
+            setHideIssueButton(false)
         }
         if (field === "issueTicket" && value) {
             fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
             setHideIssueButton(true);
+            setHideDeliverButton(false)
         }
         // if (["requestedTicket", "deliverTicket", "issueTicket"].includes(field)) {
         //                 console.log("value", field)
@@ -212,9 +215,20 @@ const Issuance = () => {
                     }
                     setHideDeliverButton(true)
                     setHidePutButton(false)
+                    setSuccessMessage(response.data.message)
+                    setShowSuccessPopup(true)
                     // isPutButtonHidden(false)
                 } else {
+                    if (ticketno?.startsWith("PTL")) {
+                        fetchRequestedTickets("PTL");
+                    } else {
+                        fetchRequestedTickets("DTL");
+                    }
                     setIsUserActive(false);
+                     setHideDeliverButton(true)
+                    setHidePutButton(false)
+                    setSuccessMessage(response.data.message)
+                    setShowSuccessPopup(true)
                 }
             })
 
@@ -263,7 +277,7 @@ const Issuance = () => {
 
     const handleDliver = (e) => {
         e.preventDefault();
-        setLoading(true);
+      
         let ticketno;
         // Check all rows have qty entered
         const allRowsHaveQty = pickTicketData.every(row => {
@@ -285,6 +299,7 @@ const Issuance = () => {
             ticketno = row.rec_ticket_no;
             return [{ recTicketNo: row.rec_ticket_no }];
         });
+          setLoading(true);
         if (ticketno && ticketno.startsWith("PTL")) {
             savePtlDeliver(submitData)
                 .then((response) => {
@@ -434,20 +449,20 @@ const Issuance = () => {
     };
 
 
-        // const useDebounce = (value, delay) => {
-        //     const [debouncedValue, setDebouncedValue] = useState(value);
-        //     useEffect(() => {
-        //         const handler = setTimeout(() => setDebouncedValue(value), delay);
-        //         return () => clearTimeout(handler);
-        //     }, [value, delay]);
-        //     return debouncedValue;
-        // };
-    
-        // const debouncedSearch = useDebounce(searchText, 500);
-        // useEffect(() => {
-        //     fetchIssueData(page, perPage, debouncedSearch);
-        // }, [page, perPage, debouncedSearch]);
-    
+    // const useDebounce = (value, delay) => {
+    //     const [debouncedValue, setDebouncedValue] = useState(value);
+    //     useEffect(() => {
+    //         const handler = setTimeout(() => setDebouncedValue(value), delay);
+    //         return () => clearTimeout(handler);
+    //     }, [value, delay]);
+    //     return debouncedValue;
+    // };
+
+    // const debouncedSearch = useDebounce(searchText, 500);
+    // useEffect(() => {
+    //     fetchIssueData(page, perPage, debouncedSearch);
+    // }, [page, perPage, debouncedSearch]);
+
     //  const fetchIssueData = async (page, perPage , search = "") => {
     //     setLoading(true); // start loader
     //     try {
@@ -458,6 +473,45 @@ const Issuance = () => {
     //         setLoading(false); // stop loader after API finishes
     //     }
     // };
+
+    const [issuanceData, setIssuanceData] = useState();
+
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
+
+    const debouncedSearch = useDebounce(searchText, 500); // delay in ms
+
+
+
+    useEffect(() => {
+        fetchData(page, perPage, debouncedSearch);
+
+    }, [page, perPage, debouncedSearch]);
+
+    const fetchData = (page = 1, size = 10, search = "") => {
+        setLoading(true);
+        getIssuanceData(page, size, search)
+            .then((response) => {
+                if (response?.data?.content) {
+                    setIssuanceData(response.data.content);
+                    setTotalRows(response.data.totalElements || 0);
+                } else {
+                    console.warn("No content found in response:", response.data);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching search data:", error);
+            }).finally(() => {
+                setLoading(false);
+            })
+    };
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -480,7 +534,7 @@ const Issuance = () => {
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Issue List</h5>
-
+                   
                     <IssuanceShowTable
                         data={pickTicketData}
                         page={page}
@@ -502,7 +556,6 @@ const Issuance = () => {
                         formErrors={formErrors}
                         fetchPickTicketDetail={fetchPickTicketDetail}
                         ticketNo={formData.issueTicket || formData.deliverTicket || formData.requestedTicket}
-
                     />
                     {isUserActive && (
                         <p>
@@ -516,6 +569,7 @@ const Issuance = () => {
                         {hideDeliverButton && (
                             <button className='ComCssSubmitButton' onClick={handleDliver} >Deliver</button>
                         )}
+                            {/* <button className='ComCssSubmitButton' onClick={handleDliver} >Deliver</button> */}
 
                         {hideIssueButton && (
                             <button className='ComCssSubmitButton' onClick={handleIssue} >Issue</button>
@@ -542,9 +596,9 @@ const Issuance = () => {
                         )}
                     </div>
                 </div>
-                                <LoadingOverlay loading={loading} />
-                  <IssuanceTable
-                    // data={requesterDeatil}
+                <LoadingOverlay loading={loading} />
+                <IssuanceTable
+                    data={issuanceData}
                     page={page}
                     perPage={perPage}
                     totalRows={totalRows}

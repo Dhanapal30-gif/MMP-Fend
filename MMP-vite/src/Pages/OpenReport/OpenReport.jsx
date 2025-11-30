@@ -11,7 +11,7 @@ const OpenReport = ({ page, totalRows, loading, setPage,  }) => {
 const [perPage, setPerPage] = useState(10); // ✅ must exist
 
     const columns = generateColumns({
-        fields: ["ProductName", "Ongoing", "Open"],
+        fields: ["productName", "ongoing", "open"],
     });
 
     const fetchApproverTicktes = async () => {

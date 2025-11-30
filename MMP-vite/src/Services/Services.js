@@ -259,9 +259,9 @@ export const updatePoDeatil = (id, formData) =>
 
 
 const Delete_PoDetail = `${url}/Podeatil/deletePoDetail`;  // Base URL without the id
-export const deletePoDetail = (ids) => {
+export const deletePoDetail = (ids,modifiedby) => {
   const query = ids.map(id => `id=${id}`).join('&');
-  return axios.delete(`${Delete_PoDetail}?${query}`);
+  return axios.delete(`${Delete_PoDetail}?${query}&modifiedby=${modifiedby}`);
 };
 
 
