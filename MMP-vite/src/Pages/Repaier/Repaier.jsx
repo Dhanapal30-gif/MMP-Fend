@@ -39,7 +39,7 @@ const Repaier = () => {
     const [tableData, setTableData] = useState([]);
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(20);
+    const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);

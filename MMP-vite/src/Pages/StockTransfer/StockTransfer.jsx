@@ -8,7 +8,7 @@ import { fetchRequesterDetail, fetchRequesterSearch } from "../../components/Req
 
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { saveGRN } from '../../Services/Services_09.js';
-import { checkAvailable, downloadRequester, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, fetchRetPartcode, fetchStockTransferAll, fetchTransferPartcode, saveRequester, saveReturning, saveStockTransfer } from '../../Services/Services-Rc.js';
+import { checkAvailable, downloadRequester, downloadStockTransfer, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, fetchRetPartcode, fetchStockTransferAll, fetchTransferPartcode, saveRequester, saveReturning, saveStockTransfer } from '../../Services/Services-Rc.js';
 import { ContactSupportOutlined } from '@mui/icons-material';
 
 const StockTransfer = () => {
@@ -141,12 +141,7 @@ const StockTransfer = () => {
         }
     };
 
-    const fetchAll = (page, perPage, search = "") => {
-        if (search && search.trim() !== "") {
-        } else {
-            fetchStockAll(page, perPage);
-        }
-    };
+
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -160,12 +155,12 @@ const StockTransfer = () => {
     const debouncedSearch = useDebounce(searchText, 500); // delay in ms
 
     useEffect(() => {
-        fetchAll(page, perPage, debouncedSearch);
+        fetchStockAll(page, perPage, debouncedSearch);
     }, [page, perPage, debouncedSearch]);
 
 
-    const fetchStockAll = (page, size) => {
-        fetchStockTransferAll(page, size)
+    const fetchStockAll = (page, size,search="") => {
+        fetchStockTransferAll(page, size,search)
             .then((response) => {
                 if (response?.data?.content) {
                     setStockTransferDetail(response.data.content); // use correct state setter
@@ -239,6 +234,43 @@ const StockTransfer = () => {
         setShowTable(false)
     }
 
+
+
+    const exportToExcel = (search = "") => {
+                const userId = sessionStorage.getItem("userName") || "System";
+        
+                setLoading(true);
+        
+               
+        
+                 const apiCall = () => {
+            if (search?.trim() !== "") {
+                return downloadStockTransfer(search);
+            } else {
+                return downloadStockTransfer(""); // or another API for no search
+            }
+        };
+    
+               
+                apiCall()
+                    .then(response => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.setAttribute("download", "StockManual Update.xlsx");
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        // setDownloadDone(true);
+                    })
+                    .catch((error) => {
+                        console.error("Download failed:", error);
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                        setTimeout(() => setDownloadDone(false), 5000);
+                    });
+            };
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -311,17 +343,7 @@ const StockTransfer = () => {
                 <h5 className='ComCssTableName'>Requested Tickets</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                     <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
-                        {loading
-                            ? downloadProgress !== null
-                                ? `Downloading... ${downloadProgress}%`
-                                : "Downloading..."
-                            : downloadDone
-                                ? "✅ Done"
-                                : (
-                                    <>
-                                        <FaFileExcel /> Export
-                                    </>
-                                )}
+                        <FaFileExcel /> Export
                     </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}

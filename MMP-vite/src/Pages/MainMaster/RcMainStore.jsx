@@ -40,7 +40,7 @@ const RcMainStore = () => {
   const [size, setSize] = useState(10); // Your size control
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [rackRows, setRackRows] = useState([{ racklocation: "" }]);
-
+const [resetKey, setResetKey] = useState(0);
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -128,6 +128,8 @@ const handleLocationChange = (index, value) => {
       .then((response) => {
         fetchMainMaster(page, perPage);
         setShowSuccessPopup(true);
+        setResetKey(prev => prev + 1);  
+        setPage(1);
         setSuccessMessage("Masterdata Added Successfully")
         formClear();
       })
@@ -1196,6 +1198,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
                           <LoadingOverlay loading={loading} />
           
           <DataTable
+          key={resetKey}                 
+  paginationDefaultPage={1} 
             columns={column}
             data={rcStoreData}
             pagination

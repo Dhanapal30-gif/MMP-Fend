@@ -43,6 +43,7 @@ import PTLRequest from './Pages/PTLOpreatorRequest/PTLRequest';
 import CompatabilityMaster from './Pages/CompatabilityMaster/CompatabilityMaster';
 import LocalSummaryReport from './Pages/LocalSummaryReport/LocalSummaryReport';
 import StockReport from './Pages/StockReport/StockReport';
+import StockUpdate from './Pages/StockUpdate/StockUpdate';
 function App() {
   const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -92,6 +93,7 @@ function App() {
       { name: "Compatability Master", path: "/compatabilityMaster" },
       { name: "LocalSummary Report", path: "/localSummaryReport" },
       { name: "StockReport", path: "/stockReport" },
+      { name: "StockUpdate", path: "/stockUpdate" },
     ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -132,9 +134,9 @@ function App() {
       <div className='App'>
         {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />}
 
-    {userId && <NotificationList userId={userId} />}
+        {userId && <NotificationList userId={userId} />}
 
-{/* <NotificationList/> */}
+        {/* <NotificationList/> */}
         <Routes>
           <Route path="/" element={<Login setUserId={setUserId} />} />
           <Route path="/createAccount" element={<CreateAccount />} />
@@ -172,6 +174,7 @@ function App() {
           <Route path='/localSummaryReport' element={<LocalSummaryReport />} />
           <Route path='/compatabilityMaster' element={<CompatabilityMaster />} />
           <Route path='/stockReport' element={<StockReport />} />
+          <Route path='/stockUpdate' element={<StockUpdate />} />
 
           <Route
             path="/receving"
@@ -188,7 +191,7 @@ function App() {
 
       </div>
     </ThemeProvider>
-    
+
   )
 }
 

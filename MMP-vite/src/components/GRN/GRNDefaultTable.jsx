@@ -62,10 +62,10 @@ const GRNDefaultTable = ({
       "totalValue",
       "totalValueEuro",
       "unitprice",
-      "GRNQty",
-      "GRNo",
-      "GRDate",
-      "GRNComment",
+      "grnqty",
+      "grno",
+      "grdate",
+      "grcomments",
 
     ],
     customConfig: {
@@ -84,9 +84,10 @@ const GRNDefaultTable = ({
             totalValue: { label: "Total Value" },
             totalValueEuro: { label: "Total Value Euro" },
             unitprice: { label: "UnitPrice" },
-            GRNo: { label: "GRN Number" },
-            GRDate: { label: "GRN Date" }
-
+            grno: { label: "GRN Number" },
+            grnqty: { label: "GRN Qty" },
+            grdate: { label: "GRN Date" },
+            grcomments: { label: "GRN Comments" }
 
         },
     // onEdit,

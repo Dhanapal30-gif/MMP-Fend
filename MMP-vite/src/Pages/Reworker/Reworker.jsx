@@ -329,7 +329,8 @@ const Reworker = () => {
     const showRequest =
         requestButton &&
         boardFetch.length > 0 &&
-        boardFetch[0].is_ptlrequest === "0" &&
+        // boardFetch[0].is_ptlrequest === "0" &&
+        (boardFetch[0]?.is_ptlrequest === "0" || !boardFetch[0]?.is_ptlrequest) &&
         (
             ['Trackchange', 'Reflow'].includes(boardFetch[0]?.type) ||
             !['Soldring', 'Desoldring'].includes(boardFetch[0]?.type)

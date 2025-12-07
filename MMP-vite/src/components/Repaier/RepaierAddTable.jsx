@@ -89,11 +89,16 @@ const RepaierAddTable = ({
     }),
   ];
 
-
+const paginatedData = React.useMemo(() => {
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      return data.slice(start, end);
+  }, [data, page, perPage]);
+  
   return (
     <CommonDataTable
       columns={columns}
-      data={data}
+      data={paginatedData}
       page={page}
       perPage={perPage}
       totalRows={totalRows}

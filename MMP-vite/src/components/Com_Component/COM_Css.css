@@ -382,6 +382,12 @@ body {
 .ComCssUpload button:active {
   transform: scale(0.98);
 }
+.disabledDarkText .MuiInputBase-input.Mui-disabled {
+  -webkit-text-fill-color: black; /* Chrome/Safari */
+  color: black;                    /* Firefox/other */
+  opacity: 1;                      /* remove default opacity */
+}
+
 /* Roboto */
 @font-face {
   font-family: 'Roboto';

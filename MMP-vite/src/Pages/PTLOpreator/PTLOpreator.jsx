@@ -93,7 +93,7 @@ const PTLOpreator = () => {
         // send payload to API if needed
         try {
             const response = await savePTLSubmit(payload);
-            setSuccessMessage("API success:", response.message)
+            setSuccessMessage("Submited success:", response.message)
             setShowSuccessPopup(true)
             fetchData();
             setShowTable(false)

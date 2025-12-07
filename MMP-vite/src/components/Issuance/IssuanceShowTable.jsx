@@ -64,7 +64,7 @@ const IssuanceShowTable = ({
 
   const handleSave = async () => {
     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
-    if (activeRow?.requestertype?.toLowerCase() === "submodule") {
+    if (activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule" ) {
       
       const hasSerial = formData.newSerialNumber && formData.newSerialNumber.trim() !== "";
       if (!hasSerial) {
@@ -334,6 +334,7 @@ const printCleanTable = () => {
     color: "white",
     border: "none",
     borderRadius: "6px",
+    marginTop:"-79px",
     padding: "8px 16px",
     fontSize: "14px",
     cursor: "pointer",
@@ -380,7 +381,7 @@ const printCleanTable = () => {
         PaperProps={{
           sx: {
             // width: 1200,       // custom width in px
-            width: activeRow?.requestertype ?.toLowerCase() === "submodule" ? 1200 : 970, // dynamic width
+            width: activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule" ? 1200 : 970, // dynamic width
             border: '3px solid', // border width required
             borderImage: 'linear-gradient(to bottom, #d27c19ff 50%, #afee39ff 50%) 1', // top 50% blue, bottom 50% green
             borderRadius: 3,              // rounded corners
@@ -404,7 +405,7 @@ const printCleanTable = () => {
         >
           <span>Partcode: {activeRow?.partcode}</span>
           <span>
-            {activeRow?.requestertype?.toLowerCase() === "submodule" && (
+            {activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule" && (
 
               <label style={{ display: 'flex', flexDirection: 'column', fontSize: '12px', fontWeight: 'bold', color: 'yellow', marginTop: '-5px' }}>
                 New Serial Number

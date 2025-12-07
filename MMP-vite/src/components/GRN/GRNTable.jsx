@@ -12,6 +12,7 @@ const GRNTable = ({
   loading,
   setPage,
   setPerPage,
+  handleGRNCommentChange,
   selectedRows,
   selectedGrnRows,
   setSelectedGrnRows,
@@ -47,7 +48,7 @@ const GRNTable = ({
       "recevingTicketNo", "ponumber", "vendorname", "postingdate",
       "partcode", "partdescription", "UOM", "TYC", "invoiceNo",
       "invoiceDate", "receivingDate", "recevingQty", "orderqty",
-      "unitprice", "GRNQty", "Comment"
+      "unitprice", "GRNQty", "GRComments"
     ],
     onEdit,
     showEdit: false,
@@ -57,7 +58,7 @@ const GRNTable = ({
     data,
     customConfig: {
       recevingTicketNo: { label: "Ticket No", width: "140px" },
-      Comment: { label: "Comment", width: "270px", height: "70px" }
+      GRComments: { label: "Comment", width: "270px", height: "70px" }
     },
     customCellRenderers: {
       GRNQty: (row) => (
@@ -94,11 +95,11 @@ const GRNTable = ({
 />
 
       ),
-      Comment: (row) => (
+      GRComments: (row) => (
         <TextField
           placeholder="Enter Comment"
-          value={row.Comment || ""}
-          onChange={(e) => handleGRNQtyChange(row.selectedid, "Comment", e.target.value)}
+          value={row.GRComments || ""}
+          onChange={(e) => handleGRNCommentChange(row.selectedid, "GRComments", e.target.value)}
 
           className="invoice-input"
         />

@@ -52,6 +52,8 @@ const Add_Po_Detail = () => {
   const [rcMainStore, setRcMainStore] = useState([]);
   const [downloadProgress, setDownloadProgress] = useState(null);
   const [downloadDone, setDownloadDone] = useState(false);
+  const [addSearchText, setAddSearchText] = useState("");
+  const [filteredAddData, setFilteredAddData] = useState([]);
   const [formData, setFormData] = useState({
     ordertype: "", potool: "", ponumber: "", podate: "",
     currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
@@ -255,6 +257,7 @@ const Add_Po_Detail = () => {
       ccf: "", totalvalueeuro: "", createdby: "", updatedby: "", postatus: "", ordertype: "", partdiscription: "", UOM: ""
     })
     setSelectedRows([]);
+    setTableData([]);
   }
   const calculateColumnWidth = (data, key, charWrap = 19, charWidth = 8, minWidth = 190, maxWidth = 318) => {
     if (!Array.isArray(data) || data.length === 0) return minWidth;
@@ -642,7 +645,7 @@ const Add_Po_Detail = () => {
     setFormData(row);
     // console.log("Editing Row Data:", row);  // Debugging
     setFormData({
-      id: row.id || "",
+      intsysid: row.intsysid || "",
       ordertype: row.ordertype || "",
       potool: row.potool || "",
       ponumber: row.ponumber || "",
@@ -665,16 +668,17 @@ const Add_Po_Detail = () => {
     setSelectedRows([]);
   };
 
-  const handleUpdate = (e, id) => {
+  const handleUpdate = (e, intsysid) => {
     e.preventDefault();
     if (!valiDate()) return;
     setLoading(true);
     const updatedby = sessionStorage.getItem('userName') || "System";
     const updateFormData = {
       ...formData,
-      id,
       updatedby
     };
+     const id = formData.intsysid;
+console.log("ID being sent:", intsysid);
 
     updatePoDeatil(id, updateFormData)
       .then((response) => {
@@ -786,6 +790,24 @@ const Add_Po_Detail = () => {
         setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
       });
   };
+
+
+  useEffect(() => {
+    if (!addSearchText) {
+      setFilteredAddData(tableData);
+    } else {
+      const lower = addSearchText.toLowerCase();
+  
+      const result = tableData.filter((row) =>
+        Object.values(row).some((val) =>
+          String(val).toLowerCase().includes(lower)
+        )
+      );
+  
+      setFilteredAddData(result);
+    }
+  }, [addSearchText, tableData]);
+  
   return (
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
@@ -815,14 +837,14 @@ const Add_Po_Detail = () => {
             />
             <Autocomplete
               disabled={isFrozen}
-              options={["I-BUY", "P20", "SRM", "Nokia Internal Transfer", "RC Internal Transfer"]}
+              options={["I-BUY", "P20", "SRM", "Nokia Internal Transfer", "RC Internal Transfer","Harvester"]}
               getOptionLabel={(option) => (typeof option === "string" ? option : "")}
               value={formData.potool || []}
               onChange={(event, newValue) => setFormData({ ...formData, potool: newValue || [] })}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Po Toll"
+                  label="Po Tool"
                   variant="outlined"
                   error={Boolean(formErrors.potool)}
                   helperText={formErrors.potool}
@@ -1057,10 +1079,29 @@ const Add_Po_Detail = () => {
       </div>
       {showTable && (
         <div className='ComCssTable'>
-          <h5 className='ComCssTableName'>ADD PO</h5>
+          <h5 className='ComCssTableName'>ADD PO Details</h5>
+
+          <div
+                        className="d-flex justify-content-end align-items-center mb-3"
+                        style={{ marginTop: "9px", display: "flex" }}>
+                        <div style={{ position: "relative", width: "200px" }}>
+                            <input
+                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                                placeholder="Search..." value={addSearchText}
+                                onChange={(e) => setAddSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span onClick={() => setAddSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+
           <DataTable
             columns={column}
-            data={tableData}
+            data={filteredAddData}
             pagination
             // paginationServer
             progressPending={loading}

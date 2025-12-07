@@ -27,6 +27,8 @@ const PTLRequest = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [requestDeatil, setRequestDetail] = useState([]);
     const [downloadProgress, setDownloadProgress] = useState(null);
+        const [addSearchText, setAddSearchText] = useState("");
+const [filteredAddData, setFilteredAddData] = useState([]);
 
 
     const [formData, setFormData] = useState({
@@ -100,8 +102,12 @@ const PTLRequest = () => {
     };
 
     const handleAddClick = () => {
-        // if (!valiDate()) return;
-        // alert("eriuh")
+        
+        if (tableData.length >= 15) {
+        setErrorMessage("Cannot add more than 15 Component");
+        setShowErrorPopup(true);
+        return;
+    }
         if (tableData.some(item => item.partcode === formData.partcode)) {
             setErrorMessage("Partcode Already Added")
             setShowErrorPopup(true);
@@ -239,6 +245,22 @@ const PTLRequest = () => {
             });
     };
 
+    
+    useEffect(() => {
+      if (!addSearchText) {
+        setFilteredAddData(tableData);
+      } else {
+        const lower = addSearchText.toLowerCase();
+    
+        const result = tableData.filter((row) =>
+          Object.values(row).some((val) =>
+            String(val).toLowerCase().includes(lower)
+          )
+        );
+    
+        setFilteredAddData(result);
+      }
+    }, [addSearchText, tableData]);
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -264,10 +286,27 @@ const PTLRequest = () => {
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>ADD Board</h5>
+                     <div
+                        className="d-flex justify-content-end align-items-center mb-3"
+                        style={{ marginTop: "9px", display: "flex" }}>
+                        <div style={{ position: "relative", width: "200px" }}>
+                            <input
+                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                                placeholder="Search..." value={addSearchText}
+                                onChange={(e) => setAddSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span onClick={() => setAddSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
                     <LoadingOverlay loading={loading} />
 
                     <PTLRequestAddTable
-                        data={tableData}
+                        data={filteredAddData}
                         page={page}
                         perPage={perPage}
                         totalRows={tableData.length}

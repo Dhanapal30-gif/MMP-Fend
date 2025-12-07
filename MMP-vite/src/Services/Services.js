@@ -253,9 +253,16 @@ export const fetchPoDeatil = (page = 0, size = 10)=>{
 // export const updatePoDetaildata = (intsysid, formData) =>
 //   axios.put(`${update_PoDetail}/${intsysid}`, formData);
 
+// const update_PoDeatil = `${url}/Podeatil/updatePoDetail`;
+// export const updatePoDeatil = (intsysid, formData) =>
+//   axios.put(`${update_PoDeatil}/${intsysid}`, formData);
+
 const update_PoDeatil = `${url}/Podeatil/updatePoDetail`;
-export const updatePoDeatil = (id, formData) =>
-  axios.put(`${update_PoDeatil}/${id}`, formData);
+
+export const updatePoDeatil = (id, formData) => {
+  if (!id) return Promise.reject("ID is missing");
+  return axios.put(`${update_PoDeatil}/${id}`, formData);
+};
 
 
 const Delete_PoDetail = `${url}/Podeatil/deletePoDetail`;  // Base URL without the id

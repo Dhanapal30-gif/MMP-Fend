@@ -46,6 +46,8 @@ const Issuance = () => {
     const [loading, setLoading] = useState(false);
     const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
+        const [addSearchText, setAddSearchText] = useState("");
+    const [filteredAddData, setFilteredAddData] = useState([]);
 
 
     const handleChange = (field, value) => {
@@ -233,8 +235,9 @@ const Issuance = () => {
             })
 
             .catch((error) => {
-                alert(error.response?.data?.message || "Something went wrong!");
-
+                // alert(error.response?.data?.message || "Something went wrong!");
+                setErrorMessage(error.response?.data?.message || "Something went wrong!");
+                setShowErrorPopup(true);
             }).finally(() => {
                 setLoading(false);
             });
@@ -419,6 +422,7 @@ const Issuance = () => {
                     setHideIssueButton(true);
                     setPickTicketData([]);
                     setShowTable(false);
+                    fetchData();
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
@@ -439,6 +443,7 @@ const Issuance = () => {
                     setHideIssueButton(true);
                     setPickTicketData([]);
                     setShowTable(false);
+                    fetchData();
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
@@ -494,7 +499,7 @@ const Issuance = () => {
 
     }, [page, perPage, debouncedSearch]);
 
-    const fetchData = (page = 1, size = 10, search = "") => {
+    const fetchData = (page = 0, size = 10, search = "") => {
         setLoading(true);
         getIssuanceData(page, size, search)
             .then((response) => {
@@ -512,6 +517,21 @@ const Issuance = () => {
             })
     };
 
+useEffect(() => {
+  if (!addSearchText) {
+    setFilteredAddData(pickTicketData);
+  } else {
+    const lower = addSearchText.toLowerCase();
+
+    const result = pickTicketData.filter((row) =>
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(lower)
+      )
+    );
+
+    setFilteredAddData(result);
+  }
+}, [addSearchText, pickTicketData]);
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -534,9 +554,24 @@ const Issuance = () => {
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Issue List</h5>
-                   
+                   <div
+                        className="d-flex justify-content-end align-items-center mb-3"
+                        style={{ marginTop: "9px", display: "flex" }}>
+                        <div style={{ position: "relative", width: "200px" }}>
+                            <input
+                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                                placeholder="Search..." value={addSearchText}
+                                onChange={(e) => setAddSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span onClick={() => setAddSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                                </span>
+                            )}
+                        </div>
+                    </div>
                     <IssuanceShowTable
-                        data={pickTicketData}
+                        data={filteredAddData}
                         page={page}
                         perPage={perPage}
                         totalRows={tableData.length}

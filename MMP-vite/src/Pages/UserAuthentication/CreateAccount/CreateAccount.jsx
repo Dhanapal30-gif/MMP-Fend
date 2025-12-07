@@ -81,7 +81,7 @@ const CreateAccount = () => {
   }, [isEdit, editFormData, storeProduct]);
 
 
-  console.log("editFormData", editFormData)
+  // console.log("editFormData", editFormData)
 
 
   const [userRoleData, setUserRoleData] = useState([]);
@@ -407,7 +407,7 @@ const CreateAccount = () => {
                   fullWidth
                   size="small"
                 />
-                {(formData.requestType?.includes("Submodule") || formData.requestType?.includes("others")) && (
+                {(formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others")) && (
 
                   <Autocomplete
                     multiple
@@ -659,7 +659,7 @@ const CreateAccount = () => {
               {formData.requesterType?.includes("Material Request") && (
                 <Autocomplete
                   multiple
-                  options={["Submodule", "others", "ThermalGel"]}
+                  options={["Sub Module", "others", "ThermalGel"]}
                   getOptionLabel={(option) => option || ""}
                   value={formData.requestType || []}
                   onChange={(event, newValue) =>
@@ -724,13 +724,13 @@ const CreateAccount = () => {
 
               </div>
             )} */}
-            {(formData.requestType?.includes("Submodule") || formData.requestType?.includes("others")) && (
+            {/* {(formData.requestType?.includes("Submodule") || formData.requestType?.includes("others")) && (
 
               <div className='ProductTexfiled'>
                 <ThemeProvider theme={TextFiledTheme}>
                 </ThemeProvider>
               </div>
-            )}
+            )} */}
           </div>
           <Button type="submit" variant="contained" color="primary"
             fullWidth

@@ -13,14 +13,13 @@ const allFields = [
   "partcode",
   "partdescription",
   "UOM",
-  "componentType",
-  "ComponentUsage",
+  "componenttype",
   "compatabilitypartcode",
   "inventory_box_no",
   "req_qty",
   "batchCode",
   "location",
-  "allocatedQty",
+  "TotalAvailableQty",
   "ApprovedL1Qty",
   "ApprovedL2Qty",
   "faultySerialNumber",
@@ -37,12 +36,12 @@ const hideForReturning = [
   "productname",
   "productgroup",
   "productfamily",
-  "componentType",
+  "componenttype",
   "compatabilitypartcode",
   "req_qty",
   "batchCode",
   "location",
-  "allocatedQty",
+  "TotalAvailableQty",
   "UOM",
   "approved_l1",
   "approved_l1_date",
@@ -63,7 +62,7 @@ const hideForStock = [
   "productname",
   "productgroup",
   "productfamily",
-  "componentType",
+  "componenttype",
   "compatabilitypartcode",
 
   "req_qty",
@@ -81,12 +80,12 @@ const hideForPTL = [
   "productname",
   "productgroup",
   "productfamily",
-  "componentType",
+  "componenttype",
   "compatabilitypartcode",
   "req_qty",
   "batchCode",
   "location",
-  "allocatedQty",
+  "TotalAvailableQty",
   "UOM",
   // "ApprovedL1Qty",
   "ApprovedL2Qty",
@@ -99,6 +98,9 @@ const hideForPTL = [
   "ordertype"
 ];
  
+const hideApproverFiled = [
+  "ApprovedL2Qty",
+]
 
 const customConfig = {
   rec_ticket_no: { label: "Rec Ticket No" },
@@ -109,27 +111,27 @@ const customConfig = {
   partcode: { label: "Part Code" },
   partdescription: { label: "Part Description" },
   UOM: { label: "UOM" },
-  componentType: { label: "Component Type" },
+  componenttype: { label: "Component Usage" },
   compatabilitypartcode: { label: "Compatibility Part Code" },
   req_qty: { label: "Request Qty" },
   batchCode: { label: "Batch Code" },
   location: { label: "Location" },
-  allocatedQty: { label: "Allocated Qty" },
+  TotalAvailableQty: { label: "Available Qty" },
   ApprovedL1Qty: { label: "Approved Qty L1" },
   ApprovedL2Qty: { label: "Approved Qty L2" },
   Comment: { label: "Comment", width: "250px" },
-  // recordstatus: { label: "Status" },
-  recordstatus: {
-  label: "Status",
-  format: (value) => {
-    if (value === "MSC00003") return "l2_pending";
-    if (value === "MSC00001") return "l1_pending";
-    return value;
-  },
-},
+  recordstatus: { label: "Status" },
+//   recordstatus: {
+//   label: "Status",
+//   format: (value) => {
+//     if (value === "MSC00003") return "l2_pending";
+//     if (value === "MSC00001") return "l1_pending";
+//     return value;
+//   },
+// },
 
   faultySerialNumber: { label: "Faulty Serial Number" },
-  ComponentUsage: { label: "Component Usage" },
+  // ComponentUsage: { label: "Component Usage" },
   // recordstatus: { label: "Status" }
 };
 
@@ -164,6 +166,9 @@ const ApproverTable = ({
     else if (ticketNo.startsWith("INV")) {
       return allFields.filter((f) => !hideForStock.includes(f));
     }
+    // else if (data.some((row) => row.recordstatus === "L1-Pending")) {
+    //   return allFields.filter((f) => !hideApproverFiled.includes(f));
+    // }
     return allFields;
   }, [data]);
 

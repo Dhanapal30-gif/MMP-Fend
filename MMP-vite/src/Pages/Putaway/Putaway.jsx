@@ -44,7 +44,8 @@ const Putaway = () => {
     const [isPutProcess, setIsPutProcess] = useState(false)
     const [rc_DHLProcess, setRc_DHLProcess] = useState(false)
     const [putawayRc_DHL, setPutawayRc_DHL] = useState([])
-
+ const [addSearchText, setAddSearchText] = useState("");
+  const [filteredAddData, setFilteredAddData] = useState([]);
 
     const [isUserActive, setIsUserActive] = useState(false)
     const [pageClose, setPageClose] = useState(0);
@@ -943,6 +944,7 @@ const [putIds,setPutIds]=useState([])
                                 batchcode: d.batch,
                                 qty: Number(d.qty),
                                 editingToLocation: d.toLocation,
+                                location: d.fromLocation,
                                 createdby: username,
                                 transferTicketNo: row.transferTicketNo
                             }))
@@ -1012,6 +1014,24 @@ const [putIds,setPutIds]=useState([])
     const exportToExcel = (hiddenButton, search = "") => {
         download({ hiddenButton, search });
     }
+
+
+    useEffect(() => {
+        if (!addSearchText) {
+          setFilteredAddData(putawayProcessDetail);
+        } else {
+          const lower = addSearchText.toLowerCase();
+      
+          const result = putawayProcessDetail.filter((row) =>
+            Object.values(row).some((val) =>
+              String(val).toLowerCase().includes(lower)
+            )
+          );
+      
+          setFilteredAddData(result);
+        }
+      }, [addSearchText, putawayProcessDetail]);
+      
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -1035,14 +1055,31 @@ const [putIds,setPutIds]=useState([])
                         {stockTransferPutProcess && "Putaway Stock Transfer Process"}
                         {rc_DHLProcess && "RC-DHL Stock Transfer Process"}
                     </h5>
+
+                    <div
+                        className="d-flex justify-content-end align-items-center mb-3"
+                        style={{ marginTop: "9px", display: "flex" }}>
+                        <div style={{ position: "relative", width: "200px" }}>
+                            <input
+                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                                placeholder="Search..." value={addSearchText}
+                                onChange={(e) => setAddSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span onClick={() => setAddSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                                </span>
+                            )}
+                        </div>
+                    </div>
                     {
                         recevingPutProcess &&
                         <PutawayProcessTable
-                            data={putawayProcessDetail}
+                            data={filteredAddData}
                             // putawayProcessDetail={putawayProcessDetail}
                             page={page}
                             perPage={perPage}
-                            totalRows={putawayProcessDetail.length}
+                            totalRows={filteredAddData.length}
                             loading={loading}
                             setPage={setPage}
                             setPerPage={setPerPage}

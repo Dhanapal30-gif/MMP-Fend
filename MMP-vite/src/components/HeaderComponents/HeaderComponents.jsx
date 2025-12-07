@@ -311,6 +311,7 @@ const HeaderComponents = () => {
                     <ul className="dropdown-menu">
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/stockTransfer" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Transfer</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockUpdate" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manula Stock Update</Link></li>)}
 
                     </ul>
                   )}

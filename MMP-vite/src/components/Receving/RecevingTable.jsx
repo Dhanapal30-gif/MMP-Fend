@@ -9,7 +9,7 @@ import * as XLSX from "xlsx";
 import { FaFileExcel } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 
-export const RecevingTable = ({ formData, poDetail, handleFieldChange, formErrors, selectedRows, setSelectedRows }) => {
+export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, formErrors,setFormErrors, selectedRows, setSelectedRows }) => {
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
     const [errorMessage, setErrorMessage] = useState('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const paginatedData = poDetail.slice((page - 1) * perPage, page * perPage);
+    const paginatedData = filteredAddData.slice((page - 1) * perPage, page * perPage);
 
     const calculateColumnWidth = (data, key, charWrap = 19, charWidth = 8, minWidth = 190, maxWidth = 318) => {
         if (!Array.isArray(data) || data.length === 0) return minWidth;
@@ -54,33 +54,95 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             setSelectedRows((prev) => prev.filter((k) => k !== key));
         }
     };
+    // useEffect(() => {
+    //     const updatedData = filteredAddData.map((row, index) => {
+    //         const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+    //         if (
+    //             expApplicable === "no" &&
+    //             row.shelflife &&
+    //             !row.exp_date &&
+    //             !row.expiryAutoSet
+    //         ) {
+    //             const today = new Date();
+    //             const expiry = new Date(today);
+    //             expiry.setMonth(expiry.getMonth() + parseInt(row.shelflife, 10));
+    //             expiry.setDate(0);
+    //             return {
+    //                 ...row,
+    //                 exp_date: expiry.toISOString().split("T")[0],
+    //                 expiryAutoSet: true,
+    //             };
+    //         }
+    //         return row;
+    //     });
+
+    //     // Update poDetail state
+    //     updatedData.forEach((row, idx) => handleFieldChange(idx, "exp_date", row.exp_date));
+    //     updatedData.forEach((row, idx) => handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet));
+    // }, [filteredAddData]);
+
+
     useEffect(() => {
-        const updatedData = poDetail.map((row, index) => {
-            const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
-            if (
-                expApplicable === "no" &&
-                row.shelflife &&
-                !row.exp_date &&
-                !row.expiryAutoSet
-            ) {
-                const today = new Date();
-                const expiry = new Date(today);
-                expiry.setMonth(expiry.getMonth() + parseInt(row.shelflife, 10));
-                expiry.setDate(0);
-                return {
-                    ...row,
-                    exp_date: expiry.toISOString().split("T")[0],
-                    expiryAutoSet: true,
-                };
+    // Flag to track if any state change occurred in this run
+    let madeUpdates = false; 
+
+    const updatedData = filteredAddData.map((row, index) => {
+        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        
+        // Use the row data to check if an update is needed
+        if (
+            expApplicable === "no" &&
+            row.shelflife &&
+            !row.exp_date &&             // Check 1: Must NOT have an exp_date
+            !row.expiryAutoSet          // Check 2: Must NOT be auto-set already
+        ) {
+            const today = new Date();
+            const expiry = new Date(today);
+            const shelfLifeMonths = parseInt(row.shelflife, 10);
+            
+            // Set expiry date to shelf life months in the future
+            expiry.setMonth(expiry.getMonth() + shelfLifeMonths);
+            // setDate(0) sets it to the last day of the *previous* month.
+            // A more typical approach is to set it to the last day of the calculated month:
+            // expiry.setDate(0); 
+            // It seems you intended to use setDate(1) then go back, or just set to the calculated end date.
+            // Let's stick to your current logic as you said it "is working" in terms of calculation:
+            expiry.setDate(0); 
+            
+            const newExpDate = expiry.toISOString().split("T")[0];
+            
+            madeUpdates = true; // An update *will* be made
+            
+            // Return the calculated new row object
+            return {
+                ...row,
+                exp_date: newExpDate,
+                expiryAutoSet: true,
+            };
+        }
+        return row;
+    });
+
+    // ⛔️ IMPORTANT CHANGE: Only call handleFieldChange if an update was actually calculated
+    if (madeUpdates) {
+        // Now, perform your updates. Since you calculate a fully updated row, 
+        // you only need to update the two changed fields if they were changed.
+        
+        updatedData.forEach((row, idx) => {
+            // Only update if it was part of the 'madeUpdates' calculation
+            if (row.expiryAutoSet) {
+                 handleFieldChange(idx, "exp_date", row.exp_date);
+                 handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet);
             }
-            return row;
         });
+    }
 
-        // Update poDetail state
-        updatedData.forEach((row, idx) => handleFieldChange(idx, "exp_date", row.exp_date));
-        updatedData.forEach((row, idx) => handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet));
-    }, [poDetail]);
-
+    // You MUST ensure 'handleFieldChange' is stable (wrapped in useCallback) 
+    // or remove it from the dependency array if possible, 
+    // AND that the state change it triggers only changes 
+    // the value of filteredAddData ONCE for these fields.
+    
+}, [filteredAddData, handleFieldChange]); // Add handleFieldChange if it's not stable
     const Defaultcolumn = [
         {
             name: (
@@ -168,7 +230,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                     onChange={(e) => {
                         const value = e.target.value;
                         const key = `${row.ponumber}-${row.partcode}`;
-                        const idx = poDetail.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                        const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
                         if (idx === -1) return;
 
                         handleFieldChange(idx, 'recevingQty', value);
@@ -215,7 +277,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                     onChange={(e) => {
                         const value = e.target.value;
                         const key = `${row.ponumber}-${row.partcode}`; // stable unique key
-                        const idx = poDetail.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                        const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
                         if (idx === -1) return;
 
                         // allow empty or partial decimal inputs
@@ -225,7 +287,7 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
                             // Only update Euro if valid number
                             const total = parseFloat(value);
                             if (!isNaN(total)) {
-                                const ccf = parseFloat(poDetail[idx].ccf) || 1;
+                                const ccf = parseFloat(filteredAddData[idx].ccf) || 1;
                                 handleFieldChange(idx, 'totalValueEuro', (total * ccf).toFixed(2));
                             } else {
                                 handleFieldChange(idx, 'totalValueEuro', '');
@@ -247,49 +309,108 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
             width: `${calculateColumnWidth('totalValueEuro')}px`
         }
         ,
-        {
-            name: "Expiry Date",
-            cell: (row) => {
-                const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
-                const isDisabled = expApplicable === "notapplicable";
+        // {
+        //     name: "Expiry Date",
+        //     cell: (row) => {
+        //         const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        //         const isDisabled = expApplicable === "notapplicable";
 
-                // Calculate min date (2 months after receivingDate)
-                let minExpiryDate = "";
-                const receiving = new Date(formData.receivingDate);
-                if (!isNaN(receiving)) {
-                    const minDate = new Date(receiving);
-                    minDate.setMonth(minDate.getMonth() + 2);
-                    minDate.setDate(1);
-                    minExpiryDate = minDate.toISOString().split("T")[0];
-                }
+        //         // Calculate min date (2 months after receivingDate)
+        //         let minExpiryDate = "";
+        //         const receiving = new Date(formData.receivingDate);
+        //         if (!isNaN(receiving)) {
+        //             const minDate = new Date(receiving);
+        //             minDate.setMonth(minDate.getMonth() + 2);
+        //             minDate.setDate(1);
+        //             minExpiryDate = minDate.toISOString().split("T")[0];
+        //         }
 
-                return (
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        value={row.exp_date || ""}
-                        onChange={(e) => {
-                            if (expApplicable === "yes") {
-                                const key = `${row.ponumber}-${row.partcode}`;
-                                const idx = poDetail.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
-                                if (idx === -1) return;
-                                handleFieldChange(idx, "exp_date", e.target.value);
-                            }
-                        }}
-                        disabled={isDisabled}
-                        className="invoice-input"
-                        error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
-                        helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
-                        inputProps={{
-                            min: expApplicable === "yes" ? minExpiryDate : undefined,
-                        }}
-                    />
+        //         return (
+        //             <TextField
+        //                 type="date"
+        //                 variant="outlined"
+        //                 value={row.exp_date || ""}
+        //                 onChange={(e) => {
+        //                     if (expApplicable === "yes") {
+        //                         const key = `${row.ponumber}-${row.partcode}`;
+        //                         const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+        //                         if (idx === -1) return;
+        //                         handleFieldChange(idx, "exp_date", e.target.value);
+        //                     }
+        //                 }}
+        //                 disabled={isDisabled}
+        //                 className="invoice-input"
+        //                 error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
+        //                 helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
+        //                 inputProps={{
+        //                     min: expApplicable === "yes" ? minExpiryDate : undefined,
+        //                 }}
+        //             />
 
-                );
-            }
-        }
+        //         );
+        //     }
+        // }
 
+{
+    name: "Expiry Date",
+    cell: (row) => {
+        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        const isDisabled = expApplicable === "notapplicable";
 
+        // --- 1. Calculate the ABSOLUTE MINIMUM Date (2 Months from Today) ---
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+        
+        // Clone today's date for the minimum calculation
+        const finalMinDate = new Date(today);
+        
+        // Set the minimum selectable date to exactly 2 months from today
+        finalMinDate.setMonth(finalMinDate.getMonth() + 2);
+        
+        // Convert the final minimum date to the required 'YYYY-MM-DD' string format
+        const minExpiryDate = finalMinDate.toISOString().split("T")[0];
+        
+        // --- 2. Calculate the MAXIMUM Date (2 Months after the Minimum Date) ---
+        
+        // Clone the final minimum date
+        const finalMaxDate = new Date(finalMinDate);
+        
+        // Add exactly 2 more months to define the maximum boundary
+        finalMaxDate.setMonth(finalMaxDate.getMonth() + 2);
+        
+        // Convert the final maximum date to the required 'YYYY-MM-DD' string format
+        const maxExpiryDate = finalMaxDate.toISOString().split("T")[0];
+
+        // --- 3. Render the TextField with both 'min' and 'max' attributes ---
+        
+        return (
+            <TextField
+                type="date"
+                variant="outlined"
+                value={row.exp_date || ""}
+                onChange={(e) => {
+                    if (expApplicable === "yes") {
+                        const key = `${row.ponumber}-${row.partcode}`;
+                        const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                        if (idx === -1) return;
+                        handleFieldChange(idx, "exp_date", e.target.value);
+                    }
+                }}
+                disabled={isDisabled}
+                className="invoice-input"
+                error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
+                helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
+                inputProps={{
+                    // MINIMUM date constraint: Today + 2 Months (e.g., 04-02-2026)
+                    min: expApplicable === "yes" ? minExpiryDate : undefined,
+                    // MAXIMUM date constraint: Min Date + 2 Months (e.g., 04-04-2026)
+                    max: expApplicable === "yes" ? maxExpiryDate : undefined, 
+                }}
+            />
+        );
+    }
+}
     ]
 
     const handlePageChange = (newPage) => {
@@ -304,10 +425,10 @@ export const RecevingTable = ({ formData, poDetail, handleFieldChange, formError
         <div >
             <DataTable
                 columns={Defaultcolumn}
-                data={poDetail}
+                data={filteredAddData}
                 pagination
                 progressPending={loading}
-                paginationTotalRows={poDetail.length}
+                paginationTotalRows={filteredAddData.length}
                 onChangeRowsPerPage={handlePerRowsChange}
                 onChangePage={handlePageChange}
                 paginationPerPage={perPage}

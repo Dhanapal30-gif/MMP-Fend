@@ -14,6 +14,8 @@ import { tr } from 'date-fns/locale';
 import { fetchScreenName, fetchUserRole } from '../../Services/Services';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns'; // make sure this import is correct
+import * as XLSX from "xlsx";
+import ExcelJS from 'exceljs';
 
 const Role = () => {
 
@@ -377,8 +379,70 @@ const filteredData = roleAndScreen.filter((row) => {
   );
 });
 
+// const filteredRole = roleAndScreen.filter(v =>
+//         v.userrole?.toLowerCase().includes(searchText.toLowerCase()) ||
+//         v.screenNameSelect?.toLowerCase().includes(searchText.toLowerCase()) 
+       
+
+//     );
+    //  const exportToExcel = (searchText = "") => {
+    //         if (searchText && searchText.trim() !== "") {
+    //             if (!Array.isArray(vendorMaster) || filteredData.length === 0) {
+    //                 return;
+    //             }
+    //             const sheet = XLSX.utils.json_to_sheet(filteredData);
+    //             const workbook = XLSX.utils.book_new();
+    //             XLSX.utils.book_append_sheet(workbook, sheet, "Role");
+    //             XLSX.writeFile(workbook, "RoleMaster.xlsx");
+    
+    //         } else {
+    //             if (!Array.isArray(roleAndScreen) || roleAndScreen.length === 0) {
+    //                 // console.warn("No data to export.");
+    //                 return;
+    //             }
+    //             const sheet = XLSX.utils.json_to_sheet(roleAndScreen);
+    //             const workbook = XLSX.utils.book_new();
+    //             XLSX.utils.book_append_sheet(workbook, sheet, "Vendors");
+    //             XLSX.writeFile(workbook, "RoleMaster.xlsx");
+    //         }
+    
+    //     };
 
     
+const exportToExcel = async (searchText = "") => {
+    const data = searchText?.trim() !== "" ? filteredData : roleAndScreen;
+    if (!Array.isArray(data) || data.length === 0) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('RoleMaster');
+
+    // Add header row
+    const headers = Object.keys(data[0]);
+    const headerRow = sheet.addRow(headers);
+
+    // Style header
+    headerRow.eachCell(cell => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF0000FF' } // Blue
+        };
+        cell.font = { color: { argb: 'FFFFFFFF' }, bold: true }; // White text
+    });
+
+    // Add data rows
+    data.forEach(item => {
+        sheet.addRow(Object.values(item));
+    });
+
+    // Save file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'RoleMaster.xlsx';
+    link.click();
+};
     return (
         <div className='COMCssContainer'>
             <div className='ComCssInput'>
