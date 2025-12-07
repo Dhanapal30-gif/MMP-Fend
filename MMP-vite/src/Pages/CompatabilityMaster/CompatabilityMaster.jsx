@@ -62,6 +62,7 @@ const CompatabilityMaster = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [updateButton, setUpdateButton] = useState(false);
     const [addButton, setAddButton] = useState(true)
+    const [resetKey, setResetKey] = useState(0);
 
     const [formData, setFormData] = useState({
         parentpartcode: "",
@@ -311,6 +312,7 @@ const CompatabilityMaster = () => {
                 setShowTable(false);
                 setShowUploadTable(false);
                 setExcelUploadData([]);
+                setResetKey(prev => prev + 1);  
                 fetchData();
             } else {
                 setErrorMessage(response.data?.message || "Something went wrong");
@@ -627,6 +629,7 @@ const CompatabilityMaster = () => {
                     <h5 className='ComCssTableName'>ADD Compatability</h5>
 
                     <CompatabilityAddTable
+                    resetKey={resetKey}
                         data={tableData}
                         page={page}
                         perPage={perPage}
@@ -671,7 +674,7 @@ const CompatabilityMaster = () => {
                 </div>
             )}
             <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>Requested Tickets</h5>
+                <h5 className='ComCssTableName'>Compatability Details</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                     <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
                         {loading

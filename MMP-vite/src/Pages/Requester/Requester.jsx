@@ -49,6 +49,7 @@ const Requester = () => {
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
+        const [addSearchText, setAddSearchText] = useState("");
     const [downloadProgress, setDownloadProgress] = useState(null);
 
 
@@ -57,16 +58,16 @@ const Requester = () => {
         { label: "Project", value: "Project" },
     ];
     const requestTypeOption = [
-        { label: "Submodule", value: "Submodule" },
+        { label: "Sub Module", value: "Sub Module" },
         { label: "Others", value: "Others" },
         { label: "ThermalGel", value: "ThermalGel" },
     ];
 
     useEffect(() => {
-  if ((formData.requestFor?.value || formData.requestFor) === "Material Request") {
-    handleChange("orderType", "Repair");
-  }
-}, [formData.requestFor]);
+        if ((formData.requestFor?.value || formData.requestFor) === "Material Request") {
+            handleChange("orderType", "Repair");
+        }
+    }, [formData.requestFor]);
 
     const availbleqty = compatibilityData?.[0]?.Availbleqty ?? "0";
     const compAvailbleQty = compatibilityData?.[0]?.compatabilityQty ?? "0";
@@ -181,17 +182,18 @@ const Requester = () => {
             errors.compatibilityPartCode = " Enter compatibilityPartCode";
             isValid = false;
         }
-   const type1 = formData.requesterType?.value || formData.requesterType;
-if (type1 === "Submodule" && !formData.faultyUnitModuleSerialNo) {            errors.faultySerialNumber = " Enter faultySerialNumber";
+        const type1 = formData.requesterType?.value || formData.requesterType;
+        if (type1 === "Sub Module" && !formData.faultyUnitModuleSerialNo) {
+            errors.faultySerialNumber = " Enter faultySerialNumber";
             isValid = false;
         }
         // if (formData.requesterType?.value === "Submodule" || formData.requesterType === "Submodule" && !formData.faultyUnitModuleSerialNo) {
 
-          const type = formData.requesterType?.value || formData.requesterType;
-if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
-    errors.faultyUnitModuleSerialNo = "Enter faultyUnitModuleSerialNo";
-    isValid = false;
-}
+        const type = formData.requesterType?.value || formData.requesterType;
+        if (type === "Sub Module" && !formData.faultyUnitModuleSerialNo) {
+            errors.faultyUnitModuleSerialNo = "Enter faultyUnitModuleSerialNo";
+            isValid = false;
+        }
 
 
         setFormErrors(errors);
@@ -318,7 +320,7 @@ if (type === "Submodule" && !formData.faultyUnitModuleSerialNo) {
             setLoading(true);
             const response = await checkAvailable(partcodeQtyMap);
             // console.log("Availability response:", response.data);
-if (response.data?.success === false && response.data.insufficientParts?.length > 0) {
+            if (response.data?.success === false && response.data.insufficientParts?.length > 0) {
                 // Extract all failing partCodes
                 const partCodes = response.data.insufficientParts
                     .map(item => `${item.partCode} (${item.error})`) // include error message
@@ -326,7 +328,7 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
 
                 setErrorMessage(partCodes);
                 setShowErrorPopup(true);
-                return false; 
+                return false;
             }
             setcheck(true);
             return true;
@@ -339,6 +341,11 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
     };
 
     const handleAdd = () => {
+         if (tableData.length >= 15) {
+        setErrorMessage("Cannot add more than 15 Component");
+        setShowErrorPopup(true);
+        return;
+    }
         if (!valiDate()) return;
         const currentPartCode = typeof formData.partCode === "object"
             ? formData.partCode.partcode || formData.partCode.label
@@ -390,62 +397,62 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
     }
 
     const formClearFull = () => {
-    setFormData({
-        requestFor: null,
-        requesterType: "",
-        orderType: null,
-        productName: null,
-        productGroup: "",
-        productFamily: "",
-        partCode: null,
-        partDescription: "",
-        requestQty: "",
-        compatibilityPartCode: "",
-        faultySerialNumber: "",
-        faultyUnitModuleSerialNo: "",
-        requestercomments: "",
-    });
-    setFormErrors({});
-};
+        setFormData({
+            requestFor: null,
+            requesterType: "",
+            orderType: null,
+            productName: null,
+            productGroup: "",
+            productFamily: "",
+            partCode: null,
+            partDescription: "",
+            requestQty: "",
+            compatibilityPartCode: "",
+            faultySerialNumber: "",
+            faultyUnitModuleSerialNo: "",
+            requestercomments: "",
+        });
+        setFormErrors({});
+    };
 
     const formClear = () => {
-    setFormData(prev => {
-        if (isFrozen) {
-            return {
-                requestFor: prev.requestFor,        // use prev instead of formData
-                requesterType: prev.requesterType,
-                orderType: prev.orderType,
-                productName: prev.productName,
-                productGroup: prev.productName?.productgroup || "",
-                productFamily: prev.productFamily || prev.productName?.productfamily || "",
-                partCode: null,
-                partDescription: null,
-                requestQty: "",
-                compatibilityPartCode: "",
-                faultySerialNumber: "",
-                faultyUnitModuleSerialNo: "",
-                requestercomments: "",
-            };
-        } else {
-            return {
-                requestFor: "",
-                requesterType: "",
-                orderType: "",
-                productName: null,
-                productGroup: "",
-                partCode: null,
-                partDescription: "",
-                requestQty: "",
-                compatibilityPartCode: "",
-                faultySerialNumber: "",
-                faultyUnitModuleSerialNo: "",
-                requestercomments: "",
-            };
-        }
-    });
+        setFormData(prev => {
+            if (isFrozen) {
+                return {
+                    requestFor: prev.requestFor,        // use prev instead of formData
+                    requesterType: prev.requesterType,
+                    orderType: prev.orderType,
+                    productName: prev.productName,
+                    productGroup: prev.productName?.productgroup || "",
+                    productFamily: prev.productFamily || prev.productName?.productfamily || "",
+                    partCode: null,
+                    partDescription: null,
+                    requestQty: "",
+                    compatibilityPartCode: "",
+                    faultySerialNumber: "",
+                    faultyUnitModuleSerialNo: "",
+                    requestercomments: "",
+                };
+            } else {
+                return {
+                    requestFor: "",
+                    requesterType: "",
+                    orderType: "",
+                    productName: null,
+                    productGroup: "",
+                    partCode: null,
+                    partDescription: "",
+                    requestQty: "",
+                    compatibilityPartCode: "",
+                    faultySerialNumber: "",
+                    faultyUnitModuleSerialNo: "",
+                    requestercomments: "",
+                };
+            }
+        });
 
-    setFormErrors({});
-};
+        setFormErrors({});
+    };
 
 
     useEffect(() => {
@@ -473,83 +480,150 @@ if (response.data?.success === false && response.data.insufficientParts?.length 
     //   return axios.post(checkAvailableQty, partcodeQtyMap); // POST with body
     // };
 
+    // const handleSubmit = async () => {
+    //     setLoading(true)
+    //     const partcodeQtyMap = tableData.map(item => {
+    //         if (item.compatibilityPartCode) {
+    //             return {
+    //                 partCode: item.compatibilityPartCode,
+    //                 requestQty: item.requestQty
+    //             };
+    //         } else {
+    //             return {
+    //                 partCode: item.partCode,
+    //                 requestQty: item.requestQty
+    //             };
+    //         }
+    //     });
+
+    //     const availability = await checkAvilability(partcodeQtyMap);
+    //     const userName = sessionStorage.getItem("userName") || "System";
+
+    //     if (availability === true) {
+    //         let updatedFormData = {};
+    //         updatedFormData = tableData.map((row) => ({
+    //             ...row,
+    //                 requesterType: row.requesterType?.value || row.requesterType, // extract value
+
+    //             createdby: userName,
+    //             modifiedby: userName,
+    //         }));
+    //         setIsFrozen(false);
+    //         saveRequester(updatedFormData)
+    //             .then((response) => {
+    //                 if (response.status === 200 && response.data) {
+    //                     const { message } = response.data;
+    //                     setSuccessMessage(message || "Saved successfully");
+    //                     setShowSuccessPopup(true);
+    //                     setTableData([]);
+    //                     setShowTable(false);
+    //                     setIsFrozen(false);
+    //                     console.log("setIsFrozen", isFrozen)
+
+    //                     fetchRequester()
+    //                     formClearFull();
+    //                     // console.log("formdata after submit", formData)
+    //                     // if (typeof handleClear === "function") handleClear();
+    //                 } else {
+    //                     setErrorMessage(response.data?.message);
+    //                     setShowErrorPopup(true);
+    //                     setTableData([]);
+    //                     setShowTable(false);
+    //                 }
+    //             })
+    //             .catch((error) => {
+    //                 const errMsg = error?.response?.data?.message;
+    //                 if (errMsg) {
+    //                     setErrorMessage(errMsg);
+    //                     setShowErrorPopup(true);
+    //                 }
+    //             })
+    //             .finally(() => {
+    //                 setLoading(false);
+    //             });
+    //     }
+    // };
+   
+
     const handleSubmit = async () => {
-        setLoading(true)
-        const partcodeQtyMap = tableData.map(item => {
-            if (item.compatibilityPartCode) {
-                return {
-                    partCode: item.compatibilityPartCode,
-                    requestQty: item.requestQty
-                };
-            } else {
-                return {
-                    partCode: item.partCode,
-                    requestQty: item.requestQty
-                };
-            }
-        });
+    setLoading(true);
 
-        const availability = await checkAvilability(partcodeQtyMap);
-        const userName = sessionStorage.getItem("userName") || "System";
+    // 1. Prepare data for the SINGLE API call
+    const userName = sessionStorage.getItem("userId") || "System";
+        const createdName = sessionStorage.getItem("userName") || "System";
 
-        if (availability === true) {
-            let updatedFormData = {};
-            updatedFormData = tableData.map((row) => ({
-                ...row,
-                createdby: userName,
-                modifiedby: userName,
-            }));
-                        setIsFrozen(false);
-            saveRequester(updatedFormData)
-                .then((response) => {
-                    if (response.status === 200 && response.data) {
-                        const { message } = response.data;
-                        setSuccessMessage(message || "Saved successfully");
-                        setShowSuccessPopup(true);
-                        setTableData([]);
-                        setShowTable(false);
-                        setIsFrozen(false);
-                        console.log("setIsFrozen",isFrozen)
+    // The data prepared here is the final payload for the save API.
+    const updatedFormData = tableData.map((row) => ({
+        ...row,
+        requesterType: row.requesterType?.value || row.requesterType, 
+        createdby: userName,
+        modifiedby: userName,
+        createdName: createdName
+    }));
+    
+    // --- REMOVE THE checkAvilability CALL AND THE IF STATEMENT ---
+    
+    try {
+        // 2. Call the SINGLE, ATOMIC save API
+        // This saveRequester API now handles:
+        // A) Ticket number generation (atomic sequence)
+        // B) Availability check (inside the transaction)
+        // C) Inventory update (protected by Optimistic Locking)
+        const response = await saveRequester(updatedFormData);
 
-                        fetchRequester()
-formClearFull();                        
-                        // console.log("formdata after submit", formData)
-                        // if (typeof handleClear === "function") handleClear();
-                    } else {
-            setErrorMessage(response.data?.message);
-            setShowErrorPopup(true);
+        // 3. Handle SUCCESS (HTTP 200)
+        if (response.status === 200 && response.data?.success) {
+            const { message } = response.data;
+            setSuccessMessage(message || "Saved successfully");
+            setShowSuccessPopup(true);
+            
+            // Clear UI state
             setTableData([]);
             setShowTable(false);
-        }
-    })
-    .catch((error) => {
-        const errMsg = error?.response?.data?.message;
-        if (errMsg) {
-            setErrorMessage(errMsg);
+            setIsFrozen(false);
+            formClearFull();
+            fetchRequester(); // Refresh data view
+
+        } else {
+            // Handle logical success but internal server-defined failure (less common, but safe)
+            setErrorMessage(response.data?.message || "An unknown error occurred.");
             setShowErrorPopup(true);
         }
-    })
-    .finally(() => {
-        setLoading(false);
-    });
+
+    } catch (error) {
+        // 4. Handle CRITICAL ERRORS (e.g., HTTP 409 Conflict, 500 Internal Error)
+        
+        const responseData = error?.response?.data;
+        const errMsg = responseData?.message;
+        
+        // This handles INSUFFICIENT STOCK and OPTIMISTIC LOCK failures from the server
+        if (error.response?.status === 409 || error.response?.status === 400) {
+            // Check your server response for specific insufficient stock message
+            setErrorMessage(errMsg || "Request failed due to stock change or conflict.");
+        } else {
+            // Generic server or network error
+            setErrorMessage(errMsg || "Network or unexpected server error occurred.");
         }
-    };
-// useEffect(() => {
-//     console.log("isFrozen changed:", isFrozen);
-// }, [isFrozen]);
+        
+        setShowErrorPopup(true);
 
- const fetchRequester = async () => {
-    setLoading(true);
-    const userId = sessionStorage.getItem("userName") || "System";
-
-    try {
-        await fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
-    } catch (err) {
-        console.error("Error fetching putaway data:", err);
     } finally {
         setLoading(false);
     }
 };
+
+    const fetchRequester = async () => {
+        setLoading(true);
+        const userId = sessionStorage.getItem("userId") || "System";
+
+        try {
+            await fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
+        } catch (err) {
+            console.error("Error fetching putaway data:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // const fetchfindSearch = (page, size, search) => {
     //     setLoading(true)
@@ -587,7 +661,7 @@ formClearFull();
     }, [page, perPage, debouncedSearch]);
 
 
-    const fetchData = async (page, perPage , search = "") => {
+    const fetchData = async (page, perPage, search = "") => {
         setLoading(true); // start loader
         try {
             if (search && search.trim() !== "") {
@@ -643,7 +717,23 @@ formClearFull();
     };
 
 
+const [filteredData, setFilteredData] = useState([]);
 
+useEffect(() => {
+  if (!addSearchText) {
+    setFilteredData(tableData);
+  } else {
+    const lower = addSearchText.toLowerCase();
+
+    const result = tableData.filter((row) =>
+      Object.values(row).some((val) =>
+        String(val).toLowerCase().includes(lower)
+      )
+    );
+
+    setFilteredData(result);
+  }
+}, [addSearchText, tableData]);
     // console.log("search", searchText)
     return (
         <div className='ComCssContainer'>
@@ -676,9 +766,25 @@ formClearFull();
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>ADD Board</h5>
+                    <div
+                        className="d-flex justify-content-end align-items-center mb-3"
+                        style={{ marginTop: "9px", display: "flex" }}>
+                        <div style={{ position: "relative", width: "200px" }}>
+                            <input
+                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                                placeholder="Search..." value={addSearchText}
+                                onChange={(e) => setAddSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span onClick={() => setAddSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                                </span>
+                            )}
+                        </div>
+                    </div>
 
                     <RequesterAddTable
-                        data={tableData}
+                        data={filteredData}
                         page={page}
                         perPage={perPage}
                         totalRows={tableData.length}
@@ -693,8 +799,8 @@ formClearFull();
                     <div className="ComCssButton9">
                         <button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>
                         <button className='ComCssDeleteButton' onClick={cancelTableData} >Cancel</button>
-
                     </div>
+
                 </div>
             )}
 

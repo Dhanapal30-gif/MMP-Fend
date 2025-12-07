@@ -232,6 +232,7 @@ const VeendorMaster = () => {
                 })
                 setSearchText("");
                 fetchVendotMaster();
+                setPage(1);
 
             })
             .catch((error) => {
@@ -422,6 +423,7 @@ const VeendorMaster = () => {
         setLoading(true);
         try {
             const response = await getVenodtMaster();
+            setPage(1)
             setVendorMaster(response.data);
         } catch (error) {
             setErrorMessage("Error fetching vendors", error);
@@ -519,6 +521,7 @@ const VeendorMaster = () => {
             setHandleSubmitButton(true);
             setDeletButton(false);
             setConfirmDelete(false)
+            setPage(1);
         } catch (error) {
             setErrorMessage("Delete error:", error);
             setShowErrorPopup(true);

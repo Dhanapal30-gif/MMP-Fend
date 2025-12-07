@@ -207,7 +207,8 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
             partcode: newValue?.value || "",
             partdescription: newValue?.partdescription || "",
             racklocation: newValue?.racklocation || "",
-            availableqty: newValue?.availableqty || ""
+            availableqty: newValue?.availableqty || "",
+            pickingqty: newValue?.pickingqty || ""
         }));
     }}
 
@@ -251,6 +252,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                         <ComTextFiled
                             label="Pickingqty"
                             className="comTextFiled"
+                            type="number"
                             name="pickingqty"
                             value={formData.pickingqty}
                             onChange={handleChange}

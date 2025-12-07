@@ -324,8 +324,10 @@ const RequesterTextFiled = ({
                     getOptionLabel={(option) => option.partcode || ""}
                     isOptionEqualToValue={(option, value) => option?.partcode === value?.partcode}
                     // onChange={(e, newValue) => handleChange("partCode", newValue || null)}
-                    onChange={(e, newValue) => {
+                    onChange={(e, newValue) => {    
                         handleChange("partCode", newValue || null);
+
+                            handleChange("requestQty", newValue?.requestQty || "");
 
                         // Set the read-only fields based on selected part
                         handleChange("componentType", newValue?.componentType || "");
@@ -379,7 +381,7 @@ const RequesterTextFiled = ({
                     helperText={formErrors?.requestQty || ""}
                 />
 
-                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "SubModule") && (
+                {(formData.requesterType?.value === "Sub Module" || formData.requesterType === "Sub Module") && (
                     <ComTextFiled
                         label="Available Qty"
                         name="availableQty"
@@ -418,7 +420,7 @@ const RequesterTextFiled = ({
                     />
                 )}
 
-                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "SubModule") && (
+                {(formData.requesterType?.value === "Sub Module" || formData.requesterType === "Sub Module") && (
                     <ComTextFiled
                         label="Faulty Serial Number"
                         name="faultySerialNumber"
@@ -429,7 +431,7 @@ const RequesterTextFiled = ({
                     />
                 )}
 
-                {(formData.requesterType?.value === "Submodule" || formData.requesterType === "SubModule") && (
+                {(formData.requesterType?.value === "Sub Module" || formData.requesterType === "Sub Module") && (
                     <ComTextFiled
                         label="Faulty Unit Module Serial No"
                         name="faultyUnitModuleSerialNo"

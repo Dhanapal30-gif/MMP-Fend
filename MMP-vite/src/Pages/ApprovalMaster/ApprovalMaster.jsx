@@ -78,13 +78,13 @@ const ApprovalMaster = () => {
             errors.approver1 = "please select approver1";
             isVlaid = false;
         }
-        if (!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" || formData.requesttype==="PTL Request")) {
+        if (!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" || formData.requesttype === "PTL Request")) {
 
-        if (!formData.approver2 || formData.approver2.length === 0) {
-            errors.approver2 = "please select approver2";
-            isVlaid = false;
+            if (!formData.approver2 || formData.approver2.length === 0) {
+                errors.approver2 = "please select approver2";
+                isVlaid = false;
+            }
         }
-    }
         if (formData.requesttype == "Material Request") {
             if (formData.issuancetype === "DTL") {
                 if (!formData.issuancetype) {
@@ -129,7 +129,7 @@ const ApprovalMaster = () => {
             }
         }
 
-       
+
         setFormErrors(errors);
         return isVlaid;
     }
@@ -139,16 +139,16 @@ const ApprovalMaster = () => {
             label: (
                 <>
                     Others (
-                    <span style={{ fontSize: "12px",fontWeight:'bold', color: "red" }}>
-                          ,Mechanical Assembly, Raw Material, OGI
+                    <span style={{ fontSize: "12px", fontWeight: 'bold', color: "red" }}>
+                        ,Mechanical Assembly, Raw Material, OGI
                     </span>
                     )
                 </>
             ),
             value: "others",
         },
-        { label: "Thermal Gel", value: "thermal" },
-        { label: "Submodule", value: "submodule" },
+        { label: "Thermal Gel", value: "Thermal Gel" },
+        { label: "Submodule", value: "Sub Module" },
     ];
 
     const formClear = () => {
@@ -216,9 +216,9 @@ const ApprovalMaster = () => {
             approver1: (formData.approver1 || []).map(g => g?.approver1 || g).join(","),
             approver2: (formData.approver2 || []).map(g => g?.approver2 || g).join(",")
         };
-if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
-    delete updatedFormData.approver2;
-  }
+        if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
+            delete updatedFormData.approver2;
+        }
         saveApprovalMaster(updatedFormData)
             .then((response) => {
                 const data = response.data;
@@ -356,7 +356,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                 : "", width: `${calculateColumnWidth(approvalMaster, 'Approver2')}`,
             wrap: true,
         }
-    ], [approvalMaster,selectedRows]);
+    ], [approvalMaster, selectedRows]);
 
     const conditionalRowStyles = [
         {
@@ -640,35 +640,35 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
     //     setSelectedRows([]);
     // };
 
-   const handleEdit = (row) => {
-    setFormData({
-        id: row.id || "",
-        requesttype: row.requesttype || "",
-        issuancetype: row.issuancetype || "",
-        componenttype: row.componenttype || "",
-        productgroup: row.productgroup
-            ? Array.isArray(row.productgroup)
-                ? row.productgroup
-                : row.productgroup.split(",").map(item => item.trim())
-            : [],
-        approver1: row.approver1
-            ? Array.isArray(row.approver1)
-                ? row.approver1
-                : row.approver1.split(",").map(item => item.trim())
-            : [],
-        approver2: row.approver2
-            ? Array.isArray(row.approver2)
-                ? row.approver2
-                : row.approver2.split(",").map(item => item.trim())
-            : []
-    });
+    const handleEdit = (row) => {
+        setFormData({
+            id: row.id || "",
+            requesttype: row.requesttype || "",
+            issuancetype: row.issuancetype || "",
+            componenttype: row.componenttype || "",
+            productgroup: row.productgroup
+                ? Array.isArray(row.productgroup)
+                    ? row.productgroup
+                    : row.productgroup.split(",").map(item => item.trim())
+                : [],
+            approver1: row.approver1
+                ? Array.isArray(row.approver1)
+                    ? row.approver1
+                    : row.approver1.split(",").map(item => item.trim())
+                : [],
+            approver2: row.approver2
+                ? Array.isArray(row.approver2)
+                    ? row.approver2
+                    : row.approver2.split(",").map(item => item.trim())
+                : []
+        });
 
-    setHandleSubmitButton(false);
-    setHandleUploadButton(false);
-    setHandleUpdateButton(true);
-    setDeletButton(false);
-    setSelectedRows([]);
-};
+        setHandleSubmitButton(false);
+        setHandleUploadButton(false);
+        setHandleUpdateButton(true);
+        setDeletButton(false);
+        setSelectedRows([]);
+    };
 
 
     const filteredData = approvalMaster.filter(row =>
@@ -736,8 +736,8 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                     <ThemeProvider theme={TextFiledTheme}>
 
                         <Autocomplete
-                        ListboxComponent={DropdownCom}
-                            options={["Material Request", "Scrap Request", "Stock Transfer Request", "Material Request Projects","Stock Transfer ","Returning","PTL Request"]}
+                            ListboxComponent={DropdownCom}
+                            options={["Material Request", "Scrap Request", "Stock Transfer Request", "Material Request Projects", "Stock Transfer ", "Returning", "PTL Request"]}
                             getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                             value={formData.requesttype || []}
                             onChange={(event, newValue) => {
@@ -763,10 +763,10 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                                 />
                             )}
                         />
-                        {formData.requesttype === "Material Request" || formData.requesttype==="Returning" && (
+                        {formData.requesttype === "Material Request" || formData.requesttype === "Returning" && (
                             <Autocomplete
-                        ListboxComponent={DropdownCom}  
-                            options={["DTL", "PTL"]}
+                                ListboxComponent={DropdownCom}
+                                options={["DTL", "PTL"]}
                                 getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                                 value={formData.issuancetype || []}
                                 onChange={(event, newValue) => setFormData({ ...formData, issuancetype: newValue || [] })}
@@ -786,7 +786,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         )}
                         {(formData.requesttype === "Material Request" && formData.issuancetype !== "PTL") && (
                             <Autocomplete
-                        ListboxComponent={DropdownCom}
+                                ListboxComponent={DropdownCom}
                                 options={componentOptions}
                                 getOptionLabel={(option) =>
                                     typeof option === "string" ? option : option.value
@@ -825,47 +825,84 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                         )}
                         {formData.requesttype == "Material Request" && formData.issuancetype !== "PTL" && (
                             <Autocomplete
-                            
-                        ListboxComponent={DropdownCom}    
-                            multiple
+
+                                ListboxComponent={DropdownCom}
+                                multiple
                                 options={uniqueProductGroup}
                                 getOptionLabel={(option) =>
                                     typeof option === "string" ? option : option.ProductGroup || ""
                                 }
                                 value={formData.productgroup || []} // ✅ Must be array of objects
+                                // onChange={(event, newValue) => {
+                                //     const selectedGroups = newValue || [];
+                                //     const selectedGroupNames = selectedGroups
+                                //         .map(g => g?.ProductGroup)
+                                //         .filter(Boolean); // ✅ safe map
+
+                                //     const matched = storeProduct.filter(item =>
+                                //         selectedGroupNames.includes(item.ProductGroup)
+                                //     );
+
+                                //     const validLineLeads = matched
+                                //         .map(item => item.lineLead)
+                                //         .filter(v => v && v !== "null");
+
+                                //     const validEngineers = matched
+                                //         .map(item => item.productEngineer)
+                                //         .filter(v => v && v !== "null");
+
+                                //     const updatedData = {
+                                //         ...formData,
+                                //         productgroup: selectedGroups, // ✅ send object array as Autocomplete value
+                                //         approver1: [],
+                                //         approver2: []
+                                //     };
+
+                                //     if (formData.componenttype === "others") {
+                                //         updatedData.approver1 = [...new Set(validLineLeads)];
+                                //     } else if (formData.componenttype === "submodule") {
+                                //         updatedData.approver1 = [...new Set(validEngineers)];
+                                //     }
+
+                                //     setFormData(updatedData);
+                                // }}
+
                                 onChange={(event, newValue) => {
-                                    const selectedGroups = newValue || [];
-                                    const selectedGroupNames = selectedGroups
-                                        .map(g => g?.ProductGroup)
-                                        .filter(Boolean); // ✅ safe map
+    const selectedGroups = newValue || [];
+    const selectedGroupNames = selectedGroups
+        .map(g => g?.ProductGroup)
+        .filter(Boolean);
 
-                                    const matched = storeProduct.filter(item =>
-                                        selectedGroupNames.includes(item.ProductGroup)
-                                    );
+    const matched = storeProduct.filter(item =>
+        selectedGroupNames.includes(item.ProductGroup)
+    );
 
-                                    const validLineLeads = matched
-                                        .map(item => item.lineLead)
-                                        .filter(v => v && v !== "null");
+    const validLineLeads = matched
+        .map(item => item.lineLead)
+        .filter(v => v && v !== "null");
 
-                                    const validEngineers = matched
-                                        .map(item => item.productEngineer)
-                                        .filter(v => v && v !== "null");
+    const validEngineers = matched
+        .map(item => item.productEngineer)
+        .filter(v => v && v !== "null");
 
-                                    const updatedData = {
-                                        ...formData,
-                                        productgroup: selectedGroups, // ✅ send object array as Autocomplete value
-                                        approver1: [],
-                                        approver2: []
-                                    };
+    const updatedData = {
+        ...formData,
+        productgroup: selectedGroups,
+    };
 
-                                    if (formData.componenttype === "others") {
-                                        updatedData.approver1 = [...new Set(validLineLeads)];
-                                    } else if (formData.componenttype === "submodule") {
-                                        updatedData.approver1 = [...new Set(validEngineers)];
-                                    }
+    // ✅ Only auto-refresh approvers if NOT in edit mode
+    if (!handleUpdateButton) {
+        if (formData.componenttype === "others") {
+            updatedData.approver1 = [...new Set(validLineLeads)];
+        } else if (formData.componenttype === "submodule") {
+            updatedData.approver1 = [...new Set(validEngineers)];
+        }
+        updatedData.approver2 = [];
+    }
 
-                                    setFormData(updatedData);
-                                }}
+    setFormData(updatedData);
+}}
+
                                 isOptionEqualToValue={(option, value) =>
                                     option.ProductGroup === value.ProductGroup
                                 }
@@ -883,7 +920,7 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                             />
                         )}
 
-                        <Autocomplete
+                        {/* <Autocomplete
                         ListboxComponent={DropdownCom}
                             multiple
                             options={formData.componenttype === "others" || formData.componenttype === "submodule" ? [] : storeUserId} // ✅ hide dropdown if "others"
@@ -908,29 +945,78 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                                     className='ProductTexfiled-textfield '
                                 />
                             )}
-                        />
-                        {/* {formData.requesttype !== "Returning"  && formData.issuancetype !== "PTL" && ( */}
-{!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" ||formData.requesttype==="PTL Request") && (
+                        /> */}
 
                         <Autocomplete
-                        ListboxComponent={DropdownCom}
+                            ListboxComponent={DropdownCom}
                             multiple
-                            options={storeUserId}
-                            getOptionLabel={(option) => option} // ✅ Ensure it's a string
-                            value={formData.approver2 || []}
-                            onChange={(event, newValue) => setFormData({ ...formData, approver2: newValue || [] })}
+                            options={formData.componenttype === "others" || formData.componenttype === "submodule"
+                                ? []
+                                : storeUserId.filter(u => !(formData.approver2 || []).includes(u))} // remove approver2 from options
+                            getOptionLabel={(option) => option}
+                            disableClearable={formData.componenttype === "others" || formData.componenttype === "submodule"}
+                            value={formData.approver1 || []}
+                            isOptionEqualToValue={(option, value) => option === value}
+                            onChange={(event, newValue) => {
+                                if (formData.componenttype !== "others" && formData.componenttype !== "submodule") {
+                                    setFormData({ ...formData, approver1: newValue || [] });
+                                }
+                            }}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="Approver2"
+                                    label="Approver1"
                                     variant="outlined"
-                                    error={Boolean(formErrors.approver2)}
-                                    helperText={formErrors.approver2}
-                                    size="small"  // <-- Reduce height
-                                    className='ProductTexfiled-textfield '
+                                    error={Boolean(formErrors.approver1)}
+                                    helperText={formErrors.approver1}
+                                    size="small"
+                                    className='ProductTexfiled-textfield'
                                 />
                             )}
-                        /> )}
+                        />
+
+                        {/* {formData.requesttype !== "Returning"  && formData.issuancetype !== "PTL" && ( */}
+                        {!(formData.requesttype === "Returning" && formData.issuancetype === "PTL" || formData.requesttype === "PTL Request") && (
+
+                            // <Autocomplete
+                            // ListboxComponent={DropdownCom}
+                            //     multiple
+                            //     options={storeUserId}
+                            //     getOptionLabel={(option) => option} // ✅ Ensure it's a string
+                            //     value={formData.approver2 || []}
+                            //     onChange={(event, newValue) => setFormData({ ...formData, approver2: newValue || [] })}
+                            //     renderInput={(params) => (
+                            //         <TextField
+                            //             {...params}
+                            //             label="Approver2"
+                            //             variant="outlined"
+                            //             error={Boolean(formErrors.approver2)}
+                            //             helperText={formErrors.approver2}
+                            //             size="small"  // <-- Reduce height
+                            //             className='ProductTexfiled-textfield '
+                            //         />
+                            //     )}
+                            // /> 
+                            <Autocomplete
+                                ListboxComponent={DropdownCom}
+                                multiple
+                                options={storeUserId.filter(u => !(formData.approver1 || []).includes(u))} // remove approver1 from options
+                                getOptionLabel={(option) => option}
+                                value={formData.approver2 || []}
+                                onChange={(event, newValue) => setFormData({ ...formData, approver2: newValue || [] })}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Approver2"
+                                        variant="outlined"
+                                        error={Boolean(formErrors.approver2)}
+                                        helperText={formErrors.approver2}
+                                        size="small"
+                                        className='ProductTexfiled-textfield'
+                                    />
+                                )}
+                            />
+                        )}
                     </ThemeProvider>
                 </div>
                 <div className='ComCssButton9'>
@@ -969,85 +1055,85 @@ if (formData.requesttype === "Returning" && formData.issuancetype === "PTL") {
                 )}
                 {showApprovalTable && !showUploadTable && (
                     <><LoadingOverlay loading={loading} />
-                    <DataTable
-                        columns={column}
-                        data={paginatedData}
-                        // conditionalRowStyles={conditionalRowStyles} // ✅ add this line
-                        pagination
-                        paginationServer
-                        progressPending={loading}
-                        paginationTotalRows={totalRows}
-                        onChangeRowsPerPage={handlePerRowsChange}
-                        onChangePage={handlePageChange}
-                        paginationPerPage={perPage}
-                        paginationDefaultPage={page}
-                        paginationRowsPerPageOptions={[10, 20, 30, 50]}
-                        paginationComponentOptions={{
-                            rowsPerPageText: 'Rows per page:',
-                            rangeSeparatorText: 'of',
-                            noRowsPerPage: false,
-                            // selectAllRowsItem: true,
-                            // selectAllRowsItemText: 'All',
-                        }}
-                        fixedHeader    // ✅ ADD THIS LINE
-                        fixedHeaderScrollHeight="400px"
-                        highlightOnHover
-                        className="react-datatable"
-                        //conditionalRowStyles={rowHighlightStyle}
-                        customStyles={{
-                            // headRow: {
-                            //     style: {
-                            //         background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                            //         color: "white",
-                            //         fontWeight: "bold",
-                            //         fontSize: "14px",
-                            //         textAlign: "center",
-                            //         minHeight: "50px",
-                            //     },
-                            // },
-                            // rows: {
-                            //     style: {
-                            //         fontSize: "14px",
-                            //         textAlign: "center",
-                            //         alignItems: "center", // Centers content vertically
-                            //         fontFamily: "Arial, Helvetica, sans-serif",
-                            //     },
-                            // },
-                            // cells: {
-                            //     style: {
-                            //         padding: "5px",  // Removed invalid negative padding
-                            //         //textAlign: "center",
-                            //         justifyContent: "center",  // Centers header text
-                            //         whiteSpace: 'pre-wrap', // wrap text
-                            //         wordBreak: 'break-word', // allow breaking words
-                            //     },
-                            // },
-                            // headCells: {
-                            //     style: {
-                            //         display: "flex",
-                            //         justifyContent: "center",  // Centers header text
-                            //         alignItems: "left",
-                            //         textAlign: "left",
-                            //         whiteSpace: 'pre-wrap',
-                            //         wordBreak: 'break-word',
-                            //     },
-                            // },
-                            // pagination: {
-                            //     style: {
-                            //         border: "1px solid #ddd",
-                            //         backgroundColor: "#f9f9f9",
-                            //         color: "#333",
-                            //         minHeight: "35px",
-                            //         padding: "5px",
-                            //         fontSize: "12px",
-                            //         fontWeight: "bolder",
-                            //         display: "flex",
-                            //         justifyContent: "flex-end", // Corrected
-                            //         alignItems: "center", // Corrected
-                            //     },
-                            // },
-                        }}
-                    />
+                        <DataTable
+                            columns={column}
+                            data={paginatedData}
+                            // conditionalRowStyles={conditionalRowStyles} // ✅ add this line
+                            pagination
+                            paginationServer
+                            progressPending={loading}
+                            paginationTotalRows={totalRows}
+                            onChangeRowsPerPage={handlePerRowsChange}
+                            onChangePage={handlePageChange}
+                            paginationPerPage={perPage}
+                            paginationDefaultPage={page}
+                            paginationRowsPerPageOptions={[10, 20, 30, 50]}
+                            paginationComponentOptions={{
+                                rowsPerPageText: 'Rows per page:',
+                                rangeSeparatorText: 'of',
+                                noRowsPerPage: false,
+                                // selectAllRowsItem: true,
+                                // selectAllRowsItemText: 'All',
+                            }}
+                            fixedHeader    // ✅ ADD THIS LINE
+                            fixedHeaderScrollHeight="400px"
+                            highlightOnHover
+                            className="react-datatable"
+                            //conditionalRowStyles={rowHighlightStyle}
+                            customStyles={{
+                                // headRow: {
+                                //     style: {
+                                //         background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                                //         color: "white",
+                                //         fontWeight: "bold",
+                                //         fontSize: "14px",
+                                //         textAlign: "center",
+                                //         minHeight: "50px",
+                                //     },
+                                // },
+                                // rows: {
+                                //     style: {
+                                //         fontSize: "14px",
+                                //         textAlign: "center",
+                                //         alignItems: "center", // Centers content vertically
+                                //         fontFamily: "Arial, Helvetica, sans-serif",
+                                //     },
+                                // },
+                                // cells: {
+                                //     style: {
+                                //         padding: "5px",  // Removed invalid negative padding
+                                //         //textAlign: "center",
+                                //         justifyContent: "center",  // Centers header text
+                                //         whiteSpace: 'pre-wrap', // wrap text
+                                //         wordBreak: 'break-word', // allow breaking words
+                                //     },
+                                // },
+                                // headCells: {
+                                //     style: {
+                                //         display: "flex",
+                                //         justifyContent: "center",  // Centers header text
+                                //         alignItems: "left",
+                                //         textAlign: "left",
+                                //         whiteSpace: 'pre-wrap',
+                                //         wordBreak: 'break-word',
+                                //     },
+                                // },
+                                // pagination: {
+                                //     style: {
+                                //         border: "1px solid #ddd",
+                                //         backgroundColor: "#f9f9f9",
+                                //         color: "#333",
+                                //         minHeight: "35px",
+                                //         padding: "5px",
+                                //         fontSize: "12px",
+                                //         fontWeight: "bolder",
+                                //         display: "flex",
+                                //         justifyContent: "flex-end", // Corrected
+                                //         alignItems: "center", // Corrected
+                                //     },
+                                // },
+                            }}
+                        />
                     </>
                 )}
                 {showUploadTable && !showApprovalTable && (

@@ -75,16 +75,16 @@ const GRNTextField = ({
               helperText={formErrors?.grnNumber || ""}
             />
           )}
-          {showFields.includes("grnDate") && (
+          {showFields.includes("GRDate") && (
             <ComTextFiled
               label="GRN Date"
               type="date"
-              name="grnDate"
+              name="GRDate"
               InputLabelProps={{ shrink: true }}
-              value={formData.grnDate}
+              value={formData.GRDate}
               onChange={handleGrnChange}
-              error={Boolean(formErrors?.grnDate)}
-              helperText={formErrors?.grnDate || ""}
+              error={Boolean(formErrors?.GRDate)}
+              helperText={formErrors?.GRDate || ""}
             />
           )}
         </div>

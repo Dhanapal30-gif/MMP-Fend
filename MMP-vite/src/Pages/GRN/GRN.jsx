@@ -14,7 +14,7 @@ import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const GRN = () => {
-    const [formData, setFormData] = useState({ ponumber: "", partcode: "",receivingDate: "",  recevingTicketNo: "", grnNumber: "", grnDate: "" });
+    const [formData, setFormData] = useState({ ponumber: "", partcode: "",receivingDate: "",  recevingTicketNo: "", grnNumber: "", GRDate: "" });
     const [GRNPen, setGRNPen] = useState([]);
     const [groupedData, setGroupedData] = useState([]);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
@@ -72,8 +72,8 @@ const GRN = () => {
             errors.grnNumber = "Please Enter grnNumber";
             isValid = false;
         }
-        if (!formData.grnDate) {
-            errors.grnDate = "Please Enter grnDate";
+        if (!formData.GRDate) {
+            errors.GRDate = "Please Enter GRDate";
             isValid = false;
         }
         selectedGrnRows.forEach((id) => {
@@ -117,6 +117,7 @@ const GRN = () => {
                     ...item,
                     id: originalIndex,
                     selectedid: originalIndex,
+                    GRNQty: item.grnqty
                 };
             });
 
@@ -159,6 +160,17 @@ const GRN = () => {
 
     }, [formData, GRNPen]);
 
+    
+    const handleGRNCommentChange = (selectedid, field, value) => {
+  setData(prev =>
+    prev.map(item =>
+      item.selectedid === selectedid ? { ...item, [field]: value } : item
+    )
+  );
+};
+
+
+
     const handleGrnAction = (e) => {
         e.preventDefault();
 
@@ -184,13 +196,15 @@ const GRN = () => {
                 ponumber: row.ponumber,
                 partcode: row.partcode,
                 GRNo: formData.grnNumber,
-                grnDate: formatDateTime(formData.grnDate),
+                GRDate: formatDateTime(formData.GRDate),
                 invoiceDate: formatDateTime(formData.invoiceDate),
                 postingdate: formatDateTime(formData.postingdate),
                 receivingDate: formatDateTime(formData.receivingDate),
                 GRNQty: Number(row.GRNQty),
                 createdby: username,
                 updatedby: username,
+    GRComments: row.GRComments || "",
+                // GRComments:formData.Comment || ""
             }));
 
             saveGRN(submitData)
@@ -219,7 +233,7 @@ const GRN = () => {
             const updateData = {
                 ...formData,
                 id: formData.id,
-                grnDate: formatDateTime(formData.grnDate),
+                GRDate: formatDateTime(formData.GRDate),
                 GRNQty: Number(data[0].GRNQty), // 
                 grnNumber: formData.grnNumber,
                 //   invoiceDate: formatDateTime(formData.invoiceDate),
@@ -349,12 +363,12 @@ const GRN = () => {
             partcode: row.partcode,
             recevingTicketNo: row.recevingTicketNo,
             grnNumber: row.ponumber,
-            grnDate: row.GRDate,
-            id: row.id,
-        });
+GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // Since row.grdate is null, this sets grnDate to ""            id: row.id,
+        GRNQty: row.grnqty || ""
+});
         setIsEditMode(true);
 
-        setData([{ ...row, id: row.id, selectedid: row.id }]);
+        setData([{ ...row, id: row.id, selectedid: row.id,GRNQty: row.grnqty || "" }]);
         setTotalRows(1);
         setFormErrors({});
     };
@@ -395,7 +409,9 @@ const GRN = () => {
             </div>
             {(isEditMode || formData.ponumber || formData.partcode || formData.recevingTicketNo) && data.length > 0 && (
                 <div className='RecevingInputHide'>
-                    <GRNTextField formData={formData} setFormData={setFormData} handleChange={handleChange} showFields={["grnNumber", "grnDate"]} handleGrnChange={handleGrnChange} formErrors={formErrors} />
+                              {/* <h5 className='ComCssTableName'>GRN  Details</h5> */}
+
+                    <GRNTextField formData={formData} setFormData={setFormData} handleChange={handleChange} showFields={["grnNumber", "GRDate"]} handleGrnChange={handleGrnChange} formErrors={formErrors} />
                     <div className='GRNTable'>
                         <GRNTable
                             data={data}
@@ -411,6 +427,7 @@ const GRN = () => {
                             formErrors={formErrors}
                             isEditMode={isEditMode}
                             editingRowId={editingRowId}
+                            handleGRNCommentChange={handleGRNCommentChange}
                         />
                         <div className='ComCssButton9'>
                             {!isEditMode && (
@@ -433,6 +450,8 @@ const GRN = () => {
             )}
 
             <div className='ComCssTable'>
+                          <h5 className='ComCssTableName'>GRN  Details</h5>
+
                 {selectedRows.length > 0 && !isEditMode && (
 
                     <div className="ComCssButton9">

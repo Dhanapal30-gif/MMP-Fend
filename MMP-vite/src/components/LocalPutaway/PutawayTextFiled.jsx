@@ -57,12 +57,20 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
   }
 }}
 
-          renderInput={(params) => <TextField {...params}
-            error={Boolean(formErrors?.partcode)}
-            helperText={formErrors?.partcode || ""}
-            label="Part Code" size="small" />}
+         renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Part Code"
+      size="small"
+      error={Boolean(formErrors?.partcode)}
+      helperText={formErrors?.partcode || ""}
+      disabled={isFrozen}
+       className="disabledDarkText"
 
-        />
+    />
+  )}
+  disabled={isFrozen}
+/>
 
         <ComTextFiled
           label="Part Description"

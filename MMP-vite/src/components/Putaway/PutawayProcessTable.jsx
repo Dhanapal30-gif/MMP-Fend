@@ -106,43 +106,43 @@ const PutawayProcessTable = ({
             // "createdon",
             // "showDetail"
         ],
-         customConfig: {
-      recevingTicketNo: { label: "Receving TicketNo" },
-      location: { label: "Location", },
-      partcode: { label: "PartCode" },
-      partdescription: { label: "Part Description" },
-      ponumber: { label: "PO Number" },
-      poDate: { label: "PO Date" },
-      vendorname: { label: "Vendor Name" },
-      postingdate: { label: "Postin Date" },
-      recevingQty: { label: "Receving Qty" },
-      grnqty: { label: "GRN Qty" },
-      putqty: { label: "PUT Qty" },
-      grno: { label: "GRN No" },
-      Status: { label: "Status" },
-    //   createdon: { label: "Create Don" },
-    },
+        customConfig: {
+            recevingTicketNo: { label: "Receving TicketNo" },
+            location: { label: "Location", },
+            partcode: { label: "PartCode" },
+            partdescription: { label: "Part Description" },
+            ponumber: { label: "PO Number" },
+            poDate: { label: "PO Date" },
+            vendorname: { label: "Vendor Name" },
+            postingdate: { label: "Postin Date" },
+            recevingQty: { label: "Receving Qty" },
+            grnqty: { label: "GRN Qty" },
+            putqty: { label: "PUT Qty" },
+            grno: { label: "GRN No" },
+            Status: { label: "Status" },
+            //   createdon: { label: "Create Don" },
+        },
         selectedRows: selectedRows1,
         handleSelect: handleSelect1,
         handleSelectAll: handleSelectAll1,
         customCellRenderers: {
-                Status: (row) => row.Status || "Pending",
+            Status: (row) => row.Status || "Pending",
 
-             location: (row) => {
-  if (!row.location) return "";
-  const value = Array.isArray(row.location)
-    ? row.location.join(",")
-    : String(row.location);
+            location: (row) => {
+                if (!row.location) return "";
+                const value = Array.isArray(row.location)
+                    ? row.location.join(",")
+                    : String(row.location);
 
-  const parts = value.split(",");
-  return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      {parts.map((loc, i) => (
-        <span key={i}>{loc.trim()}</span>
-      ))}
-    </div>
-  );
-},
+                const parts = value.split(",");
+                return (
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        {parts.map((loc, i) => (
+                            <span key={i}>{loc.trim()}</span>
+                        ))}
+                    </div>
+                );
+            },
             // location: (row) => {
             //     if (!row.location) return "";
             //     const parts = row.location.split(",");
@@ -212,7 +212,7 @@ const PutawayProcessTable = ({
                 maxWidth={false}
 
                 fullWidth
-                
+
                 PaperProps={{
                     sx: {
                         width: 900,
@@ -240,7 +240,7 @@ const PutawayProcessTable = ({
                     <span>Partcode: {activeRow?.partcode}</span>
                     <span>Good Qty: {activeRow?.GRNQty}</span>
                     <span>BatchCode: {activeRow?.rcbatchcode}</span>
-                    <span>Put Qty: {activeRow?.Allowed_putqty}</span>
+                    <span>Put Qty: {activeRow?.allowedPutqty}</span>
 
                 </DialogTitle>
 
@@ -250,6 +250,7 @@ const PutawayProcessTable = ({
                             <TableHead>
                                 <TableRow sx={{ bgcolor: '#e3f2fd' }}>
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Location</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>AvailableQty</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Quantity</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -257,7 +258,7 @@ const PutawayProcessTable = ({
                                 {Object.keys(locationQty).map((loc) => {
                                     const totalEntered = Object.values(locationQty)
                                         .reduce((acc, val) => acc + Number(val || 0), 0);
-
+                                        const availableQtyForLoc = activeRow?.availableQty?.[loc] || 0; // ✅ get actual available qty
                                     const remainingQty = activeRow?.GRNQty - totalEntered + Number(locationQty[loc] || 0);
                                     const disabled = remainingQty <= 0; // freeze remaining locations
 
@@ -270,36 +271,62 @@ const PutawayProcessTable = ({
                                             }}
                                         >
                                             <TableCell>{loc}</TableCell>
+                                                    <TableCell>{availableQtyForLoc}</TableCell>  {/* Show actual available qty */}
+
                                             <TableCell>
                                                 <TextField
                                                     type="number"
                                                     value={locationQty[loc] || ""} // ✅ show empty string if no value
+                                                    // onChange={(e) => {
+                                                    //     let val = e.target.value;
+
+                                                    //     // allow empty string or numbers only
+                                                    //     if (val === "" || /^\d*$/.test(val)) {
+                                                    //         // check individual value doesn't exceed GRNQty
+                                                    //         const numVal = val === "" ? 0 : Number(val);
+                                                    //         if (numVal > activeRow?.allowedPutqty) {
+                                                    //             setErrorMessage(`Value cannot exceed Allowed_putqty (${activeRow?.allowedPutqty})`);
+                                                    //             setShowErrorPopup(true)
+                                                    //             return;
+                                                    //         }
+
+                                                    //         // check total doesn't exceed GRNQty
+                                                    //         const currentTotal = Object.values(locationQty).reduce(
+                                                    //             (acc, v) => acc + Number(v || 0),
+                                                    //             0
+                                                    //         );
+                                                    //         if (currentTotal - Number(locationQty[loc] || 0) + numVal > activeRow?.GRNQty) {
+                                                    //             alert(`Total entered qty cannot exceed GRN Qty (${activeRow?.GRNQty})`);
+                                                    //             return;
+                                                    //         }
+
+                                                    //         setLocationQty((prev) => ({ ...prev, [loc]: val }));
+                                                    //     }
+                                                    // }}
+
                                                     onChange={(e) => {
                                                         let val = e.target.value;
 
-                                                        // allow empty string or numbers only
                                                         if (val === "" || /^\d*$/.test(val)) {
-                                                            // check individual value doesn't exceed GRNQty
                                                             const numVal = val === "" ? 0 : Number(val);
-                                                            if (numVal > activeRow?.Allowed_putqty) {
-                                                                setErrorMessage(`Value cannot exceed Allowed_putqty (${activeRow?.Allowed_putqty})`);
-                                                                setShowErrorPopup(true)
-                                                                return;
-                                                            }
 
-                                                            // check total doesn't exceed GRNQty
-                                                            const currentTotal = Object.values(locationQty).reduce(
-                                                                (acc, v) => acc + Number(v || 0),
-                                                                0
-                                                            );
-                                                            if (currentTotal - Number(locationQty[loc] || 0) + numVal > activeRow?.GRNQty) {
-                                                                alert(`Total entered qty cannot exceed GRN Qty (${activeRow?.GRNQty})`);
+                                                            // calculate total excluding current location
+                                                            const totalOtherLocations = Object.keys(locationQty)
+                                                                .filter(k => k !== loc)
+                                                                .reduce((acc, k) => acc + Number(locationQty[k] || 0), 0);
+
+                                                            const remainingForThisLoc = activeRow?.allowedPutqty - totalOtherLocations;
+
+                                                            if (numVal > remainingForThisLoc) {
+                                                                setErrorMessage(`Cannot exceed allowed put qty (${remainingForThisLoc})`);
+                                                                setShowErrorPopup(true);
                                                                 return;
                                                             }
 
                                                             setLocationQty((prev) => ({ ...prev, [loc]: val }));
                                                         }
                                                     }}
+
                                                     inputProps={{
                                                         min: 0,
                                                         max: remainingQty,
@@ -324,8 +351,8 @@ const PutawayProcessTable = ({
                     </TableContainer>
                 </DialogContent>
                 <DialogActions>
-                    <Button  sx={{fontSize: '13px'}} onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button variant="contained"  sx={{fontSize: '13px'}}onClick={handleSave}>Save</Button>
+                    <Button sx={{ fontSize: '13px' }} onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button variant="contained" sx={{ fontSize: '13px' }} onClick={handleSave}>Save</Button>
                 </DialogActions>
             </Dialog>
 

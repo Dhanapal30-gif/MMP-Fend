@@ -254,6 +254,7 @@ const LocalPutaway = () => {
             availableQuantity: "",
             quantity: ""
         })
+        setIsFrozen(false);
     }
     const exportToExcel = (search = "") => {
         setDownloadDone(false);
@@ -289,6 +290,7 @@ const LocalPutaway = () => {
 
    const handleEdit = (row) => {
     setIsEditMode(true);
+    setIsFrozen(true);
     setFormData({
         ...row,
         quantity: row.putawayqty, // map column to formData field

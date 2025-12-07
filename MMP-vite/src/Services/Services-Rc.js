@@ -64,7 +64,7 @@ export const checkAvailable = (partcodeQtyMap) => {
   return axios.post(checkAvailableQty, partcodeQtyMap); // send array as JSON body
 };
 
-const requester = `${url}/RequesterCon/saveRequester`
+const requester = `${url}/RequesterCon/saverequestList`
 export const saveRequester = (formData) => axios.post(requester, formData);
 
 
@@ -176,9 +176,9 @@ export const saveStockTransfer = (formData) => axios.post(saveStockTransferList,
 
 
 const fetchStockTransfer = `${url}/StockTransferCon/fetchStockTransfer`;
-export const fetchStockTransferAll = (page = 0, size = 10) => {
+export const fetchStockTransferAll = (page = 0, size = 10,search="") => {
   return axios.get(fetchStockTransfer, {
-    params: { page, size },
+    params: { page, size,search },
   });
 };
 
@@ -280,3 +280,49 @@ const Get_Issuance = `${url}/IssuacneCon/fetchIssueDetail`;
 export const getIssuanceData = (page = 0, size = 10, search = "") => {
   return axios.get(Get_Issuance, { params: { page, size, search: search || undefined, }, });
 }
+
+
+const fetchStockUpdatePartcodeList = `${url}/StockTransferCon/fetchStochUpdatePartcode`;
+export const fetchStockUpdatePartcode = () =>
+  axios.get(fetchStockUpdatePartcodeList, {});
+
+
+const fetchStockUpdatePartcodeDetailsList = `${url}/StockTransferCon/fetchStockUpdatePartcodeDetails`;
+export const fetchStockUpdatePartcodeDetails = (partcode) =>
+  axios.get(fetchStockUpdatePartcodeDetailsList, {
+    params: { partcode },
+  });
+
+
+  const saveStockUpdateList = `${url}/manualStock/saveStockUpdate`
+export const saveStockUpdate = (formData) => axios.post(saveStockUpdateList, formData);
+
+
+
+
+const fetchStockUpdateTableData = `${url}/manualStock/fetchStockUpdateDetails`;
+export const fetchStockTableData = (page = 0, size = 10, search = "") => {
+  return axios.get(fetchStockUpdateTableData, {
+    params: { page, size, search },
+  });
+};
+
+
+  const saveStockList = `${url}/manualStock/saveStockEdit`
+export const saveStockEdit = (formData) => axios.post(saveStockList, formData);
+
+
+const Get_DownloadStockManualUpdate = `${url}/manualStock/downloadStockManualUpdateTable-excel`;
+export const downloadStockManualUpdate = (search) =>
+  axios.get(Get_DownloadStockManualUpdate, {
+    params: {search },
+    responseType: "blob",
+  });
+
+  
+const Get_DownloadStockTransfer = `${url}/StockTransferCon/downloadStockTransfer-excel`;
+export const downloadStockTransfer = (search) =>
+  axios.get(Get_DownloadStockTransfer, {
+    params: {search },
+    responseType: "blob",
+  });

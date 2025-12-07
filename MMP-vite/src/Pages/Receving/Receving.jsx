@@ -35,7 +35,8 @@ const Receving = () => {
   const [updateButton, setUpdateButton] = useState(false);
   const [deleteButton, setDeleteButton] = useState(false);
   const [loading, setLoading] = useState(false);
-
+const [addSearchText, setAddSearchText] = useState("");
+  const [filteredAddData, setFilteredAddData] = useState([]);
   const [selectedDeleteRows, setSelectedDeleteRows] = useState([]);
   const [formData, setFormData] = useState({
     ponumber: "", vendorname: "", currency: "", postingdate: "", rcBactchCode: "",
@@ -392,6 +393,22 @@ const Receving = () => {
   }, [selectedDeleteRows]);
 
 
+  useEffect(() => {
+    if (!addSearchText) {
+      setFilteredAddData(poDetail);
+    } else {
+      const lower = addSearchText.toLowerCase();
+  
+      const result = poDetail.filter((row) =>
+        Object.values(row).some((val) =>
+          String(val).toLowerCase().includes(lower)
+        )
+      );
+  
+      setFilteredAddData(result);
+    }
+  }, [addSearchText, poDetail]);
+  
   return (
     <div className='ComCssContainer'>
       <div className='ComCssInput'>
@@ -476,9 +493,28 @@ const Receving = () => {
 
             <div className='RecevingTable'>
 
+          <div
+                        className="d-flex justify-content-end align-items-center mb-3"
+                        style={{ marginTop: "9px", display: "flex" }}>
+                        <div style={{ position: "relative", width: "200px" }}>
+                            <input
+                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                                placeholder="Search..." value={addSearchText}
+                                onChange={(e) => setAddSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span onClick={() => setAddSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
               <RecevingTable
-                poDetail={poDetail}
-                setPoDetail={setPoDetail}
+                // poDetail={poDetail}
+                // setPoDetail={setPoDetail}
+                filteredAddData={filteredAddData}
+                setFilteredAddData={setFilteredAddData}
                 handleFieldChange={handleFieldChange}
                 formData={formData}
                 setFormData={setFormData}

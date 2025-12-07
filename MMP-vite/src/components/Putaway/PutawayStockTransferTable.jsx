@@ -148,32 +148,46 @@ const handleQtyChange = (idx, value) => {
     const newQty = Number(sanitizedValue || 0);
     const selectedRow = dialogRows[idx];
 
-    // total already assigned qty for same batch including saved rows
+    const batch = selectedRow.batch;
+    const location = selectedRow.fromLocation;   // 👈 LOCATION
+
+    // -------------------------
+    // 1️⃣ CALCULATE USED QTY (Batch + Location)
+    // -------------------------
     let alreadyUsedQty = 0;
 
+    // saved rows
     if (savedRows[activeRow.id]) {
         alreadyUsedQty += savedRows[activeRow.id]
-            .filter(r => r.batch === selectedRow.batch)
+            .filter(r => r.batch === batch && r.fromLocation === location)
             .reduce((sum, r) => sum + Number(r.qty || 0), 0);
     }
 
-    // include currently entered rows excluding this row
+    // dialog entered rows (except current row)
     alreadyUsedQty += dialogRows
-        .filter((r, i) => i !== idx && r.batch === selectedRow.batch)
+        .filter((r, i) => i !== idx && r.batch === batch && r.fromLocation === location)
         .reduce((sum, r) => sum + Number(r.qty || 0), 0);
 
+    // -------------------------
+    // 2️⃣ CALCULATE REMAINING AVAILABLE QTY
+    // -------------------------
     const avail = Number(selectedRow.availQty || 0);
     const remainingQty = avail - alreadyUsedQty;
 
-    // 🚫 Block entry if exceeds
+    // -------------------------
+    // 3️⃣ VALIDATION BLOCK
+    // -------------------------
     if (newQty > remainingQty) {
-        // alert(`You can only enter max ${remainingQty} qty for batch ${selectedRow.batch}`);
-         setErrorMessage(`You can only enter max ${remainingQty} qty for batch ${selectedRow.batch}`);
-            setShowErrorPopup(true)
-        return; // do not update qty
+        setErrorMessage(
+            `Max ${remainingQty} qty allowed for Batch ${batch} at Location ${location}`
+        );
+        setShowErrorPopup(true);
+        return;
     }
 
-    // ✔ Update normally
+    // -------------------------
+    // 4️⃣ UPDATE
+    // -------------------------
     setDialogRows(prev =>
         prev.map((row, i) => i === idx ? { ...row, qty: sanitizedValue } : row)
     );
@@ -224,7 +238,7 @@ const handleQtyChange = (idx, value) => {
     const handleSave = () => {
         let hasError = false;
         const username = sessionStorage.getItem("userName") || "System";
-if (dialogRows.length <= 1) {
+if (dialogRows.length < 1) {
         // alert("Please add at least one additional row before saving.");
         setErrorMessage("Please add at least one additional row before saving")
         setShowErrorPopup(true)
@@ -278,13 +292,13 @@ if (dialogRows.length <= 1) {
             batchLocSet.add(batchLocKey);
 
             batchSums[row.batch] = (batchSums[row.batch] || 0) + qty;
-            if (batchSums[row.batch] > avail) {
-                // alert(`Total quantity for batch ${row.batch} exceeds available qty`);
-                setErrorMessage(`Total quantity for batch ${row.batch} exceeds available qty`)
-                setShowErrorPopup(true)
-                hasError = true;
-                break;
-            }
+            // if (batchSums[row.batch] > avail) {
+            //     // alert(`Total quantity for batch ${row.batch} exceeds available qty`);
+            //     setErrorMessage(`Total quantity for batch ${row.batch} exceeds available qty`)
+            //     setShowErrorPopup(true)
+            //     hasError = true;
+            //     break;
+            // }
         }
 
         if (hasError) return;

@@ -28,6 +28,7 @@ const CompatabilityAddTable = ({
     perPage,
     totalRows,
     loading,
+    resetKey,
     setPage,
     setPerPage,
     setTableData
@@ -80,6 +81,8 @@ const cancelColumn = {
 
     return (
         <CommonDataTable
+          key={resetKey}                 
+  paginationDefaultPage={1} 
             columns={columns}
             data={normalizedData}
             page={page}

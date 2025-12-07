@@ -9,6 +9,7 @@ const CommonDataTable = ({
   perPage,
   onPageChange,
   onPerPageChange,
+  resetKey,
     selectedRows// ← important
 
 }) => {
@@ -23,6 +24,8 @@ const CommonDataTable = ({
 
   return (
     <DataTable
+  //    key={resetKey}                 
+  // paginationDefaultPage={1} 
       columns={columns}
       data={data}
       progressPending={loading}

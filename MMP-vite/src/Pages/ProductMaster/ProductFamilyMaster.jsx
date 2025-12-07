@@ -41,6 +41,7 @@ const ProductFamilyMaster = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [resetKey, setResetKey] = useState(0);
 
   const [formData, setFormData] = useState({
     productname: '',
@@ -116,8 +117,9 @@ const ProductFamilyMaster = () => {
       });
 
       // Refresh table
-      fetchProduct(1, perPage); // reset to first page
+       fetchProduct(1, perPage); // reset to first page
       setPage(1);
+      setResetKey(prev => prev + 1);  
     } catch (error) {
       if (error.response) {
         const message =
@@ -769,6 +771,8 @@ const ProductFamilyMaster = () => {
           <>
             <LoadingOverlay loading={loading} />
             <DataTable
+                 key={resetKey}                 
+  paginationDefaultPage={1} 
               columns={columns}
               data={productMaster}
               pagination

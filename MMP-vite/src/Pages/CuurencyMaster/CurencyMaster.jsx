@@ -318,16 +318,39 @@ const CurencyMaster = () => {
             wrap: true,
             width: `${calculateColumnWidth(curencyMster, 'CurrencyValue')}px`
         },
+        // {
+        //     name: "Effective Date",
+        //     selector: row => row.effectivedate,
+        //     width: `${calculateColumnWidth(curencyMster, 'Effectivedate')}px`
+        // },
         {
-            name: "Effective Date",
-            selector: row => row.effectivedate,
-            width: `${calculateColumnWidth(curencyMster, 'Effectivedate')}px`
-        },
+    name: "Effective Date",
+    selector: row => {
+        if (!row.effectivedate) return "";
+        const date = new Date(row.effectivedate);
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    },
+    width: `${calculateColumnWidth(curencyMster, 'effectivedate')}px`
+},
+
         {
-            name: "Modified Date",
-            selector: row => row.modifieddate,
-            width: `${calculateColumnWidth(curencyMster, 'modifieddate')}px`
-        }
+    name: "Modified Date",
+    selector: row => {
+        if (!row.modifieddate) return "";
+        const date = new Date(row.modifieddate);
+        return date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    },
+    width: `${calculateColumnWidth(curencyMster, 'modifieddate')}px`
+}
+
     ]
 
     const handleEdit = (row) => {
