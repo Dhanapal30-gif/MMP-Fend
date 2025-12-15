@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import IssuanceTextFiled from "../../components/Issuance/IssuanceTextFiled";
 import IssuanceShowTable from "../../components/Issuance/IssuanceShowTable";
 import IssuanceTable from "../../components/Issuance/IssuanceTable";
-import { fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
+import { downloadIssuance, fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
@@ -280,7 +280,7 @@ const Issuance = () => {
 
     const handleDliver = (e) => {
         e.preventDefault();
-      
+      console.log("deliver clicked");
         let ticketno;
         // Check all rows have qty entered
         const allRowsHaveQty = pickTicketData.every(row => {
@@ -288,6 +288,23 @@ const Issuance = () => {
             return true;
             //  return row.batchesQty.every(bq => Number(bq.qty || 0) > 0);
         });
+
+console.log("pickTicketData",pickTicketData);
+
+    //    const allRowsHaveQty = pickTicketData.length > 0 &&
+    // pickTicketData.every((row, rowIndex) => {
+    //     return row.batchesQty.every((bq, batchIndex) => {
+    //         const valid = bq.savedQty !== null &&
+    //                       bq.savedQty !== "" &&
+    //                       !isNaN(bq.savedQty) &&
+    //                       Number(bq.savedQty) > 0;
+    //         if (!valid) {
+    //             console.log("Invalid qty at row", rowIndex, "batch", batchIndex, bq);
+    //         }
+    //         return valid;
+    //     });
+    // });
+
 
         if (!allRowsHaveQty) {
             setErrorMessage("Please enter quantity for all rows before delivering!");
@@ -532,6 +549,40 @@ useEffect(() => {
     setFilteredAddData(result);
   }
 }, [addSearchText, pickTicketData]);
+
+const exportToExcel = (search = "") => {
+        const userId = sessionStorage.getItem("userName") || "System";
+
+        // setDownloadDone(false);
+        // setDownloadProgress(null);
+        setLoading(true);
+
+        let apiCall;
+
+            apiCall = () => downloadIssuance( search);
+       
+
+        // Call apiCall without arguments, since it’s already a function returning a Promise
+        apiCall()
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "IssuanceReport.xlsx");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setDownloadDone(true);
+            })
+            .catch((error) => {
+                console.error("Download failed:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+                // setTimeout(() => setDownloadDone(false), 5000);
+            });
+    };
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>

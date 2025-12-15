@@ -75,10 +75,35 @@ const [resetKey, setResetKey] = useState(0);
     expdateapplicable: '',
     shelflife: 0
   })
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData({ ...formData, [name]: value });
+  // };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  let updatedValue = value;
+
+  if (name === "ComponentUsage") {
+    const v = value.toLowerCase().replace(/\s+/g, "");
+    if (v === "submodule") {
+      updatedValue = "Sub Module";
+    }
+    if (v === "thermalgel") {
+      updatedValue = "Thermal Gel";
+    }
+    if (v === "others") {
+      updatedValue = "Others";
+    }
+  }
+
+  setFormData({
+    ...formData,
+    [name]: updatedValue
+  });
+};
+
+
 const handleLocationChange = (index, value) => {
     const updatedRows = [...rackRows];
     updatedRows[index].racklocation = value;
@@ -154,6 +179,36 @@ const handleLocationChange = (index, value) => {
       errors.partcode = "Please Enter partcode";
       isValid = false;
     }
+    if (!formData.partdescription) {
+      errors.partdescription = "Please Enter Partdescription";
+      isValid = false;
+    }
+    if (!formData.ComponentUsage) {
+      errors.ComponentUsage = "Please Select ComponentUsage";
+      isValid = false;
+    }
+    if (!formData.TYC) {
+      errors.TYC = "Please Enter Tyc";
+      isValid = false;
+    }
+    if (!formData.technology) {
+      errors.technology = "Please Enter Technology";
+      isValid = false;
+    }
+    if (!formData.expdateapplicable) {
+      errors.expdateapplicable = "Please Select Exp-Date Applicable";
+      isValid = false;
+    }
+    // if (!formData.shelflife) {
+    //   errors.shelflife = "Please Enter Shelflife";
+    //   isValid = false;
+    // }
+
+
+    //  if (!formData.technology) {
+    //   errors.technology = "Please Enter technology";
+    //   isValid = false;
+    // }
      const hasRack = rackRows.some(row => row.racklocation && row.racklocation.trim() !== "");
   if (!hasRack) {
     errors.racklocation = "Please enter at least one rack location";
@@ -236,7 +291,7 @@ const handleLocationChange = (index, value) => {
       setHandleUploadButton(true);
       setHandleSubmitButton(false);
       setShowUploadTable(true);
-      setShowProductTable(false);
+      // setShowProductTable(false);
     };
 
     reader.onerror = (error) => {
@@ -442,16 +497,16 @@ const handleLocationChange = (index, value) => {
       selector: row => row.technology,
       width: `${calculateColumnWidth(rcStoreData, 'technology')}px`
     },
-    {
-      name: "UnitPrice",
-      selector: row => row.unitprice,
-      width: `${calculateColumnWidth(rcStoreData, 'unitprice')}px`
-    },
-    {
-      name: "Quantity",
-      selector: row => row.quantity,
-      width: `${calculateColumnWidth(rcStoreData, 'quantity')}px`
-    },
+    // {
+    //   name: "UnitPrice",
+    //   selector: row => row.unitprice,
+    //   width: `${calculateColumnWidth(rcStoreData, 'unitprice')}px`
+    // },
+    // {
+    //   name: "Quantity",
+    //   selector: row => row.quantity,
+    //   width: `${calculateColumnWidth(rcStoreData, 'quantity')}px`
+    // },
     {
       name: "UOM",
       selector: row => row.uom,
@@ -525,16 +580,18 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
     e.preventDefault();
     
     const errors = [];
-    excelUploadData.slice(1).forEach((row) => {
-      if (!row.partcode || row.partcode.trim() === "") {
-        setErrorMessage("PartCode is Required");
-        setShowErrorPopup(true);
-        // errors.push("partcode  is required");
-      }
-    });
+
+    excelUploadData.forEach((row, index) => {
+  if (!row.partcode || row.partcode.trim() === "") {
+    errors.push(`Row ${index + 1}: PartCode is required`);
+  }
+  if (!row.racklocation || row.racklocation.trim() === "") {
+    errors.push(`Row ${index + 1}: Racklocation is required`);
+  }
+});
 
     if (errors.length > 0) {
-      setErrorMessage("partcode is required");
+      setErrorMessage(errors[0]);
       setShowErrorPopup(true);
       return;
     }
@@ -888,6 +945,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               onChange={handleChange}
               size="small"
               className='ProductTexfiled-textfield '
+               error={Boolean(formErrors.partdescription)}
+              helperText={formErrors.partdescription}
             />
             <TextField
               id="outlined-basic"
@@ -915,18 +974,35 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               size="small"
               className='ProductTexfiled-textfield '
             />
-            <TextField
+            {/* <TextField
               id="outlined-basic"
               label="ComponentUsage"
               variant="outlined"
               name="ComponentUsage"
               value={formData.ComponentUsage}
               onChange={handleChange}
-              //error={Boolean(formErrors.partcode)}
-              //helperText={formErrors.partcode}
-              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+                 error={Boolean(formErrors.ComponentUsage)}
+              helperText={formErrors.ComponentUsage}
               size="small"
               className='ProductTexfiled-textfield '
+            /> */}
+             <Autocomplete
+              options={["Sub Module", "Thermal Gel", "Others","PTL"]}
+              getOptionLabel={(option) => (typeof option === "string" ? option : "")}
+              value={formData.ComponentUsage || []}
+              onChange={(event, newValue) => setFormData({ ...formData, ComponentUsage: newValue || [] })}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Component Usage"
+                  variant="outlined"
+                  error={Boolean(formErrors.ComponentUsage)}
+                  helperText={formErrors.ComponentUsage}
+                  // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+                  size="small"  // <-- Reduce height
+                  className='ProductTexfiled-textfield '
+                />
+              )}
             />
             <TextField
               id="outlined-basic"
@@ -935,8 +1011,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               name="TYC"
               value={formData.TYC}
               onChange={handleChange}
-              //error={Boolean(formErrors.partcode)}
-              //helperText={formErrors.partcode}
+              error={Boolean(formErrors.TYC)}
+              helperText={formErrors.TYC}
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
               className='ProductTexfiled-textfield '
             />
@@ -1037,9 +1113,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               name="technology"
               value={formData.technology}
               onChange={handleChange}
-              //error={Boolean(formErrors.partcode)}
-              //helperText={formErrors.partcode}
-              //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+                error={Boolean(formErrors.technology)}
+              helperText={formErrors.technology}
               className='ProductTexfiled-textfield '
             />
             {/* <TextField
@@ -1055,7 +1130,7 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               className='ProductTexfiled-textfield '
             /> */}
             
-            <TextField
+            {/* <TextField
               id="outlined-basic"
               label="Quantity"
               variant="outlined"
@@ -1066,8 +1141,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               //helperText={formErrors.partcode}
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
               className='ProductTexfiled-textfield '
-            />
-            <TextField
+            /> */}
+            {/* <TextField
               id="outlined-basic"
               label="Unit Price"
               variant="outlined"
@@ -1079,7 +1154,7 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
               size="small"
               className='ProductTexfiled-textfield '
-            />
+            /> */}
             <Autocomplete
               options={["Yes", "No", "NotApplicable"]}
               getOptionLabel={(option) => (typeof option === "string" ? option : "")}
@@ -1090,8 +1165,8 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
                   {...params}
                   label="Expdateapplicable"
                   variant="outlined"
-                  //error={Boolean(formErrors.recordstatus)}
-                  // helperText={formErrors.recordstatus}
+                  error={Boolean(formErrors.expdateapplicable)}
+                  helperText={formErrors.expdateapplicable}
                   // sx={{ "& .MuiInputBase-root": { height: "40px" } }}
                   size="small"  // <-- Reduce height
                   className='ProductTexfiled-textfield '
@@ -1104,18 +1179,20 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
                 label="Shelf Life"
                 name="shelflife"
                 type="number"
-  value={formData.shelflife || 0}  // optional fallback
+  value={formData.shelflife || 0}  
                 onChange={handleChange}
                 inputProps={{ min: 0 }}
                 variant="outlined"
                 size="small"
                 className='ProductTexfiled-textfield '
+                // error={Boolean(formErrors.shelflife)}
+                //   helperText={formErrors.shelflife}
               />
             )}
             <div   style={{
-    maxHeight: 180,           // scroll after 3 rows
+    maxHeight: 230,           // scroll after 3 rows
     overflowY: "auto",        // vertical scroll
-    border: "1px solid #ccc", // full outer border
+    border: "1px solid #138606ff", // full outer border
     borderRadius: 4,           // optional rounded corners
     // padding: 8,               // spacing inside the border
   }}> {/* Adjust height as needed */}
@@ -1143,11 +1220,16 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
               onChange={(e) => handleLocationChange(index, e.target.value)} 
               error={Boolean(formErrors.racklocation)}      
               helperText={formErrors.racklocation || ""}   
+              sx={{
+    "& .MuiInputBase-input": { fontSize: "13px" },   // input text
+
+    "& .MuiFormHelperText-root": { fontSize: "13px" } // helper text
+  }}
             />
           </TableCell>
           <TableCell>
             {rackRows.length > 1 && (
-              <IconButton onClick={() => removeRow(index)} size="small" color="error">
+              <IconButton onClick={() => removeRow(index)} size="small"  color="error">
                 <Remove />
               </IconButton>
             )}

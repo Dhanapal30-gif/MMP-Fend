@@ -6,8 +6,8 @@ import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, TextField } from "@mui/material";
 
-const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
-  ptldata, groupOptions, handleInputChange, nameOptions, serialOptions,
+const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,isTicetFreze,
+  ptldata,ptlPutawayTicketList, groupOptions, handleInputChange, nameOptions, serialOptions,
   partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
 
 
@@ -25,6 +25,7 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
       <ThemeProvider theme={TextFiledTheme}>
         {/* // Assume PTLdata = [{ partcode, partdescription, racklocation, availableQuantity }, ...] */}
 
+{!isTicetFreze && (
         <Autocomplete
           options={ptldata.map(item => ({
             label: item.partcode,
@@ -55,7 +56,7 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
 
     }));
   }
-}}
+}} 
 
          renderInput={(params) => (
     <TextField
@@ -71,7 +72,8 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
   )}
   disabled={isFrozen}
 />
-
+)}
+{!isTicetFreze && (
         <ComTextFiled
           label="Part Description"
           name="partdescription"
@@ -80,6 +82,8 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
           InputProps={{ readOnly: true }}
 
         />
+)}
+{!isTicetFreze && (
         <ComTextFiled
           label="Rack Location"
           name="racklocation"
@@ -88,7 +92,8 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
           InputProps={{ readOnly: true }}
 
         />
-        {!isEditMode && (
+)}
+        {!isEditMode && !isTicetFreze && (
         <ComTextFiled
           label="Available Qty"
           name="availableQuantity"
@@ -98,6 +103,8 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
 
         />
 )}
+
+{!isTicetFreze && (
         <ComTextFiled
           label="Put Qty"
           name="quantity"
@@ -106,6 +113,27 @@ const PutawayTextFiled = ({ formData, setFormData,isEditMode, isFrozen,
           error={Boolean(formErrors?.quantity)}
           helperText={formErrors?.quantity || ""}
         />
+)}
+
+{isTicetFreze && (
+    <div style={{ width: 390 }}> {/* width in px */}
+
+<Autocomplete
+  options={ptlPutawayTicketList.map(item => ({
+    label: item.putawayTicket,
+    value: item.putawayTicket
+  }))}
+  value={formData.ticketNumber || null} // example
+  onChange={(e, newVal) => setFormData(prev => ({
+    ...prev,
+    ticket: newVal?.value || ""
+  }))}
+  renderInput={(params) => (
+    <TextField {...params} label="Select Ticket"  size="small" />
+  )}
+  
+/> </div>)}
+
       </ThemeProvider>
     </div>
   )

@@ -48,7 +48,7 @@ const HeaderComponents = () => {
   };
 
   const handleSignOut = () => {
-        // let userId = sessionStorage.getItem("userId") || localStorage.getItem("userName") || "";
+    // let userId = sessionStorage.getItem("userId") || localStorage.getItem("userName") || "";
 
     sessionStorage.clear();
     localStorage.clear();
@@ -119,7 +119,7 @@ const HeaderComponents = () => {
           <div class="header-logo-box"></div>
           <div className="logo-section">
             {/* <p>NOKIA   </p> */}
-              <img src={Imagee} alt="Nokia Logo" className="logo" />
+            <img src={Imagee} alt="Nokia Logo" className="logo" />
 
             {/* <img src={Imagee} alt="Logo" className="logo" /> */}
             {/* <span className="logo-text">Mat Man Pro</span> */}
@@ -223,8 +223,13 @@ const HeaderComponents = () => {
               <ul className="nav-links">
                 <li className="dropdown-container" >
                   {/* <ul><Link to="/home">Home</Link></ul> */}
-                  <span className="nav-link">
+                  {/* <span className="nav-link">
                     <AiFillHome className="nav-icon" /> Home
+                  </span> */}
+                  <span className="nav-link">
+                    <Link to="/home" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+                      <AiFillHome className="nav-icon" style={{ marginRight: '5px' }} /> Home
+                    </Link>
                   </span>
                 </li>
                 <li className="dropdown-container" onMouseEnter={toggleServicesDropdown} onMouseLeave={closeServicesDropdown}>
@@ -297,6 +302,9 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Approver")) && (<li><Link to="/approver" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approver</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Issuance")) && (<li><Link to="/issuance" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Returning")) && (<li><Link to="/returning" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Returning</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("DeploymentPopup")) && (<li><Link to="/deploymentPopup" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>DeploymentPopup</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("ManualRCRequest")) && (<li><Link to="/manualRCRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual RC Request</Link></li>)}
+
                       {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
                     </ul>
                   )}
@@ -311,7 +319,7 @@ const HeaderComponents = () => {
                     <ul className="dropdown-menu">
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/stockTransfer" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Transfer</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Report</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockUpdate" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manula Stock Update</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockUpdate" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual Stock Update</Link></li>)}
 
                     </ul>
                   )}

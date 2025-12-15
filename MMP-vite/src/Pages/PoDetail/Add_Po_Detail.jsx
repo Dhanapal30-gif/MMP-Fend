@@ -741,9 +741,10 @@ console.log("ID being sent:", intsysid);
     }
   }
 
-  useEffect(()=>{
-    console.log("selectedRows",selectedRows)
-  },[selectedRows])
+  // useEffect(()=>{
+  //   console.log("selectedRows",selectedRows)
+  // },[selectedRows])
+  
   const fetchfind = (page = 1, size = 10, search = "") => {
     setLoading(true);
     getPoDetailFind(page - 1, size, search)

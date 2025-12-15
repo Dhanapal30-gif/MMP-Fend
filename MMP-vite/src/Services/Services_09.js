@@ -222,15 +222,19 @@ export const downloadLocalReportFilter = (formData) =>
 //   });
 const Get_DownloadLocalIndiviualReport = `${url}/repaierCon/downloadLocalIndiviualReportrt-excel`;
 export const downloadIndiviualReport = (userId) =>
-  axios.get(Get_DownloadLocalIndiviualReport, {
-    params: { userId },
-    responseType: "blob",
-  });
+  axios.post(
+    Get_DownloadLocalIndiviualReport,
+    {}, // body (empty)
+    {
+      params: { userId },  // <-- correct place
+      responseType: "blob",
+    }
+  );
 
 const Get_DownloadLocalIndiviualReportSearch = `${url}/repaierCon/downloadLocalIndiviualReportrt-excel`;
-export const downloadLocalIndiviualReportSearch = (userId, search) =>
-  axios.get(Get_DownloadLocalIndiviualReportSearch, {
-    params: { userId, search },
+export const downloadLocalIndiviualReportSearch = ( search,userId) =>
+  axios.post(Get_DownloadLocalIndiviualReportSearch, {},{
+    params: { search,userId },
     responseType: "blob",
   });
 
@@ -264,13 +268,31 @@ export const getLocalReportDetailFilter = (page = 0, size = 10, formData) => {
 
 
 
+const Get_PTLPutawayTicket = `${url}/localPutawayCon/fetchPTLStorePutawayTicket`;
+export const fetchPTLPutawayTicket = () => axios.get(Get_PTLPutawayTicket);
+
+
+
+const Get_PTLPutawayTicketDetail = `${url}/localPutawayCon/fetchPTLStorePutawayTicketDetail`;
+export const fetchPTLPutawayTicketDetail = (ticket) => {
+  return axios.get(Get_PTLPutawayTicketDetail, { 
+    params: { ticketNumber: ticket } 
+  });
+};
+
 const Get_PTLPutaway = `${url}/localPutawayCon/fetchPTLStorePutaway`;
 export const fetchPTLPutaway = () => axios.get(Get_PTLPutaway);
-
 
 const savePTLPutaway = `${url}/localPutawayCon/savePutaway`
 export const savePutaway = (formData) => axios.put(savePTLPutaway, formData);
 
+const savePTLTicketPutaway = `${url}/localPutawayCon/savePTLTicketPutaway`
+export const saveTicketPutaway = (formData, ticketNo) => 
+    axios.put(savePTLTicketPutaway, formData, {
+        params: { ticketNo },                     // separate string param
+        headers: { 'Content-Type': 'application/json' } // ensure JSON body
+    });
+    
 const savePut = `${url}/localPutawayCon/saveShowLocation`
 export const savePutLocation = (formData) => axios.put(savePut, formData);
 

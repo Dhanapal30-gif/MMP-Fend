@@ -5,6 +5,10 @@ import { url } from '../app.config';
 const Login_Api = `${url}/userAuth/login`
 export const LoginUser = (formData) => axios.post(Login_Api, formData);
 
+const forgotPassword = `${url}/userAuth/forgotPassword`
+export const forGotUserPassword  = (formData) => axios.post(forgotPassword, formData);
+
+
 const Careate_Api = `${url}/userAuth/createAccount`
 export const CreateAccountUser = (formData) => axios.post(Careate_Api, formData);
 

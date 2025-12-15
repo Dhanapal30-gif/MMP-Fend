@@ -145,7 +145,7 @@ const ApprovalMaster = () => {
                     )
                 </>
             ),
-            value: "others",
+            value: "Others",
         },
         { label: "Thermal Gel", value: "Thermal Gel" },
         { label: "Submodule", value: "Sub Module" },
@@ -191,7 +191,7 @@ const ApprovalMaster = () => {
                 const data = response.data.data || [];
                 setApprovalMaster(data);
                 setTotalRows(data.length); // ✅ use data.length, not approvalMaster.length
-                console.log("fetchCurrency", data.length);
+                // console.log("fetchCurrency", data.length);
             });
 
     }
@@ -499,15 +499,65 @@ const ApprovalMaster = () => {
             };
         }, 0);
     };
-
+    const allowedRequestTypes = [
+        "Material Request",
+        "Scrap Request",
+        "Stock Transfer Request",
+        "Material Request Projects",
+        "Stock Transfer",
+        "Returning",
+        "PTL Request"
+    ];
+    const allowedComponentTypes = [
+        "Sub Module", "Thermal Gel", "Others"
+    ];
     const handleExcelUpload = (e) => {
         e.preventDefault();
         const errors = [];
-        excelUploadData.slice(1).forEach((row) => {
-            if (!row.requesttype || row.requesttype.trim() === "") {
-                errors.push("Product Name is required");
+
+        // validate all rows
+        const validatedRows = excelUploadData.map((row, index) => {
+            const value = row?.requesttype?.trim();
+            const value1 = row?.componenttype?.trim();
+            if (!value) {
+                errors.push(`Row ${index + 1}: Request Type is required`);
+                return null;
             }
-        });
+
+            const match = allowedRequestTypes.find(
+                type => type.toLowerCase() === value.toLowerCase()
+            );
+
+            if (!match) {
+                errors.push(`Row ${index + 1}: Request Type mismatch - ${row.requesttype}`);
+                return null;
+            }
+
+            // const match1 = allowedComponentTypes.find(
+            //     type => type.toLowerCase() === value1.toLowerCase()
+            // );
+
+            // if (!match1) {
+            //     errors.push(`Row ${index + 1}: Component Type mismatch - ${row.componenttype}`);
+            //     return null;
+            // }
+
+            // auto-format
+            return {
+                ...row,
+                requesttype: match
+            };
+        }).filter(Boolean); // remove null rows
+
+        if (errors.length > 0) {
+            alert(errors.join("\n"));
+            return; // STOP upload
+        }
+        // excelUploadData.slice(1).forEach((row) => {
+        //     if (!row.requesttype || row.requesttype.trim() === "") {
+        //         errors.push("Product Name is required");
+        //     }
+        // });
         const createdby = sessionStorage.getItem("userName") || "System";
         const updatedby = sessionStorage.getItem("userName") || "System";
         const updatedFormData = excelUploadData.map(item => ({
@@ -519,31 +569,27 @@ const ApprovalMaster = () => {
         uploadApprovalMaster(updatedFormData) // Call bulk API
             .then((response) => {
                 const data = response.data;
-                if (data.success) {
+              
                     setSuccessMessage(data.message || "Product upload Successfully");
+                    // fetchApprovalMaster();
                     setShowSuccessPopup(true);
                     setHandleUploadButton(false);
                     setHandleSubmitButton(true);
                     setShowUploadTable(false);
                     setShowBomTable(true);
+                    setExcelUploadData([]);
                     setFormData({ requesttype: "", issuancetype: "", componenttype: "", productgroup: [], approver1: [], approver2: [] });
                     fetchApprovalMaster();
-                } else {
-                    setErrorMessage(data.message || "Unknown error");
-                    setShowErrorPopup(true);
-                }
+                
             })
             .catch((error) => {
                 if (error.response && error.response.data && error.response.data.message) {
                     setErrorMessage(error.response.data.message);
                     setShowUploadTable(true);
                     setShowApprovalTable(false);
-                } else {
-                    setErrorMessage("Network error, please try again");
-                    setShowUploadTable(true);
-                    setShowApprovalTable(false);
+                                    setShowErrorPopup(true);
+
                 }
-                setShowErrorPopup(true);
                 //setShowApprovalTable(true);
             });
     }
@@ -868,40 +914,40 @@ const ApprovalMaster = () => {
                                 // }}
 
                                 onChange={(event, newValue) => {
-    const selectedGroups = newValue || [];
-    const selectedGroupNames = selectedGroups
-        .map(g => g?.ProductGroup)
-        .filter(Boolean);
+                                    const selectedGroups = newValue || [];
+                                    const selectedGroupNames = selectedGroups
+                                        .map(g => g?.ProductGroup)
+                                        .filter(Boolean);
 
-    const matched = storeProduct.filter(item =>
-        selectedGroupNames.includes(item.ProductGroup)
-    );
+                                    const matched = storeProduct.filter(item =>
+                                        selectedGroupNames.includes(item.ProductGroup)
+                                    );
 
-    const validLineLeads = matched
-        .map(item => item.lineLead)
-        .filter(v => v && v !== "null");
+                                    const validLineLeads = matched
+                                        .map(item => item.lineLead)
+                                        .filter(v => v && v !== "null");
 
-    const validEngineers = matched
-        .map(item => item.productEngineer)
-        .filter(v => v && v !== "null");
+                                    const validEngineers = matched
+                                        .map(item => item.productEngineer)
+                                        .filter(v => v && v !== "null");
 
-    const updatedData = {
-        ...formData,
-        productgroup: selectedGroups,
-    };
+                                    const updatedData = {
+                                        ...formData,
+                                        productgroup: selectedGroups,
+                                    };
 
-    // ✅ Only auto-refresh approvers if NOT in edit mode
-    if (!handleUpdateButton) {
-        if (formData.componenttype === "others") {
-            updatedData.approver1 = [...new Set(validLineLeads)];
-        } else if (formData.componenttype === "submodule") {
-            updatedData.approver1 = [...new Set(validEngineers)];
-        }
-        updatedData.approver2 = [];
-    }
+                                    // ✅ Only auto-refresh approvers if NOT in edit mode
+                                    if (!handleUpdateButton) {
+                                        if (formData.componenttype === "others") {
+                                            updatedData.approver1 = [...new Set(validLineLeads)];
+                                        } else if (formData.componenttype === "submodule") {
+                                            updatedData.approver1 = [...new Set(validEngineers)];
+                                        }
+                                        updatedData.approver2 = [];
+                                    }
 
-    setFormData(updatedData);
-}}
+                                    setFormData(updatedData);
+                                }}
 
                                 isOptionEqualToValue={(option, value) =>
                                     option.ProductGroup === value.ProductGroup

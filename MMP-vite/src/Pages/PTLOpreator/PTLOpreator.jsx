@@ -84,7 +84,7 @@ const PTLOpreator = () => {
     const handleSubmit = async () => {
         const payload = filteredData.map(item => ({
             id: item.id,   // use selectedid if that's your row ID
-            pickingqty: item.availableqty, // match backend field
+            pickingqty: item.pickingqty, // match backend field
             partcode:item.partcode
         }));
 

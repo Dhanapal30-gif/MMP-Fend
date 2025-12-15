@@ -113,24 +113,33 @@ const ReworkerTextFiled = ({
   setShowErrorPopup,
   setBoardFetch,
   handleChange,
-  setLoading
+  setLoading,
+  setSearchScanText,
+  searchScanText
 }) => {
-  const [searchTerm, setSearchTerm] = useState(formData.searchBoardserialNumber || '');
+  // const [searchTerm, setSearchTerm] = useState(formData.searchBoardserialNumber || '');
 
+    // searchScanText = useState(formData.searchBoardserialNumber || '');
+ React.useEffect(() => {
+    if (formData.searchBoardserialNumber) {
+      setSearchScanText(formData.searchBoardserialNumber);
+    }
+  }, [formData.searchBoardserialNumber]);
   // Debounce fetch after 3 seconds
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (searchTerm && searchTerm.trim() !== '') {
+      if (searchScanText && searchScanText.trim() !== '') {
         setLoading(true);
-        fetchSearchBoard(searchTerm)
+        fetchSearchBoard(searchScanText)
           .then((response) => {
             const data = response.data;
             if (data && data.length > 0) {
               setBoardFetch(data);
               setFormData((prev) => ({ ...prev, ...data[0] }));
             } else {
-              setErrorMessage("No record found for this serial number.");
+              setErrorMessage("No record found for this serial number.",searchScanText);
               setShowErrorPopup(true);
+              setSearchScanText("");
             }
           })
           .catch((error) => {
@@ -143,7 +152,7 @@ const ReworkerTextFiled = ({
     }, 300); // 3 seconds
 
     return () => clearTimeout(handler); // cleanup on change
-  }, [searchTerm]);
+  }, [searchScanText]);
 
   return (
     <div className="ComCssTexfiled">
@@ -151,9 +160,9 @@ const ReworkerTextFiled = ({
         <ComTextFiled
           label="Module Serial Number"
           name="searchBoardserialNumber"
-          value={searchTerm}
+          value={searchScanText}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
+            setSearchScanText(e.target.value);
             handleChange(e);
           }}
           sx={{ width: '320px' }}
@@ -161,7 +170,7 @@ const ReworkerTextFiled = ({
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  onClick={() => setSearchTerm(formData.searchBoardserialNumber)}
+                  onClick={() => setSearchScanText(formData.searchBoardserialNumber)}
                   edge="end"
                   sx={{
                     backgroundColor: '#1976d2',
