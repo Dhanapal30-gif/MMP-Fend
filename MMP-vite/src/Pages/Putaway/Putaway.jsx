@@ -612,10 +612,11 @@ const [putIds,setPutIds]=useState([])
         if (recevingPutProcess) {
             submitData = filteredData.map((row) => ({
                 Location: row.location,
-                Product_Qty: row.GRNQty,
+                Product_Qty: row.allowedPutqty,
                 Product_Code: row.partcode,
                 Product_Name: row.partdescription,
                 ticketno: row.recevingTicketNo,
+            
             }));
         } else if (returningPutProcess) {
             submitData = filteredData.map((row) => ({

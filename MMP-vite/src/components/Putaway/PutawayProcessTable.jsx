@@ -35,17 +35,40 @@ const PutawayProcessTable = ({
     const [activeRow, setActiveRow] = useState(null);
     const [locationQty, setLocationQty] = useState({}); // {loc1: 5, loc2: 3}
 
-    const handleOpen = (row) => {
-        setActiveRow(row);
-        // preload existing values if any
-        const parts = row.location?.split(",") || [];
-        const init = {};
-        parts.forEach(loc => {
-            init[loc.trim()] = row.putQtyDetails?.[loc.trim()] || "";
-        });
-        setLocationQty(init);
-        setOpen(true);
-    };
+    // const handleOpen = (row) => {
+    //     setActiveRow(row);
+    //     // preload existing values if any
+    //     const parts = row.location?.split(",") || [];
+    //     const init = {};
+    //     parts.forEach(loc => {
+    //         init[loc.trim()] = row.putQtyDetails?.[loc.trim()] || "";
+    //     });
+    //     setLocationQty(init);
+    //     setOpen(true);
+    // };
+const handleOpen = (row) => {
+    setActiveRow(row);
+
+    // Parse backend string (locationsWithQty) into a map { loc: qty }
+    const availableQtyMap = {};
+    row.locationsWithQty?.split(",").forEach(locQty => {
+        const match = locQty.match(/location:(.*?)\)\s*\(Qty:(\d+)\)/);
+        if (match) {
+            availableQtyMap[match[1].trim()] = Number(match[2]);
+        }
+    });
+
+    // Preload putQty if any
+    const init = {};
+    const parts = row.location?.split(",") || [];
+    parts.forEach(loc => {
+        init[loc.trim()] = row.putQtyDetails?.[loc.trim()] || "";
+    });
+
+    setLocationQty(init);
+    setActiveRow({ ...row, availableQtyMap }); // store the parsed map
+    setOpen(true);
+};
 
     const handleSave = () => {
         // check if at least one location has a qty
@@ -251,100 +274,52 @@ const PutawayProcessTable = ({
                                 <TableRow sx={{ bgcolor: '#e3f2fd' }}>
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Location</TableCell>
                                     <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>AvailableQty</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Quantity</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px' }}>Enter Qty</TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
-                                {Object.keys(locationQty).map((loc) => {
-                                    const totalEntered = Object.values(locationQty)
-                                        .reduce((acc, val) => acc + Number(val || 0), 0);
-                                        const availableQtyForLoc = activeRow?.availableQty?.[loc] || 0; // ✅ get actual available qty
-                                    const remainingQty = activeRow?.GRNQty - totalEntered + Number(locationQty[loc] || 0);
-                                    const disabled = remainingQty <= 0; // freeze remaining locations
+                           <TableBody>
+  {Object.keys(locationQty).map((loc) => {
+      const totalEntered = Object.values(locationQty)
+          .reduce((acc, val) => acc + Number(val || 0), 0);
 
-                                    return (
-                                        <TableRow
-                                            key={loc}
-                                            sx={{
-                                                '&:nth-of-type(odd)': { bgcolor: '#f9f9f9' },
-                                                bgcolor: disabled ? '#ffcdd2' : 'inherit',
-                                            }}
-                                        >
-                                            <TableCell>{loc}</TableCell>
-                                                    <TableCell>{availableQtyForLoc}</TableCell>  {/* Show actual available qty */}
+      const availableQtyForLoc = activeRow?.availableQtyMap?.[loc] || 0; // ✅ use parsed map
+      const remainingQty = activeRow?.GRNQty - totalEntered + Number(locationQty[loc] || 0);
+      const disabled = remainingQty <= 0;
 
-                                            <TableCell>
-                                                <TextField
-                                                    type="number"
-                                                    value={locationQty[loc] || ""} // ✅ show empty string if no value
-                                                    // onChange={(e) => {
-                                                    //     let val = e.target.value;
+      return (
+          <TableRow key={loc} sx={{ '&:nth-of-type(odd)': { bgcolor: '#f9f9f9' }, bgcolor: disabled ? '#ffcdd2' : 'inherit' }}>
+              <TableCell>{loc}</TableCell>
+              <TableCell>{availableQtyForLoc}</TableCell> {/* Show actual available qty */}
+              <TableCell>
+                  <TextField
+                      type="number"
+                      value={locationQty[loc] || ""}
+                      onChange={(e) => {
+                          let val = e.target.value;
+                          if (val === "" || /^\d*$/.test(val)) {
+                              const numVal = val === "" ? 0 : Number(val);
+                              const totalOtherLocations = Object.keys(locationQty)
+                                  .filter(k => k !== loc)
+                                  .reduce((acc, k) => acc + Number(locationQty[k] || 0), 0);
+                              const remainingForThisLoc = activeRow?.allowedPutqty - totalOtherLocations;
+                              if (numVal > remainingForThisLoc) {
+                                  setErrorMessage(`Cannot exceed allowed put qty (${remainingForThisLoc})`);
+                                  setShowErrorPopup(true);
+                                  return;
+                              }
+                              setLocationQty((prev) => ({ ...prev, [loc]: val }));
+                          }
+                      }}
+                      inputProps={{ min: 0, max: remainingQty, disabled }}
+                      size="small"
+                      sx={{ width: '47%', borderRadius: 2, bgcolor: disabled ? '#ffcdd2' : 'inherit' }}
+                  />
+              </TableCell>
+          </TableRow>
+      );
+  })}
+</TableBody>
 
-                                                    //     // allow empty string or numbers only
-                                                    //     if (val === "" || /^\d*$/.test(val)) {
-                                                    //         // check individual value doesn't exceed GRNQty
-                                                    //         const numVal = val === "" ? 0 : Number(val);
-                                                    //         if (numVal > activeRow?.allowedPutqty) {
-                                                    //             setErrorMessage(`Value cannot exceed Allowed_putqty (${activeRow?.allowedPutqty})`);
-                                                    //             setShowErrorPopup(true)
-                                                    //             return;
-                                                    //         }
-
-                                                    //         // check total doesn't exceed GRNQty
-                                                    //         const currentTotal = Object.values(locationQty).reduce(
-                                                    //             (acc, v) => acc + Number(v || 0),
-                                                    //             0
-                                                    //         );
-                                                    //         if (currentTotal - Number(locationQty[loc] || 0) + numVal > activeRow?.GRNQty) {
-                                                    //             alert(`Total entered qty cannot exceed GRN Qty (${activeRow?.GRNQty})`);
-                                                    //             return;
-                                                    //         }
-
-                                                    //         setLocationQty((prev) => ({ ...prev, [loc]: val }));
-                                                    //     }
-                                                    // }}
-
-                                                    onChange={(e) => {
-                                                        let val = e.target.value;
-
-                                                        if (val === "" || /^\d*$/.test(val)) {
-                                                            const numVal = val === "" ? 0 : Number(val);
-
-                                                            // calculate total excluding current location
-                                                            const totalOtherLocations = Object.keys(locationQty)
-                                                                .filter(k => k !== loc)
-                                                                .reduce((acc, k) => acc + Number(locationQty[k] || 0), 0);
-
-                                                            const remainingForThisLoc = activeRow?.allowedPutqty - totalOtherLocations;
-
-                                                            if (numVal > remainingForThisLoc) {
-                                                                setErrorMessage(`Cannot exceed allowed put qty (${remainingForThisLoc})`);
-                                                                setShowErrorPopup(true);
-                                                                return;
-                                                            }
-
-                                                            setLocationQty((prev) => ({ ...prev, [loc]: val }));
-                                                        }
-                                                    }}
-
-                                                    inputProps={{
-                                                        min: 0,
-                                                        max: remainingQty,
-                                                        disabled,
-                                                    }}
-                                                    size="small"
-                                                    sx={{
-                                                        width: '47%',
-                                                        borderRadius: 2,
-                                                        '& .MuiOutlinedInput-root': { borderRadius: '8px' },
-                                                        bgcolor: disabled ? '#ffcdd2' : 'inherit',
-                                                    }}
-                                                />
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
 
                         </Table>
 

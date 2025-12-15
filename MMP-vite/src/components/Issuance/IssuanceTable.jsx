@@ -7,7 +7,7 @@ import CryptoJS from "crypto-js";
 
 
 const fields = [
-  "rec_ticket_no",
+  "recTicketNo",
   "requestertype",
   "requestfor",
   "ordertype",
@@ -16,16 +16,17 @@ const fields = [
   "partcode",
   "partdescription",
   "reqQty",
-  "approved_l2",
-  "approved2_qty",
+  "approvedL2",
+  "approved2Qty",
   "fsn",
   "fmsn",
-  "issueQty",
-  "status"
+  "issuedQty",
+  "stataus",
+  "newSerialNumber"
 ];
 
 const customConfig = {
-  rec_ticket_no: { label: "Request TicketNo" },
+  recTicketNo: { label: "Request TicketNo" },
   requestertype: { label: "RequesterType" },
   requestfor: { label: "Request For" },
   ordertype: { label: "Order Type" },
@@ -35,11 +36,13 @@ const customConfig = {
   partcode: { label: "PartCode" },
   partdescription: { label: "PartDescription" },
   reqQty: { label: "Request Qty" },
-  approved_l2:{lable: "Approved_l2"},
-  approved2_qty: { label: "Approved2Qty" },
+  approvedL2:{lable: "Approved_l2"},
+  approved2Qty: { label: "Approved2Qty" },
   fsn: { label: "Faulty SerialNo" },
   fmsn: { label: "Faulty UnitModule SerialNo" },
-  issueQty:{label:"issueQty"}
+  issuedQty:{label:"issueQty"},
+    stataus: { label: "Status"}   ,
+    newSerialNumber: { label: "New Serial Number"}
 
 };
 

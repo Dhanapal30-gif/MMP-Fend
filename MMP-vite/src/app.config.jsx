@@ -2,6 +2,7 @@
 
 //Nokia
 // export const url = 'http://10.134.135.179:8089';
+// export const url = 'https://10.134.135.179:8089';
 
 
 //OLD

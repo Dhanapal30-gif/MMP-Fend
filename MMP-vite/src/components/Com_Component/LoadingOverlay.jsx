@@ -11,7 +11,7 @@ const LoadingOverlay = ({ loading }) => {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            return 75;
+            return 95;
           }
           return prev + 5;
         });

@@ -7,7 +7,7 @@ import './Reworker.css';
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLRequest, savePTLStore, saveReworkerSubmit } from '../../Services/Services_09';
+import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, saveDoneRequest, savePTLRepaier, savePTLRequest, savePTLStore, saveReworkerSubmit } from '../../Services/Services_09';
 import { fetchSearchBoard } from '../../Services/Services-Rc';
 import ReworkerTypeBasedhide from "../../components/Reworker/ReworkerTypeBasedhide";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
@@ -35,8 +35,10 @@ const Reworker = () => {
     const [submitButton, setSubmitButton] = useState(false);
     const [clearButton, setClearButton] = useState(false);
     const [boardFetch, setBoardFetch] = useState([])
-
-
+    const [selectedGrnRows, setSelectedGrnRows] = useState([]);
+    const [doneSelectButton, setDoneSelectButton] = useState(false);
+ const [searchScanText, setSearchScanText]= useState('');
+ 
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -49,13 +51,54 @@ const Reworker = () => {
         }
     };
 
+    // console.log("selectedGrnRows", selectedGrnRows)
 
+    const fullData = boardFetch;
+
+    const handleDoneClick = () => {
+        if (selectedGrnRows.length === 0) return; // nothing selected
+
+        const selectedRowsData = boardFetch.filter(row =>
+            selectedGrnRows.includes(row.id)
+        );
+
+        setLoading(true);
+
+        saveDoneRequest(selectedRowsData)
+            .then((response) => {
+                if (response.status === 200 && response.data) {
+                    setSuccessMessage(response.data.message || "Saved successfully");
+                    setShowSuccessPopup(true);
+                    setSubmitButton(true);
+
+                    // ✅ Mark rows as done so checkboxes hide
+                    setBoardFetch(prev =>
+                        prev.map(row =>
+                            selectedGrnRows.includes(row.id)
+                                ? { ...row, is_done: 1 }
+                                : row
+                        )
+                    );
+
+                    // ✅ Clear selection so "select all" checkbox resets
+                    setSelectedGrnRows([]);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+    React.useEffect(() => {
+        // Remove any previously selected rows that are now done
+        setSelectedGrnRows(prev =>
+            prev.filter(id => !boardFetch.find(row => row.id === id && row.is_done === 1))
+        );
+    }, [boardFetch]);
 
     const handleSearchClick = (searchTerm) => {
-        // const searchTerm = formData.searchBoardserialNumber; // ✅ get search input value
-        // console.log("formData", formData)
+       
         if (!searchTerm) {
-            // console.warn("Please enter a module serial number.");
             setErrorMessage("Please enter a module serial number.");
             setShowErrorPopup(true);
             return;
@@ -129,6 +172,7 @@ const Reworker = () => {
                 boardserialnumber: "",
                 searchBoardserialNumber: ""
             }));
+            setSearchScanText("");
         } else if (field === "ProductGroup") {
             setFormData(prev => ({
                 ...prev,
@@ -136,15 +180,17 @@ const Reworker = () => {
                 ProductName: "",
                 boardserialnumber: ""
             }));
+            setSearchScanText("");
         } else if (field === "ProductName") {
             setFormData(prev => ({
                 ...prev,
                 ProductName: value,
                 boardserialnumber: ""
             }));
+            setSearchScanText("");
         } else if (field === "boardserialnumber") {
             setFormData(prev => ({ ...prev, boardserialnumber: value }));
-
+setSearchScanText("");
             const searchTerm = value; // ✅ use the current input value
             handleSearchClick(searchTerm);
         }
@@ -212,6 +258,7 @@ const Reworker = () => {
             i.productname === formData.ProductName
         ).map(i => i.boardserialnumber)
     )].map(val => ({ label: val, value: val }));
+
     const valiDate = () => {
         const errors = {};
         let isValid = true;
@@ -226,6 +273,10 @@ const Reworker = () => {
         setFormErrors(errors); // if you’re using error state
         return isValid;
     };
+
+    const allRowsDone =
+        boardFetch.length > 0 &&
+        boardFetch.every(row => row.is_done === 1);
 
 
     useEffect(() => {
@@ -260,7 +311,7 @@ const Reworker = () => {
                     setShowSuccessPopup(true);
                     setRequestButton(false)
                     setdoneButton(true)
-                    setIsFrozen(true);
+                    // setIsFrozen(true);
                     // setTableData([]);
                     // setShowTable(false);
                     // ✅ only call if it exists
@@ -279,9 +330,18 @@ const Reworker = () => {
                 setShowErrorPopup(true);
             });
     }
+    const [confirmSubmit, setConfirmSubmit] = useState(false);
 
+    const handleCancel = () => {
+        setConfirmSubmit(false);
+    };
+    const onSubmitClick = () => {
+        setConfirmSubmit(true);
+
+    };
     const handleSubmit = async () => {
         setLoading(true);
+        setConfirmSubmit(false);
         const reworkername = sessionStorage.getItem("userName")
 
         const payload = boardFetch.map(item => ({
@@ -359,6 +419,8 @@ const Reworker = () => {
                     setShowErrorPopup={setShowErrorPopup}
                     setErrorMessage={setErrorMessage}
                     setLoading={setLoading}
+                    setSearchScanText={setSearchScanText}
+                    searchScanText={searchScanText}
                 // formErrors={formErrors} // ✅ Pass this prop
                 // handlePoChange={handlePoChange}
                 // productOptions={productOptions}
@@ -441,6 +503,8 @@ const Reworker = () => {
                                 setSubmitButton={setSubmitButton}
                                 isFrozen={isFrozen}
                                 setLoading={setLoading}
+                                selectedGrnRows={selectedGrnRows}   // <-- current selection
+                                setSelectedGrnRows={setSelectedGrnRows} // <-- setter function
 
                             />
                         </>
@@ -496,7 +560,7 @@ const Reworker = () => {
                             <button className='ComCssSubmitButton' onClick={handlePTLRequest}>Request</button>
                         )}
 
-                        {boardFetch.some(item => item.checkSubmit === "1") && (
+                        {/* {boardFetch.some(item => item.checkSubmit === "1") && (
                             <button className='ComCssSubmitButton' onClick={handleSubmit}>
                                 Submit
                             </button>
@@ -506,9 +570,21 @@ const Reworker = () => {
                             <button className='ComCssSubmitButton' onClick={handleSubmit}>
                                 Submit
                             </button>
+                        )} */}
+
+                        {allRowsDone && (
+                            <button className="ComCssSubmitButton" onClick={onSubmitClick}>
+                                Submit
+                            </button>
                         )}
                         {clearButton && (
                             <button className='ComCssClearButton' onClick={handleClear}>Clear</button>
+                        )}
+                        {selectedGrnRows.length > 0 && (
+
+                            <button className='ComCssSubmitButton' onClick={handleDoneClick}>
+                                Done
+                            </button>
                         )}
                     </div>
                 </div>
@@ -528,6 +604,14 @@ const Reworker = () => {
                 message={errorMessage}
                 severity="error"
                 color="secondary"
+            />
+            <CustomDialog
+                open={confirmSubmit}
+                onClose={handleCancel}
+                onConfirm={handleSubmit}
+                title="Confirm"
+                message="Are you sure you want to Submit this?"
+                color="primary"
             />
         </div>)
 }

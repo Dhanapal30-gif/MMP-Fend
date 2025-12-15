@@ -552,6 +552,7 @@ const BomMaster = () => {
                 setHandleSubmitButton(true);
                 setShowUploadTable(false);
                 setShowBomTable(true);
+                fetchBomMaster();
             })
             .catch((error) => {
                 if (error.response) {
@@ -853,7 +854,8 @@ const BomMaster = () => {
                     {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
                     <button className='ComCssClearButton' onClick={formClear}>
                         Clear
-                    </button>                </div>
+                    </button>                
+                    </div>
             </div>
             <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (

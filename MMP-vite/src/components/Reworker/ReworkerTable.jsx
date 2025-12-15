@@ -1,6 +1,6 @@
 import React from 'react'
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
-import { generateColumns } from '../../components/Com_Component/generateColumns';
+import { generateColumnshidecheckbox } from '../../components/Com_Component/generateColumnshidecheckbox';
 import { TextField } from "@mui/material";
 import { saveDoneRequest } from '../../Services/Services_09';
 
@@ -19,13 +19,66 @@ const ReworkerTable = ({
     setRequestButton,
     doneButton,
     setdoneButton,
+      setSelectedGrnRows,
+  selectedGrnRows,
     isFrozen = { isFrozen },
     setBoardFetch,
     setSubmitButton,
     setLoading
 }) => {
 
-    const columns = generateColumns({
+const requestedQtyInitRef = React.useRef(false);
+
+React.useEffect(() => {
+  if (requestedQtyInitRef.current) return;
+  if (!data?.length) return;
+
+  requestedQtyInitRef.current = true;
+
+  setBoardFetch(prev =>
+    prev.map(row => ({
+      ...row,
+      RequestedQty: row.pickingqty
+    }))
+  );
+}, [data, setBoardFetch]);
+
+
+//    const handleGrnSelectAll = () => {
+//     if (selectedGrnRows.length === data.length) {
+//         setSelectedGrnRows([]);
+//     } else {
+//         setSelectedGrnRows(data.map((row) => row.id));
+//     }
+// };
+
+const handleGrnSelectAll = () => {
+    const notDoneRows = data.filter(row => row.is_done !== 1).map(row => row.id);
+
+    if (selectedGrnRows.length === notDoneRows.length) {
+        setSelectedGrnRows([]); // deselect all
+    } else {
+        setSelectedGrnRows(notDoneRows); // select only not-done rows
+    }
+};
+
+
+const handleGrnSelect = (rowSelectedId) => {
+    setSelectedGrnRows((prev) =>
+        prev.includes(rowSelectedId)
+            ? prev.filter((id) => id !== rowSelectedId)
+            : [...prev, rowSelectedId]
+    );
+};
+
+  const paginatedData = React.useMemo(() => {
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    return data.slice(start, end);
+}, [data, page, perPage]);
+
+
+    const columns = generateColumnshidecheckbox({
         fields: [
             "productname",
             "boardserialnumber",
@@ -37,8 +90,9 @@ const ReworkerTable = ({
             "RequestedQty",
             "pickingqty",
             "pickedqty",
-            "Submit",
-            "Repairer Name"
+            // "Submit",
+            // "Status",
+            "repairerName"
 
         ],
         customConfig: {
@@ -51,11 +105,17 @@ const ReworkerTable = ({
             RequestedQty: { label: "Requested Qty" },
             pickingqty: { label: "Picking Qty" },
             pickedqty: { label: "picked Qty" },
-
+            repairerName: { label: "Repairer Name"}
 
         },
-
+         data,  
+selectedRows: selectedGrnRows,
+      handleSelect: handleGrnSelect,
+      handleSelectAll: handleGrnSelectAll,
         customCellRenderers: {
+            RequestedQty: (row) => row.RequestedQty,
+
+
             pickingqty: (row) => (
                 <TextField
                     type="number"
@@ -86,6 +146,8 @@ const ReworkerTable = ({
             //         )}
             //     </div>
             // )
+
+            /*
             Submit: (row) => (
                 <div className="ReworkerButton9">
                     {row.is_done === "0" || row.is_done === null ? (
@@ -102,6 +164,10 @@ const ReworkerTable = ({
                     )}
                 </div>
             )
+
+
+
+            */
 
 
         }
@@ -150,11 +216,6 @@ const ReworkerTable = ({
     };
 
 
-const paginatedData = React.useMemo(() => {
-    const start = (page - 1) * perPage;
-    const end = start + perPage;
-    return data.slice(start, end);
-}, [data, page, perPage]);
 
     return (
         <CommonDataTable

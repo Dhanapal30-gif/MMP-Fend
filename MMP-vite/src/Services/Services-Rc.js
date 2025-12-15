@@ -326,3 +326,32 @@ export const downloadStockTransfer = (search) =>
     params: {search },
     responseType: "blob",
   });
+
+  const Get_DownloadIssuance = `${url}/IssuacneCon/downloadRequesterTable-excel`;
+export const downloadIssuance = (search) =>
+  axios.get(Get_DownloadIssuance, {
+    params: { search },
+    responseType: "blob",
+  });
+
+
+const openRc = `${url}/Manual_Rack/openRack`;
+
+export const openRcRack = (rackName) => {
+  return axios.post(openRc, {
+    rackName: rackName
+  });
+};
+
+
+const CloseRc = `${url}/Manual_Rack/CloseRack`;
+
+export const closeRcRack = (rackName) => {
+  return axios.delete(CloseRc, {
+    data: { rackName }
+  });
+};
+
+
+const Get_RcRequest = `${url}/Manual_Rack/getRcRequest`;
+export const getRequestDetail = () => axios.get(Get_RcRequest);
