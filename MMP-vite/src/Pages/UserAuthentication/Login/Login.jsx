@@ -8,7 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../../components/Com_Component/TextFiledTheme';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-const Login = ({ setUserId }) => {
+const Login = ({ setUserId ,setIsLoggedIn }) => {
     const navigate = useNavigate();
     const [screen, setScreen] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
@@ -66,7 +66,7 @@ const Login = ({ setUserId }) => {
             // localStorage.setItem("allowedScreens", JSON.stringify(response.allowedScreens));
 localStorage.setItem("userRole", JSON.stringify(data.userrole));
 
-
+            setIsLoggedIn(true);
             setUserId(data.empId);
 
             // Fetch screens

@@ -24,11 +24,11 @@ const allFields = [
   "ApprovedL2Qty",
   "faultySerialNumber",
   "Comment",
-  "recordstatus",
+  
   "approved_l1",
   "approved_l1_date",
-  "createdon",
-
+  "Request Date",
+"recordstatus",
 
 ];
 
@@ -55,7 +55,7 @@ const hideForRequester = [
   "approved_l1",
   "approved_l1_date",
   "inventory_box_no",
-  "createdon",
+  
   "ordertype"
 ]
 const hideForStock = [

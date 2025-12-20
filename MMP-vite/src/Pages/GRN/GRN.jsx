@@ -14,7 +14,7 @@ import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const GRN = () => {
-    const [formData, setFormData] = useState({ ponumber: "", partcode: "",receivingDate: "",  recevingTicketNo: "", grnNumber: "", GRDate: "" });
+    const [formData, setFormData] = useState({ ponumber: "", partcode: "", receivingDate: "", recevingTicketNo: "", grnNumber: "", GRDate: "" });
     const [GRNPen, setGRNPen] = useState([]);
     const [groupedData, setGroupedData] = useState([]);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
@@ -49,14 +49,13 @@ const GRN = () => {
 
     const handleGrnChange = (e) => {
         const { name, value } = e.target;
-
-        
-   
+        setSelectedGrnRows([])
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleChange = (name, value) => {
-        const actualValue = value?.label || value; // support both raw string and { label }
+        setSelectedGrnRows([])
+        const actualValue = value?.label || value; 
         setFormData(prev => ({ ...prev, [name]: actualValue }));
     };
 
@@ -160,14 +159,14 @@ const GRN = () => {
 
     }, [formData, GRNPen]);
 
-    
+
     const handleGRNCommentChange = (selectedid, field, value) => {
-  setData(prev =>
-    prev.map(item =>
-      item.selectedid === selectedid ? { ...item, [field]: value } : item
-    )
-  );
-};
+        setData(prev =>
+            prev.map(item =>
+                item.selectedid === selectedid ? { ...item, [field]: value } : item
+            )
+        );
+    };
 
 
 
@@ -203,7 +202,7 @@ const GRN = () => {
                 GRNQty: Number(row.GRNQty),
                 createdby: username,
                 updatedby: username,
-    GRComments: row.GRComments || "",
+                GRComments: row.GRComments || "",
                 // GRComments:formData.Comment || ""
             }));
 
@@ -272,6 +271,7 @@ const GRN = () => {
         setFormData({});
         setSelectedRows([]);
         setIsEditMode(false);
+        setSelectedGrnRows([]);
 
     }
 
@@ -353,25 +353,50 @@ const GRN = () => {
         download(search)
     }
 
+    // const handleEditClick = (row) => {
+    //     fetchfindPo(setPonumberEdit, setTotalRows, row.ponumber);
+    //     setIsPendingView(false);
+    //     setSelectedRows([]);
+    //     setEditingRowId(row.id);
+    //     setFormData({
+    //         ponumber: row.ponumber,
+    //         partcode: row.partcode,
+    //         recevingTicketNo: row.recevingTicketNo,
+    //         grnNumber: row.ponumber,
+    //         GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // Since row.grdate is null, this sets grnDate to ""            id: row.id,
+    //         GRNQty: row.grnqty || ""
+    //     });
+    //     setIsEditMode(true);
+
+    //     setData([{ ...row, id: row.id, selectedid: row.id, GRNQty: row.grnqty || "" }]);
+    //     setTotalRows(1);
+    //     setFormErrors({});
+    // };
+
+
     const handleEditClick = (row) => {
         fetchfindPo(setPonumberEdit, setTotalRows, row.ponumber);
         setIsPendingView(false);
         setSelectedRows([]);
         setEditingRowId(row.id);
+
         setFormData({
             ponumber: row.ponumber,
             partcode: row.partcode,
             recevingTicketNo: row.recevingTicketNo,
             grnNumber: row.ponumber,
-GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // Since row.grdate is null, this sets grnDate to ""            id: row.id,
-        GRNQty: row.grnqty || ""
-});
+            GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // <-- missing comma
+            id: row.id,
+            GRNQty: row.grnqty || ""
+        });
+
         setIsEditMode(true);
 
-        setData([{ ...row, id: row.id, selectedid: row.id,GRNQty: row.grnqty || "" }]);
+        setData([{ ...row, id: row.id, selectedid: row.id, GRNQty: row.grnqty || "" }]);
         setTotalRows(1);
         setFormErrors({});
     };
+
 
     const handleCancel = () => {
         setSelectedRows([]);
@@ -389,6 +414,8 @@ GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // S
 
         } catch (error) {
             const msg = error?.response?.data?.message || "Delete failed";
+            setErrorMessage(msg);
+            setShowErrorPopup(true);
 
         }
     };
@@ -409,7 +436,7 @@ GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // S
             </div>
             {(isEditMode || formData.ponumber || formData.partcode || formData.recevingTicketNo) && data.length > 0 && (
                 <div className='RecevingInputHide'>
-                              {/* <h5 className='ComCssTableName'>GRN  Details</h5> */}
+                    {/* <h5 className='ComCssTableName'>GRN  Details</h5> */}
 
                     <GRNTextField formData={formData} setFormData={setFormData} handleChange={handleChange} showFields={["grnNumber", "GRDate"]} handleGrnChange={handleGrnChange} formErrors={formErrors} />
                     <div className='GRNTable'>
@@ -450,7 +477,7 @@ GRDate: row.grdate ? new Date(row.grdate).toISOString().split('T')[0] : "", // S
             )}
 
             <div className='ComCssTable'>
-                          <h5 className='ComCssTableName'>GRN  Details</h5>
+                <h5 className='ComCssTableName'>GRN  Details</h5>
 
                 {selectedRows.length > 0 && !isEditMode && (
 

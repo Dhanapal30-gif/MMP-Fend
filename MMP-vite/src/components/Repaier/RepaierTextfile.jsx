@@ -129,7 +129,18 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                 // inputProps={{ maxLength: 11 }}
 
                 />
+<ComTextFiled
+                    label="Repaire Location"
+                    name="repairelocation"
+                    value={formData.repairelocation}
+                    onChange={handleChange}
+                    disabled={isFrozen}
+                    error={Boolean(formErrors?.repairelocation)}
+                    helperText={formErrors?.repairelocation || ""}
+                    className="comTextFiled"
+                // inputProps={{ maxLength: 11 }}
 
+                />
                 <Autocomplete
 
                     options={RepaierType}
@@ -178,50 +189,50 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                                 />
                             )}
                         /> */}
-<Autocomplete
-    options={partOptions}
-    value={partOptions.find(opt => opt.value === formData.partcode) || null}
-    getOptionLabel={(option) => option.label || ""}
+                        <Autocomplete
+                            options={partOptions}
+                            value={partOptions.find(opt => opt.value === formData.partcode) || null}
+                            getOptionLabel={(option) => option.label || ""}
 
-    // ⭐ FIX: STOP auto-scroll to selected item
-    ListboxProps={{
-        style: {
-            scrollBehavior: "auto"
-        },
-        onScroll: (e) => {
-            // prevent MUI from auto-scrolling to selected item
-            e.stopPropagation();
-        }
-    }}
+                            // ⭐ FIX: STOP auto-scroll to selected item
+                            ListboxProps={{
+                                style: {
+                                    scrollBehavior: "auto"
+                                },
+                                onScroll: (e) => {
+                                    // prevent MUI from auto-scrolling to selected item
+                                    e.stopPropagation();
+                                }
+                            }}
 
-    onOpen={() => {
-        setTimeout(() => {
-            const el = document.querySelector('.MuiAutocomplete-listbox');
-            if (el) el.scrollTop = 0;  // force go to top
-        }, 0);
-    }}
+                            onOpen={() => {
+                                setTimeout(() => {
+                                    const el = document.querySelector('.MuiAutocomplete-listbox');
+                                    if (el) el.scrollTop = 0;  // force go to top
+                                }, 0);
+                            }}
 
-    onChange={(e, newValue) => {
-        setFormData(prev => ({
-            ...prev,
-            partcode: newValue?.value || "",
-            partdescription: newValue?.partdescription || "",
-            racklocation: newValue?.racklocation || "",
-            availableqty: newValue?.availableqty || "",
-            pickingqty: newValue?.pickingqty || ""
-        }));
-    }}
+                            onChange={(e, newValue) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    partcode: newValue?.value || "",
+                                    partdescription: newValue?.partdescription || "",
+                                    racklocation: newValue?.racklocation || "",
+                                    availableqty: newValue?.availableqty || "",
+                                    pickingqty: newValue?.pickingqty || ""
+                                }));
+                            }}
 
-    renderInput={(params) => (
-        <TextField
-            {...params}
-            className="comTextFiled"
-            label="Partcode"
-            variant="outlined"
-            size="small"
-        />
-    )}
-/>
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    className="comTextFiled"
+                                    label="Partcode"
+                                    variant="outlined"
+                                    size="small"
+                                />
+                            )}
+                        />
 
                         <ComTextFiled
                             label="partdescription"
@@ -330,6 +341,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                             />
                         </>
                     )}
+                    
             </ThemeProvider>
         </div>
     )

@@ -639,17 +639,27 @@ const Add_Po_Detail = () => {
         });
   };
 
+  const formatToInputDate = (d) => {
+  if (!d) return "";
+  const date = new Date(d);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`; // format for type="date"
+};
   const handleEdit = (row) => {
     setHandleAdd(false);
     sethidePonumber(true);
     setFormData(row);
+    setShowTable(false);
+    setTableData([]);
     // console.log("Editing Row Data:", row);  // Debugging
     setFormData({
-      intsysid: row.intsysid || "",
+      id: row.id || "",
       ordertype: row.ordertype || "",
       potool: row.potool || "",
       ponumber: row.ponumber || "",
-      podate: row.podate || "",
+      // podate: row.podate || "",
       currency: row.currency || "",
       vendorname: row.vendorname || "",
       vendorcode: row.vendorcode || "",
@@ -660,6 +670,8 @@ const Add_Po_Detail = () => {
       totalvalue: row.totalvalue || "",
       ccf: row.ccf || "",
       totalvalueeuro: row.totalvalueeuro || "",
+      podate: formatToInputDate(row.podate),
+
     });
     setHandleSubmitButton(false);
     setHandleUploadButton(false);
@@ -668,7 +680,7 @@ const Add_Po_Detail = () => {
     setSelectedRows([]);
   };
 
-  const handleUpdate = (e, intsysid) => {
+  const handleUpdate = (e, id) => {
     e.preventDefault();
     if (!valiDate()) return;
     setLoading(true);
@@ -677,8 +689,8 @@ const Add_Po_Detail = () => {
       ...formData,
       updatedby
     };
-     const id = formData.intsysid;
-console.log("ID being sent:", intsysid);
+    //  const id = formData.id;
+// console.log("ID being sent:", formData.id)
 
     updatePoDeatil(id, updateFormData)
       .then((response) => {
@@ -693,6 +705,7 @@ console.log("ID being sent:", intsysid);
         setHandleUpdateButton(false);
         fetchPoDetail(page, perPage);
         setSearchText("");
+        setIsFrozen(false);
       }).catch((error) => {
         setLoading(false);
         if (error.response) {

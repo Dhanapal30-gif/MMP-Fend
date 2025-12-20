@@ -46,24 +46,37 @@ const Issuance = () => {
     const [loading, setLoading] = useState(false);
     const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
-        const [addSearchText, setAddSearchText] = useState("");
+    const [addSearchText, setAddSearchText] = useState("");
     const [filteredAddData, setFilteredAddData] = useState([]);
 
-
+    const buildTicketNo = (type, value) => {
+        if (!value) return "";
+        return `${type}-${value}`;
+    };
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        // console.log("formdat", formData)
 
-        // if (field === "category" && value === "DTL") {
-        //     fetchRequestedTickets(value);
-        // }
+        if (
+            (field === "requestedTicket" ||
+                field === "deliverTicket" ||
+                field === "issueTicket") &&
+            !value
+        ) {
+            setShowTable(false);
+            setPickTicketData([]);
+            return;
+        }
         if (field === "category" && value) {
             fetchRequestedTickets(value);
         }
 
         if (field === "requestedTicket" && value) {
             // console.log("value", field)
-            fetchPickTicketDetail(value);
+            setActiveTable("requestedTicket");
+            //  fetchPickTicketDetail(`pickTicketNo-${value}`);
+            const ticket = buildTicketNo("pickTicketNo", value);
+            fetchPickTicketDetail(ticket);
+            // fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
             setHideDeliverButton(false);
@@ -71,31 +84,33 @@ const Issuance = () => {
         }
         if (field === "deliverTicket" && value) {
             // console.log("value", field)
-            fetchPickTicketDetail(value);
+            setActiveTable("deliverTicket");
+            // fetchPickTicketDetail(`deliverTicketNo-${value}`);
+
+            const ticket = buildTicketNo("deliverTicketNo", value);
+            fetchPickTicketDetail(ticket);
+
+            // fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
             setHideDeliverButton(true);
             setHideIssueButton(false)
         }
         if (field === "issueTicket" && value) {
-            fetchPickTicketDetail(value);
+            setActiveTable("issueTicket");
+            // fetchPickTicketDetail(`issueTicketNo-${value}`);
+            const ticket = buildTicketNo("issueTicketNo", value);
+            fetchPickTicketDetail(ticket);
+            // fetchPickTicketDetail(value);
             setTableData([]);
             setShowTable(false)
             setHideIssueButton(true);
             setHideDeliverButton(false)
         }
-        // if (["requestedTicket", "deliverTicket", "issueTicket"].includes(field)) {
-        //                 console.log("value", field)
+        //         if (field === "requestedTicket") setActiveTable("requestedTicket");
+        // if (field === "deliverTicket") setActiveTable("deliverTicket");
+        // if (field === "issueTicket") setActiveTable("issueTicket");
 
-        //     if (value) {
-        //         fetchPickTicketDetail(value);
-        //         setShowTable(true);
-        //     } else {
-        //         setShowTable(false);
-        //     }
-        //     // Deliver button logic
-        //     setHideDeliverButton(field === "deliverTicket" ? !value : true);
-        // }
     };
 
     const fetchRequestedTickets = async (category) => {
@@ -168,22 +183,30 @@ const Issuance = () => {
             setLoading(false); // <-- make sure loading is turned off
         }
     };
+
+    const tableTitleMap = {
+        requestedTicket: "Pick List",
+        deliverTicket: "Delivery List",
+        issueTicket: "Issue List",
+        pickResponse: "Delivery List"
+
+    };
+    const getTableTitle = () => tableTitleMap[activeTable] || "";
+
+    const [activeTable, setActiveTable] = useState("");
+
+    // const getTableTitle = () => {
+    //   if (formData.issueTicket) return tableTitleMap.issueTicket;
+    //   if (formData.deliverTicket) return tableTitleMap.deliverTicket;
+    //   if (formData.requestedTicket) return tableTitleMap.requestedTicket;
+    //   return "";
+    // };
     const handlePut = (e) => {
         e.preventDefault();
         setLoading(true);
         let ticketno = pickTicketData[0]?.rec_ticket_no; // ✅ assign from first row
         const submitData = pickTicketData.flatMap(row => {
-            // if (row.batchesQty && row.batchesQty.length > 0) {
-            //     return row.batchesQty.map(bq => ({
-            //         Location: bq.location,
-            //         Product_Qty: bq.savedQty,
-            //         Product_Code: row.partcode,
-            //         Product_Name: row.partdescription,
-            //         ticketno: row.rec_ticket_no,
-            //         savePickIssuance: "issuance"
-            //     }));
-            // }
-            //batches mean coming from backend
+           
             if (row.batches && row.batches.length > 0) {
                 return row.batches.map(bq => ({
                     Location: bq.location,
@@ -215,6 +238,7 @@ const Issuance = () => {
                     } else {
                         fetchRequestedTickets("DTL");
                     }
+                    setActiveTable("pickResponse");
                     setHideDeliverButton(true)
                     setHidePutButton(false)
                     setSuccessMessage(response.data.message)
@@ -226,8 +250,12 @@ const Issuance = () => {
                     } else {
                         fetchRequestedTickets("DTL");
                     }
+                       const ticketNoSubmitted = submitData[0].ticketno;
+       
+            setFormData(prev => ({ ...prev, deliverTicket: ticketNoSubmitted }));
+      
                     setIsUserActive(false);
-                     setHideDeliverButton(true)
+                    setHideDeliverButton(true)
                     setHidePutButton(false)
                     setSuccessMessage(response.data.message)
                     setShowSuccessPopup(true)
@@ -280,7 +308,7 @@ const Issuance = () => {
 
     const handleDliver = (e) => {
         e.preventDefault();
-      console.log("deliver clicked");
+        // console.log("deliver clicked");
         let ticketno;
         // Check all rows have qty entered
         const allRowsHaveQty = pickTicketData.every(row => {
@@ -289,21 +317,21 @@ const Issuance = () => {
             //  return row.batchesQty.every(bq => Number(bq.qty || 0) > 0);
         });
 
-console.log("pickTicketData",pickTicketData);
+        // console.log("pickTicketData", pickTicketData);
 
-    //    const allRowsHaveQty = pickTicketData.length > 0 &&
-    // pickTicketData.every((row, rowIndex) => {
-    //     return row.batchesQty.every((bq, batchIndex) => {
-    //         const valid = bq.savedQty !== null &&
-    //                       bq.savedQty !== "" &&
-    //                       !isNaN(bq.savedQty) &&
-    //                       Number(bq.savedQty) > 0;
-    //         if (!valid) {
-    //             console.log("Invalid qty at row", rowIndex, "batch", batchIndex, bq);
-    //         }
-    //         return valid;
-    //     });
-    // });
+        //    const allRowsHaveQty = pickTicketData.length > 0 &&
+        // pickTicketData.every((row, rowIndex) => {
+        //     return row.batchesQty.every((bq, batchIndex) => {
+        //         const valid = bq.savedQty !== null &&
+        //                       bq.savedQty !== "" &&
+        //                       !isNaN(bq.savedQty) &&
+        //                       Number(bq.savedQty) > 0;
+        //         if (!valid) {
+        //             console.log("Invalid qty at row", rowIndex, "batch", batchIndex, bq);
+        //         }
+        //         return valid;
+        //     });
+        // });
 
 
         if (!allRowsHaveQty) {
@@ -314,12 +342,12 @@ console.log("pickTicketData",pickTicketData);
 
         const submitData = pickTicketData.flatMap(row => {
             if (row.batchesQty && row.batchesQty.length > 0) {
-                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no }));
+                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no,productName:row.productname }));
             }
             ticketno = row.rec_ticket_no;
             return [{ recTicketNo: row.rec_ticket_no }];
         });
-          setLoading(true);
+        setLoading(true);
         if (ticketno && ticketno.startsWith("PTL")) {
             savePtlDeliver(submitData)
                 .then((response) => {
@@ -344,6 +372,11 @@ console.log("pickTicketData",pickTicketData);
                     setHideDeliverButton(false);
                     setHidePutButton(false);
                     setHideIssueButton(true);
+
+                      const ticketNoSubmitted = submitData[0].recTicketNo;
+       
+            setFormData(prev => ({ ...prev, issueTicket: ticketNoSubmitted }));
+      
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
@@ -534,23 +567,23 @@ console.log("pickTicketData",pickTicketData);
             })
     };
 
-useEffect(() => {
-  if (!addSearchText) {
-    setFilteredAddData(pickTicketData);
-  } else {
-    const lower = addSearchText.toLowerCase();
+    useEffect(() => {
+        if (!addSearchText) {
+            setFilteredAddData(pickTicketData);
+        } else {
+            const lower = addSearchText.toLowerCase();
 
-    const result = pickTicketData.filter((row) =>
-      Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(lower)
-      )
-    );
+            const result = pickTicketData.filter((row) =>
+                Object.values(row).some((val) =>
+                    String(val).toLowerCase().includes(lower)
+                )
+            );
 
-    setFilteredAddData(result);
-  }
-}, [addSearchText, pickTicketData]);
+            setFilteredAddData(result);
+        }
+    }, [addSearchText, pickTicketData]);
 
-const exportToExcel = (search = "") => {
+    const exportToExcel = (search = "") => {
         const userId = sessionStorage.getItem("userName") || "System";
 
         // setDownloadDone(false);
@@ -559,8 +592,8 @@ const exportToExcel = (search = "") => {
 
         let apiCall;
 
-            apiCall = () => downloadIssuance( search);
-       
+        apiCall = () => downloadIssuance(search);
+
 
         // Call apiCall without arguments, since it’s already a function returning a Promise
         apiCall()
@@ -583,6 +616,18 @@ const exportToExcel = (search = "") => {
             });
     };
 
+
+const getCurrentTicketNo = () => {
+    if (activeTable === "issueTicket" && formData.issueTicket)
+        return `issueTicketNo-${formData.issueTicket}`;
+    if (activeTable === "deliverTicket" && formData.deliverTicket)
+        return `deliverTicketNo-${formData.deliverTicket}`;
+    if (activeTable === "requestedTicket" && formData.requestedTicket)
+        return `pickTicketNo-${formData.requestedTicket}`;
+    return "";
+};
+
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -604,8 +649,10 @@ const exportToExcel = (search = "") => {
             </div>
             {showTable && (
                 <div className='ComCssTable'>
-                    <h5 className='ComCssTableName'>Issue List</h5>
-                   <div
+                    {/* <h5 className='ComCssTableName'>Issue List</h5> */}
+                    <h5 className='ComCssTableName'>{getTableTitle()}</h5>
+
+                    <div
                         className="d-flex justify-content-end align-items-center mb-3"
                         style={{ marginTop: "9px", display: "flex" }}>
                         <div style={{ position: "relative", width: "200px" }}>
@@ -638,10 +685,21 @@ const exportToExcel = (search = "") => {
                         setSuccessMessage={setSuccessMessage}
                         setShowSuccessPopup={setShowSuccessPopup}
                         setShowErrorPopup={setShowErrorPopup}
+                        setLoading={setLoading}
                         setErrorMessage={setErrorMessage}
                         formErrors={formErrors}
                         fetchPickTicketDetail={fetchPickTicketDetail}
-                        ticketNo={formData.issueTicket || formData.deliverTicket || formData.requestedTicket}
+                        // ticketNo={formData.issueTicket || formData.deliverTicket || formData.requestedTicket}
+                        ticketNo={
+                            activeTable === "issueTicket"
+                                ? `issueTicketNo-${formData.issueTicket}`
+                                : activeTable === "deliverTicket"
+                                    ? `deliverTicketNo-${formData.deliverTicket}`
+                                    : `pickTicketNo-${formData.requestedTicket}`
+                        }
+
+                    //    ticketNo={getCurrentTicketNo()}
+
                     />
                     {isUserActive && (
                         <p>
@@ -655,7 +713,7 @@ const exportToExcel = (search = "") => {
                         {hideDeliverButton && (
                             <button className='ComCssSubmitButton' onClick={handleDliver} >Deliver</button>
                         )}
-                            {/* <button className='ComCssSubmitButton' onClick={handleDliver} >Deliver</button> */}
+                        {/* <button className='ComCssSubmitButton' onClick={handleDliver} >Deliver</button> */}
 
                         {hideIssueButton && (
                             <button className='ComCssSubmitButton' onClick={handleIssue} >Issue</button>

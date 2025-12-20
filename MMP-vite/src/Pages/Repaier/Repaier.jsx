@@ -16,6 +16,7 @@ const Repaier = () => {
         // productfamily: "",
         // productgroup: "",
         boardserialnumber: "",
+        repairelocation:"",
         type: "",
         partcode: "",
         partdescription: "",
