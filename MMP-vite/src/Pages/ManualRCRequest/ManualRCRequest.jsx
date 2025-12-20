@@ -66,7 +66,6 @@ const ManualRCRequest = () => {
             errors.rackName = "select Rack Name ";
             isValid = false;
         }
-
         setFormErrors(errors); // if you’re using error state
         return isValid;
     };
@@ -78,12 +77,11 @@ const ManualRCRequest = () => {
             const res = await openRcRack(formData.rackName);
             setSuccessMessage(res.data?.message || "Saved successfully");
             setShowSuccessPopup(true);
-
             fetchManualRequest();
         } catch (err) {
             setErrorMessage(err.response?.data?.message || "An error occurred");
             setShowErrorPopup(true);
-            console.error(err);
+            // console.error(err);
         } finally {
             setLoading(false);
         }
@@ -98,10 +96,11 @@ const ManualRCRequest = () => {
             setSuccessMessage(res.data?.message || "Saved successfully");
             setShowSuccessPopup(true);
             setSearchText("");
+            fetchManualRequest();
         } catch (err) {
             setErrorMessage(err.response?.data?.message || "An error occurred");
             setShowErrorPopup(true);
-            console.error(err);
+            // console.error(err);
         } finally {
             setLoading(false);
         }
@@ -110,6 +109,7 @@ const ManualRCRequest = () => {
     useEffect(() => {
         fetchManualRequest();
     }, [])
+    
     const filteredData = React.useMemo(() => {
         if (!searchText) return requestData;
 
@@ -162,8 +162,6 @@ const ManualRCRequest = () => {
                             onChange={(e, newValue) =>
                                 handlePoChange("rackName", newValue?.value || "")
                             }
-                            // disabled={isFrozen}
-
                             renderInput={(params) => (
                                 <TextField {...params}
                                     error={Boolean(formErrors?.rackName)}
@@ -176,17 +174,14 @@ const ManualRCRequest = () => {
                     <div className="ComCssButton9">
                         <button className='ComCssSubmitButton' onClick={handleOpen} >Open</button>
                         <button className='ComCssSubmitButton' onClick={handleClose} >Close</button>
-
                     </div>
                 </div>
-
             </div>
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Request Detail</h5>
                 <div
                     className="d-flex justify-content-end align-items-center mb-3"
                     style={{ marginTop: "9px", display: "flex" }}>
-
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input
                             type="text"
@@ -213,8 +208,6 @@ const ManualRCRequest = () => {
                     setPerPage={setPerPage}
                     totalRows={filteredData.length}
                     loading={false}
-                    // setPage={() => { }}
-                    // setPerPage={() => { }}
                     setPage={setPage}
                 />
             </div>

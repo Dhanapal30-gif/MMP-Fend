@@ -27,21 +27,24 @@ const PutawayDefaultTable = ({
 
   const columns = generateColumns({
     fields: [
-      "Putaway_Delete",
+      // "Putaway_Delete",
       "recevingTicketNo",
+       "ponumber",
       "partcode",
       "partdescription",
       "UOM",
       "location",
-      "ponumber",
+     
       "poDate",
-      "vendorname",
       "postingdate",
+ 
+          "grno",
       "GRDate",
       "recevingQty",
       "grnqty",
       "putqty",
-      "grno",
+  
+           "vendorname",
       "status",
     ],
     customConfig: {

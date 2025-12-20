@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './App.css'
-
 import Login from './Pages/UserAuthentication/Login/Login'
 import HeaderComponents from './components/HeaderComponents/HeaderComponents';
 import HomeComponenet from './components/Homecomponents/HomeComponenet';
@@ -23,6 +22,7 @@ import PTLMaster from './Pages/Local-PTL-Master/PTLMaster';
 import Repaier from './Pages/Repaier/Repaier';
 import Reworker from './Pages/Reworker/Reworker';
 import PTLOpreator from './Pages/PTLOpreator/PTLOpreator';
+import LocalndindividualReportCom from './components/LocalndindividualReport/LocalndindividualReportCom';
 import LocalndindividualReport from './Pages/LocalndindividualReport/LocalndindividualReport';
 import LocalReport from './Pages/LocalReport/LocalReport';
 import LocalPutaway from './Pages/LocalPutaway/LocalPutaway';
@@ -46,16 +46,16 @@ import StockReport from './Pages/StockReport/StockReport';
 import StockUpdate from './Pages/StockUpdate/StockUpdate';
 import DeploymentPopup from './Pages/DeploeyementNotification/DeploymentPopup';
 import ForgotPassword from './Pages/UserAuthentication/Login/ForgotPassword';
-import ScreenRoute from "./ScreenRoute";
-
-import { fetchScreens } from './Services/Services_09';
 import ManualRCRequest from './Pages/ManualRCRequest/ManualRCRequest';
-
 function App() {
+
+  // const [count, setCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [allowedScreens, setAllowedScreens] = useState([]);
   const location = useLocation();
   const [userId, setUserId] = useState(sessionStorage.getItem("userId") || "");
+
+
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => {
     const role = sessionStorage.getItem('userRole');
@@ -64,23 +64,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const roles = JSON.parse(sessionStorage.getItem("userRole"));
-    const storedScreens = sessionStorage.getItem("allowedScreens");
-
-    if (storedScreens) {
-      setAllowedScreens(JSON.parse(storedScreens));
-    } else if (roles?.length) {
-      fetchScreens(roles).then(res => {
-        const allowed = res.data
-          .map(i => i.split(","))
-          .flat()
-          .map(s => s.trim());
-
-        sessionStorage.setItem("allowedScreens", JSON.stringify(allowed));
-        setAllowedScreens(allowed);
-      });
-    }
-  }, []);
+  const storedUserId = sessionStorage.getItem("userId");
+  setUserId(storedUserId || "");
+}, [isLoggedIn]);
 
   const registerScreens = async () => {
     const screens = [
@@ -122,13 +108,12 @@ function App() {
       { name: "StockUpdate", path: "/stockUpdate" },
       { name: "ManualRCRequest", path: "/manualRCRequest" },
     ];
-
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
     } catch (err) {
       console.error("Screen auto-registration failed", err);
     }
-  };
+  }
 
   const theme = createTheme({
     typography: {
@@ -139,84 +124,97 @@ function App() {
     },
   });
 
-  const hideHeader =
-    location.pathname === '/' ||
-    location.pathname === '/login' ||
-    location.pathname === '/createAccount' ||
-    location.pathname === '/forgotPassword';
+  const currentPath = location.pathname.replace(/\/$/, "");
+  const hideHeader = location.pathname === '/' || location.pathname === '/login' || location.pathname === '/createAccount' || location.pathname === '/forgotPassword';
+  const [screen, setScreen] = useState([]); // <-- add this
+
+  useEffect(() => {
+    const storedScreens = sessionStorage.getItem("allowedScreens");
+    if (storedScreens) setScreen(JSON.parse(storedScreens));
+  }, []);
+
+  // console.log("allowedScreens", sessionStorage.getItem("allowedScreens"))
+
+  const isScreenAllowed = (screenName) => {
+    const allowedScreens = JSON.parse(sessionStorage.getItem("allowedScreens") || "[]");
+    return allowedScreens.includes(screenName);
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <div className='App'>
+        {/* {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />} */}
+{!hideHeader && (
+  <HeaderComponents
+    isLoggedIn={isLoggedIn}
+    setUserId={setUserId}
+    setIsLoggedIn={setIsLoggedIn}
+    notificationCount={notificationCount}
 
-        {!hideHeader && (
-          <HeaderComponents
-            isLoggedIn={isLoggedIn}
-            allowedScreens={allowedScreens}
-          />
-        )}
+  />
+)}
 
-        {userId && <NotificationList userId={userId} />}
 
+
+{/* {userId && !hideHeader && <NotificationList userId={userId} />} */}
+{userId && !hideHeader && (
+  <NotificationList
+    userId={userId}
+    setNotificationCount={setNotificationCount}
+  />
+)}
+
+        {/* <NotificationList/> */}
         <Routes>
-          <Route
-  path="/grn"
-  element={
-    <PrivateRoute>
-      <ScreenRoute screenName="GRN">
-        <GRN />
-      </ScreenRoute>
-    </PrivateRoute>
-  }
-/>
-
-          <Route path="/" element={<Login setUserId={setUserId} />} />
+          <Route path="/" element={<Login setUserId={setUserId} setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/createAccount" element={<CreateAccount />} />
-          <Route path="/forgotPassword" element={<ForgotPassword />} />
-
-          <Route path="/home" element={<PrivateRoute><HomeComponenet /></PrivateRoute>} />
-          <Route path="/product" element={<PrivateRoute><ProductFamilyMaster /></PrivateRoute>} />
-          <Route path="/rcMainStore" element={<PrivateRoute><RcMainStore /></PrivateRoute>} />
-          <Route path="/veendorMaster" element={<PrivateRoute><VeendorMaster /></PrivateRoute>} />
-          <Route path="/bomMaster" element={<PrivateRoute><BomMaster /></PrivateRoute>} />
-          <Route path="/curencyMaster" element={<PrivateRoute><CurencyMaster /></PrivateRoute>} />
-          <Route path="/approvalMaster" element={<PrivateRoute><ApprovalMaster /></PrivateRoute>} />
-          <Route path="/add_Po_Detail" element={<PrivateRoute><Add_Po_Detail /></PrivateRoute>} />
-          <Route path="/grn" element={<PrivateRoute><GRN /></PrivateRoute>} />
-          <Route path="/poStatus" element={<PrivateRoute><PoStatus /></PrivateRoute>} />
-          <Route path="/putaway" element={<PrivateRoute><Putaway /></PrivateRoute>} />
-          <Route path="/PTLMaster" element={<PrivateRoute><PTLMaster /></PrivateRoute>} />
-          <Route path="/repaier" element={<PrivateRoute><Repaier /></PrivateRoute>} />
-          <Route path="/reworker" element={<PrivateRoute><Reworker /></PrivateRoute>} />
-          <Route path="/PTLOpreator" element={<PrivateRoute><PTLOpreator /></PrivateRoute>} />
-          <Route path="/localndindividualReport" element={<PrivateRoute><LocalndindividualReport /></PrivateRoute>} />
-          <Route path="/localReport" element={<PrivateRoute><LocalReport /></PrivateRoute>} />
-          <Route path="/localPutaway" element={<PrivateRoute><LocalPutaway /></PrivateRoute>} />
-          <Route path="/roleMaster" element={<PrivateRoute><RoleMaster /></PrivateRoute>} />
-          <Route path="/role" element={<PrivateRoute><Role /></PrivateRoute>} />
-          <Route path="/technology" element={<PrivateRoute><Technology /></PrivateRoute>} />
-          <Route path="/openReport" element={<PrivateRoute><OpenReport /></PrivateRoute>} />
-          <Route path="/userDetail" element={<PrivateRoute><UserDetail /></PrivateRoute>} />
-          <Route path="/requester" element={<PrivateRoute><Requester /></PrivateRoute>} />
-          <Route path="/approver" element={<PrivateRoute><Approver /></PrivateRoute>} />
-          <Route path="/issuance" element={<PrivateRoute><Issuance /></PrivateRoute>} />
-          <Route path="/returning" element={<PrivateRoute><Returning /></PrivateRoute>} />
-          <Route path="/stockTransfer" element={<PrivateRoute><StockTransfer /></PrivateRoute>} />
-          <Route path="/ptlRequest" element={<PrivateRoute><PTLRequest /></PrivateRoute>} />
-          <Route path="/localSummaryReport" element={<PrivateRoute><LocalSummaryReport /></PrivateRoute>} />
-          <Route path="/compatabilityMaster" element={<PrivateRoute><CompatabilityMaster /></PrivateRoute>} />
-          <Route path="/stockReport" element={<PrivateRoute><StockReport /></PrivateRoute>} />
-          <Route path="/stockUpdate" element={<PrivateRoute><StockUpdate /></PrivateRoute>} />
-          <Route path="/deploymentPopup" element={<PrivateRoute><DeploymentPopup /></PrivateRoute>} />
-          <Route path="/receving" element={<PrivateRoute><Receving /></PrivateRoute>} />
-          <Route path="/manualRCRequest" element={<PrivateRoute><ManualRCRequest/></PrivateRoute>} />
-
+          <Route path="/home" element={<HomeComponenet />} />
+          <Route path="/product" element={<ProductFamilyMaster />} />
+          <Route path="/rcMainStore" element={<RcMainStore />} />
+          <Route path="/veendorMaster" element={<VeendorMaster />} />
+          <Route path='/bomMaster' element={<BomMaster />} />
+          <Route path='/curencyMaster' element={<CurencyMaster />} />
+          <Route path='/approvalMaster' element={<ApprovalMaster />} />
+          <Route path='/add_Po_Detail' element={<Add_Po_Detail />} />
+          <Route path='/grn' element={<GRN />} />
+          <Route path='/poStatus' element={<PoStatus />} />
+          <Route path='/putaway' element={<Putaway />} />
+          <Route path='/PTLMaster' element={<PTLMaster />} />
+          <Route path='/repaier' element={<Repaier />} />
+          <Route path='/reworker' element={<Reworker />} />
+          <Route path='/PTLOpreator' element={<PTLOpreator />} />
+          <Route path='/localndindividualReport' element={<LocalndindividualReport />} />
+          <Route path='/localReport' element={<LocalReport />} />
+          <Route path='/localPutaway' element={<LocalPutaway />} />
+          <Route path='/roleMaster' element={<RoleMaster />} />
+          <Route path='/role' element={<Role />} />
+          <Route path='/technology' element={<Technology />} />
+          <Route path='/openReport' element={<OpenReport />} />
+          <Route path='/userDetail' element={<UserDetail />} />
+          <Route path='/requester' element={<Requester />} />
+          <Route path='/approver' element={<Approver />} />
+          <Route path='/issuance' element={<Issuance />} />
+          <Route path='/returning' element={<Returning />} />
+          <Route path='/stockTransfer' element={<StockTransfer />} />
+          <Route path='/ptlRequest' element={<PTLRequest />} />
+          <Route path='/localSummaryReport' element={<LocalSummaryReport />} />
+          <Route path='/compatabilityMaster' element={<CompatabilityMaster />} />
+          <Route path='/stockReport' element={<StockReport />} />
+          <Route path='/stockUpdate' element={<StockUpdate />} />
+          <Route path='/deploymentPopup' element={<DeploymentPopup />} />
+          <Route path='/forgotPassword' element={<ForgotPassword />} />
+          <Route path='/manualRCRequest' element={<ManualRCRequest />} />
+          <Route
+            path="/receving"
+            element={
+              <PrivateRoute>
+                <Receving />
+              </PrivateRoute>
+            }
+          />
         </Routes>
-
       </div>
     </ThemeProvider>
-    
-  );
+  )
 }
-
-export default App;
+export default App

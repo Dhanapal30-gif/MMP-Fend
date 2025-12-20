@@ -1,6 +1,6 @@
 import React from 'react';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
-import { generateColumns } from '../../components/Com_Component/generateColumns';
+import { generateColumns_checkBox } from '../../components/Com_Component/generateColumns_checkBox';
 import { Autocomplete, TextField } from '@mui/material';
 
 const PoTable = ({
@@ -34,20 +34,12 @@ const PoTable = ({
 
 
   const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedRows(data.map((row) => row.id)); // ✅ use selectedid
-    } else {
-      setSelectedRows([]);
-    }
-  };
-
-  // const handleSelect = (rowId, checked) => {
-  //   if (checked) {
-  //     setSelectedRows((prev) => [...prev, rowId]);
-  //   } else {
-  //     setSelectedRows((prev) => prev.filter((id) => id !== rowId));
-  //   }
-  // };
+  if (e.target.checked) {
+    setSelectedRows(data.map((row) => row.Poid));
+  } else {
+    setSelectedRows([]);
+  }
+};
 
   const handleSelect = (poid, isChecked) => {
     setSelectedRows((prev) => {
@@ -56,7 +48,7 @@ const PoTable = ({
     });
   };
 
-  const columns = generateColumns({
+  const columns = generateColumns_checkBox({
     fields: [
       "ponumber",
       "postingdate",
@@ -85,7 +77,7 @@ const PoTable = ({
     handleSelectAll,
     customCellRenderers: {
       postatus: (row) => {
-        if (row.postatus !== "Close") {
+        if (row.postatus !== "Closed") {
           return (
             <Autocomplete
               options={poStatusChange}

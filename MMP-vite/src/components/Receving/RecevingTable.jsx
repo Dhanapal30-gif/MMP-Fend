@@ -9,7 +9,7 @@ import * as XLSX from "xlsx";
 import { FaFileExcel } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 
-export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, formErrors,setFormErrors, selectedRows, setSelectedRows }) => {
+export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,setDeleteButton, formErrors,setFormErrors, selectedRows, setSelectedRows }) => {
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [loading, setLoading] = useState(false);
@@ -41,6 +41,7 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, fo
             setSelectedRows((prev) => [...new Set([...prev, ...currentPageKeys])]);
         } else {
             setSelectedRows((prev) => prev.filter((k) => !currentPageKeys.includes(k)));
+        setDeleteButton(false)
         }
     };
 
@@ -52,8 +53,10 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, fo
             setSelectedRows((prev) => [...prev, key]);
         } else {
             setSelectedRows((prev) => prev.filter((k) => k !== key));
+            setDeleteButton(false)
         }
     };
+    
     // useEffect(() => {
     //     const updatedData = filteredAddData.map((row, index) => {
     //         const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");

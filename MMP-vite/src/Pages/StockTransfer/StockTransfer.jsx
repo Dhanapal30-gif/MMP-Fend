@@ -99,7 +99,7 @@ const StockTransfer = () => {
             if (response?.status === 200 && response.data) {
                 setSuccessMessage(response.data.message || "Saved successfully");
                 setShowSuccessPopup(true);
-                fetchAll();
+                fetchStockAll();
                 setFormData({ transfertype: "", ordertype: "", partcode: "" });
             } else {
                 setErrorMessage(response.data?.message || "Unknown error");

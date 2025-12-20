@@ -151,6 +151,16 @@ const [addSearchText, setAddSearchText] = useState("");
   }));
 
 
+
+const toBackendDateTime = (d) => {
+  if (!d) return null;
+  const date = new Date(d); // "dd/mm/yyyy" from form
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} 00:00:00.000`; // backend format
+};
+
   const handleAction = (e) => {
     e.preventDefault();
 
@@ -192,15 +202,18 @@ const [addSearchText, setAddSearchText] = useState("");
       setShowErrorPopup(false);
       setShowSuccessPopup(false);
       // Merge formData + poDetail[0] into single object
-      const mergedData = {
-        ...formData,
-        invoiceDate: formData.invoiceDate ? `${formData.invoiceDate} 00:00:00.000` : null,
-        postingdate: formData.postingdate ? `${formData.postingdate} 00:00:00.000` : null,
-        ...poDetail[0],
-        updatedby: username,
-      };
+       const mergedData = {
+    ...poDetail[0],
+    ...formData,
+    invoiceDate: toBackendDateTime(formData.invoiceDate),
+    postingdate: toBackendDateTime(formData.postingdate),
+    receivingDate: toBackendDateTime(formData.receivingDate),
+    exp_date: toBackendDateTime(formData.exp_date),
+    updatedby: username,
+  };
 
       const id = formData.id;
+      console.log("id:",id)
       setLoading(true);
 
       updateRecDeatil(id, mergedData)
@@ -305,49 +318,65 @@ const [addSearchText, setAddSearchText] = useState("");
     // setSelectedRows("")
     setSelectedDeleteRows([])
     setDeleteButton(false)
+    setUpdateButton(false)
+    setSubmitButton(true)
   }
 
 
+const toDDMMYYYY = (dateStr) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
-  const handleEdit = (rowData) => {
-    setShowRecevingTable(true);
-    setSubmitButton(false);
-    setUpdateButton(true);
+const formatToInputDate = (d) => {
+  if (!d) return "";
+  const date = new Date(d);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`; // format for type="date"
+};
 
-    setFormData({
-      id: rowData.id || "",
-      ponumber: rowData.ponumber,
-      vendorname: rowData.vendorname,
-      postingdate: rowData.postingdate,
-      currency: rowData.currency,
-      ccf: rowData.ccf,
-      invoiceNo: rowData.invoiceNo,
-      invoiceDate: rowData.invoiceDate?.substring(0, 10) || "",
-      //receivingDate: rowData.receivingDate,
-      rcBactchCode: rowData.rcBactchCode,
-      receivingDate: rowData.receivingDate ? `${rowData.receivingDate} 00:00:00.000` : null,
-      //invoiceDate: rowData.invoiceDate,
-    });
+const handleEdit = (rowData) => {
+  setShowRecevingTable(true);
+  setSubmitButton(false);
+  setUpdateButton(true);
 
-    const combinedRow = {
-      partcode: rowData.partcode,
-      partdescription: rowData.partdescription,
-      orderqty: rowData.orderqty || "",
-      openOrderQty: rowData.orderqty - rowData.recevingQty || "",
-      UOM: rowData.UOM || "",
-      tyc: rowData.TYC,
-      recevingQty: rowData.recevingQty,
-      totalValue: rowData.totalValue,
-      totalValueEuro: rowData.totalValueEuro,
-      // exp_date: rowData.exp_date,
-      exp_date: rowData.exp_date ? `${rowData.exp_date} 00:00:00.000` : null,
-    };
-    // console.log("receivingDate:", rowData.receivingDate);
-    // console.log("invoiceDate :", rowData.invoiceDate);
-    // console.log("postingdate :", rowData.postingdate);
+  setFormData({
+    id: rowData.id || "",
+    ponumber: rowData.ponumber,
+    vendorname: rowData.vendorname,
+    postingdate: formatToInputDate(rowData.postingdate),
+    currency: rowData.currency,
+    ccf: rowData.ccf,
+    invoiceNo: rowData.invoiceNo,
+    invoiceDate: formatToInputDate(rowData.invoiceDate),
+    exp_date: formatToInputDate(rowData.exp_date),
+    receivingDate: formatToInputDate(rowData.receivingDate),
+    rcBactchCode: rowData.rcBactchCode,
+  });
 
-    setPoDetail([combinedRow]);
+  const combinedRow = {
+    partcode: rowData.partcode,
+    partdescription: rowData.partdescription,
+    orderqty: rowData.orderqty || "",
+    openOrderQty: rowData.orderqty - rowData.recevingQty || "",
+    UOM: rowData.UOM || "",
+    tyc: rowData.TYC,
+    recevingQty: rowData.recevingQty,
+    totalValue: rowData.totalValue,
+    totalValueEuro: rowData.totalValueEuro,
+    exp_date: formatToInputDate(rowData.exp_date),
   };
+
+  setPoDetail([combinedRow]);
+};
+
+
   const handleRowSelect = (id) => {
     setDeleteButton(true);
     setSubmitButton(false);
@@ -572,6 +601,7 @@ const [addSearchText, setAddSearchText] = useState("");
           handleRowSelect={handleRowSelect}
           selectedDeleteRows={selectedDeleteRows}
           exportToExcel={exportToExcel}
+          setDeleteButton={setDeleteButton}
         /> </div>
       {/* </div> */}
       {/* </div> */}

@@ -26,7 +26,8 @@ const IssuanceShowTable = ({
   formData,
   setFormData,
   fetchPickTicketDetail,
-  ticketNo
+  ticketNo,
+  setLoading
 }) => {
 
   const [open, setOpen] = useState(false);
@@ -96,23 +97,27 @@ const IssuanceShowTable = ({
     }));
 
     console.log("Payload to send:", payload);
+      setLoading(true); // start loader
+
     try {
       await saveIssueBatchcodeQty(payload); // API call
       // alert("Submitted successfully!");
       setSuccessMessage("Submitted successfully!")
       setShowSuccessPopup(true)
-      // fetchPickTicketDetail();
-      fetchPickTicketDetail(activeRow?.rec_ticket_no);
+
+              await fetchPickTicketDetail(activeRow?.rec_ticket_no);
+
+  //    fetchPickTicketDetail(ticketNo);
+      // fetchPickTicketDetail(activeRow?.rec_ticket_no);
       setOpen(false);
     } catch (error) {
       console.error("Error submitting payload:", error);
       alert("Failed to submit. Please try again.");
-    }
+    }finally {
+    setLoading(false); // stop loader
+  }
 
-    // Call your API here
-    // api.saveLocationQty(payload);
-
-    setOpen(false);
+  
   };
 
 
@@ -160,7 +165,7 @@ const IssuanceShowTable = ({
         "partcode",
         "partdescription",
         "UOM",
-        "componentType",
+        "componenttype",
         "compatabilitypartcode",
         "req_qty",
         "batchCode",
@@ -169,7 +174,7 @@ const IssuanceShowTable = ({
         "allocatedQty",
         "approvedQty",
         "Comment",
-        "recordstatus"
+        // "recordstatus"
       ]; // all fields for others
     }
   }, [data]);
@@ -184,7 +189,7 @@ const IssuanceShowTable = ({
       productname: { label: "Product Name" },
       productgroup: { label: "Product Group" },
       productfamily: { label: "Product Family" },
-      componentType: { label: "Component Type" },
+      componenttype: { label: "Component Type" },
       compatabilitypartcode: { label: "Compatability PartCode" },
       req_qty: { label: "Req Qty" },
       batchCode: { label: "BatchCode" },
@@ -487,9 +492,9 @@ const printCleanTable = () => {
                               const numVal = val === "" ? 0 : Number(val);
 
                               // Don't allow more than allocatedQty
-                              if (numVal > batch.allocatedQty) {
+                              if (numVal > batch.AvailableQty) {
                                 // alert(`Cannot exceed allocated qty (${batch.allocatedQty}) for this batch`);
-                                setErrorMessage(`Cannot exceed allocated qty (${batch.allocatedQty}) for this batch`)
+                                setErrorMessage(`Cannot exceed Available qty (${batch.AvailableQty}) for this batch`)
                                 setShowErrorPopup(true);
                                 return;
                               }

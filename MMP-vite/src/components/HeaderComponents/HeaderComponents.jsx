@@ -17,44 +17,68 @@ import { GiCube } from "react-icons/gi";
 import { HiChartBar } from "react-icons/hi";
 import CloseIcon from '@mui/icons-material/Close';
 
-const HeaderComponents = () => {
+const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId,notificationCount  }) => {
   const [empName, setEmpName] = useState("");
   const [userRole, setUserRole] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for toggling the mobile menu
-
   const [servicesDropdown, setServicesDropdown] = useState(false);
   const navigate = useNavigate();
-
   const [openIcon, setOpenIcon] = useState(false);
+  const [screen, setScreen] = useState([]); // <-- add this
+  const [notifications, setNotifications] = useState([]);
+const [avatarEl, setAvatarEl] = useState(null);
+const avatarOpen = Boolean(avatarEl);
 
+  // useEffect(() => {
+  //   const sessionName = sessionStorage.getItem("userName") || localStorage.getItem("userName") || "";
+  //   const roleStr = sessionStorage.getItem("userRole") || "[]";
+  //   const role = JSON.parse(roleStr);
+  //   setEmpName(sessionName);
+  //   setUserRole(role);
+  // }, []);
 
   useEffect(() => {
-    // const sessionName = sessionStorage.getItem("userName") || "";
-    const sessionName = sessionStorage.getItem("userName") || localStorage.getItem("userName") || "";
-    const roleStr = sessionStorage.getItem("userRole") || "[]";
-    const role = JSON.parse(roleStr); // now it's an array
-    const loginStatus = localStorage.getItem("isLoggedIn") === "true";
-    // let userId = sessionStorage.getItem("userId") || localStorage.getItem("userName") || "";
+  if (!isLoggedIn) {
+    setEmpName("");
+    setUserRole([]);
+    return;
+  }
 
-    setEmpName(sessionName);
-    setUserRole(role);
-    setIsLoggedIn(loginStatus);
-  }, []);
+  const sessionName =
+    sessionStorage.getItem("userName") ||
+    localStorage.getItem("userName") ||
+    "";
+
+  const roleStr = sessionStorage.getItem("userRole") || "[]";
+
+  setEmpName(sessionName);
+  setUserRole(JSON.parse(roleStr));
+}, [isLoggedIn]);   // 👈 THIS IS THE FIX
+
   const handleLinkClick = () => {
     setIsMenuOpen(false);
     setOpenIcon(false);
     setServicesDropdown(false);
   };
+const handleAvatarClick = (e) => {
+  setAvatarEl(e.currentTarget);
+};
+
+const handleAvatarClose = () => {
+  setAvatarEl(null);
+};
+
+const confirmLogout = () => {
+  handleAvatarClose();
+  handleSignOut();
+};
 
   const handleSignOut = () => {
-    // let userId = sessionStorage.getItem("userId") || localStorage.getItem("userName") || "";
-
     sessionStorage.clear();
     localStorage.clear();
-    setIsLoggedIn(false);
+    setUserId(null);       // 🔥 VERY IMPORTANT
+    setIsLoggedIn(false); // 🔥
     navigate("/");
-    // userId=""
   };
 
   const toggleServicesDropdown = () => {
@@ -62,7 +86,6 @@ const HeaderComponents = () => {
   };
 
   const closeServicesDropdown = () => {
-
     setServicesDropdown(false);
   };
 
@@ -76,41 +99,25 @@ const HeaderComponents = () => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const [notifications, setNotifications] = useState([
-
-  ]);
   const handleRemove = (index) => {
     setNotifications((prev) => prev.filter((_, i) => i !== index));
   };
-
-
-  const [screen, setScreen] = useState([]); // <-- add this
 
   useEffect(() => {
     const storedScreens = sessionStorage.getItem("allowedScreens");
     if (storedScreens) setScreen(JSON.parse(storedScreens));
   }, []);
 
-  // console.log("allowedScreens", sessionStorage.getItem("allowedScreens"))
-
   const isScreenAllowed = (screenName) => {
     const allowedScreens = JSON.parse(sessionStorage.getItem("allowedScreens") || "[]");
-    // console.log("Allowed Screens from sessionStorage:", allowedScreens);
-    // console.log("Checking screenName:", screenName);
-
     const result = allowedScreens.includes(screenName);
-    // console.log("isScreenAllowed Result:", result);
-
     return result;
   };
-
-  // console.log("userRole", userRole)
-  //   console.log("isScreenAllowed", isScreenAllowed("userDetail"))
-
 
   return (
     <>
@@ -129,15 +136,13 @@ const HeaderComponents = () => {
             <div class="scroll-box">
               <div class="scroll-text">Mat Man Pro</div>
             </div>
-
           </div>
           <div className="notification">
             <IconButton sx={{ color: 'white' }} onClick={handleClick}>
-              <Badge badgeContent={notifications.length} color="error">
+              <Badge badgeContent={notificationCount} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-
             <Menu
               anchorEl={anchorEl}
               open={open}
@@ -189,29 +194,42 @@ const HeaderComponents = () => {
                       </IconButton>
                     </Box>
                   </MenuItem>
-
                 ))
               )}
             </Menu>
-
-
           </div>
 
           <div className="avatar-container">
-            {isLoggedIn ? (
-              <div className="avatar-wrapper">
-                <Avatar
-                  className="avatar"
-                  sx={{ bgcolor: "#076935" }}
-                  onClick={handleSignOut}
-                />
-                <h5 className="avatar-name">{empName}</h5>
-              </div>
-            ) : (
-              <Link to="/" className="signup-btn">{empName}</Link>
-            )}
-          </div>
+  {isLoggedIn && (
+    <>
+      <div className="avatar-wrapper">
+        <Avatar
+          className="avatar"
+          sx={{ bgcolor: "#076935", cursor: "pointer" }}
+          onClick={handleAvatarClick}
+        />
+        <h5 className="avatar-name">{empName}</h5>
+      </div>
+
+      <Menu
+        anchorEl={avatarEl}
+        open={avatarOpen}
+        onClose={handleAvatarClose}
+        disableScrollLock
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem onClick={confirmLogout} sx={{ color: "red" }}>
+          Logout
+        </MenuItem>
+      </Menu>
+    </>
+  )}
+</div>
+
         </div>
+
+
         <div className="header">
           <div className="hamburger-menu" onClick={() => setOpenIcon(!openIcon)}>
             {isMenuOpen ? <FaTimes /> : <FaBars />} {/* Show hamburger icon or close icon */}
@@ -252,7 +270,6 @@ const HeaderComponents = () => {
                     <GiCube className="nav-icon" /> Masters <FaChevronDown className="dropdown-icon" />
                   </span>
                   {servicesDropdown && (
-
                     <ul className="dropdown-menu">
                       {(userRole.includes("Admin") || isScreenAllowed("Product Family Master")) && <li><Link to="/product" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Product Family Master</Link></li>}
                       {(userRole.includes("Admin") || isScreenAllowed("BOM Master")) && <li><Link to="/bomMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Bom Master</Link></li>}
@@ -262,7 +279,6 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Compatability Master")) && <li><Link to="/compatabilityMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Compatability Master</Link></li>}
                       {(userRole.includes("Admin") || isScreenAllowed("Approval Master")) && <li><Link to="/approvalMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approval Master</Link></li>}
                       {/* {(userRole.includes("Admin") || isScreenAllowed("Compatability Master")) && <li><Link to="/compatabilityMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Compatability Master</Link></li>} */}
-
                     </ul>
                   )}
                 </li>
@@ -281,7 +297,6 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("PTL Request")) && (<li><Link to="/ptlRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTL Request</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Local Putaway")) && (<li><Link to="/localPutaway" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Putaway</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Technology")) && (<li><Link to="/technology" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Technology</Link></li>)}
-
                     </ul>
                   )}
                 </li>
@@ -304,8 +319,6 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Returning")) && (<li><Link to="/returning" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Returning</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("DeploymentPopup")) && (<li><Link to="/deploymentPopup" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>DeploymentPopup</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("ManualRCRequest")) && (<li><Link to="/manualRCRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual RC Request</Link></li>)}
-
-                      {/* <li><Link to="/service3" className="dropdown-item" onClick={closeServicesDropdown}>AcountActivation</Link></li> */}
                     </ul>
                   )}
                 </li>
@@ -320,7 +333,6 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/stockTransfer" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Transfer</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Stock Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/stockUpdate" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual Stock Update</Link></li>)}
-
                     </ul>
                   )}
                 </li>
@@ -338,7 +350,6 @@ const HeaderComponents = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("LocalSummary Report")) && (<li><Link to="/localSummaryReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Summary Report</Link></li>)}
-
                     </ul>
                   )}
                 </li>
@@ -353,7 +364,6 @@ const HeaderComponents = () => {
                     <ul className="dropdown-menu">
                       {/* <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
                     <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li> */}
-
                     </ul>
                   )}
                 </li>
@@ -361,7 +371,6 @@ const HeaderComponents = () => {
             </nav>
           </nav>
         </div>
-
       </header>
       {/* <div class="footer">Footer</div> */}
     </>

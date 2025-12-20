@@ -16,7 +16,7 @@ const PoTextFiled = ({
 
   const statusOptions = [
     { label: "Open", value: "Open" },
-    { label: "Close", value: "Close" },
+    { label: "Closed", value: "Closed" },
     { label: "Manual Close", value: "Manual Close" },
     { label: "Canceled", value: "Canceled" },
     { label: "On Hold", value: "On Hold" }
@@ -95,7 +95,7 @@ const PoTextFiled = ({
           value={getOptionObj(formData.partcode, partcodeOptions)}
           onChange={(e, newValue) => handleChange("partcode", newValue?.value || "")}
           renderInput={(params) => (
-            <TextField {...params} label="partcode" variant="outlined" size="small" />
+            <TextField {...params} label="Partcode" variant="outlined" size="small" />
           )}
         />
         <Autocomplete
@@ -104,7 +104,7 @@ const PoTextFiled = ({
           value={getOptionObj(formData.partDescription, partDescriptionOptions)}
           onChange={(e, newValue) => handleChange("partDescription", newValue?.value || "")}
           renderInput={(params) => (
-            <TextField {...params} label="partDescription" variant="outlined" size="small" />
+            <TextField {...params} label="Part Description" variant="outlined" size="small" />
           )}
         />
 
