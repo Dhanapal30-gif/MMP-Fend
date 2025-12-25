@@ -336,16 +336,20 @@ export const downloadIssuance = (search) =>
 
 
 const openRc = `${url}/Manual_Rack/openRack`;
-
 export const openRcRack = (rackName) => {
   return axios.post(openRc, {
     rackName: rackName
   });
 };
 
+const openPTL = `${url}/Manual_Rack/openPTLRack`;
+export const openPTLRack = (rackName) => {
+  return axios.post(openPTL, {
+    rackName: rackName
+  });
+};
 
 const CloseRc = `${url}/Manual_Rack/CloseRack`;
-
 export const closeRcRack = (rackName) => {
   return axios.delete(CloseRc, {
     data: { rackName }
@@ -353,5 +357,23 @@ export const closeRcRack = (rackName) => {
 };
 
 
+const ClosePTLRc = `${url}/Manual_Rack/ClosePTLRack`;
+export const closePTLRack = (rackName) => {
+  return axios.delete(ClosePTLRc, {
+    data: { rackName }
+  });
+};
 const Get_RcRequest = `${url}/Manual_Rack/getRcRequest`;
 export const getRequestDetail = () => axios.get(Get_RcRequest);
+
+const Get_PTLDoorRequest = `${url}/Manual_Rack/getPTLRequest`;
+export const getPTLRequestDetail = () => axios.get(Get_PTLDoorRequest);
+
+const ponumberVerify = `${url}/Podeatil/ponumberVerify`;
+export const ponumberVerifyBackend = (ponumber) => {
+  return axios.post(`${url}/Podeatil/ponumberVerify`, {
+    ponumber
+  });
+};
+
+

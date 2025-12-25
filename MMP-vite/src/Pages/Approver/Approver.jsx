@@ -51,6 +51,16 @@ const Approver = () => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+
+    useEffect(() => {
+    if (formData.rec_ticket_no) {
+        setRejecComment(false);      // ✅ reset reject mode
+        setSelectedGrnRows([]);      // optional but recommended
+        setFormErrors({});           // clear old errors
+    }
+}, [formData.rec_ticket_no]);
+
+
     const fetchApproverTicktes = async (userId) => {
         try {
             const response = await fetchApproverTicket(userId);
@@ -213,6 +223,30 @@ const Approver = () => {
         return isValid;
     };
 
+
+    const valiDateComment = (selectedData) => {
+        const errors = {};
+        let isValid = true;
+
+
+
+        selectedData.forEach((row) => {
+            const commentField = "Comment";
+            if (!row[commentField] || row[commentField].trim() === "") {
+                errors[`${commentField}${row.selectedId}`] = "Enter comment";
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            setErrorMessage("Enter comment");
+            setShowErrorPopup(true);
+        }
+
+        setFormErrors(errors);
+        return isValid;
+    };
+
     const handleSubmit = async () => {
         setLoading(true); // start loader
         try {
@@ -248,6 +282,7 @@ const Approver = () => {
                 approverL1TicketL1: "",
                 requesterType: ""
             })
+            setSelectedGrnRows([]);
             fetchApproverTicktes(userId);
         } catch (error) {
             alert(error.response?.data?.message || "Something went wrong!")
@@ -385,19 +420,24 @@ const Approver = () => {
     };
 
     const handleReject = async () => {
-        setRejecComment(true);
+
         try {
             if (selectedGrnRows.length === 0) {
                 setErrorMessage("Please select at least one row before submitting!");
                 setShowErrorPopup(true);
                 return;
             }
-
+            setRejecComment(true);
             const selectedData = approveTicketDetail.filter(row =>
                 selectedGrnRows.includes(row.selectedId)
             );
+
+            if (!selectedData.length) return; // safety check
+
+            if (!valiDateComment(selectedData)) return;
+
             const ticketNo = selectedData[0]?.rec_ticket_no || "";
-            let payload = [{}]
+            let payload = []
             // console.log("Selected Data:", selectedData);
 
             if (ticketNo.startsWith("PTL")) {
@@ -406,15 +446,15 @@ const Approver = () => {
                     partcode: row.partcode,
                     recordstatus: "MSC00005",
                     requestQty: row.req_qty || 0,
-
+                      reject_comments: row.Comment || ""
                 }))
             } else {
                 payload = selectedData.map(row => ({
                     requestTicketNo: row.rec_ticket_no,
                     partCode: row.partcode,
                     recordstatus: "MSC00005",
+                      reject_comments: row.Comment || "",
                     requestQty: row.req_qty || 0,
-
                 }))
             }
             // console.log("Payload to send:", payload);
@@ -432,7 +472,10 @@ const Approver = () => {
             setShowTable(false);
             setTableData([]);
             fetchApproverTicktes(userId);
-
+            setFormData({
+                approverL1TicketL1: "",
+                requesterType: ""
+            })
         } catch (error) {
             console.error("Error submitting data:", error);
         }
@@ -486,10 +529,11 @@ const Approver = () => {
                         rejectComment={rejectComment}
                     />
                     <div className="ComCssButton9">
-                        {requesterApproveButton && <button className='ComCssRequesterApproveButton' onClick={handleSubmit} >Approve</button>}
-                        {returningApproveButton && <button className='ComCssReturningApproveButton' onClick={handleReturningApprove} >Approve</button>}
-                        {ptlRequestApproveButton && <button className='ComCssPTLApproveButton' onClick={handlePTLApprove} >Approve</button>}
-                        {stockRequestApproveButton && <button className='ComCssStockApproveButton' onClick={handleStockApprove} >Approve</button>}
+                        
+                        {!rejectComment && requesterApproveButton && <button className='ComCssRequesterApproveButton' onClick={handleSubmit} >Approve</button>}
+                        {!rejectComment && returningApproveButton && <button className='ComCssReturningApproveButton' onClick={handleReturningApprove} >Approve</button>}
+                        {!rejectComment && ptlRequestApproveButton && <button className='ComCssPTLApproveButton' onClick={handlePTLApprove} >Approve</button>}
+                        {!rejectComment && stockRequestApproveButton && <button className='ComCssStockApproveButton' onClick={handleStockApprove} >Approve</button>}
 
                         {/* <button className='ComCssSubmitButton' onClick={handleSubmit}  >Approve</button> */}
                         <button className='ComCssDeleteButton' onClick={handleReject}>Reject</button>

@@ -17,7 +17,7 @@ import { GiCube } from "react-icons/gi";
 import { HiChartBar } from "react-icons/hi";
 import CloseIcon from '@mui/icons-material/Close';
 
-const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId,notificationCount  }) => {
+const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCount }) => {
   const [empName, setEmpName] = useState("");
   const [userRole, setUserRole] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for toggling the mobile menu
@@ -26,8 +26,8 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId,notificationCou
   const [openIcon, setOpenIcon] = useState(false);
   const [screen, setScreen] = useState([]); // <-- add this
   const [notifications, setNotifications] = useState([]);
-const [avatarEl, setAvatarEl] = useState(null);
-const avatarOpen = Boolean(avatarEl);
+  const [avatarEl, setAvatarEl] = useState(null);
+  const avatarOpen = Boolean(avatarEl);
 
   // useEffect(() => {
   //   const sessionName = sessionStorage.getItem("userName") || localStorage.getItem("userName") || "";
@@ -38,40 +38,40 @@ const avatarOpen = Boolean(avatarEl);
   // }, []);
 
   useEffect(() => {
-  if (!isLoggedIn) {
-    setEmpName("");
-    setUserRole([]);
-    return;
-  }
+    if (!isLoggedIn) {
+      setEmpName("");
+      setUserRole([]);
+      return;
+    }
 
-  const sessionName =
-    sessionStorage.getItem("userName") ||
-    localStorage.getItem("userName") ||
-    "";
+    const sessionName =
+      sessionStorage.getItem("userName") ||
+      localStorage.getItem("userName") ||
+      "";
 
-  const roleStr = sessionStorage.getItem("userRole") || "[]";
+    const roleStr = sessionStorage.getItem("userRole") || "[]";
 
-  setEmpName(sessionName);
-  setUserRole(JSON.parse(roleStr));
-}, [isLoggedIn]);   // 👈 THIS IS THE FIX
+    setEmpName(sessionName);
+    setUserRole(JSON.parse(roleStr));
+  }, [isLoggedIn]);   // 👈 THIS IS THE FIX
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
     setOpenIcon(false);
     setServicesDropdown(false);
   };
-const handleAvatarClick = (e) => {
-  setAvatarEl(e.currentTarget);
-};
+  const handleAvatarClick = (e) => {
+    setAvatarEl(e.currentTarget);
+  };
 
-const handleAvatarClose = () => {
-  setAvatarEl(null);
-};
+  const handleAvatarClose = () => {
+    setAvatarEl(null);
+  };
 
-const confirmLogout = () => {
-  handleAvatarClose();
-  handleSignOut();
-};
+  const confirmLogout = () => {
+    handleAvatarClose();
+    handleSignOut();
+  };
 
   const handleSignOut = () => {
     sessionStorage.clear();
@@ -200,32 +200,32 @@ const confirmLogout = () => {
           </div>
 
           <div className="avatar-container">
-  {isLoggedIn && (
-    <>
-      <div className="avatar-wrapper">
-        <Avatar
-          className="avatar"
-          sx={{ bgcolor: "#076935", cursor: "pointer" }}
-          onClick={handleAvatarClick}
-        />
-        <h5 className="avatar-name">{empName}</h5>
-      </div>
+            {isLoggedIn && (
+              <>
+                <div className="avatar-wrapper">
+                  <Avatar
+                    className="avatar"
+                    sx={{ bgcolor: "#076935", cursor: "pointer" }}
+                    onClick={handleAvatarClick}
+                  />
+                  <h5 className="avatar-name">{empName}</h5>
+                </div>
 
-      <Menu
-        anchorEl={avatarEl}
-        open={avatarOpen}
-        onClose={handleAvatarClose}
-        disableScrollLock
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <MenuItem onClick={confirmLogout} sx={{ color: "red" }}>
-          Logout
-        </MenuItem>
-      </Menu>
-    </>
-  )}
-</div>
+                <Menu
+                  anchorEl={avatarEl}
+                  open={avatarOpen}
+                  onClose={handleAvatarClose}
+                  disableScrollLock
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MenuItem onClick={confirmLogout} sx={{ color: "red" }}>
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </div>
 
         </div>
 
@@ -297,6 +297,8 @@ const confirmLogout = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("PTL Request")) && (<li><Link to="/ptlRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTL Request</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Local Putaway")) && (<li><Link to="/localPutaway" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Putaway</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Technology")) && (<li><Link to="/technology" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Technology</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("ManualDoor")) && (<li><Link to="/manualDoor" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual Door</Link></li>)}
+
                     </ul>
                   )}
                 </li>
@@ -319,6 +321,7 @@ const confirmLogout = () => {
                       {(userRole.includes("Admin") || isScreenAllowed("Returning")) && (<li><Link to="/returning" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Returning</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("DeploymentPopup")) && (<li><Link to="/deploymentPopup" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>DeploymentPopup</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("ManualRCRequest")) && (<li><Link to="/manualRCRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual RC Request</Link></li>)}
+
                     </ul>
                   )}
                 </li>

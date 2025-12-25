@@ -65,7 +65,9 @@ const RequesterTextFiled = ({
                 partcode: item.partcode,
                 partdescription: item.partdescription,
                 productname: item.productname,
-                componentType: item.componentType
+                componentUsage: item.componentUsage ,
+                tyc:item.tyc,
+                uom:item.uom
 
             }));
     }, [formData.productName, productandPartcode]);
@@ -324,15 +326,15 @@ const RequesterTextFiled = ({
                     getOptionLabel={(option) => option.partcode || ""}
                     isOptionEqualToValue={(option, value) => option?.partcode === value?.partcode}
                     // onChange={(e, newValue) => handleChange("partCode", newValue || null)}
-                    onChange={(e, newValue) => {    
+                    onChange={(e, newValue) => {
                         handleChange("partCode", newValue || null);
 
-                            handleChange("requestQty", newValue?.requestQty || "");
+                        handleChange("requestQty", newValue?.requestQty || "");
 
                         // Set the read-only fields based on selected part
-                        handleChange("componentType", newValue?.componentType || "");
-                        handleChange("uom", newValue?.UOM || "");
-                        handleChange("typeOfComponent", newValue?.["Type Of Component"] || "");
+                        handleChange("componentUsage", newValue?.componentUsage || "");
+                        handleChange("uom", newValue?.uom || "");  // lowercase key
+                        handleChange("tyc", newValue?.tyc || "");  // lowercase key
                     }}
                     renderInput={(params) => <TextField {...params}
                         error={Boolean(formErrors?.partCode)}
@@ -350,27 +352,27 @@ const RequesterTextFiled = ({
                         helperText={formErrors?.partDescription || ""}
                         label="Part Description" size="small" />}
                 />
-                <ComTextFiled
-                    label="UOM"
-                    name="UOM"
-                    value={formData.UOM || ""}
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                />
-                <ComTextFiled
-                    label="Type Of Component"
-                    name="TYC"
-                    value={formData.TYC || ""}
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                />
-                <ComTextFiled
-                    label="Component Usage"
-                    name="componentType"
-                    value={formData.componentType || ""}
-                    InputProps={{ readOnly: true }}
-                    InputLabelProps={{ shrink: true }}
-                />
+               <ComTextFiled
+    label="UOM"
+    name="uom"
+    value={formData.uom || ""}
+    InputProps={{ readOnly: true }}
+    InputLabelProps={{ shrink: true }}
+/>
+<ComTextFiled
+    label="Type Of Component"
+    name="tyc"
+    value={formData.tyc || ""}
+    InputProps={{ readOnly: true }}
+    InputLabelProps={{ shrink: true }}
+/>
+<ComTextFiled
+    label="Component Usage"
+    name="componentUsage"
+    value={formData.componentUsage || ""}
+    InputProps={{ readOnly: true }}
+    InputLabelProps={{ shrink: true }}
+/>
                 <ComTextFiled
                     label="Request Qty"
                     name="requestQty"

@@ -22,10 +22,16 @@ export const saveProductsBulk = (excelUploadData) => axios.post(Save_All, excelU
 const Get_UserMailId = `${url}/getEmailId`;
 export const getUserMailId = () => axios.get(Get_UserMailId);
 
-const Get_ProductMasterData = `${url}/getProduct`;
-export const getProductMasterData = (page = 0, size = 10, search = "") => {
-  return axios.get(Get_ProductMasterData, { params: { page, size,search: search || undefined, }, });
+// const Get_ProductMasterData = `${url}/getProduct`;
+// export const getProductMasterData = (page = 0, size = 10, search = "") => {
+//   return axios.get(Get_ProductMasterData, { params: { page, size,search: search || undefined, }, });
+// };
+
+const Get_ProductMasterData = `${url}/getPTLRequest`;
+export const getProductMasterData = () => {
+  return axios.get(Get_ProductMasterData);
 };
+
 
 const Update_Product = (id) => `${url}/updateProduct/${id}`;
 export const updateProduct = (id, formData) => {

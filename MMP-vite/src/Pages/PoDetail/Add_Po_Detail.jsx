@@ -14,6 +14,7 @@ import { deletePoDetail, downloadPoDetail, downloadSearchPoDetail, fetchCurency,
 import dayjs from "dayjs"; // or use native JS date
 import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { ponumberVerifyBackend } from '../../Services/Services-Rc';
 
 const Add_Po_Detail = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -566,30 +567,72 @@ const Add_Po_Detail = () => {
   //     totalvalueeuro: "",
   //   }));
   // };
-  const handleAddClick = () => {
-    if (!valiDate()) return;
+  // const handleAddClick = () => {
+  //   if (!valiDate()) return;
 
-    // Check if partcode already exists
-    const isDuplicate = tableData.some(item => item.partcode === formData.partcode);
-    if (isDuplicate) {
-      setErrorMessage("Partcode already exists");
+  //   const ponumberCheck=formData.ponumber
+  //   console.log("ponumber",ponumberCheck)
+
+  //   await ponumberVerifyBackend(ponumberCheck)
+  //   // Check if partcode already exists
+  //   const isDuplicate = tableData.some(item => item.partcode === formData.partcode);
+  //   if (isDuplicate) {
+  //     setErrorMessage("Partcode already exists");
+  //     setShowErrorPopup(true);
+  //     return;
+  //   }
+
+  //   setShowTable(true);
+  //   setTableData(prev => [...prev, formData]);
+  //   setIsFrozen(true);
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     partcode: "",
+  //     partdescription: "",
+  //     unitprice: "",
+  //     orderqty: "",
+  //     totalvalue: "",
+  //     totalvalueeuro: "",
+  //   }));
+  // };
+const handleAddClick = async () => {
+  if (!valiDate()) return;
+
+  try {
+    const res = await ponumberVerifyBackend(formData.ponumber);
+
+    if (res.data.success) {
+      const isDuplicate = tableData.some(
+        item => item.partcode === formData.partcode
+      );
+      if (isDuplicate) {
+        setErrorMessage("Partcode already exists");
+        setShowErrorPopup(true);
+        return;
+      }
+
+      setShowTable(true);
+      setTableData(prev => [...prev, formData]);
+      setIsFrozen(true);
+      setFormData(prev => ({
+        ...prev,
+        partcode: "",
+        partdescription: "",
+        unitprice: "",
+        orderqty: "",
+        totalvalue: "",
+        totalvalueeuro: "",
+      }));
+    } else {
+      setErrorMessage(res.data.message);
       setShowErrorPopup(true);
-      return;
+      // alert(res.data.message); 
     }
-
-    setShowTable(true);
-    setTableData(prev => [...prev, formData]);
-    setIsFrozen(true);
-    setFormData(prev => ({
-      ...prev,
-      partcode: "",
-      partdescription: "",
-      unitprice: "",
-      orderqty: "",
-      totalvalue: "",
-      totalvalueeuro: "",
-    }));
-  };
+  } catch (err) {
+    setErrorMessage(err.response?.data?.message || "Server error"); 
+    setShowErrorPopup(true);
+  }
+};
 
 
   const handlePageChange = (newPage) => {
@@ -1023,7 +1066,7 @@ const Add_Po_Detail = () => {
                 />
               )}
             />
-            <TextField
+            {/* <TextField
               label="Unit Price"
               variant="outlined"
               name="unitprice"
@@ -1033,7 +1076,29 @@ const Add_Po_Detail = () => {
               error={Boolean(formErrors.unitprice)}
               helperText={formErrors.unitprice}
               size="small"
-            />
+            /> */}
+
+            <TextField
+  label="Unit Price"
+  variant="outlined"
+  name="unitprice"
+  type="number"
+  value={formData.unitprice}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (value === "" || Number(value) > 0) {
+      handleChange(e);
+    }
+  }}
+  inputProps={{ min: 1 }}
+  onKeyDown={(e) => {
+    if (e.key === "-" || e.key === "0") e.preventDefault();
+  }}
+  error={Boolean(formErrors.unitprice)}
+  helperText={formErrors.unitprice}
+  size="small"
+/>
+
             <TextField
               label="Order Qty"
               variant="outlined"

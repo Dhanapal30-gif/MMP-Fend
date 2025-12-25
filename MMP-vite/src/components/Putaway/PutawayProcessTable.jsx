@@ -261,7 +261,7 @@ const handleOpen = (row) => {
                     }}
                 >
                     <span>Partcode: {activeRow?.partcode}</span>
-                    <span>Good Qty: {activeRow?.GRNQty}</span>
+                    <span>Good Qty: {activeRow?.grnqty}</span>
                     <span>BatchCode: {activeRow?.rcbatchcode}</span>
                     <span>Put Qty: {activeRow?.allowedPutqty}</span>
 
@@ -292,11 +292,13 @@ const handleOpen = (row) => {
               <TableCell>{availableQtyForLoc}</TableCell> {/* Show actual available qty */}
               <TableCell>
                   <TextField
-                      type="number"
+                        type="text"
+
                       value={locationQty[loc] || ""}
                       onChange={(e) => {
                           let val = e.target.value;
-                          if (val === "" || /^\d*$/.test(val)) {
+                          if (!/^\d*$/.test(val)) return;
+                        //   if (val === "" || /^\d*$/.test(val)) {
                               const numVal = val === "" ? 0 : Number(val);
                               const totalOtherLocations = Object.keys(locationQty)
                                   .filter(k => k !== loc)
@@ -308,7 +310,7 @@ const handleOpen = (row) => {
                                   return;
                               }
                               setLocationQty((prev) => ({ ...prev, [loc]: val }));
-                          }
+                        //   }
                       }}
                       inputProps={{ min: 0, max: remainingQty, disabled }}
                       size="small"

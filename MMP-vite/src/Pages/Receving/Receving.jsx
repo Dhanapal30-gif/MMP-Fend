@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect ,useCallback} from 'react'
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
@@ -43,18 +43,28 @@ const [addSearchText, setAddSearchText] = useState("");
     invoiceNo: "", invoiceDate: "", receivingDate: ""
   })
 
-  const handleFieldChange = (index, field, value) => {
-    setPoDetail((prev) =>
-      prev.map((item, i) =>
-        i === index
-          ? {
-            ...item,
-            [field]: value,
-          }
-          : item
-      )
-    );
-  };
+  // const handleFieldChange = (index, field, value) => {
+  //   setPoDetail((prev) =>
+  //     prev.map((item, i) =>
+  //       i === index
+  //         ? {
+  //           ...item,
+  //           [field]: value,
+  //         }
+  //         : item
+  //     )
+  //   );
+  // };
+const handleFieldChange = useCallback((key, field, value) => {
+  setPoDetail(prev =>
+    prev.map(row =>
+      `${row.ponumber}-${row.partcode}` === key
+        ? { ...row, [field]: value }
+        : row
+    )
+  );
+}, []);
+
 
   //receving ticket no fetching
   // useEffect(() => {
@@ -317,6 +327,8 @@ const toBackendDateTime = (d) => {
     setSearchText("");
     // setSelectedRows("")
     setSelectedDeleteRows([])
+    setSelectedRows([])
+    setFormErrors([])
     setDeleteButton(false)
     setUpdateButton(false)
     setSubmitButton(true)
@@ -462,6 +474,7 @@ const handleEdit = (rowData) => {
               formData={formData}
               setFormData={setFormData}
               formErrors={formErrors}
+              setFormErrors={setFormErrors}
               ponumber={ponumber}
               setPoDetail={setPoDetail}
               setShowRecevingTable={setShowRecevingTable}

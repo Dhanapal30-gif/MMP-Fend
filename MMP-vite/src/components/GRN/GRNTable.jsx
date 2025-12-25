@@ -58,6 +58,17 @@ const GRNTable = ({
     data,
     customConfig: {
       recevingTicketNo: { label: "Ticket No", width: "140px" },
+      ponumber: { label: "PO Number", width: "140px" },
+      vendorname: { label: "Vendorname", width: "140px" },
+      postingdate: { label: "PostingDate", width: "140px" },
+      partcode: { label: "Partcode", width: "140px" },
+      partdescription: { label: "Partdescription", width: "140px" },
+      invoiceNo: { label: "InvoiceNo", width: "140px" },
+      invoiceDate: { label: "InvoiceDate", width: "140px" },
+      receivingDate: { label: "ReceivingDate", width: "140px" },
+      orderqty: { label: "OrderQty", width: "140px" },
+      recevingQty: { label: "RecevingQty", width: "140px" },
+      unitprice: { label: "Unitprice", width: "140px" },
       GRComments: { label: "Comment", width: "270px", height: "70px" }
     },
     customCellRenderers: {
@@ -73,26 +84,30 @@ const GRNTable = ({
         //   className="invoice-input"
         // />
         <TextField
-  type="number"
-  placeholder="GRN Qty"
-  value={row.GRNQty || ""}
-  onChange={(e) => {
-    const value = Number(e.target.value);
-    const max = Number(row.recevingQty || 0);
-
-    if (value <= max) {
-      handleGRNQtyChange(row.selectedid, "GRNQty", value);
-      // Clear any previous error
-      setFormErrors(prev => ({ ...prev, [`GRNQty_${row.selectedid}`]: "" }));
-    } else {
-      // Show error if exceeds
-      setFormErrors(prev => ({ ...prev, [`GRNQty_${row.selectedid}`]: `Cannot exceed ${max}` }));
-    }
-  }}
-  error={!!formErrors?.[`GRNQty_${row.selectedid}`]}
-  helperText={formErrors?.[`GRNQty_${row.selectedid}`] || ""}
-  className="invoice-input"
-/>
+          type="number"
+          placeholder="GRN Qty"
+          value={row.GRNQty || ""}
+          onKeyDown={(e) => {
+            if (e.key === "-") e.preventDefault(); // block minus
+          }}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            const max = Number(row.recevingQty || 0);
+            if (/^\d*\.?\d*$/.test(value) || value === "") {
+              if (value <= max) {
+                handleGRNQtyChange(row.selectedid, "GRNQty", value);
+                // Clear any previous error
+                setFormErrors(prev => ({ ...prev, [`GRNQty_${row.selectedid}`]: "" }));
+              } else {
+                // Show error if exceeds
+                setFormErrors(prev => ({ ...prev, [`GRNQty_${row.selectedid}`]: `Cannot exceed ${max}` }));
+              }
+            }
+          }}
+          error={!!formErrors?.[`GRNQty_${row.selectedid}`]}
+          helperText={formErrors?.[`GRNQty_${row.selectedid}`] || ""}
+          className="invoice-input"
+        />
 
       ),
       GRComments: (row) => (

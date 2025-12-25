@@ -348,7 +348,8 @@ setSearchScanText("");
             id: item.id,   // use selectedid if that's your row ID
             pickingqty: item.availableqty, // match backend field
             reworkername,
-            productname:item.productname
+            productname:item.productname,
+            boardSerialNo:item.boardserialnumber
         }));
 
         try {
