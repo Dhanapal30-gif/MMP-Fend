@@ -64,6 +64,35 @@ const ProductFamilyMaster = () => {
     size: 10
   };
 
+
+  // const filteredProductMaster = productMaster.filter(v =>
+  //       v.productname?.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       v.productgroup?.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       v.productfamily?.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       v.lineLead?.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       v.productEngineer?.toLowerCase().includes(searchText.toLowerCase()) ||
+  //       v.recordstatus?.toLowerCase().includes(searchText.toLowerCase())
+
+  //   );
+
+  const s = searchText.toLowerCase();
+const filteredProductMaster = productMaster
+  .filter(v =>
+    v.productname?.toLowerCase().includes(s) ||
+    v.productgroup?.toLowerCase().includes(s) ||
+    v.productfamily?.toLowerCase().includes(s) ||
+    (Array.isArray(v.lineLead) && v.lineLead.join(",").toLowerCase().includes(s)) ||
+    (Array.isArray(v.productEngineer) && v.productEngineer.join(",").toLowerCase().includes(s)) ||
+    v.recordstatus?.toLowerCase().includes(s)
+  )
+  .map(v => ({
+    ...v,
+    lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
+    productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
+  }));
+
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -80,9 +109,13 @@ const ProductFamilyMaster = () => {
     return isValid;
   };
 
+  // useEffect(() => {
+  //   fetchProduct(page, perPage, debouncedSearch);
+  // }, [page, perPage, debouncedSearch]);
   useEffect(() => {
-    fetchProduct(page, perPage, debouncedSearch);
-  }, [page, perPage, debouncedSearch]);
+  fetchProduct();
+}, []);
+
 
   useEffect(() => {
     getUserMail();
@@ -137,11 +170,25 @@ const ProductFamilyMaster = () => {
   };
 
   //FetchAllproduct
-  const fetchProduct = (page = 1, size = 10, search = "") => {
+  // const fetchProduct = (page = 1, size = 10, search = "") => {
+  //   setLoading(true);
+  //   getProductMasterData(page - 1, size, search) // Pass as separate arguments
+  //     .then((response) => {
+  //       setProductMaster(response.data.content || []);
+  //       setTotalRows(response.data.totalElements || 0);
+  //     })
+  //     .catch((error) => {
+  //       setErrorMessage("Error fetching data");
+  //       setShowErrorPopup(true);
+  //     })
+  //     .finally(() => setLoading(false));
+  // };
+
+   const fetchProduct = () => {
     setLoading(true);
-    getProductMasterData(page - 1, size, search) // Pass as separate arguments
+    getProductMasterData() // Pass as separate arguments
       .then((response) => {
-        setProductMaster(response.data.content || []);
+        setProductMaster(response.data);
         setTotalRows(response.data.totalElements || 0);
       })
       .catch((error) => {
@@ -151,16 +198,33 @@ const ProductFamilyMaster = () => {
       .finally(() => setLoading(false));
   };
 
+
   //Pagenation
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
+const filteredProductData = productMaster.filter(row =>
+  Object.values(row).some(value => {
+    if (typeof value === "string") {
+      return value.toLowerCase().includes(s);
+    }
 
+    if (Array.isArray(value)) {
+      return value.join(",").toLowerCase().includes(s);
+    }
+
+    return false;
+  })
+);
   const paginatedData = excelUploadData.slice(
     (page - 1) * perPage,
     page * perPage
   );
 
+  const paginatedProductData = filteredProductData.slice(
+        (page - 1) * perPage,
+        page * perPage
+    );
   const handlePerRowsChange = (newPerPage, newPage) => {
     setPerPage(newPerPage);
     setPage(newPage);
@@ -242,18 +306,40 @@ const ProductFamilyMaster = () => {
     {
       name: "Product Family", selector: row => row.productfamily, width: "159px",
     },
+    // {
+    //   name: "Line Lead",
+    //   selector: row => row.lineLead
+    //     ? row.lineLead.split(",").map(email => <div key={email}>{email}</div>)
+    //     : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
+    // },
     {
-      name: "Line Lead",
-      selector: row => row.lineLead
-        ? row.lineLead.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
-    },
+  name: "Line Lead",
+  selector: row =>
+    Array.isArray(row.lineLead)
+      ? row.lineLead.map(email => (
+          <div key={email}>{email}</div>
+        ))
+      : "",
+  width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
+},
+
+    // {
+    //   name: "Product Engineer",
+    //   selector: row => row.productEngineer
+    //     ? row.productEngineer.split(",").map(email => <div key={email}>{email}</div>)
+    //     : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
+    // },
     {
-      name: "Product Engineer",
-      selector: row => row.productEngineer
-        ? row.productEngineer.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
-    },
+  name: "Product Engineer",
+  selector: row =>
+    Array.isArray(row.productEngineer)
+      ? row.productEngineer.map(email => (
+          <div key={email}>{email}</div>
+        ))
+      : "",
+  width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
+},
+
     {
       name: "Status", selector: row => row.recordstatus, width: "199px",
     },
@@ -310,6 +396,7 @@ const ProductFamilyMaster = () => {
       recordstatus: ""
     }];
 
+    /*
   const exportToExcel = (search = "") => {
     console.log("searchTeaxt", search)
     if (search && search.trim() !== "") {
@@ -350,7 +437,8 @@ const ProductFamilyMaster = () => {
         });
     }
   };
-
+ 
+  */
   const formClear = () => {
     setFormData({ productname: '', productgroup: '', productfamily: '', createdBy: '', lineLead: '', productEngineer: '', status: '' });
     setExcelUploadData([]);
@@ -632,6 +720,25 @@ const ProductFamilyMaster = () => {
 
   }
 
+  const exportToExcel = (searchText = "") => {
+  const dataToExport =
+    searchText && searchText.trim() !== "" ? filteredProductMaster : productMaster;
+
+  if (!Array.isArray(dataToExport) || dataToExport.length === 0) return;
+
+  const formattedData = dataToExport.map(({ id, ...v }) => ({
+    ...v,
+    lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
+    productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
+  }));
+
+  const sheet = XLSX.utils.json_to_sheet(formattedData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, sheet, "ProductMaster");
+  XLSX.writeFile(workbook, "ProductMaster.xlsx");
+};
+
+
   return (
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
@@ -744,7 +851,7 @@ const ProductFamilyMaster = () => {
 
       <div className='ComCssTable'>
         {showProductTable && !showUploadTable && (
-          <h5 className='ComCssTableName'>Product Details ✅</h5>
+          <h5 className='ComCssTableName'>Product Details </h5>
         )}
         {showUploadTable && !showProductTable && (
           <h5 className='ComCssTableName'>Upload product Detail</h5>
@@ -774,9 +881,9 @@ const ProductFamilyMaster = () => {
                  key={resetKey}                 
   paginationDefaultPage={1} 
               columns={columns}
-              data={productMaster}
+              data={filteredProductData}
               pagination
-              paginationServer
+              // paginationServer
               progressPending={loading}
               paginationTotalRows={totalRows}
               onChangeRowsPerPage={handlePerRowsChange}

@@ -200,8 +200,8 @@ const CurencyMaster = () => {
         fetchCurency()
             .then((response) => {
                 setCurencyMaster(response.data || []);
-                setTotalRows(response.data.toatlElements || 0)
-                console.log("fetchCurrency", response.data);
+                // setTotalRows(response.data.totalElements || response.data.length)
+                // console.log("fetchCurrency", response.data);
             })
     }
 
@@ -279,7 +279,7 @@ const CurencyMaster = () => {
     const column = [
         {
             name: (
-                <div style={{ textAlign: 'center',marginLeft:"4px" }}>
+                <div style={{ textAlign: 'center', marginLeft: "4px" }}>
                     <label>Select All</label>
                     <br />
                     <input type="checkbox" onChange={handleSelectAll}
@@ -324,32 +324,32 @@ const CurencyMaster = () => {
         //     width: `${calculateColumnWidth(curencyMster, 'Effectivedate')}px`
         // },
         {
-    name: "Effective Date",
-    selector: row => {
-        if (!row.effectivedate) return "";
-        const date = new Date(row.effectivedate);
-        return date.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
-    },
-    width: `${calculateColumnWidth(curencyMster, 'effectivedate')}px`
-},
+            name: "Effective Date",
+            selector: row => {
+                if (!row.effectivedate) return "";
+                const date = new Date(row.effectivedate);
+                return date.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                });
+            },
+            width: `${calculateColumnWidth(curencyMster, 'effectivedate')}px`
+        },
 
         {
-    name: "Modified Date",
-    selector: row => {
-        if (!row.modifieddate) return "";
-        const date = new Date(row.modifieddate);
-        return date.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
-    },
-    width: `${calculateColumnWidth(curencyMster, 'modifieddate')}px`
-}
+            name: "Modified Date",
+            selector: row => {
+                if (!row.modifieddate) return "";
+                const date = new Date(row.modifieddate);
+                return date.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                });
+            },
+            width: `${calculateColumnWidth(curencyMster, 'modifieddate')}px`
+        }
 
     ]
 
@@ -369,11 +369,23 @@ const CurencyMaster = () => {
         setHandleDeleteButton(false);
         setSelectedRows([]);
     };
+    // const filteredData = curencyMster.filter(row =>
+    //     Object.values(row).some(value =>
+    //         typeof value === "string" && value.toLowerCase().includes(searchText.toLowerCase())
+    //     )
+    // );
     const filteredData = curencyMster.filter(row =>
-        Object.values(row).some(value =>
-            typeof value === "string" && value.toLowerCase().includes(searchText.toLowerCase())
-        )
+        row.currencyname?.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.currencyvalue?.toString().includes(searchText) ||
+        new Date(row.effectivedate)
+            .toLocaleDateString("en-GB")
+            .toLowerCase()
+            .includes(searchText.toLowerCase())
     );
+ useEffect(() => {
+        setTotalRows(filteredData.length); // important!
+    }, [filteredData]);
+
     const paginatedData = filteredData.slice(
         (page - 1) * perPage,
         page * perPage
@@ -447,7 +459,7 @@ const CurencyMaster = () => {
                 </div>
                 <div className='ComCssButton9'>
                     {handleSubmitButton && <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>}
-                    {handleUpdateButton && <button className='ComCssUpdateButton'  onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
+                    {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
                     {handleDeleteButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
                     <button className='ComCssClearButton' onClick={formClear}>Clear</button>
                 </div>
@@ -476,6 +488,7 @@ const CurencyMaster = () => {
                     columns={column}
                     data={paginatedData}
                     pagination
+
                     paginationServer
                     progressPending={loading}
                     paginationTotalRows={totalRows}

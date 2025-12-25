@@ -23,7 +23,7 @@ const allFields = [
   "ApprovedL1Qty",
   "ApprovedL2Qty",
   "faultySerialNumber",
-  "Comment",
+  // "Comment",
   
   "approved_l1",
   "approved_l1_date",
@@ -69,9 +69,10 @@ const hideForStock = [
   "batchCode",
   "location",
   "allocatedQty",
-
+  "approved_l1",
+  "approved_l1_date",
   "faultySerialNumber",
-  "Comment",
+  // "Comment",
 
 
 
@@ -90,7 +91,7 @@ const hideForPTL = [
   // "ApprovedL1Qty",
   "ApprovedL2Qty",
   "faultySerialNumber",
-  "Comment",
+  // "Comment",
   "approved_l1",
   "approved_l1_date",
   "inventory_box_no",
@@ -151,26 +152,56 @@ const ApproverTable = ({
   setShowErrorPopup,
   rejectComment
 }) => {
+  // const visibleFields = useMemo(() => {
+  //   if (!data || data.length === 0) return allFields;
+  //   const ticketNo = data[0]?.rec_ticket_no ?? "";
+  //   if (ticketNo.startsWith("RTN")) {
+  //     return allFields.filter((f) => !hideForReturning.includes(f));
+  //   }
+  //   else if (ticketNo.startsWith("PTL")) {
+  //     return allFields.filter((f) => !hideForPTL.includes(f));
+  //   }
+  //   else if (ticketNo.startsWith("4")) {
+  //     return allFields.filter((f) => !hideForRequester.includes(f));
+  //   }
+  //   else if (ticketNo.startsWith("INV")) {
+  //     return allFields.filter((f) => !hideForStock.includes(f));
+  //   }
+  //   // else if (data.some((row) => row.recordstatus === "L1-Pending")) {
+  //   //   return allFields.filter((f) => !hideApproverFiled.includes(f));
+  //   // }
+  //   return allFields;
+  // }, [data]);
+
   const visibleFields = useMemo(() => {
-    if (!data || data.length === 0) return allFields;
-    const ticketNo = data[0]?.rec_ticket_no ?? "";
-    if (ticketNo.startsWith("RTN")) {
-      return allFields.filter((f) => !hideForReturning.includes(f));
-    }
-    else if (ticketNo.startsWith("PTL")) {
-      return allFields.filter((f) => !hideForPTL.includes(f));
-    }
-    else if (ticketNo.startsWith("4")) {
-      return allFields.filter((f) => !hideForRequester.includes(f));
-    }
-    else if (ticketNo.startsWith("INV")) {
-      return allFields.filter((f) => !hideForStock.includes(f));
-    }
-    // else if (data.some((row) => row.recordstatus === "L1-Pending")) {
-    //   return allFields.filter((f) => !hideApproverFiled.includes(f));
-    // }
-    return allFields;
-  }, [data]);
+  let fields = [...allFields];
+
+  if (!data || data.length === 0) return fields;
+
+  const ticketNo = data[0]?.rec_ticket_no ?? "";
+
+  if (ticketNo.startsWith("RTN")) {
+    fields = fields.filter(f => !hideForReturning.includes(f));
+  } else if (ticketNo.startsWith("PTL")) {
+    fields = fields.filter(f => !hideForPTL.includes(f));
+  } else if (ticketNo.startsWith("4")) {
+    fields = fields.filter(f => !hideForRequester.includes(f));
+  } else if (ticketNo.startsWith("INV")) {
+    fields = fields.filter(f => !hideForStock.includes(f));
+  }
+
+  // ✅ Comment control MUST be AFTER filtering
+  if (rejectComment && !fields.includes("Comment")) {
+    fields.push("Comment");
+  }
+
+  if (!rejectComment) {
+    fields = fields.filter(f => f !== "Comment");
+  }
+
+  return fields;
+}, [data, rejectComment]);
+
 
   const normalizedData = useMemo(() => {
     return data.map((row) => ({
@@ -264,7 +295,9 @@ const ApproverTable = ({
 
         Comment: (row) => {
           if (!rejectComment) return null; // don't show comment if rejectComment is false
-          return (
+         
+           if (!selectedGrnRows.includes(row.selectedId)) return null;
+ return (
             <TextField
               placeholder="Enter Comment"
               value={row.Comment ?? ""}
@@ -276,7 +309,7 @@ const ApproverTable = ({
 
       },
     });
-  }, [data, selectedGrnRows, formErrors, visibleFields]);
+  }, [data, selectedGrnRows, formErrors,rejectComment, visibleFields]);
 
   return (
     <CommonAddDataTable

@@ -9,7 +9,7 @@ import * as XLSX from "xlsx";
 import { FaFileExcel } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 
-export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,setDeleteButton, formErrors,setFormErrors, selectedRows, setSelectedRows }) => {
+export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, setDeleteButton, formErrors, setFormErrors, selectedRows, setSelectedRows }) => {
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
             setSelectedRows((prev) => [...new Set([...prev, ...currentPageKeys])]);
         } else {
             setSelectedRows((prev) => prev.filter((k) => !currentPageKeys.includes(k)));
-        setDeleteButton(false)
+            setDeleteButton(false)
         }
     };
 
@@ -56,7 +56,7 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
             setDeleteButton(false)
         }
     };
-    
+
     // useEffect(() => {
     //     const updatedData = filteredAddData.map((row, index) => {
     //         const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
@@ -86,66 +86,75 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
 
 
     useEffect(() => {
-    // Flag to track if any state change occurred in this run
-    let madeUpdates = false; 
+        // Flag to track if any state change occurred in this run
+        let madeUpdates = false;
 
-    const updatedData = filteredAddData.map((row, index) => {
-        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
-        
-        // Use the row data to check if an update is needed
-        if (
-            expApplicable === "no" &&
-            row.shelflife &&
-            !row.exp_date &&             // Check 1: Must NOT have an exp_date
-            !row.expiryAutoSet          // Check 2: Must NOT be auto-set already
-        ) {
-            const today = new Date();
-            const expiry = new Date(today);
-            const shelfLifeMonths = parseInt(row.shelflife, 10);
-            
-            // Set expiry date to shelf life months in the future
-            expiry.setMonth(expiry.getMonth() + shelfLifeMonths);
-            // setDate(0) sets it to the last day of the *previous* month.
-            // A more typical approach is to set it to the last day of the calculated month:
-            // expiry.setDate(0); 
-            // It seems you intended to use setDate(1) then go back, or just set to the calculated end date.
-            // Let's stick to your current logic as you said it "is working" in terms of calculation:
-            expiry.setDate(0); 
-            
-            const newExpDate = expiry.toISOString().split("T")[0];
-            
-            madeUpdates = true; // An update *will* be made
-            
-            // Return the calculated new row object
-            return {
-                ...row,
-                exp_date: newExpDate,
-                expiryAutoSet: true,
-            };
-        }
-        return row;
-    });
+        const updatedData = filteredAddData.map((row, index) => {
+            const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
 
-    // ⛔️ IMPORTANT CHANGE: Only call handleFieldChange if an update was actually calculated
-    if (madeUpdates) {
-        // Now, perform your updates. Since you calculate a fully updated row, 
-        // you only need to update the two changed fields if they were changed.
-        
-        updatedData.forEach((row, idx) => {
-            // Only update if it was part of the 'madeUpdates' calculation
-            if (row.expiryAutoSet) {
-                 handleFieldChange(idx, "exp_date", row.exp_date);
-                 handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet);
+            // Use the row data to check if an update is needed
+            if (
+                expApplicable === "no" &&
+                row.shelflife &&
+                !row.exp_date &&             // Check 1: Must NOT have an exp_date
+                !row.expiryAutoSet          // Check 2: Must NOT be auto-set already
+            ) {
+                const today = new Date();
+                const expiry = new Date(today);
+                const shelfLifeMonths = parseInt(row.shelflife, 10);
+
+                // Set expiry date to shelf life months in the future
+                expiry.setMonth(expiry.getMonth() + shelfLifeMonths);
+                // setDate(0) sets it to the last day of the *previous* month.
+                // A more typical approach is to set it to the last day of the calculated month:
+                // expiry.setDate(0); 
+                // It seems you intended to use setDate(1) then go back, or just set to the calculated end date.
+                // Let's stick to your current logic as you said it "is working" in terms of calculation:
+                expiry.setDate(0);
+
+                const newExpDate = expiry.toISOString().split("T")[0];
+
+                madeUpdates = true; // An update *will* be made
+
+                // Return the calculated new row object
+                return {
+                    ...row,
+                    exp_date: newExpDate,
+                    expiryAutoSet: true,
+                };
             }
+            return row;
         });
-    }
 
-    // You MUST ensure 'handleFieldChange' is stable (wrapped in useCallback) 
-    // or remove it from the dependency array if possible, 
-    // AND that the state change it triggers only changes 
-    // the value of filteredAddData ONCE for these fields.
-    
-}, [filteredAddData, handleFieldChange]); // Add handleFieldChange if it's not stable
+        // ⛔️ IMPORTANT CHANGE: Only call handleFieldChange if an update was actually calculated
+        if (madeUpdates) {
+            // Now, perform your updates. Since you calculate a fully updated row, 
+            // you only need to update the two changed fields if they were changed.
+
+            // updatedData.forEach((row, idx) => {
+            //     // Only update if it was part of the 'madeUpdates' calculation
+            //     if (row.expiryAutoSet) {
+            //         handleFieldChange(idx, "exp_date", row.exp_date);
+            //         handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet);
+            //     }
+            // });
+
+            updatedData.forEach((row) => {
+  if (row.expiryAutoSet) {
+    const key = `${row.ponumber}-${row.partcode}`;
+    handleFieldChange(key, "exp_date", row.exp_date);
+    handleFieldChange(key, "expiryAutoSet", true);
+  }
+});
+
+        }
+
+        // You MUST ensure 'handleFieldChange' is stable (wrapped in useCallback) 
+        // or remove it from the dependency array if possible, 
+        // AND that the state change it triggers only changes 
+        // the value of filteredAddData ONCE for these fields.
+
+    }, [filteredAddData, handleFieldChange]); // Add handleFieldChange if it's not stable
     const Defaultcolumn = [
         {
             name: (
@@ -225,43 +234,46 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
                 <TextField
                     variant="outlined"
                     placeholder="Receving Qty"
-                    type="number"
+                    type="text"
                     name="recevingQty"
                     value={row.recevingQty || ""}
                     error={Boolean(formErrors[`recevingQty-${row.ponumber}-${row.partcode}`])}
                     helperText={formErrors[`recevingQty-${row.ponumber}-${row.partcode}`]}
                     onChange={(e) => {
-                        const value = e.target.value;
-                        const key = `${row.ponumber}-${row.partcode}`;
-                        const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
-                        if (idx === -1) return;
+  const value = e.target.value;
+//   const key = `${row.ponumber}-${row.partcode}`;
+const key = `${row.ponumber}-${row.partcode}`;
 
-                        handleFieldChange(idx, 'recevingQty', value);
+  const idx = filteredAddData.findIndex(
+    r => `${r.ponumber}-${r.partcode}` === key
+  );
+  if (idx === -1) return;
 
-                        // if (Number(value) > Number(row.orderqty)) {
-                        //     setErrorMessage("Receving Qty cannot be more than Order Qty");
-                        //     setShowErrorPopup(true);
-                        //     handleFieldChange(idx, 'recevingQty', ""); // reset
-                        //     return;
-                        // }
-                        const allowedQty = row.openOrderQty > 0 ? row.openOrderQty : row.orderqty;
-                        const qtyType = row.openOrderQty > 0 ? "Open Order Qty" : "Order Qty";
+  const allowedQty =
+    row.openOrderQty > 0 ? row.openOrderQty : row.orderqty;
+  const qtyType =
+    row.openOrderQty > 0 ? "Open Order Qty" : "Order Qty";
 
-                        if (Number(value) > Number(allowedQty)) {
-                            setErrorMessage(`Receiving Qty cannot be more than ${qtyType}`);
-                            setShowErrorPopup(true);
-                            handleFieldChange(idx, "recevingQty", "");
-                            return;
-                        }
-                        // Remove error if corrected
-                        if (formErrors[`recevingQty-${key}`] && Number(value) > 0) {
-                            setFormErrors((prev) => {
-                                const newErrors = { ...prev };
-                                delete newErrors[`recevingQty-${key}`];
-                                return newErrors;
-                            });
-                        }
-                    }}
+  if (/^\d*\.?\d*$/.test(value) || value === "") {
+    handleFieldChange(key, "recevingQty", value);
+  }
+
+  if (Number(value) > Number(allowedQty)) {
+    setErrorMessage(`Receiving Qty cannot be more than ${qtyType}`);
+    setShowErrorPopup(true);
+    handleFieldChange(key, "recevingQty", "");
+    return;
+  }
+
+  if (formErrors[`recevingQty-${key}`] && Number(value) > 0) {
+    setFormErrors(prev => {
+      const n = { ...prev };
+      delete n[`recevingQty-${key}`];
+      return n;
+    });
+  }
+}}
+
                     className="invoice-input"
                 />
 
@@ -285,15 +297,15 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
 
                         // allow empty or partial decimal inputs
                         if (/^\d*\.?\d*$/.test(value) || value === "") {
-                            handleFieldChange(idx, 'totalValue', value);
+                            handleFieldChange(key, 'totalValue', value);
 
                             // Only update Euro if valid number
                             const total = parseFloat(value);
                             if (!isNaN(total)) {
                                 const ccf = parseFloat(filteredAddData[idx].ccf) || 1;
-                                handleFieldChange(idx, 'totalValueEuro', (total * ccf).toFixed(2));
+                                handleFieldChange(key, 'totalValueEuro', (total * ccf).toFixed(2));
                             } else {
-                                handleFieldChange(idx, 'totalValueEuro', '');
+                                handleFieldChange(key, 'totalValueEuro', '');
                             }
                         }
                     }}
@@ -354,66 +366,66 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
         //     }
         // }
 
-{
-    name: "Expiry Date",
-    cell: (row) => {
-        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
-        const isDisabled = expApplicable === "notapplicable";
+        {
+            name: "Expiry Date",
+            cell: (row) => {
+                const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+                const isDisabled = expApplicable === "notapplicable";
 
-        // --- 1. Calculate the ABSOLUTE MINIMUM Date (2 Months from Today) ---
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-        
-        // Clone today's date for the minimum calculation
-        const finalMinDate = new Date(today);
-        
-        // Set the minimum selectable date to exactly 2 months from today
-        finalMinDate.setMonth(finalMinDate.getMonth() + 2);
-        
-        // Convert the final minimum date to the required 'YYYY-MM-DD' string format
-        const minExpiryDate = finalMinDate.toISOString().split("T")[0];
-        
-        // --- 2. Calculate the MAXIMUM Date (2 Months after the Minimum Date) ---
-        
-        // Clone the final minimum date
-        const finalMaxDate = new Date(finalMinDate);
-        
-        // Add exactly 2 more months to define the maximum boundary
-        finalMaxDate.setMonth(finalMaxDate.getMonth() + 2);
-        
-        // Convert the final maximum date to the required 'YYYY-MM-DD' string format
-        const maxExpiryDate = finalMaxDate.toISOString().split("T")[0];
+                // --- 1. Calculate the ABSOLUTE MINIMUM Date (2 Months from Today) ---
 
-        // --- 3. Render the TextField with both 'min' and 'max' attributes ---
-        
-        return (
-            <TextField
-                type="date"
-                variant="outlined"
-                value={row.exp_date || ""}
-                onChange={(e) => {
-                    if (expApplicable === "yes") {
-                        const key = `${row.ponumber}-${row.partcode}`;
-                        const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
-                        if (idx === -1) return;
-                        handleFieldChange(idx, "exp_date", e.target.value);
-                    }
-                }}
-                disabled={isDisabled}
-                className="invoice-input"
-                error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
-                helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
-                inputProps={{
-                    // MINIMUM date constraint: Today + 2 Months (e.g., 04-02-2026)
-                    min: expApplicable === "yes" ? minExpiryDate : undefined,
-                    // MAXIMUM date constraint: Min Date + 2 Months (e.g., 04-04-2026)
-                    max: expApplicable === "yes" ? maxExpiryDate : undefined, 
-                }}
-            />
-        );
-    }
-}
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Clone today's date for the minimum calculation
+                const finalMinDate = new Date(today);
+
+                // Set the minimum selectable date to exactly 2 months from today
+                finalMinDate.setMonth(finalMinDate.getMonth() + 2);
+
+                // Convert the final minimum date to the required 'YYYY-MM-DD' string format
+                const minExpiryDate = finalMinDate.toISOString().split("T")[0];
+
+                // --- 2. Calculate the MAXIMUM Date (2 Months after the Minimum Date) ---
+
+                // Clone the final minimum date
+                const finalMaxDate = new Date(finalMinDate);
+
+                // Add exactly 2 more months to define the maximum boundary
+                finalMaxDate.setMonth(finalMaxDate.getMonth() + 2);
+
+                // Convert the final maximum date to the required 'YYYY-MM-DD' string format
+                const maxExpiryDate = finalMaxDate.toISOString().split("T")[0];
+
+                // --- 3. Render the TextField with both 'min' and 'max' attributes ---
+
+                return (
+                    <TextField
+                        type="date"
+                        variant="outlined"
+                        value={row.exp_date || ""}
+                        onChange={(e) => {
+                            if (expApplicable === "yes") {
+                                const key = `${row.ponumber}-${row.partcode}`;
+                                const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                                if (idx === -1) return;
+                                handleFieldChange(key, "exp_date", e.target.value);
+                            }
+                        }}
+                        disabled={isDisabled}
+                        className="invoice-input"
+                        error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
+                        helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
+                        inputProps={{
+                            // MINIMUM date constraint: Today + 2 Months (e.g., 04-02-2026)
+                            min: expApplicable === "yes" ? minExpiryDate : undefined,
+                            // MAXIMUM date constraint: Min Date + 2 Months (e.g., 04-04-2026)
+                            max: expApplicable === "yes" ? maxExpiryDate : undefined,
+                        }}
+                    />
+                );
+            }
+        }
     ]
 
     const handlePageChange = (newPage) => {
@@ -427,6 +439,7 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange,set
     return (
         <div >
             <DataTable
+              keyField="rowKey"
                 columns={Defaultcolumn}
                 data={filteredAddData}
                 pagination

@@ -475,6 +475,12 @@ const Requester = () => {
         })
     }
 
+//     useEffect(() => {
+//   if (tableData.length > 0) {
+//     setShowTable(false);
+//   }
+// }, [tableData]);
+
 
     //     const checkAvailable = (partcodeQtyMap) => {
     //   return axios.post(checkAvailableQty, partcodeQtyMap); // POST with body
@@ -654,7 +660,7 @@ const Requester = () => {
         return debouncedValue;
     };
 
-    const debouncedSearch = useDebounce(searchText, 500);
+    const debouncedSearch = useDebounce(searchText, 1050);
 
     useEffect(() => {
         fetchData(page, perPage, debouncedSearch);

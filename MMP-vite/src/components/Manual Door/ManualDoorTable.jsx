@@ -1,12 +1,10 @@
-
-
 import React from 'react'
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumnshidecheckbox } from '../../components/Com_Component/generateColumnshidecheckbox';
 import { TextField } from "@mui/material";
 import { saveDoneRequest } from '../../Services/Services_09';
 
-const ManualRcRequestTable = ({
+const ManualDoorTable = ({
   data = [],
   page,
   perPage,
@@ -28,24 +26,25 @@ const ManualRcRequestTable = ({
   setSubmitButton,
   setLoading
 }) => {
-
-  const columns = generateColumnshidecheckbox({
+   const columns = generateColumnshidecheckbox({
     fields: [
-      "rackID",
-      "userId",
-      "Location",
-      "Product_Code",
-      "Product_Qty",
-      "ticketno",
-      "updatedDatetime"
+      "locationName",
+      "PartNO",
+      "description",
+      "qty",
+      "createdby"
+    //   "datetime",
+ 
 
     ],
     customConfig: {
-      rackID: { label: "Rack Name" },
-      Product_Code: { label: "Partcode" },
-      Product_Qty: { label: "RequestQty" },
+      locationName: { label: "Rack Name" },
+      PartNO: { label: "Partcode" },
+      description: { label: "PartDescription" },
+      Prodqtyuct_Qty: { label: "RequestQty" },
       ticketno: { label: "TicketNo" },
-      updatedDatetime: { label: "CreateDate" },
+      createdby:{label:"createdby"}
+    //   datetime: { label: "CreateDate" },
 
 
     },
@@ -89,4 +88,4 @@ const ManualRcRequestTable = ({
 
 }
 
-export default ManualRcRequestTable
+export default ManualDoorTable

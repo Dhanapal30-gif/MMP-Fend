@@ -47,6 +47,7 @@ import StockUpdate from './Pages/StockUpdate/StockUpdate';
 import DeploymentPopup from './Pages/DeploeyementNotification/DeploymentPopup';
 import ForgotPassword from './Pages/UserAuthentication/Login/ForgotPassword';
 import ManualRCRequest from './Pages/ManualRCRequest/ManualRCRequest';
+import ManualDoor from './Pages/Manual Door/ManualDoor';
 function App() {
 
   // const [count, setCount] = useState(0)
@@ -64,9 +65,9 @@ function App() {
   }, []);
 
   useEffect(() => {
-  const storedUserId = sessionStorage.getItem("userId");
-  setUserId(storedUserId || "");
-}, [isLoggedIn]);
+    const storedUserId = sessionStorage.getItem("userId");
+    setUserId(storedUserId || "");
+  }, [isLoggedIn]);
 
   const registerScreens = async () => {
     const screens = [
@@ -107,6 +108,7 @@ function App() {
       { name: "StockReport", path: "/stockReport" },
       { name: "StockUpdate", path: "/stockUpdate" },
       { name: "ManualRCRequest", path: "/manualRCRequest" },
+      { name: "manualDoor", path: "/ManualDoor" },
     ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -144,25 +146,25 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className='App'>
         {/* {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />} */}
-{!hideHeader && (
-  <HeaderComponents
-    isLoggedIn={isLoggedIn}
-    setUserId={setUserId}
-    setIsLoggedIn={setIsLoggedIn}
-    notificationCount={notificationCount}
+        {!hideHeader && (
+          <HeaderComponents
+            isLoggedIn={isLoggedIn}
+            setUserId={setUserId}
+            setIsLoggedIn={setIsLoggedIn}
+            notificationCount={notificationCount}
 
-  />
-)}
+          />
+        )}
 
 
 
-{/* {userId && !hideHeader && <NotificationList userId={userId} />} */}
-{userId && !hideHeader && (
-  <NotificationList
-    userId={userId}
-    setNotificationCount={setNotificationCount}
-  />
-)}
+        {/* {userId && !hideHeader && <NotificationList userId={userId} />} */}
+        {userId && !hideHeader && (
+          <NotificationList
+            userId={userId}
+            setNotificationCount={setNotificationCount}
+          />
+        )}
 
         {/* <NotificationList/> */}
         <Routes>
@@ -204,6 +206,8 @@ function App() {
           <Route path='/deploymentPopup' element={<DeploymentPopup />} />
           <Route path='/forgotPassword' element={<ForgotPassword />} />
           <Route path='/manualRCRequest' element={<ManualRCRequest />} />
+          <Route path='/manualDoor' element={<ManualDoor />} />
+
           <Route
             path="/receving"
             element={
