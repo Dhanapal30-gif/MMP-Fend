@@ -662,6 +662,7 @@ const handleAddClick = async () => {
         setShowTable(false);
         setTableData([]);
         formClear();
+        setSearchText("")
 
       })
       .catch((error) => {

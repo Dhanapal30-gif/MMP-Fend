@@ -303,7 +303,7 @@ const key = `${row.ponumber}-${row.partcode}`;
                             const total = parseFloat(value);
                             if (!isNaN(total)) {
                                 const ccf = parseFloat(filteredAddData[idx].ccf) || 1;
-                                handleFieldChange(key, 'totalValueEuro', (total * ccf).toFixed(2));
+                                handleFieldChange(key, 'totalValueEuro', (total / ccf).toFixed(2));
                             } else {
                                 handleFieldChange(key, 'totalValueEuro', '');
                             }

@@ -123,11 +123,20 @@ const CreateAccount = () => {
       isValid = false;
     }
 
-    if (formData.requesterType?.includes("Material Request") && formData.requestType.length === 0) {
+    // if (formData.requesterType?.includes("Material Request") && formData.requestType.length === 0) {
+    //   errors.requestType = 'Request Type is required';
+    //   isValid = false;
+    // }
+
+     if (formData.requesterType && formData.requestType.length === 0) {
       errors.requestType = 'Request Type is required';
       isValid = false;
     }
 
+    if (formData.requesterType && formData.productGroup.length === 0) {
+      errors.productGroup = 'productGroup is required';
+      isValid = false;
+    }
     // if (formData.requestType?.includes("Submodule") || formData.requestType?.includes("others") && formData.productGroup.length === 0) {
     //   errors.productGroup = 'productGroup is required';
     //   isValid = false;
@@ -656,8 +665,11 @@ const CreateAccount = () => {
                 {formErrors.requesterType && <p style={{ color: 'red' }}>{formErrors.requesterType}</p>}
               </div>
             )} */}
-              {formData.requesterType?.includes("Material Request") && (
-                <Autocomplete
+              {/* {formData.requesterType?.includes("Material Request") && ( */}
+
+
+               {formData.requesterType && (
+               <Autocomplete
                   multiple
                   options={["Sub Module", "others", "ThermalGel"]}
                   getOptionLabel={(option) => option || ""}

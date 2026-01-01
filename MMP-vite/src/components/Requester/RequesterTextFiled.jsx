@@ -65,9 +65,9 @@ const RequesterTextFiled = ({
                 partcode: item.partcode,
                 partdescription: item.partdescription,
                 productname: item.productname,
-                componentUsage: item.componentUsage ,
-                tyc:item.tyc,
-                uom:item.uom
+                componentUsage: item.componentUsage,
+                tyc: item.tyc,
+                uom: item.uom
 
             }));
     }, [formData.productName, productandPartcode]);
@@ -352,27 +352,27 @@ const RequesterTextFiled = ({
                         helperText={formErrors?.partDescription || ""}
                         label="Part Description" size="small" />}
                 />
-               <ComTextFiled
-    label="UOM"
-    name="uom"
-    value={formData.uom || ""}
-    InputProps={{ readOnly: true }}
-    InputLabelProps={{ shrink: true }}
-/>
-<ComTextFiled
-    label="Type Of Component"
-    name="tyc"
-    value={formData.tyc || ""}
-    InputProps={{ readOnly: true }}
-    InputLabelProps={{ shrink: true }}
-/>
-<ComTextFiled
-    label="Component Usage"
-    name="componentUsage"
-    value={formData.componentUsage || ""}
-    InputProps={{ readOnly: true }}
-    InputLabelProps={{ shrink: true }}
-/>
+                <ComTextFiled
+                    label="UOM"
+                    name="uom"
+                    value={formData.uom || ""}
+                    InputProps={{ readOnly: true }}
+                    InputLabelProps={{ shrink: true }}
+                />
+                <ComTextFiled
+                    label="Type Of Component"
+                    name="tyc"
+                    value={formData.tyc || ""}
+                    InputProps={{ readOnly: true }}
+                    InputLabelProps={{ shrink: true }}
+                />
+                <ComTextFiled
+                    label="Component Usage"
+                    name="componentUsage"
+                    value={formData.componentUsage || ""}
+                    InputProps={{ readOnly: true }}
+                    InputLabelProps={{ shrink: true }}
+                />
                 <ComTextFiled
                     label="Request Qty"
                     name="requestQty"

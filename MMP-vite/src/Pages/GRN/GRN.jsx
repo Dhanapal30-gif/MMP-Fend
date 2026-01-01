@@ -229,6 +229,11 @@ const GRN = () => {
                     });
                 });
         } else {
+             if (selectedGrnRows.length === 0) {
+                setErrorMessage("Please select at least one row");
+                setShowErrorPopup(true);
+                return;
+            }
             const updateData = {
                 ...formData,
                 id: formData.id,
@@ -247,11 +252,13 @@ const GRN = () => {
                         response,
                         setSuccessMessage,
                         setShowSuccessPopup,
+                    
                         afterSuccess: () => {
                             setFormData({});
                             setSelectedRows([]);
                             setIsEditMode(false);
                             fetchPendingGrn();
+                            setSelectedGrnRows([]);
                         },
                     });
                 })

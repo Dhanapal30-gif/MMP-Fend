@@ -221,7 +221,7 @@ const handleLocationChange = (index, value) => {
 
   const handleDownloadExcel = () => {
     const worksheetData = [
-      ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
+      ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology",
         "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"]
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
@@ -579,16 +579,44 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
   const excelUpload = (e) => {
     e.preventDefault();
     
-    const errors = [];
+//     const errors = [];
+//   const allowedValues = ["Sub Module", "Othres", "Thermal Gel"];
 
-    excelUploadData.forEach((row, index) => {
+//     excelUploadData.forEach((row, index) => {
+//   if (!row.partcode || row.partcode.trim() === "") {
+//     errors.push(`Row ${index + 1}: PartCode is required`);
+//   }
+//   if (!row.racklocation || row.racklocation.trim() === "") {
+//     errors.push(`Row ${index + 1}: Racklocation is required`);
+//   }
+//   if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
+//     errors.push(`Row ${index + 1}: componentUsage is required`);
+//   }
+// });
+
+const errors = [];
+const allowedValues = ["Sub Module", "Othres", "Thermal Gel"];
+
+excelUploadData.forEach((row, index) => {
   if (!row.partcode || row.partcode.trim() === "") {
     errors.push(`Row ${index + 1}: PartCode is required`);
   }
+
   if (!row.racklocation || row.racklocation.trim() === "") {
     errors.push(`Row ${index + 1}: Racklocation is required`);
   }
+
+  if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
+    errors.push(`Row ${index + 1}: componentUsage is required`);
+  } else if (row.ComponentUsage.includes(",")) {
+    errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
+  } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
+    errors.push(
+      `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Othres" or "Thermal Gel"`
+    );
+  }
 });
+
 
     if (errors.length > 0) {
       setErrorMessage(errors[0]);
@@ -848,14 +876,11 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
 
       }).catch((error) => {
         if (error.response) {
-          if (error.response.status === 409) {
-            setErrorMessage("Already exists");
-            setShowErrorPopup(true);
-          } else {
-            setErrorMessage("Something went wrong");
-            setShowErrorPopup(true);
-          }
-        }
+              const msg = error.response.data;
+setErrorMessage(msg || "Something went wrong");
+    setShowErrorPopup(true);
+    }
+        
       }).finally(() => {
         setLoading(false);
       });
