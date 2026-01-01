@@ -100,7 +100,7 @@ const handleBatchChange = (idx, val) => {
     setDialogRows(prev =>
         prev.map((r, i) =>
             i === idx
-                ? { ...r, batch: val.batch, fromLocation: val.location, availQty: val.availQty }
+                ? { ...r, batch: val.batch, fromLocation: val.location, availQty: val.availQty,qty: "" }
                 : r
         )
     );

@@ -55,7 +55,7 @@ const PutawayTextFiled = ({
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Receiving Ticket (7987)"
+              label="Receiving Ticket"
               variant="outlined"
               size="small"
               sx={{

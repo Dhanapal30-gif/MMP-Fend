@@ -455,6 +455,23 @@ const Requester = () => {
     };
 
 
+     const formClearSubmit = () => {
+        setFormData(prev => ({
+                    requestFor: prev.requestFor,       
+                    requesterType: prev.requesterType,
+                    orderType: prev.orderType,
+                    productName: null,
+                    productGroup: "", partCode: null,
+                    partDescription: null,
+                    requestQty: "",
+                    compatibilityPartCode: "",
+                    faultySerialNumber: "",
+                    faultyUnitModuleSerialNo: "",
+                    requestercomments: "",
+                   }));
+           
+        setFormErrors({});
+    };
     useEffect(() => {
         if (tableData.length > 0) {
             setShowTable(true);
@@ -552,10 +569,15 @@ const Requester = () => {
    
 
     const handleSubmit = async () => {
-    setLoading(true);
+   
 
     // 1. Prepare data for the SINGLE API call
-    const userName = sessionStorage.getItem("userId") || "System";
+    const userName = sessionStorage.getItem("userId");
+     if (!userName) {
+    alert("Please relogin");
+    return;
+  }
+   setLoading(true);
         const createdName = sessionStorage.getItem("userName") || "System";
 
     // The data prepared here is the final payload for the save API.
@@ -582,12 +604,12 @@ const Requester = () => {
             const { message } = response.data;
             setSuccessMessage(message || "Saved successfully");
             setShowSuccessPopup(true);
-            
+            formClearSubmit();
             // Clear UI state
             setTableData([]);
             setShowTable(false);
             setIsFrozen(false);
-            formClearFull();
+            setSearchText("");
             fetchRequester(); // Refresh data view
 
         } else {

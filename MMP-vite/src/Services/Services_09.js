@@ -407,9 +407,23 @@ export const getStockDetais = (page = 0, size = 10,search = "") => {
 }
 
 
+  const get_StockPartcodeDetails = `${url}/StockTransferCon/fetchStockPartcodeDetails`;
+export const getStockPartcodeDetais = (page = 0, size = 10,search = "") => {
+  return axios.get(get_StockPartcodeDetails, { params: { page, size,search }, });
+}
+
+
 const Get_DownloadStock = `${url}/StockTransferCon/download-excelSearch`;
 export const downloadStock = (search) =>
   axios.get(Get_DownloadStock, {
+    params: { search: search || undefined },
+    responseType: "blob", // 👈 essential for binary Excel files
+  });
+
+
+  const Get_DownloadPartcodeStock = `${url}/StockTransferCon/downloadPartcode-excelSearch`;
+export const downloadPartcodeStock = (search) =>
+  axios.get(Get_DownloadPartcodeStock, {
     params: { search: search || undefined },
     responseType: "blob", // 👈 essential for binary Excel files
   });

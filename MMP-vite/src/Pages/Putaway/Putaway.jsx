@@ -252,8 +252,8 @@ const Putaway = () => {
                     if (uniqueUsers.length > 0 && uniqueUsers[0] !== 0) {
                         switch (uniqueUsers[0]) {
                             case 1: colour = "green"; break;
-                            case 2: colour = "blue"; break;
-                            case 3: colour = "red"; break;
+                            case 2: colour = "red"; break;
+                            case 3: colour = "blue"; break;
                             case 4: colour = "yellow"; break;
                             default: colour = "green";
                         }
@@ -500,8 +500,8 @@ const Putaway = () => {
                     switch (uniqueUsers[0]) {
                         case 0: colour = null; break; // or any default for 0
                         case 1: colour = "green"; break;
-                        case 2: colour = "blue"; break;
-                        case 3: colour = "red"; break;
+                        case 2: colour = "red"; break;
+                        case 3: colour = "blue"; break;
                         case 4: colour = "yellow"; break;
                         default: colour = "green";
                     }
@@ -583,6 +583,7 @@ const Putaway = () => {
     }, []);
 
 const [putIds,setPutIds]=useState([])
+
     const handlePut = (e) => {
         e.preventDefault();
         // if (!valiDate()) return;

@@ -319,7 +319,7 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {(userRole.includes("Admin") || isScreenAllowed("Approver")) && (<li><Link to="/approver" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approver</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Issuance")) && (<li><Link to="/issuance" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Returning")) && (<li><Link to="/returning" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Returning</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("DeploymentPopup")) && (<li><Link to="/deploymentPopup" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>DeploymentPopup</Link></li>)}
+                      {/* {(userRole.includes("Admin") || isScreenAllowed("DeploymentPopup")) && (<li><Link to="/deploymentPopup" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>DeploymentPopup</Link></li>)} */}
                       {(userRole.includes("Admin") || isScreenAllowed("ManualRCRequest")) && (<li><Link to="/manualRCRequest" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Manual RC Request</Link></li>)}
 
                     </ul>

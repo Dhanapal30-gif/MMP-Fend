@@ -326,12 +326,12 @@ const ApprovalMaster = () => {
             sortable: true,
             width: `${calculateColumnWidth(approvalMaster, 'Requesttype')}px`
         },
-        {
-            name: "Issuance Type",
-            selector: row => row.issuancetype,
-            wrap: true,
-            width: `${calculateColumnWidth(approvalMaster, 'issuancetype')}px`
-        },
+        // {
+        //     name: "Issuance Type",
+        //     selector: row => row.issuancetype,
+        //     wrap: true,
+        //     width: `${calculateColumnWidth(approvalMaster, 'issuancetype')}px`
+        // },
         {
             name: "Component Type",
             selector: row => row.componenttype,
@@ -340,7 +340,8 @@ const ApprovalMaster = () => {
         {
             name: "Product Group",
             selector: row => row.productgroup,
-            width: `${calculateColumnWidth(approvalMaster, 'Productgroup')}px`
+            width: `${calculateColumnWidth(approvalMaster, 'Productgroup')}px`,
+            wrap: true,
         },
         {
             name: "Approver1",
