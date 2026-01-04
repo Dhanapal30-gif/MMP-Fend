@@ -347,6 +347,9 @@ const Issuance = () => {
             ticketno = row.rec_ticket_no;
             return [{ recTicketNo: row.rec_ticket_no }];
         });
+
+         ticketno = pickTicketData[0]?.rec_ticket_no;
+
         setLoading(true);
         if (ticketno && ticketno.startsWith("PTL")) {
             savePtlDeliver(submitData)
@@ -461,6 +464,9 @@ const Issuance = () => {
             }];
         });
 
+         recTicketNo = pickTicketData[0]?.rec_ticket_no;
+// console.log("recTicketNo", recTicketNo);
+        // console.log("recTicketNo", recTicketNo);
         if (recTicketNo && recTicketNo.startsWith("PTL")) {
             savePtlIssue(submitData)
                 .then((response) => {

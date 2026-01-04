@@ -21,7 +21,7 @@ const fields = [
   "fsn",
   "fmsn",
   "issuedQty",
-  "stataus",
+  "status",
   "newSerialNumber"
 ];
 
@@ -41,7 +41,7 @@ const customConfig = {
   fsn: { label: "Faulty SerialNo" },
   fmsn: { label: "Faulty UnitModule SerialNo" },
   issuedQty:{label:"issueQty"},
-    stataus: { label: "Status"}   ,
+    status: { label: "Status"}   ,
     newSerialNumber: { label: "New Serial Number"}
 
 };

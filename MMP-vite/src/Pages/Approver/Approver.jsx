@@ -271,7 +271,7 @@ const Approver = () => {
                 createdby: userId,
                 recordstatus: row.recordstatus
             }));
-            // console.log("Payload to send:", payload);
+            console.log("Payload to send:", payload);
             await saveApproverTickets(payload);
             setSuccessMessage("Submitted successfully!")
             setShowSuccessPopup(true)
