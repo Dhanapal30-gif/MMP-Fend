@@ -664,7 +664,7 @@ const Requester = () => {
     const fetchfindSearch = async (page, size, search) => {
         setLoading(true);
         try {
-            const userId = sessionStorage.getItem("userName") || "System";
+            const userId = sessionStorage.getItem("userId") || "System";
             await fetchRequesterSearch(page, userId, size, search, setRequesterDetail, setTotalRows);
         } catch (error) {
             console.error("Error fetching requester:", error);
@@ -689,24 +689,65 @@ const Requester = () => {
     }, [page, perPage, debouncedSearch]);
 
 
+    // const fetchData = async (page, perPage, search = "") => {
+    //     setLoading(true); // start loader
+    //     try {
+    //         if (search && search.trim() !== "") {
+    //             await fetchfindSearch(page, perPage, search);
+    //         }
+    //         // else if (isFilterActive) {
+    //         //     fetchFilterResult();
+    //         // }
+    //         else {
+    //             await fetchRequester()
+    //         }
+    //     } catch (err) {
+    //         console.error("Error fetching putaway data:", err);
+    //     } finally {
+    //         setLoading(false); // stop loader after API finishes
+    //     }
+    // };
+
     const fetchData = async (page, perPage, search = "") => {
-        setLoading(true); // start loader
-        try {
-            if (search && search.trim() !== "") {
-                await fetchfindSearch(page, perPage, search);
-            }
-            // else if (isFilterActive) {
-            //     fetchFilterResult();
-            // }
-            else {
-                await fetchRequester()
-            }
-        } catch (err) {
-            console.error("Error fetching putaway data:", err);
-        } finally {
-            setLoading(false); // stop loader after API finishes
-        }
-    };
+  setLoading(true);
+  try {
+    const s = search?.trim().toLowerCase();
+
+    if (s) {
+      let codes = [];
+
+       if (
+    s.includes("materialissuance") ||
+    s.includes("material issuance") ||
+    s.includes("issue") ||
+    s.includes("issuance") ||
+    s === "materialissuance-pending"
+  ) {
+    codes = ["MSC00006"];
+  } else if (s === "l1" || s === "l1-pending") {
+        codes = ["MSC00001"];
+      } else if (s === "l2" || s === "l2-pending") {
+        codes = ["MSC00004"];
+      }
+else if (s.includes("deliver") || s.includes("delivery")) {
+        codes = ["MSC00007"];
+      }
+      if (codes.length > 0) {
+        await fetchfindSearch(page, perPage, codes);
+      } else {
+        await fetchfindSearch(page, perPage, search);
+      }
+    } else {
+      await fetchRequester();
+    }
+  } catch (err) {
+    console.error("Error fetching putaway data:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
     const exportToExcel = (search = "") => {
         const userId = sessionStorage.getItem("userName") || "System";
 
