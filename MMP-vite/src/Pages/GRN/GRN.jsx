@@ -216,7 +216,8 @@ const GRN = () => {
                             setFormData({});
                             setSelectedGrnRows([]);
                             setIsEditMode(false);
-                            fetchPendingGrn();
+                            // fetchPendingGrn();
+                                fetchPendingGrn(setGRNPen, setShowErrorPopup); // ✅ THIS UPDATES DROPDOWN
                             fetchFindData();
                         },
                     });

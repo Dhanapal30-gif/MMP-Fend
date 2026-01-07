@@ -23,6 +23,7 @@ const allFields = [
   "ApprovedL1Qty",
   "ApprovedL2Qty",
   "faultySerialNumber",
+  "fmsn",
   // "Comment",
   
   "approved_l1",
@@ -72,6 +73,7 @@ const hideForStock = [
   "approved_l1",
   "approved_l1_date",
   "faultySerialNumber",
+  "fmsn",
   // "Comment",
 
 
@@ -91,6 +93,7 @@ const hideForPTL = [
   // "ApprovedL1Qty",
   "ApprovedL2Qty",
   "faultySerialNumber",
+  "fmsn",
   // "Comment",
   "approved_l1",
   "approved_l1_date",
@@ -122,6 +125,7 @@ const customConfig = {
   ApprovedL2Qty: { label: "Approved Qty L2" },
   Comment: { label: "Comment", width: "250px" },
   recordstatus: { label: "Status" },
+  fmsn:{label:"Faulty Module Serial No"},
 //   recordstatus: {
 //   label: "Status",
 //   format: (value) => {

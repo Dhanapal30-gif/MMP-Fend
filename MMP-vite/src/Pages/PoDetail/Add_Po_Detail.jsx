@@ -1083,17 +1083,20 @@ const handleAddClick = async () => {
   label="Unit Price"
   variant="outlined"
   name="unitprice"
-  type="number"
+  type="text"
   value={formData.unitprice}
   onChange={(e) => {
     const value = e.target.value;
-    if (value === "" || Number(value) > 0) {
+
+    // allow digits + single dot + decimals
+    if (/^\d*\.?\d*$/.test(value)) {
       handleChange(e);
     }
   }}
-  inputProps={{ min: 1 }}
   onKeyDown={(e) => {
-    if (e.key === "-" || e.key === "0") e.preventDefault();
+    if (["-", "+", "e", "E"].includes(e.key)) {
+      e.preventDefault();
+    }
   }}
   error={Boolean(formErrors.unitprice)}
   helperText={formErrors.unitprice}
