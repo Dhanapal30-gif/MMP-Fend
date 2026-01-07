@@ -65,8 +65,8 @@ const IssuanceShowTable = ({
 
   const handleSave = async () => {
     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
-    if (activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule" ) {
-      
+    if (activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule") {
+
       const hasSerial = formData.newSerialNumber && formData.newSerialNumber.trim() !== "";
       if (!hasSerial) {
         setErrorMessage("Please enter New Serial Number!");
@@ -97,7 +97,7 @@ const IssuanceShowTable = ({
     }));
 
     console.log("Payload to send:", payload);
-      setLoading(true); // start loader
+    setLoading(true); // start loader
 
     try {
       await saveIssueBatchcodeQty(payload); // API call
@@ -105,19 +105,19 @@ const IssuanceShowTable = ({
       setSuccessMessage("Submitted successfully!")
       setShowSuccessPopup(true)
 
-              await fetchPickTicketDetail(activeRow?.rec_ticket_no);
+      await fetchPickTicketDetail(activeRow?.rec_ticket_no);
 
-  //    fetchPickTicketDetail(ticketNo);
+      //    fetchPickTicketDetail(ticketNo);
       // fetchPickTicketDetail(activeRow?.rec_ticket_no);
       setOpen(false);
     } catch (error) {
       console.error("Error submitting payload:", error);
       alert("Failed to submit. Please try again.");
-    }finally {
-    setLoading(false); // stop loader
-  }
+    } finally {
+      setLoading(false); // stop loader
+    }
 
-  
+
   };
 
 
@@ -153,7 +153,8 @@ const IssuanceShowTable = ({
         "createdby",
         "createdon",
         "recordstatus",
-        "approver1"
+        "approver1",
+
       ]; // only fields you want for PTL
     } else {
       return [
@@ -164,6 +165,9 @@ const IssuanceShowTable = ({
         "productfamily",
         "partcode",
         "partdescription",
+
+        "fsn",
+        "fmsn",
         "UOM",
         "componenttype",
         "compatabilitypartcode",
@@ -174,6 +178,7 @@ const IssuanceShowTable = ({
         "allocatedQty",
         "approvedQty",
         "Comment",
+        "UserName"
         // "recordstatus"
       ]; // all fields for others
     }
@@ -199,6 +204,10 @@ const IssuanceShowTable = ({
       approvedQty: { label: "Approved Qty" },
       Comment: { label: "Comment" },
       recordstatus: { label: "Status" },
+      fmsn: { label: "Faulty Module Serial No" },
+
+      fsn: { label: "Faulty Serial No" },
+      UserName:{label:"Approver_2 Name"}
     },
     customCellRenderers: {
       location: (row) => {
@@ -256,38 +265,38 @@ const IssuanceShowTable = ({
 
     }
   });
-const printCleanTable = () => {
-  if (!data || data.length === 0) return;
+  const printCleanTable = () => {
+    if (!data || data.length === 0) return;
 
-  // Flatten data for printing
-  const flatData = data.flatMap(row =>
-    row.batches?.map(batch => ({
-      rec_ticket_no: row.rec_ticket_no,
-      requestertype: row.requestertype,
-      productname: row.productname,
-      productgroup: row.productgroup,
-      productfamily: row.productfamily,
-      partcode: row.partcode,
-      partdescription: row.partdescription,
-      UOM: row.UOM,
-      componentType: row.componentType,
-      compatabilitypartcode: row.compatabilitypartcode,
-      req_qty: row.req_qty,
-      batchCode: batch.batchCode,
-      location: batch.location,
-      putQty: batch.putQty || "",
-      allocatedQty: batch.allocatedQty,
-      approvedQty: row.approvedQty,
-      Comment: row.Comments || "",
-      recordstatus: row.recordstatus
-    })) || [row]
-  );
+    // Flatten data for printing
+    const flatData = data.flatMap(row =>
+      row.batches?.map(batch => ({
+        rec_ticket_no: row.rec_ticket_no,
+        requestertype: row.requestertype,
+        productname: row.productname,
+        productgroup: row.productgroup,
+        productfamily: row.productfamily,
+        partcode: row.partcode,
+        partdescription: row.partdescription,
+        UOM: row.UOM,
+        componentType: row.componentType,
+        compatabilitypartcode: row.compatabilitypartcode,
+        req_qty: row.req_qty,
+        batchCode: batch.batchCode,
+        location: batch.location,
+        putQty: batch.putQty || "",
+        allocatedQty: batch.allocatedQty,
+        approvedQty: row.approvedQty,
+        Comment: row.Comments || "",
+        recordstatus: row.recordstatus
+      })) || [row]
+    );
 
-  const allFields = Object.keys(flatData[0]).filter(
-    f => !["putQty", "Comment", "recordstatus", "componentType"].includes(f)
-  );
+    const allFields = Object.keys(flatData[0]).filter(
+      f => !["putQty", "Comment", "recordstatus", "componentType"].includes(f)
+    );
 
-  const tableHTML = `
+    const tableHTML = `
     <html>
       <head>
         <title>Print Issuance Table</title>
@@ -319,47 +328,47 @@ const printCleanTable = () => {
     </html>
   `;
 
-  const printWindow = window.open('', '', 'width=1600,height=900,scrollbars=yes');
-  printWindow.document.write(tableHTML);
-  printWindow.document.close();
-  printWindow.print();
-};
+    const printWindow = window.open('', '', 'width=1600,height=900,scrollbars=yes');
+    printWindow.document.write(tableHTML);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   return (
     <>
-     
-       <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                        <button
-  onClick={printCleanTable}
-  style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    background: "linear-gradient(90deg, #1976d2, #42a5f5)",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    marginTop:"-79px",
-    padding: "8px 16px",
-    fontSize: "14px",
-    cursor: "pointer",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-    transition: "transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out"
-  }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.transform = "scale(1.05)";
-    e.currentTarget.style.boxShadow = "0 6px 10px rgba(0,0,0,0.15)";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.transform = "scale(1)";
-    e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
-  }}
->
-  <FaPrint /> 
-</button>
 
-                       
-                    </div>
+      <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+        <button
+          onClick={printCleanTable}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            marginTop: "-79px",
+            padding: "8px 16px",
+            fontSize: "14px",
+            cursor: "pointer",
+            boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            transition: "transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 6px 10px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+          }}
+        >
+          <FaPrint />
+        </button>
+
+
+      </div>
       <CommonAddDataTable
         columns={columns}
         data={normalizedData}

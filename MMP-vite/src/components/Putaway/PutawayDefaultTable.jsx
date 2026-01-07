@@ -39,7 +39,7 @@ const PutawayDefaultTable = ({
       "postingdate",
  
           "grno",
-      "GRDate",
+      "grdate",
       "recevingQty",
       "grnqty",
       "putqty",
@@ -62,6 +62,7 @@ const PutawayDefaultTable = ({
       grno: { label: "GRN No" },
       status: { label: "Status" },
       createdon: { label: "Create Don" },
+      grdate:{ label: "GR Date" }
     },
     customCellRenderers: {
       // Putaway_Edit: (row) => (
