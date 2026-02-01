@@ -136,7 +136,7 @@ const Add_Po_Detail = () => {
       {...props}
       style={{
         ...props.style,
-        width: '900px'
+        width: '700px'
       }}
       placement="bottom-start"
     />
@@ -866,6 +866,20 @@ const handleAddClick = async () => {
     }
   }, [addSearchText, tableData]);
   
+
+  const partCodeMap = useMemo(() => {
+  const map = new Map();
+  rcMainStore.forEach(i => map.set(i.partcode, i));
+  return map;
+}, [rcMainStore]);
+
+const partDescMap = useMemo(() => {
+  const map = new Map();
+  rcMainStore.forEach(i => map.set(i.partdescription, i));
+  return map;
+}, [rcMainStore]);
+
+
   return (
     <div className='COMCssContainer'>
       <div className='ComCssInput'>
@@ -963,7 +977,7 @@ const handleAddClick = async () => {
                 />
               )}
             />
-            <Autocomplete
+            {/* <Autocomplete
               disabled={isFrozen}
               options={vendorMaster}
               ListboxComponent={DropdownCom}
@@ -1009,7 +1023,55 @@ const handleAddClick = async () => {
               // error={Boolean(formErrors.vendorcode)}
               // helperText={formErrors.vendorcode}
               size="small"
-            />
+            /> */}
+
+            <Autocomplete
+  disabled={isFrozen}
+  ListboxComponent={DropdownCom}
+  PopperComponent={CustomPopper}
+  options={vendorMaster}
+  getOptionLabel={(option) => option.vendorName || ""}
+  value={vendorMaster.find(v => v.vendorName === formData.vendorname) || null}
+  onChange={(e, newValue) => {
+    setFormData({
+      ...formData,
+      vendorname: newValue?.vendorName || "",
+      vendorcode: newValue?.vendorCode || "",
+    });
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Vendor Name"
+      error={Boolean(formErrors.vendorname)}
+      helperText={formErrors.vendorname}
+      size="small"
+    />
+  )}
+/>
+
+<Autocomplete
+  disabled={isFrozen}
+  options={vendorMaster}
+  ListboxComponent={DropdownCom}
+  getOptionLabel={(option) => option.vendorCode || ""}
+  value={vendorMaster.find(v => v.vendorCode === formData.vendorcode) || null}
+  onChange={(e, newValue) => {
+    setFormData({
+      ...formData,
+      vendorcode: newValue?.vendorCode || "",
+      vendorname: newValue?.vendorName || "",
+    });
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Vendor Code"
+      size="small"
+    />
+  )}
+/>
+ {/* 
             <Autocomplete
               options={rcMainStore}
               getOptionLabel={(option) => option?.partcode || ""}
@@ -1067,6 +1129,58 @@ const handleAddClick = async () => {
                 />
               )}
             />
+             */}
+             <Autocomplete
+  options={rcMainStore}
+  getOptionLabel={(o) => o?.partcode || ""}
+  isOptionEqualToValue={(o, v) => o.partcode === v.partcode}
+  value={partCodeMap.get(formData.partcode) || null}
+  ListboxComponent={DropdownCom}
+  onChange={(e, v) => {
+    setFormData({
+      ...formData,
+      partcode: v?.partcode || "",
+      partdescription: v?.partdescription || ""
+    });
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Partcode"
+      error={Boolean(formErrors.partcode)}
+      helperText={formErrors.partcode}
+      size="small"
+    />
+  )}
+/>
+<Autocomplete
+  options={rcMainStore}
+  getOptionLabel={(o) => o?.partdescription || ""}
+  isOptionEqualToValue={(o, v) =>
+    o.partdescription === v.partdescription
+  }
+  value={partDescMap.get(formData.partdescription) || null}
+  ListboxComponent={DropdownCom}
+  PopperComponent={CustomPopper}
+  onChange={(e, v) => {
+    setFormData({
+      ...formData,
+      partcode: v?.partcode || "",
+      partdescription: v?.partdescription || ""
+    });
+  }}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Part Description"
+      error={Boolean(formErrors.partdescription)}
+      helperText={formErrors.partdescription}
+      size="small"
+    />
+  )}
+/>
+
+
             {/* <TextField
               label="Unit Price"
               variant="outlined"

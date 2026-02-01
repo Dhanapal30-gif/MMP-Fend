@@ -19,11 +19,36 @@ const PTLOpreatoreTable = ({
   pickButton,
   setpickButton,
   setSuccessMessage,
-  setShowSuccessPopup
+  setShowSuccessPopup,
+   setSelectedRows,
+   selectedRows
 }) => {
 
   const [pickedRows, setPickedRows] = useState([]);
   const [editedQty, setEditedQty] = useState({}); // { rowId: qty }
+
+
+  
+const handleSelectAll = () => {
+  const notDoneRows = data.map(row => row.id);
+
+  if (selectedRows.length === notDoneRows.length) {
+    setSelectedRows([]); // unselect
+  } else {
+    setSelectedRows(notDoneRows); // select
+  }
+};
+
+
+
+const handleSelect = (rowSelectedId) => {
+    setSelectedRows((prev) =>
+        prev.includes(rowSelectedId)
+            ? prev.filter((id) => id !== rowSelectedId)
+            : [...prev, rowSelectedId]
+    );
+};
+
 
   const columns = generateColumns({
     fields: [
@@ -34,9 +59,9 @@ const PTLOpreatoreTable = ({
       "partdescription",
       "racklocation",
       "availableqty",
-      "RequestedQty",
+      "requestedQty",
       "pickingqty",
-      "Pick",
+      // "Pick",
       "repairername",
       "reworkername"
 
@@ -48,15 +73,16 @@ const PTLOpreatoreTable = ({
       boardserialnumber: { label: "Board Serial Number", }, // ✅ this works
       racklocation: { label: "ReackLocation" },
       availableqty: { label: "Available Qty" },
-      RequestedQty: { label: "Requested Qty" },
+      requestedQty: { label: "Requested Qty" },
       pickingqty: { label: "Picking Qty" },
-      pickedqty: { label: "Picked Qty" },
+      // pickedqty: { label: "Picked Qty" },
       repairername: { label: "Repairer Name" },
       reworkername: { label: "Reworker Name" },
-
-
     },
-
+    data,
+selectedRows: selectedRows,
+handleSelect: handleSelect,
+handleSelectAll: handleSelectAll,
     // customCellRenderers: {
     //   pickingqty: (formData) => (
     //     <TextField
@@ -130,34 +156,34 @@ const PTLOpreatoreTable = ({
           className="invoice-input"
         />
       ),
-      Pick: (row) => (
-        <div className="ReworkerButton9">
-          {pickButton && (
-            pickedRows.includes(row.id) ? (
-              <span style={{ color: 'green', fontWeight: 'bold', marginTop: '20px' }}>Done</span>
-            ) : (
-              <button
-                style={{
-                  backgroundColor: 'blue',
-                  color: 'white',
-                  marginTop: '19px'
-                }}
-                onClick={() =>
-                  handlePick(
-                    editedQty[row.selectedid] ?? row.pickingqty,
-                    row.racklocation,
-                    row.partcode,
-                    row.partdescription,
-                    row.id
-                  )
-                }
-              >
-                Pick
-              </button>
-            )
-          )}
-        </div>
-      )
+      // Pick: (row) => (
+      //   <div className="ReworkerButton9">
+      //     {pickButton && (
+      //       pickedRows.includes(row.id) ? (
+      //         <span style={{ color: 'green', fontWeight: 'bold', marginTop: '20px' }}>Done</span>
+      //       ) : (
+      //         <button
+      //           style={{
+      //             backgroundColor: 'blue',
+      //             color: 'white',
+      //             marginTop: '19px'
+      //           }}
+      //           onClick={() =>
+      //             handlePick(
+      //               editedQty[row.selectedid] ?? row.pickingqty,
+      //               row.racklocation,
+      //               row.partcode,
+      //               row.partdescription,
+      //               row.id
+      //             )
+      //           }
+      //         >
+      //           Pick
+      //         </button>
+      //       )
+      //     )}
+      //   </div>
+      // )
     }
 
   })

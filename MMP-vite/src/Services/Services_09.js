@@ -183,10 +183,24 @@ export const getindiviualDetailFind = (page = 0, size = 10, userId, search = "")
   return axios.get(Get_indiviualDetailSearch, { params: { page, size, userId, search: search || undefined, }, });
 }
 
+// const Get_indiviualDetailFilter = `${url}/repaierCon/fetchLocalIndividualReportFilter`;
+// export const getindiviualDetailFilter = (page = 0, size = 10, userId,userRole, formData) => {
+//   return axios.post(`${Get_indiviualDetailFilter}?page=${page}&size=${size}&userId=${userId}&userRole=${userRole}`, formData);
+// };
+
 const Get_indiviualDetailFilter = `${url}/repaierCon/fetchLocalIndividualReportFilter`;
-export const getindiviualDetailFilter = (page = 0, size = 10, userId, formData) => {
-  return axios.post(`${Get_indiviualDetailFilter}?page=${page}&size=${size}&userId=${userId}`, formData);
+
+export const getindiviualDetailFilter = (page = 0, size = 10, userId, userRole, formData) => {
+const roleQuery = userRole
+  .map(r => `userRole=${encodeURIComponent(r.trim())}`)
+  .join("&");
+
+  return axios.post(
+    `${Get_indiviualDetailFilter}?page=${page}&size=${size}&userId=${userId}&${roleQuery}`,
+    formData
+  );
 };
+
 
 const Get_DownloadLocalReport = `${url}/repaierCon/downloadLocalReport-excel`;
 export const downloadLocalReport = () =>
@@ -195,11 +209,16 @@ export const downloadLocalReport = () =>
   });
 
 const Get_DownloadLocalReportSearch = `${url}/repaierCon/downloadLocalReport-excel`;
-export const downloadLocalReportSearch = (search) =>
-  axios.get(Get_DownloadLocalReportSearch, {
-    params: { search },
+export const downloadLocalReportSearch = (formData) =>
+  axios.get(Get_DownloadLocalReportSearch,formData, {
     responseType: "blob",
   });
+// export const downloadLocalReportSearch = (search) =>
+//   axios.get(Get_DownloadLocalReportSearch, {
+//     params: { search },
+//     responseType: "blob",
+//   });
+
 
 const Get_DownloadLocalReportFilter = `${url}/repaierCon/downloadLocalReportFilter-excel`;
 export const downloadLocalReportFilter = (formData) =>
@@ -238,18 +257,27 @@ export const downloadLocalIndiviualReportSearch = ( search,userId) =>
     responseType: "blob",
   });
 
-const Get_DownloadLocalIndiviualReportFilter = `${url}/repaierCon/downloadLocalReportFilter-excel`;
+const Get_DownloadLocalIndiviualReportFilter =
+  `${url}/repaierCon/downloadLocalIndiviualReportrt-excel`;
 
-export const downloadLocalIndiviualReportFilter = (formData, userId) =>
-  axios.post(
-    Get_DownloadLocalIndiviualReportFilter,
-    { ...formData, userId },  // merge into one request body
-    { responseType: "blob" }  // config
+export const downloadLocalIndiviualReportFilter = (formData, userId, userRole) => {
+  const roleQuery = userRole
+    .map(r => `userRole=${encodeURIComponent(r.trim())}`)
+    .join("&");
+
+  return axios.post(
+    `${Get_DownloadLocalIndiviualReportFilter}?userId=${encodeURIComponent(userId)}&${roleQuery}`,
+    formData,
+    { responseType: "blob" }
   );
+};
+
 
 const Get_Repaier = `${url}/repaierCon/fetchRepairReworkerName`;
 export const fetchRepaier = () => axios.get(Get_Repaier);
 
+const Get_Productname = `${url}/repaierCon/fetchProductAndPartcode`;
+export const fetchProduct_Partcode = () => axios.get(Get_Productname);
 
 const get_LocalReport = `${url}/repaierCon/fetchLocalReport`;
 export const getLocalReport = (page = 0, size = 10) => {
@@ -427,3 +455,8 @@ export const downloadPartcodeStock = (search) =>
     params: { search: search || undefined },
     responseType: "blob", // 👈 essential for binary Excel files
   });
+
+
+
+  const saveTableMaster = `${url}/TableMaster/SaveTable`
+export const saveTable = (formData) => axios.post(saveTableMaster, formData);

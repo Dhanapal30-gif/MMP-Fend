@@ -29,7 +29,7 @@ const ReworkerTypeBasedhide = ({
             "type",
             "productname",
             "boardserialnumber",
-            "Repaier commnent",
+            "repairercomments",
             "Submit",
             "Repairer Name"
 
@@ -38,6 +38,7 @@ const ReworkerTypeBasedhide = ({
             productname: { label: "Product Name" },
             boardserialnumber: { label: "Board Serial Number" },
             type: { label: "Reworker Type" },
+            repairercomments: { label: "Repairer Comments"}
 
 
         },

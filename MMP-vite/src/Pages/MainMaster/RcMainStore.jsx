@@ -595,12 +595,22 @@ const handlePerRowsChange = useCallback((newPerPage, page) => {
 // });
 
 const errors = [];
-const allowedValues = ["Sub Module", "Othres", "Thermal Gel"];
+const allowedValues = ["Sub Module", "Othres", "Thermal Gel","PTL"];
 
+if (excelUploadData.length > 1000) {
+  errors.push("Cannot upload more than 1000 rows at once.");
+}
 excelUploadData.forEach((row, index) => {
-  if (!row.partcode || row.partcode.trim() === "") {
-    errors.push(`Row ${index + 1}: PartCode is required`);
-  }
+  // if (!row.partcode || row.partcode.trim() === "") {
+  //   errors.push(`Row ${index + 1}: PartCode is required`);
+  // }
+if (
+  row.partcode === null ||
+  row.partcode === undefined ||
+  String(row.partcode).trim() === ""
+) {
+  errors.push(`Row ${index + 1}: PartCode is required`);
+}
 
   if (!row.racklocation || row.racklocation.trim() === "") {
     errors.push(`Row ${index + 1}: Racklocation is required`);
@@ -612,7 +622,7 @@ excelUploadData.forEach((row, index) => {
     errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
   } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
     errors.push(
-      `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Othres" or "Thermal Gel"`
+      `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Othres" or "Thermal Gel" or "PTL"`
     );
   }
 });
@@ -640,6 +650,8 @@ excelUploadData.forEach((row, index) => {
         setShowUploadTable(false);
         setShowRcTable(true)
         setExcelUploadData([]);
+        setHandleUploadButton(false);
+        setHandleSubmitButton(true);
          fetchMainMaster(page, perPage);
          setSearchText("");
       })
@@ -1281,8 +1293,9 @@ setErrorMessage(msg || "Something went wrong");
           <h5 className='ComCssTableName'>RCStore Details</h5>
         )}
         {showUploadTable && !showRcTable && (
-          <h5 className='ComCssTableName'>Upload Master deatil</h5>
+          <h5 className='ComCssTableName'>Upload Master Detail</h5>
         )}
+         {showRcTable && !showUploadTable && (
         <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
           <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
             <FaFileExcel /> Export
@@ -1300,6 +1313,7 @@ setErrorMessage(msg || "Something went wrong");
             )}
           </div>
         </div>
+         )}
         {showRcTable && !showUploadTable && (
           <>
                           <LoadingOverlay loading={loading} />
@@ -1391,7 +1405,7 @@ setErrorMessage(msg || "Something went wrong");
             columns={uploadColumn}
             data={excelUploadData}
             pagination
-            paginationServer
+            // paginationServer
             progressPending={loading}
             paginationTotalRows={totalRows}
             onChangeRowsPerPage={handlePerRowsChange}

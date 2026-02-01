@@ -128,9 +128,16 @@ const [filteredAddData, setFilteredAddData] = useState([]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true);
+        
 
-        const userId = sessionStorage.getItem("userId") || "System";
+        
+        const userId = sessionStorage.getItem("userId");
+        if (!userId) {
+    alert("Please relogin");
+    return;
+  }
+  setLoading(true);
+         const userName = sessionStorage.getItem("userName") || "System";
         let updatedFormData;
 
 
@@ -140,6 +147,7 @@ const [filteredAddData, setFilteredAddData] = useState([]);
                 ...rest,
                 createdby: userId,
                 modifiedby: userId,
+                createdName: userName,
                 // repairername: userName
             };
         });

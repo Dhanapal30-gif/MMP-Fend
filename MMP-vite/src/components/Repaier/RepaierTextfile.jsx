@@ -30,8 +30,18 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     : "Module Serial Number must be exactly 11 characters"
             });
             setShowTable(false);
+            setFormData({...formData, SUINo: ""})
             return;
         }
+         if (!formData.productname) {
+    setFormErrors({
+      productname: "Please Enter Product Name"
+    });
+    setShowTable(false);
+     setFormData({...formData, SUINo: ""})
+    return;
+  }
+
 
         fetchSearchSuiNo(sui)
             .then((res) => {

@@ -8,7 +8,7 @@ import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, saveDoneRequest, savePTLRepaier, savePTLRequest, savePTLStore, saveReworkerSubmit } from '../../Services/Services_09';
-import { fetchSearchBoard } from '../../Services/Services-Rc';
+import { cancelReworkerBoard, fetchSearchBoard } from '../../Services/Services-Rc';
 import ReworkerTypeBasedhide from "../../components/Reworker/ReworkerTypeBasedhide";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
@@ -37,8 +37,8 @@ const Reworker = () => {
     const [boardFetch, setBoardFetch] = useState([])
     const [selectedGrnRows, setSelectedGrnRows] = useState([]);
     const [doneSelectButton, setDoneSelectButton] = useState(false);
- const [searchScanText, setSearchScanText]= useState('');
- 
+    const [searchScanText, setSearchScanText] = useState('');
+
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -97,7 +97,7 @@ const Reworker = () => {
     }, [boardFetch]);
 
     const handleSearchClick = (searchTerm) => {
-       
+
         if (!searchTerm) {
             setErrorMessage("Please enter a module serial number.");
             setShowErrorPopup(true);
@@ -190,7 +190,7 @@ const Reworker = () => {
             setSearchScanText("");
         } else if (field === "boardserialnumber") {
             setFormData(prev => ({ ...prev, boardserialnumber: value }));
-setSearchScanText("");
+            setSearchScanText("");
             const searchTerm = value; // ✅ use the current input value
             handleSearchClick(searchTerm);
         }
@@ -270,6 +270,28 @@ setSearchScanText("");
             }
         });
 
+        if (isFrozen) {
+            if (!formData.ReworkerComments || formData.ReworkerComments.trim() === "") {
+                errors.ReworkerComments = "Reworker Comments is required";
+                isValid = false;
+            }
+        }
+
+
+        setFormErrors(errors); // if you’re using error state
+        return isValid;
+    };
+
+
+    const cancelValiDate = () => {
+        const errors = {};
+        let isValid = true;
+        if (isFrozen) {
+            if (!formData.ReworkerComments || formData.ReworkerComments.trim() === "") {
+                errors.ReworkerComments = "Reworker Comments is required";
+                isValid = false;
+            }
+        }
         setFormErrors(errors); // if you’re using error state
         return isValid;
     };
@@ -293,7 +315,7 @@ setSearchScanText("");
     const handlePTLRequest = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
-        const userName = sessionStorage.getItem("userName") || "System";
+        const userName = sessionStorage.getItem("userName");
         const updatedFilteredData = boardFetch.map((row) => ({
             ...row,
             modifiedby: userName,
@@ -302,6 +324,7 @@ setSearchScanText("");
         // setPtlRequestData(prev => [...prev, filteredData]);
         // console.log("PTL Request Data:", updatedFilteredData);
 
+        setLoading(true);
         savePTLRequest(updatedFilteredData)
             .then((response) => {
                 // console.log("RESPONSE:", response);
@@ -328,6 +351,9 @@ setSearchScanText("");
                 const errMsg = error?.response?.data?.message || "Network error, please try again";
                 setErrorMessage(errMsg);
                 setShowErrorPopup(true);
+            }).
+            finally(() => {
+                setLoading(false);
             });
     }
     const [confirmSubmit, setConfirmSubmit] = useState(false);
@@ -348,8 +374,8 @@ setSearchScanText("");
             id: item.id,   // use selectedid if that's your row ID
             pickingqty: item.availableqty, // match backend field
             reworkername,
-            productname:item.productname,
-            boardSerialNo:item.boardserialnumber
+            productname: item.productname,
+            boardSerialNo: item.boardserialnumber
         }));
 
         try {
@@ -371,11 +397,39 @@ setSearchScanText("");
         }
     };
 
-    const handleCancelBoard = () => {
-        setIsFrozen(true);
-        setSubmitButton(false)
-        setClearButton(true);
+   const handleCancelBoard = async () => {
+  try {
+    setIsFrozen(true);
+    setSubmitButton(false);
+    setClearButton(true);
+
+    const isValid = cancelValiDate();
+    if (!isValid) {
+      console.warn("Validation failed. Cannot cancel.");
+      return;
     }
+
+    const payload = [
+      ...new Set(boardFetch.map(item => item.boardserialnumber))
+    ].map(boardSerialNo => ({ boardSerialNo }));
+
+    const res = await cancelReworkerBoard(payload);
+
+    if (res?.data?.success) {
+      setSuccessMessage(res.data.message);
+      setShowSuccessPopup(true);
+      setShowTable(false);
+      setFormData({ Type: "" });
+      fetchData();
+      setIsFrozen(false)
+    } else {
+      console.error("Cancel failed:", res?.data?.message);
+    }
+
+  } catch (error) {
+    console.error("Cancel board failed:", error?.response?.data?.message || error.message);
+  }
+};
 
     const handleClear = () => {
         setFormErrors({});
@@ -440,6 +494,7 @@ setSearchScanText("");
                     serialOptions={serialOptions}
                     handlePoChange={handlePoChange}
                     isFrozen={isFrozen}
+                    formErrors={formErrors}
                 />
             </div>
             {/* <div className='ComCssInputHide7'>

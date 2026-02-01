@@ -123,24 +123,36 @@ const CreateAccount = () => {
       isValid = false;
     }
 
-    // if (formData.requesterType?.includes("Material Request") && formData.requestType.length === 0) {
-    //   errors.requestType = 'Request Type is required';
-    //   isValid = false;
-    // }
-
-     if (formData.requesterType && formData.requestType.length === 0) {
+    if (formData.requesterType?.includes("Material Request") && formData.requestType.length === 0) {
       errors.requestType = 'Request Type is required';
       isValid = false;
     }
 
-    if (formData.requesterType && formData.productGroup.length === 0) {
-      errors.productGroup = 'productGroup is required';
-      isValid = false;
-    }
-    // if (formData.requestType?.includes("Submodule") || formData.requestType?.includes("others") && formData.productGroup.length === 0) {
+    //  if (formData.requesterType && formData.requestType.length === 0) {
+    //   errors.requestType = 'Request Type is required';
+    //   isValid = false;
+    // }
+
+    // if (formData.requesterType && formData.productGroup.length === 0) {
     //   errors.productGroup = 'productGroup is required';
     //   isValid = false;
     // }
+    // if (formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others") || formData.requestType?.includes("Thermal Gel") && formData.productGroup.length === 0) {
+    //   errors.productGroup = 'productGroup is required';
+    //   isValid = false;
+    // }
+
+    if (
+  (
+    formData.requestType?.includes("Sub Module") ||
+    formData.requestType?.includes("others") ||
+    formData.requestType?.includes("Thermal Gel")
+  ) &&
+  formData.productGroup.length === 0
+) {
+  errors.productGroup = 'productGroup is required';
+  isValid = false;
+}
 
     if (formData.userRole?.includes("Repairer") && formData.productname.length === 0) {
       errors.productname = 'productName is required';
@@ -171,6 +183,8 @@ const CreateAccount = () => {
       errors.adminPassword = 'adminPassword is required';
       isValid = false;
     }
+
+    console.log("errors", errors)
     setFormErrors(errors);
     return isValid;
   };
@@ -416,7 +430,7 @@ const CreateAccount = () => {
                   fullWidth
                   size="small"
                 />
-                {(formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others")) && (
+                {(formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others") || formData.requestType?.includes("Thermal Gel"))  && (
 
                   <Autocomplete
                     multiple
@@ -667,11 +681,11 @@ const CreateAccount = () => {
             )} */}
               {/* {formData.requesterType?.includes("Material Request") && ( */}
 
-
-               {formData.requesterType && (
+ {formData.requesterType.includes("Material Request") && (
+              //  {formData.requesterType && (
                <Autocomplete
                   multiple
-                  options={["Sub Module", "others", "ThermalGel"]}
+                  options={["Sub Module", "others", "Thermal Gel"]}
                   getOptionLabel={(option) => option || ""}
                   value={formData.requestType || []}
                   onChange={(event, newValue) =>

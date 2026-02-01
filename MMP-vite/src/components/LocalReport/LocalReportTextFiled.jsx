@@ -8,7 +8,7 @@ import { Autocomplete, TextField } from "@mui/material";
 
 const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
     typeOptions, ReworkerNameOptions, handleInputChange, nameOptions, serialOptions,
-    RepaierNameOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
+    RepaierNameOptions, handleChange,productNameAndPartcode, productOptions, handlePoChange, formErrors }) => {
 
     const BoardStaus = [
         { label: "Ongoing", value: "MSC00003" },
@@ -99,7 +99,34 @@ const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
                     }}
                     renderInput={(params) => <TextField {...params} label="Reworker Name" size="small" />}
                 />
+<TextField
+    id="outlined-basic"
+    label="BoardSerial Number"
+    variant="outlined"
+    name="boardserialnumber"
+    value={formData.boardserialnumber || ""}
+    onChange={(e) => handlePoChange(e.target.name, e.target.value)}
+    size="small"
+/>
 
+           <Autocomplete
+  options={productNameAndPartcode.productname || []}
+  value={formData.productname || null}
+  onChange={(e, val) => setFormData({ ...formData, productname: val })}
+  renderInput={(params) => (
+    <TextField {...params} label="Product Name" size="small" />
+  )}
+/>
+
+<Autocomplete
+  options={productNameAndPartcode.partcode || []}
+  value={formData.partcode || null}
+  onChange={(e, val) => setFormData({ ...formData, partcode: val })}
+  renderInput={(params) => (
+    <TextField {...params} label="Part Code" size="small" />
+  )}
+/>
+ 
                 <Autocomplete
                     options={BoardStaus}
                     getOptionLabel={(option) => option.label}

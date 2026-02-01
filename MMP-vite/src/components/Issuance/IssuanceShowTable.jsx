@@ -178,7 +178,9 @@ const IssuanceShowTable = ({
         "allocatedQty",
         "approvedQty",
         "Comment",
-        "UserName"
+        "createdName",
+        "UserName",
+        
         // "recordstatus"
       ]; // all fields for others
     }
@@ -207,6 +209,7 @@ const IssuanceShowTable = ({
       fmsn: { label: "Faulty Module Serial No" },
 
       fsn: { label: "Faulty Serial No" },
+      createdName: { label: "Requester Name" },
       UserName:{label:"Approver_2 Name"}
     },
     customCellRenderers: {

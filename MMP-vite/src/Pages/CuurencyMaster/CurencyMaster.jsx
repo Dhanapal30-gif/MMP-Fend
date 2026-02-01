@@ -403,7 +403,7 @@ const CurencyMaster = () => {
 
                         {normal && (
                             <Autocomplete
-                                options={["USD", "CNY", "INR"]}
+                                options={["USD", "CNY", "INR","EURO"]}
                                 getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                                 value={formData.currencyname || []}
                                 onChange={(event, newValue) => setFormData({ ...formData, currencyname: newValue || [] })}
