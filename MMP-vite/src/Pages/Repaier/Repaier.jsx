@@ -186,9 +186,9 @@ const Repaier = () => {
         e.preventDefault();
             setLoading(true);
 
-        // const userName = sessionStorage.getItem("userId") || "System";
-                const userName = localStorage.getItem("userName") || "System";
-
+        // const userName = sessionStorage.getItem("userId") ;
+                const userName = localStorage.getItem("userName");
+// console.log("userName", userName);
         let updatedFormData;
 
         if (showTable) {
@@ -337,7 +337,8 @@ const Repaier = () => {
             pickingqty: "",
             repairercomments: "",
             SUINo: "",
-            Quantity: ""
+            Quantity: "",
+            repairelocation:"",
         });
         setExtraFields({
             productGroup: "",

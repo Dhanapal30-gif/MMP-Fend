@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import IssuanceTextFiled from "../../components/Issuance/IssuanceTextFiled";
 import IssuanceShowTable from "../../components/Issuance/IssuanceShowTable";
 import IssuanceTable from "../../components/Issuance/IssuanceTable";
-import { downloadIssuance, fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
+import { downloadIssuance, downloadPTLIssuance, fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, getPTLIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
@@ -44,10 +44,15 @@ const Issuance = () => {
     const [hideDeliverButton, setHideDeliverButton] = useState(false)
     const [hideIssueButton, setHideIssueButton] = useState(false)
     const [loading, setLoading] = useState(false);
+    const [hiddenButton, setHiddenButton] = useState("");
     const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
     const [addSearchText, setAddSearchText] = useState("");
     const [filteredAddData, setFilteredAddData] = useState([]);
+    const [showMenu, setShowMenu] = useState(false);
+    const [activeTicketType, setActiveTicketType] = useState("DTL"); // default
+
+
 
     const buildTicketNo = (type, value) => {
         if (!value) return "";
@@ -112,7 +117,26 @@ const Issuance = () => {
         // if (field === "issueTicket") setActiveTable("issueTicket");
 
     };
-
+    const fetchPutawayPending = () => {
+        setPage(0); // reset to first page
+        setTotalRows(0);
+        setHiddenButton("pending");
+    }
+    const fetchPutawayClose = () => {
+        setPage(0); // reset to first page
+        setTotalRows(0);
+        setHiddenButton("closed");
+        setDonwloadCosed(true);
+    }
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
     const fetchRequestedTickets = async (category) => {
 
         try {
@@ -206,7 +230,7 @@ const Issuance = () => {
         setLoading(true);
         let ticketno = pickTicketData[0]?.rec_ticket_no; // ✅ assign from first row
         const submitData = pickTicketData.flatMap(row => {
-           
+
             if (row.batches && row.batches.length > 0) {
                 return row.batches.map(bq => ({
                     Location: bq.location,
@@ -250,10 +274,10 @@ const Issuance = () => {
                     } else {
                         fetchRequestedTickets("DTL");
                     }
-                       const ticketNoSubmitted = submitData[0].ticketno;
-       
-            setFormData(prev => ({ ...prev, deliverTicket: ticketNoSubmitted }));
-      
+                    const ticketNoSubmitted = submitData[0].ticketno;
+
+                    setFormData(prev => ({ ...prev, deliverTicket: ticketNoSubmitted }));
+
                     setIsUserActive(false);
                     setHideDeliverButton(true)
                     setHidePutButton(false)
@@ -342,13 +366,13 @@ const Issuance = () => {
 
         const submitData = pickTicketData.flatMap(row => {
             if (row.batchesQty && row.batchesQty.length > 0) {
-                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no,productName:row.productname }));
+                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no, productName: row.productname }));
             }
             ticketno = row.rec_ticket_no;
             return [{ recTicketNo: row.rec_ticket_no }];
         });
 
-         ticketno = pickTicketData[0]?.rec_ticket_no;
+        ticketno = pickTicketData[0]?.rec_ticket_no;
 
         setLoading(true);
         if (ticketno && ticketno.startsWith("PTL")) {
@@ -376,10 +400,10 @@ const Issuance = () => {
                     setHidePutButton(false);
                     setHideIssueButton(true);
 
-                      const ticketNoSubmitted = submitData[0].recTicketNo;
-       
-            setFormData(prev => ({ ...prev, issueTicket: ticketNoSubmitted }));
-      
+                    const ticketNoSubmitted = submitData[0].recTicketNo;
+
+                    setFormData(prev => ({ ...prev, issueTicket: ticketNoSubmitted }));
+
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
@@ -451,7 +475,7 @@ const Issuance = () => {
             if (row.batchesQty && row.batchesQty.length > 0) {
                 return row.batchesQty.map(bq => ({
                     recTicketNo: row.rec_ticket_no,
-                    partCode: row.partCode,
+                    partcode: row.partcode,
                     batchCode: bq.batchCode,
                     issue_qty: bq.savedQty,
                     location: bq.location
@@ -460,12 +484,13 @@ const Issuance = () => {
             recTicketNo = row.rec_ticket_no;
             return [{
                 recTicketNo: row.rec_ticket_no,
-                partCode: row.partCode
+                partcode: row.partcode    
             }];
         });
 
-         recTicketNo = pickTicketData[0]?.rec_ticket_no;
-// console.log("recTicketNo", recTicketNo);
+        recTicketNo = pickTicketData[0]?.rec_ticket_no;
+        
+        // console.log("recTicketNo", recTicketNo);
         // console.log("recTicketNo", recTicketNo);
         if (recTicketNo && recTicketNo.startsWith("PTL")) {
             savePtlIssue(submitData)
@@ -550,10 +575,19 @@ const Issuance = () => {
 
 
 
-    useEffect(() => {
-        fetchData(page, perPage, debouncedSearch);
+    // useEffect(() => {
+    //     fetchData(page, perPage, debouncedSearch);
+    //     setHiddenButton("PTL")
+    // }, [page, perPage, debouncedSearch]);
 
-    }, [page, perPage, debouncedSearch]);
+    useEffect(() => {
+    if (activeTicketType === "DTL") {
+        fetchData(page, perPage, debouncedSearch);
+    } else if (activeTicketType === "PTL") {
+        fetchptlData(page, perPage, debouncedSearch);
+    }
+}, [page, perPage, debouncedSearch, activeTicketType]);
+
 
     const fetchData = (page = 0, size = 10, search = "") => {
         setLoading(true);
@@ -562,6 +596,26 @@ const Issuance = () => {
                 if (response?.data?.content) {
                     setIssuanceData(response.data.content);
                     setTotalRows(response.data.totalElements || 0);
+                } else {
+                    console.warn("No content found in response:", response.data);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching search data:", error);
+            }).finally(() => {
+                setLoading(false);
+            })
+    };
+
+
+    const fetchptlData = (page = 0, size = 10, search = "") => {
+        setLoading(true);
+        getPTLIssuanceData(page, size, search)
+            .then((response) => {
+                if (response?.data?.content) {
+                    setIssuanceData(response.data.content);
+                    setTotalRows(response.data.totalElements || 0);
+                    setHiddenButton("PTL")
                 } else {
                     console.warn("No content found in response:", response.data);
                 }
@@ -598,9 +652,12 @@ const Issuance = () => {
 
         let apiCall;
 
-        apiCall = () => downloadIssuance(search);
+        // apiCall = () => downloadIssuance(search);
 
-
+         apiCall =
+        activeTicketType === "DTL"
+            ? () => downloadIssuance(search)
+            : () => downloadPTLIssuance(search);
         // Call apiCall without arguments, since it’s already a function returning a Promise
         apiCall()
             .then(response => {
@@ -623,15 +680,15 @@ const Issuance = () => {
     };
 
 
-const getCurrentTicketNo = () => {
-    if (activeTable === "issueTicket" && formData.issueTicket)
-        return `issueTicketNo-${formData.issueTicket}`;
-    if (activeTable === "deliverTicket" && formData.deliverTicket)
-        return `deliverTicketNo-${formData.deliverTicket}`;
-    if (activeTable === "requestedTicket" && formData.requestedTicket)
-        return `pickTicketNo-${formData.requestedTicket}`;
-    return "";
-};
+    const getCurrentTicketNo = () => {
+        if (activeTable === "issueTicket" && formData.issueTicket)
+            return `issueTicketNo-${formData.issueTicket}`;
+        if (activeTable === "deliverTicket" && formData.deliverTicket)
+            return `deliverTicketNo-${formData.deliverTicket}`;
+        if (activeTable === "requestedTicket" && formData.requestedTicket)
+            return `pickTicketNo-${formData.requestedTicket}`;
+        return "";
+    };
 
 
     return (
@@ -724,15 +781,53 @@ const getCurrentTicketNo = () => {
                         {hideIssueButton && (
                             <button className='ComCssSubmitButton' onClick={handleIssue} >Issue</button>
                         )}
+                            {/* <button className='ComCssSubmitButton' onClick={handleIssue} >Reject</button> */}
 
                     </div>
                 </div>
             )}
             <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>Issued Tickets</h5>
-                <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
-                        <FaFileExcel /> Export </button>
+                {/* <h5 className='ComCssTableName'>Issued Tickets</h5> */}
+                
+                <h5 className='ComCssTableName'>
+                    {activeTicketType === "DTL" && "DTL Issued Tickets"}
+                    {activeTicketType === "PTL" && "PTL Issued Tickets"}
+                </h5><div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                    <button className="btn btn-light" onClick={() => setShowMenu(!showMenu)}>
+                        <FaBars />
+                    </button>
+
+                    {showMenu && (
+                        <div className="ComCssButtonMenu">
+                            <button className="ComCssExportButton" onClick={() => exportToExcel(searchText)} disabled={loading}>
+                                <FaFileExcel />  </button>
+                            {activeTicketType !== "DTL" && (
+                                <button
+                                    className='ComCssPendingButton'
+                                    onClick={() => {
+                                        setActiveTicketType("DTL");
+                                        fetchData(page, perPage, debouncedSearch);
+                                        setShowMenu(false);
+                                    }}
+                                >
+                                    DTL
+                                </button>
+                            )}
+                            {activeTicketType !== "PTL" && (
+                                <button
+                                    className='ComCssPariallButton'
+                                    onClick={() => {
+                                        setActiveTicketType("PTL");
+                                        fetchptlData(page, perPage, debouncedSearch);
+                                        setShowMenu(false);
+                                    }}
+                                >
+                                    PTL
+                                </button>
+                            )}
+                        </div>
+
+                    )}
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
@@ -743,6 +838,7 @@ const getCurrentTicketNo = () => {
                                 style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
                                 ✖
                             </span>
+
                         )}
                     </div>
                 </div>

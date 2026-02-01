@@ -281,6 +281,12 @@ export const getIssuanceData = (page = 0, size = 10, search = "") => {
   return axios.get(Get_Issuance, { params: { page, size, search: search || undefined, }, });
 }
 
+const Get_PTLIssuance = `${url}/IssuacneCon/fetchPTLIssueDetail`;
+export const getPTLIssuanceData = (page = 0, size = 10, search = "") => {
+  return axios.get(Get_PTLIssuance, { params: { page, size, search: search || undefined, }, });
+}
+
+
 
 const fetchStockUpdatePartcodeList = `${url}/StockTransferCon/fetchStochUpdatePartcode`;
 export const fetchStockUpdatePartcode = () =>
@@ -334,6 +340,14 @@ export const downloadIssuance = (search) =>
     responseType: "blob",
   });
 
+   const Get_DownloadPTLIssuance = `${url}/IssuacneCon/downloadPTLTable-excel`;
+export const downloadPTLIssuance = (search) =>
+  axios.get(Get_DownloadPTLIssuance, {
+    params: { search },
+    responseType: "blob",
+  });
+
+
 
 const openRc = `${url}/Manual_Rack/openRack`;
 export const openRcRack = (rackName) => {
@@ -377,3 +391,22 @@ export const ponumberVerifyBackend = (ponumber) => {
 };
 
 
+const fetchTbalemasterProduct = `${url}/repaierCon/fetchProductDetailTableMaster`;
+export const fetchTableProductDetail= () =>
+  axios.get(fetchTbalemasterProduct, {});
+
+
+
+const fetchTableMaster = `${url}/TableMaster/fetchTableMaster`;
+export const fetchTable = () => axios.get(fetchTableMaster);
+
+
+const fetchReworkerNameDetail = `${url}/repaierCon/fetchReworkerName`;
+export const fetchReworkerName = () => axios.get(fetchReworkerNameDetail);
+
+
+
+const cancelReworker = `${url}/repaierCon/cancelReworkerBoard`;
+export const cancelReworkerBoard = (payload) => {
+  return axios.post(cancelReworker, payload);
+};

@@ -114,10 +114,12 @@ const StockTransfer = () => {
 
 
     const handleAddSubmit = async () => {
-        const userName = sessionStorage.getItem("userId") || "System";
+        const userId = sessionStorage.getItem("userId") || "System";
+         const userName = sessionStorage.getItem("userName") || "System";
         const updatedFormData = tableData.map(row => ({
             ...row,
-            createdby: userName,
+            createdby: userId,
+            createdName: userName,
             modifiedby: userName,
         }));
         try {

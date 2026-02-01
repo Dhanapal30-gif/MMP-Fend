@@ -197,16 +197,19 @@ const PTLMaster = () => {
             quantity: "", catmovement: "", MOQ: "", TRQty: "",
         });
         setIsEditMode(false);
+        setDeletButton(false);
+        setSelectedRows([]);
         setFormErrors({});
     }
-    useEffect(() => {
-        console.log("selectedrows", selectedRows)
-    }, [selectedRows])
-    // console.log("setLocalStore", localStore);
 
+    // useEffect(() => {
+    //     console.log("selectedrows", selectedRows)
+    // }, [selectedRows])
+    
 
     const onDeleteClick = () => {
         setConfirmDelete(true);
+        setIsEditMode(false);
     };
     // console.log("fpoprmdata",formData)
 
@@ -220,6 +223,7 @@ const PTLMaster = () => {
 
     const handleDelete = async () => {
         setConfirmDelete(false);
+        
         try {
             const modifiedby = sessionStorage.getItem("userId") || "System";
             await deleteLocalMaster(selectedRows,modifiedby);

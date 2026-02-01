@@ -3,8 +3,9 @@ import LocalndindividualReportCom from "../../components/LocalndindividualReport
 import LocalReportIndiviualTable from "../../components/LocalndindividualReport/LocalReportIndiviualTable";
 import { FaFileExcel } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadIndiviualReport, downloadLocalIndiviualReportFilter, downloadLocalIndiviualReportSearch, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, } from '../../Services/Services_09';
+import { downloadIndiviualReport, downloadLocalIndiviualReportFilter, downloadLocalIndiviualReportSearch, fetchProduct_Partcode, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, } from '../../Services/Services_09';
 import "./Localindivual.css";
+import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { downloadSearchProduct } from '../../Services/Services';
 const LocalndindividualReport = () => {
 
@@ -13,6 +14,9 @@ const LocalndindividualReport = () => {
         startDate: "",
         endDate: "",
         download: null,
+        partcode:"",
+        productname:"",
+        boardserialnumber:""
     });
 
     const [formErrors, setFormErrors] = useState({});
@@ -30,12 +34,14 @@ const LocalndindividualReport = () => {
     const [requestButton, setRequestButton] = useState(true);
     const [isFrozen, setIsFrozen] = useState(false);
     const [submitButton, setSubmitButton] = useState(true);
+    const [productNameAndPartcode, setProductNameAndPartcode] = useState([]);   
     const [clearButton, setClearButton] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [indiviualReport, setIndiviualReport] = useState([])
     const [isFilterActive, setIsFilterActive] = useState(false);
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
+    
 
     // console.log("formData", formData);
     const handlePoChange = (field, value) => {
@@ -73,7 +79,9 @@ const LocalndindividualReport = () => {
     };
 
     const debouncedSearch = useDebounce(searchText, 500); // delay in ms
-    const userId = sessionStorage.getItem("userId");
+    const userId = sessionStorage.getItem("userName");
+    // const userRole = sessionStorage.getItem("userRole");
+const userRole = JSON.parse(sessionStorage.getItem("userRole"));
 
     // console.log("userId", userId);
 
@@ -102,20 +110,38 @@ const LocalndindividualReport = () => {
     //   }
     // }, [page, perPage, userId]);
     useEffect(() => {
+           if (showTable) {
         fetchData(userId, page, perPage, debouncedSearch);
+           }
     }, [userId, page, perPage, debouncedSearch]);
 
+        useEffect(() => {
+            fetchProductName();
+        }, []);
+
+
+         const fetchProductName = () => {
+                fetchProduct_Partcode()
+                    .then((response) => {
+                        setProductNameAndPartcode(response.data);
+                    })
+                    .catch((error) => {
+                        // console.error("Error fetching receiving data:", error);
+                    })
+            };
     const fetchData = (userId, page = 1, size = 10, search = "") => {
+                    fetchFilterResult(search);
+
         // console.log("searchfetch", search);
-        if (search && search.trim() !== "") {
-            fetchfindSearch(userId, page, size, search);
-        }
-        else if (isFilterActive) {
-            fetchFilterResult();
-        }
-        else {
-            fetchIndiviualDetail(userId, page, size);
-        }
+        // if (search && search.trim() !== "") {
+        //     fetchfindSearch(userId, page, size, search);
+        // }
+        // else if (isFilterActive) {
+        //     fetchFilterResult();
+        // }
+        // else {
+        //     fetchIndiviualDetail(userId, page, size);
+        // }
     };
 
     const fetchIndiviualDetail = (userId, page = 1, size = 10) => {
@@ -155,17 +181,35 @@ const LocalndindividualReport = () => {
         });
     };
 
+
+    const hasAnyFilter = () => {
+        return Object.values(formData).some(
+            v => v !== null && v !== ""
+        );
+    };
+
     const handleFilter = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
 
+        if (!hasAnyFilter() && !searchText?.trim()) {
+            setErrorMessage("Please select or enter at least one filter");
+            setShowErrorPopup(true);
+            return;
+        }
+
+setShowTable(true);
         setIsFilterActive(true);
         fetchFilterResult();
 
     };
-    const fetchFilterResult = () => {
+    const fetchFilterResult = (search = "") => {
         setLoading(true)
-        getindiviualDetailFilter(page - 1, perPage, userId, formData)
+        const payload = {
+            ...formData,
+            search: search?.trim() || null
+        };
+        getindiviualDetailFilter(page - 1, perPage, userId,userRole, payload)
             .then((response) => {
                 if (response?.data?.content) {
                     setIndiviualReport(response.data.content);
@@ -179,11 +223,12 @@ const LocalndindividualReport = () => {
             });
     };
 
+    
     const Clear = () => {
         setIsFilterActive(false);
         setSearchText("");
         fetchData(userId, page, perPage, debouncedSearch);
-
+setShowTable(false);
         setFormData({
             status: "",
             startDate: "",
@@ -195,18 +240,22 @@ const LocalndindividualReport = () => {
         setDownloadDone(false);
         setDownloadProgress(null);
         setLoading(true);
+        const payload = {
+            ...formData,
+            search: search?.trim() || null
+        };
         let apiCall;  // Declare here
         // const apiCall = search?.trim() !== "" ? downloadSearchProduct : downloadLocalIndiviual;
-        if (search?.trim() !== "") {
-            apiCall = () => downloadLocalIndiviualReportSearch(search, userId);
-        }
-        else if (isFilterActive) {
-            apiCall = () => downloadLocalIndiviualReportFilter(formData, userId);
-        }
-        else {
-            apiCall = () => downloadIndiviualReport(userId);
-        }
-
+        // if (search?.trim() !== "") {
+        //     apiCall = () => downloadLocalIndiviualReportSearch(search, userId);
+        // }
+        // else if (isFilterActive) {
+        //     apiCall = () => downloadLocalIndiviualReportFilter(formData, userId);
+        // }
+        // else {
+        //     apiCall = () => downloadIndiviualReport(userId);
+        // }
+apiCall = () => downloadLocalIndiviualReportFilter(payload,userId,userRole);
         apiCall(search, {
             responseType: 'blob',
             onDownloadProgress: (progressEvent) => {
@@ -246,6 +295,7 @@ const LocalndindividualReport = () => {
                     handleInputChange={handleInputChange}
                     isFrozen={isFrozen}
                     formErrors={formErrors}
+                    productNameAndPartcode={productNameAndPartcode}
 
                 />
 
@@ -256,6 +306,7 @@ const LocalndindividualReport = () => {
 
                 </div>
             </div>
+            {showTable &&
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Report Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
@@ -300,6 +351,15 @@ const LocalndindividualReport = () => {
 
 
             </div>
+}
+  <CustomDialog
+                open={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="Error"
+                message={errorMessage}
+                severity="error"
+                color="secondary"
+            />
         </div>
 
     )

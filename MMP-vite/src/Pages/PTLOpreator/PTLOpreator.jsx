@@ -8,7 +8,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import ComTextFiled from '../../components/Com_Component/ComTextFiled'; // adjust path if needed
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme'; // adjust path if needed
 import { Autocomplete, TextField } from "@mui/material";
-import { fetchPTLBoard, savePTLSubmit } from '../../Services/Services_09';
+import { fetchPTLBoard, savePickequest, savePTLSubmit } from '../../Services/Services_09';
+import CryptoJS from "crypto-js";
 
 const PTLOpreator = () => {
     const [formData, setFormData] = useState({
@@ -26,6 +27,10 @@ const PTLOpreator = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+      const [selectedRows, setSelectedRows] = useState([]);
+      const [pickedRows, setPickedRows] = useState([]);
+    //   const [pickButton,setPickButton] =useState(true);
+
     useEffect(() => {
         fetchData(); // call immediately on mount
 
@@ -76,7 +81,9 @@ const PTLOpreator = () => {
     useEffect(() => {
         if (formData.boardserialnumber) {
             setShowTable(true);
+            setSelectedRows([]);
         } else {
+            // setSelectedRows([]);
             setShowTable(false);
         }
     }, [formData.boardserialnumber]);
@@ -93,10 +100,12 @@ const PTLOpreator = () => {
         // send payload to API if needed
         try {
             const response = await savePTLSubmit(payload);
-            setSuccessMessage("Submited success:", response.message)
+            setSuccessMessage(`${response.data.message}`);
             setShowSuccessPopup(true)
-            fetchData();
+            // fetchData();
             setShowTable(false)
+            setSelectedRows([]); 
+            setpickButton(true);
             // console.log("API success:", response);
         } catch (error) {
             setErrorMessage("Error sending payload:", error)
@@ -104,8 +113,49 @@ const PTLOpreator = () => {
             // console.error("Error sending payload:", error);
         }
     };
+const selectedRowData = filteredData.find(
+  r => r.id === selectedRows[0]
+);
 
+     const SECRET_KEY = "1234567890123456"; // same as backend
+     const handlePick = () => {
+  const selectedData = filteredData.filter(row =>
+    selectedRows.includes(row.id)
+  );
 
+  const formData = selectedData.map(row => ({
+    Qty: row.pickingqty,
+    LocationName: row.racklocation,
+    PartNO: row.partcode,
+    Description: row.partdescription
+  }));
+
+  const jsonString = JSON.stringify(formData);
+
+  const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+  const encrypted = CryptoJS.AES.encrypt(jsonString, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  }).toString();
+
+  savePickequest(encrypted).then(res => {
+    const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+
+  const decrypted = CryptoJS.AES.decrypt(res.data, key, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7
+  }).toString(CryptoJS.enc.Utf8);
+
+  const parsed = JSON.parse(decrypted);
+setpickButton(false);
+  setSuccessMessage(parsed.message);
+  
+    setShowSuccessPopup(true);
+
+  });
+};
+
+    
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -177,10 +227,24 @@ const PTLOpreator = () => {
                         setpickButton={setpickButton}
                         setSuccessMessage={setSuccessMessage}
                         setShowSuccessPopup={setShowSuccessPopup}
+                        selectedRows={selectedRows}
+                        setSelectedRows={setSelectedRows}
 
                     />
                     <div className="ComCssButton9">
+                         {selectedRows.length > 0 && selectedRowData && (
                         <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
+                       )}
+                        {selectedRows.length > 0 &&  selectedRowData && pickButton && (
+  <button
+    className="ComCssSubmitButton"
+    onClick={handlePick}
+  >
+    Pick
+  </button>
+)}
+
+
                     </div>
                 </div>
             )}

@@ -16,53 +16,52 @@ const LocalSummaryReportText = ({
     productandPartcode,
     compatibilityData,
     formErrors,
-    isFrozen
+    isFrozen,
+    ReworkerNameList
 }) => {
 
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
+                
                 <Autocomplete
-                    multiple
-                    options={shifyOption}
-                    readOnly={isFrozen}
-                    value={shifyOption.filter(o => formData.orderType?.includes(o.value))}
-                    getOptionLabel={(option) => option.label}
-                    onChange={(e, newValue) =>
-                        handleChange(
-                            "orderType",
-                            newValue.map((item) => item.value)
-                        )
-                    }
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            error={Boolean(formErrors?.orderType)}
-                            helperText={formErrors?.orderType || ""}
-                            label="Order Type"
-                            variant="outlined"
-                            size="small"
-                        />
-                    )}
-                />
+  
+  options={ReworkerNameList}
+  readOnly={isFrozen}
+  value={formData.reworkerName || []}
+  onChange={(e, newValue) =>
+    handleChange("reworkerName", newValue)
+  }
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Reworker Name"
+      variant="outlined"
+      size="small"
+    />
+  )}
+/>
+
+
+
                  <Autocomplete
                     multiple
                     options={shifyOption}
                     readOnly={isFrozen}
-                    value={shifyOption.filter(o => formData.orderType?.includes(o.value))}
+                    value={shifyOption.filter(o => formData.shiftType?.includes(o.value))}
                     getOptionLabel={(option) => option.label}
                     onChange={(e, newValue) =>
                         handleChange(
-                            "orderType",
+                            "shiftType",
                             newValue.map((item) => item.value)
                         )
                     }
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            error={Boolean(formErrors?.orderType)}
-                            helperText={formErrors?.orderType || ""}
-                            label="Order Type"
+                            error={Boolean(formErrors?.shiftType)}
+                            helperText={formErrors?.shiftType || ""}
+                            label="Shift Type"
                             variant="outlined"
                             size="small"
                         />

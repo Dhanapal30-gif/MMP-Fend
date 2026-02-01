@@ -19,6 +19,7 @@ const Returning = () => {
     });
 
     const userId = sessionStorage.getItem("userId");
+      const userName = sessionStorage.getItem("userName");
     
     const [formErrors, setFormErrors] = useState({});
     const [returningData, setReturningData] = useState([]);
@@ -169,8 +170,8 @@ const Returning = () => {
             errors.ordertype = "select Order Type";
             isValid = false;
         }
-        if (!formData.requesterType) {
-            errors.requesterType = "select Requester Type";
+        if (!formData.RequesterType) {
+            errors.RequesterType = "select Requester Type";
             isValid = false;
         }
         if (!formData.partcode) {
@@ -226,12 +227,18 @@ const Returning = () => {
 
   
    const handleSubmit = async () => {
+
+     if (!userId) {
+    alert("Please relogin");
+    return;
+  }
     try {
         // Prepare updated data
         const updatedFormData = tableData.map(row => ({
             ...row,
             createdby: userId,
-            updatedby: userId,            
+            updatedby: userId,     
+            createdName: userName,       
         }));
 
         // Call API

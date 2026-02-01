@@ -75,7 +75,8 @@ const ApproverTextFiled = ({
 
                 {/* Request Id Dropdown */}
                 <Autocomplete
-                    options={filteredRequestIds}
+                    // options={filteredRequestIds}
+                      options={(filteredRequestIds || []).filter(Boolean)}
                     value={formData.requestId || null}
                     onChange={(e, newValue) => {
                         handleChange("requestId", newValue || "");

@@ -6,7 +6,8 @@ import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
-import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchProduct_Partcode, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { fetchProductAndPartcode } from '../../Services/Services-Rc';
 
 const LocalReport = () => {
     const [formData, setFormData] = useState({
@@ -15,7 +16,8 @@ const LocalReport = () => {
         endDate: "",
         download: null,
         repairername: "",
-        reworkername: ""
+        reworkername: "",
+        boardserialnumber: ""
     });
 
     const [formErrors, setFormErrors] = useState({});
@@ -27,10 +29,13 @@ const LocalReport = () => {
     const [searchText, setSearchText] = useState("");
     const [isFilterActive, setIsFilterActive] = useState(false);
     const [repaierReworkerData, setRepaierReworkerData] = useState([]);
+    const [productNameAndPartcode, setProductNameAndPartcode] = useState([]);
     const [localReportData, setLocalReportData] = useState([]);
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
-
+    const [showTable, setShowTable] = useState(false);
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     // console.log("formData", formData);
 
     const handlePoChange = (field, value) => {
@@ -88,12 +93,23 @@ const LocalReport = () => {
 
     useEffect(() => {
         fetchRepairName();
+        fetchProductName();
     }, []);
 
     const fetchRepairName = () => {
         fetchRepaier()
             .then((response) => {
                 setRepaierReworkerData(response.data);
+            })
+            .catch((error) => {
+                // console.error("Error fetching receiving data:", error);
+            })
+    };
+
+    const fetchProductName = () => {
+        fetchProduct_Partcode()
+            .then((response) => {
+                setProductNameAndPartcode(response.data);
             })
             .catch((error) => {
                 // console.error("Error fetching receiving data:", error);
@@ -110,23 +126,36 @@ const LocalReport = () => {
         .map(i => i.name?.toLowerCase())
     )].sort().map(val => ({ label: val, value: val }));
 
+
     useEffect(() => {
-        fetchData(page, perPage, debouncedSearch);
+        if (showTable) {
+            fetchData(page, perPage, debouncedSearch);
+        }
     }, [page, perPage, debouncedSearch]);
 
 
-    const fetchData = (page = 1, size = 10, search = "") => {
-        // console.log("searchfetch", search);
-        if (search && search.trim() !== "") {
-            fetchfindSearch(page, size, search);
-        }
-        else if (isFilterActive) {
-            fetchFilterResult();
-        }
-        else {
-            fetchLocalReport(page, size)
-        }
+    // const fetchData = (page = 1, size = 10, search = "") => {
+    //     // console.log("searchfetch", search);
+    //     if (search && search.trim() !== "") {
+    //         fetchFilterResult(page, size, search);
+    //     }
+    //     else if (isFilterActive) {
+    //         fetchFilterResult();
+    //     }
+    //     else {
+    //         fetchLocalReport(page, size)
+    //     }
 
+    // };
+
+    const fetchData = (page = 1, size = 10, search = "") => {
+        if (isFilterActive) {
+            fetchFilterResult(search);   // ONLY search
+        } else if (search?.trim()) {
+            fetchfindSearch(page, size, search);
+        } else {
+            fetchLocalReport(page, size);
+        }
     };
 
     const fetchLocalReport = (page = 1, size = 10) => {
@@ -162,39 +191,68 @@ const LocalReport = () => {
             .catch((error) => {
                 console.error("Error fetching search data:", error);
             }).finally(() => {
-            setLoading(false); // always stop loader
-        });
+                setLoading(false); // always stop loader
+            });
     };
 
     // console.log("formData", formData);
+    const hasAnyFilter = () => {
+        return Object.values(formData).some(
+            v => v !== null && v !== ""
+        );
+    };
 
     const handleFilter = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
 
+        if (!hasAnyFilter() && !searchText?.trim()) {
+            setErrorMessage("Please select or enter at least one filter");
+            setShowErrorPopup(true);
+            return;
+        }
+        setShowTable(true);
         setIsFilterActive(true);
         fetchFilterResult();
 
     };
-    const fetchFilterResult = () => {
-        setLoading(true)
-        getLocalReportDetailFilter(page - 1, perPage, formData)
-            .then((response) => {
-                if (response?.data?.content) {
-                    setLocalReportData(response.data.content);
-                    setTotalRows(response.data.totalElements || 0);
-                }
+    // const fetchFilterResult = () => {
+    //     setLoading(true)
+    //     getLocalReportDetailFilter(page - 1, perPage, formData)
+    //         .then((response) => {
+    //             if (response?.data?.content) {
+    //                 setLocalReportData(response.data.content);
+    //                 setTotalRows(response.data.totalElements || 0);
+    //             }
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error in filter API:", error);
+    //         }).finally(() => {
+    //         setLoading(false); // always stop loader
+    //     });
+    // };
+
+
+    const fetchFilterResult = (search = "") => {
+        setLoading(true);
+        const payload = {
+            ...formData,
+            search: search?.trim() || null
+        };
+
+        getLocalReportDetailFilter(page - 1, perPage, payload)
+            .then(res => {
+                setLocalReportData(res.data.content || []);
+                setTotalRows(res.data.totalElements || 0);
             })
-            .catch((error) => {
-                console.error("Error in filter API:", error);
-            }).finally(() => {
-            setLoading(false); // always stop loader
-        });
+            .finally(() => setLoading(false));
     };
+
 
     const Clear = () => {
         setIsFilterActive(false);
         setSearchText("");
+        setShowTable(false);
         fetchData(page, perPage, debouncedSearch);
         setFormData({
             status: "",
@@ -211,15 +269,20 @@ const LocalReport = () => {
         setLoading(true);
         let apiCall;  // Declare here
         // const apiCall = search?.trim() !== "" ? downloadSearchProduct : downloadLocalIndiviual;
-        if (search?.trim() !== "") {
-            apiCall = () => downloadLocalReportSearch(search);
-        }
-        else if (isFilterActive) {
-            apiCall = () => downloadLocalReportFilter(formData);
-        }
-        else {
-            apiCall = () => downloadLocalReport();
-        }
+        // if (search?.trim() !== "") {
+        //     apiCall = () => downloadLocalReportSearch(search);
+        // }
+        // else if (isFilterActive) {
+        //     apiCall = () => downloadLocalReportFilter(formData);
+        // }
+        // else {
+        //     apiCall = () => downloadLocalReport();
+        // }
+        const payload = {
+            ...formData,
+            search: search?.trim() || null
+        };
+apiCall = () => downloadLocalReportFilter(payload);
 
         apiCall(search, {
             responseType: 'blob',
@@ -262,6 +325,7 @@ const LocalReport = () => {
                     formErrors={formErrors}
                     RepaierNameOptions={RepaierNameOptions}
                     ReworkerNameOptions={ReworkerNameOptions}
+                    productNameAndPartcode={productNameAndPartcode}
                 />
 
                 <div className="ReworkerButton9">
@@ -270,49 +334,60 @@ const LocalReport = () => {
                 </div>
 
             </div>
-            <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>Report Detail</h5>
-                <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
-                        {loading
-                            ? downloadProgress !== null
-                                ? `Downloading... ${downloadProgress}%`
-                                : "Downloading..."
-                            : downloadDone
-                                ? "✅ Done"
-                                : (
-                                    <>
-                                        <FaFileExcel /> Export
-                                    </>
-                                )}
-                    </button>
-                    <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-                        <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
-                        {searchText && (
-                            <span
-                                onClick={() => setSearchText("")}
-                                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
-                                ✖
-                            </span>
-                        )}
+            {showTable &&
+                <div className='ComCssTable'>
+                    <h5 className='ComCssTableName'>Report Detail</h5>
+                    <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                        <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
+                            {loading
+                                ? downloadProgress !== null
+                                    ? `Downloading... ${downloadProgress}%`
+                                    : "Downloading..."
+                                : downloadDone
+                                    ? "✅ Done"
+                                    : (
+                                        <>
+                                            <FaFileExcel /> Export
+                                        </>
+                                    )}
+                        </button>
+                        <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                            <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            {searchText && (
+                                <span
+                                    onClick={() => setSearchText("")}
+                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
+                                    ✖
+                                </span>
+                            )}
+                        </div>
                     </div>
+                    <>
+                        <LoadingOverlay loading={loading} />
+                        <LocalReportTbale
+                            data={localReportData}
+                            page={page}
+                            perPage={perPage}
+                            totalRows={totalRows}
+                            setPage={setPage}
+                            setPerPage={setPerPage}
+                        />
+
+                    </>
+
                 </div>
+            }
 
-                <>
-                    <LoadingOverlay loading={loading} />
-
-                    <LocalReportTbale
-                        data={localReportData}
-                        page={page}
-                        perPage={perPage}
-                        totalRows={totalRows}
-                        setPage={setPage}
-                        setPerPage={setPerPage}
-                    />
-                </>
-            </div>
+            <CustomDialog
+                open={showErrorPopup}
+                onClose={() => setShowErrorPopup(false)}
+                title="Error"
+                message={errorMessage}
+                severity="error"
+                color="secondary"
+            />
         </div>)
 }
 

@@ -48,6 +48,7 @@ import DeploymentPopup from './Pages/DeploeyementNotification/DeploymentPopup';
 import ForgotPassword from './Pages/UserAuthentication/Login/ForgotPassword';
 import ManualRCRequest from './Pages/ManualRCRequest/ManualRCRequest';
 import ManualDoor from './Pages/Manual Door/ManualDoor';
+import TableMaster from './Pages/TableMaster/TableMaster';
 function App() {
 
   // const [count, setCount] = useState(0)
@@ -109,6 +110,7 @@ function App() {
       { name: "StockUpdate", path: "/stockUpdate" },
       { name: "ManualRCRequest", path: "/manualRCRequest" },
       { name: "manualDoor", path: "/ManualDoor" },
+       { name: "tableMaster", path: "/TableMaster" },
     ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -207,6 +209,7 @@ function App() {
           <Route path='/forgotPassword' element={<ForgotPassword />} />
           <Route path='/manualRCRequest' element={<ManualRCRequest />} />
           <Route path='/manualDoor' element={<ManualDoor />} />
+          <Route path='/tableMaster' element={<TableMaster />} />
 
           <Route
             path="/receving"

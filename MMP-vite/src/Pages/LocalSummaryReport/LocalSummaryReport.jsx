@@ -7,7 +7,7 @@ import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../.
 import { fetchRequesterDetail, fetchRequesterSearch } from "../../components/Requester/RequesterActions.js";
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { saveGRN } from '../../Services/Services_09.js';
-import { checkAvailable, downloadRequester, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, saveRequester } from '../../Services/Services-Rc.js';
+import { checkAvailable, downloadRequester, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, fetchReworkerName, saveRequester } from '../../Services/Services-Rc.js';
 import { ContactSupportOutlined } from '@mui/icons-material';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
@@ -30,6 +30,7 @@ const LocalSummaryReport = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [downloadDone, setDownloadDone] = useState(false);
     const [requesterDeatil, setRequesterDetail] = useState([]);
+    const [ReworkerNameList, setReworkerNameList] = useState([]); 
     const [page, setPage] = useState(0);
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
@@ -49,6 +50,20 @@ const LocalSummaryReport = () => {
         setFormData({});
         setFormErrors({});
     }
+
+    useEffect(() =>{
+        fetchReworkerNameList();
+    },[])
+
+    const fetchReworkerNameList = async () => {
+        try {
+            const response = await fetchReworkerName();
+            setReworkerNameList(response.data || []);
+        } catch (error) {
+            console.error("Error fetching requester details:", error);
+        }
+    };
+            
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -60,6 +75,7 @@ const LocalSummaryReport = () => {
                     handleChange={handleChange}
                     shifyOption={shifyOption}
                     formErrors={formErrors}
+                    ReworkerNameList={ReworkerNameList}
                 // handlePutawayChange={handlePutawayChange}
                 // poDropdownOptions={Array.isArray(putawayTicket) ? [...new Set(putawayTicket)] : []}
                 />

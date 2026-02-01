@@ -278,7 +278,8 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {(userRole.includes("Admin") || isScreenAllowed("Currency Master")) && <li><Link to="/curencyMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Currency Master</Link></li>}
                       {(userRole.includes("Admin") || isScreenAllowed("Compatability Master")) && <li><Link to="/compatabilityMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Compatability Master</Link></li>}
                       {(userRole.includes("Admin") || isScreenAllowed("Approval Master")) && <li><Link to="/approvalMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Approval Master</Link></li>}
-                      {/* {(userRole.includes("Admin") || isScreenAllowed("Compatability Master")) && <li><Link to="/compatabilityMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Compatability Master</Link></li>} */}
+                      {(userRole.includes("Admin") || isScreenAllowed("tableMaster")) && <li><Link to="/tableMaster" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Table Master</Link></li>}
+
                     </ul>
                   )}
                 </li>

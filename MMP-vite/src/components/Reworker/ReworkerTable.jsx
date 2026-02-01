@@ -85,7 +85,7 @@ const handleGrnSelect = (rowSelectedId) => {
             "partcode",
             "partdescription",
             "racklocation",
-            "Repaier commnent",
+            "repairercomments",
             "availableqty",
             "RequestedQty",
             "pickingqty",
@@ -105,6 +105,7 @@ const handleGrnSelect = (rowSelectedId) => {
             RequestedQty: { label: "Requested Qty" },
             pickingqty: { label: "Picking Qty" },
             pickedqty: { label: "picked Qty" },
+            repairercomments:{ label: "Repairer Comments"},
             repairerName: { label: "Repairer Name"}
 
         },

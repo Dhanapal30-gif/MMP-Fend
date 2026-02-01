@@ -7,7 +7,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, TextField } from "@mui/material";
 
 const LocalndindividualReportCom = ({ formData, setFormData, isFrozen,
-  typeOptions, groupOptions, handleInputChange, nameOptions, serialOptions,
+  typeOptions, productNameAndPartcode, handleInputChange, nameOptions, serialOptions,
   partOptions, handleChange, productOptions, handlePoChange, formErrors }) => {
 
   const BoardStaus = [
@@ -78,7 +78,33 @@ const getDownloadValue = () => {
           onChange={(e, newValue) => handlePoChange("status", newValue?.value || "")}
           renderInput={(params) => <TextField {...params} label="Status" size="small" />}
         />
+<TextField
+    id="outlined-basic"
+    label="BoardSerial Number"
+    variant="outlined"
+    name="boardserialnumber"
+    value={formData.boardserialnumber || ""}
+    onChange={(e) => handlePoChange(e.target.name, e.target.value)}
+    size="small"
+/>
+<Autocomplete
+  options={productNameAndPartcode.partcode || []}
+  value={formData.partcode || null}
+  onChange={(e, val) => setFormData({ ...formData, partcode: val })}
+  renderInput={(params) => (
+    <TextField {...params} label="Part Code" size="small" />
+  )}
+/>
 
+
+   <Autocomplete
+  options={productNameAndPartcode.productname || []}
+  value={formData.productname || null}
+  onChange={(e, val) => setFormData({ ...formData, productname: val })}
+  renderInput={(params) => (
+    <TextField {...params} label="Product Name" size="small" />
+  )}
+/>
         <ComTextFiled
           label="Start Date"
           name="startDate"

@@ -749,7 +749,7 @@ else if (s.includes("deliver") || s.includes("delivery")) {
 
 
     const exportToExcel = (search = "") => {
-        const userId = sessionStorage.getItem("userName") || "System";
+        const userId = sessionStorage.getItem("userId") || "System";
 
         setDownloadDone(false);
         setDownloadProgress(null);
@@ -770,7 +770,7 @@ else if (s.includes("deliver") || s.includes("delivery")) {
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement("a");
                 link.href = url;
-                link.setAttribute("download", "LocalReport.xlsx");
+                link.setAttribute("download", "RequesterData.xlsx");
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
