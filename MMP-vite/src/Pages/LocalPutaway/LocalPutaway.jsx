@@ -9,6 +9,8 @@ import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../.
 import { downloadLocal, downloadSearchLocal, fetchBoardSerialNumber, fetchproductPtl, fetchPTLPutaway, fetchPTLPutawayTicket, fetchPTLPutawayTicketDetail, fetchPutaway, getindiviualDetailFilter, getindiviualDetailFind, getLocalINdiviual, getLocalMaster, getLocalPutaway, getLocalPutawaySearch, savePTLRepaier, savePTLRequest, savePTLStore, savePutaway, savePutLocation, saveTicketPutaway } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { deleteLocalPutaway } from '../../Services/Services-Rc';
+import { InputAdornment, IconButton } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 const LocalPutaway = () => {
     const [formData, setFormData] = useState({
@@ -279,7 +281,7 @@ const LocalPutaway = () => {
                 fetchData();
                 fetchPutawayDetailTable();
                 fetchPutawayTicket();
-                setsearchText("");
+                setSearchText("");
             })
             .catch((error) => {
                 if (error.response) {
@@ -435,7 +437,7 @@ const LocalPutaway = () => {
         }
         const handleFrezeFiled=()=>{
             setIsTicetFreze(true)
-            setPutButton(fal)
+            setPutButton(false)
             setSubmitButton(false)
         }
 
@@ -544,17 +546,47 @@ const LocalPutaway = () => {
                                 )}
                     </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-                        <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
-                        {searchText && (
-                            <span
-                                onClick={() => setSearchText("")}
-                                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
-                                ✖
-                            </span>
-                        )}
-                    </div>
+  <input
+    type="text"
+    className="form-control"
+    style={{ height: "30px", paddingRight: "55px" }}
+    placeholder="Search..."
+    value={searchText}
+    onChange={(e) => setSearchText(e.target.value)}
+  />
+
+  {searchText && (
+    <span
+      onClick={() => setSearchText("")}
+      style={{
+        position: "absolute",
+        right: "30px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        cursor: "pointer",
+        color: "#aaa",
+        fontWeight: "bold"
+      }}
+    >
+      ✖
+    </span>
+  )}
+
+  <span
+    // onClick={handleSearchClick}
+    style={{
+      position: "absolute",
+      right: "8px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      cursor: "pointer"
+    }}
+  >
+    🔍
+  </span>
+</div>
+
+
                 </div>
                 <LoadingOverlay loading={loading} />
 

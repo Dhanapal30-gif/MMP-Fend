@@ -460,3 +460,20 @@ export const downloadPartcodeStock = (search) =>
 
   const saveTableMaster = `${url}/TableMaster/SaveTable`
 export const saveTable = (formData) => axios.post(saveTableMaster, formData);
+
+
+
+const rejectedIssuance = `${url}/IssuacneCon/IssuanceReject`;
+export const rejectedIssuanceTicket = (ticketno,comment ) => {
+  return axios.post(rejectedIssuance, null, {
+    params: {
+      issuanceTicket: ticketno,
+      rejectedComment: comment
+    }
+  });
+};
+
+
+const saveLocal_Bulk =`${url}/LocalMaster/bulk_Save`
+export const saveLocalMasteUpload = (excelUploadData) =>axios.post(saveLocal_Bulk,excelUploadData)
+

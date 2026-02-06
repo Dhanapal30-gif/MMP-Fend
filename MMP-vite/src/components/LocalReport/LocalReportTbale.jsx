@@ -21,6 +21,7 @@ const fields = [
   "racklocation",
   "pickingqty",
   "pickedqty",
+   "repairercomments",
   "repairername",
   "reworkername",
   "recordstatus",
@@ -29,7 +30,7 @@ const fields = [
   "ptl_op_st_date",
   "ptl_op_end_date",
   "enddate",
-  "repairercomments",
+ 
 ];
 
 

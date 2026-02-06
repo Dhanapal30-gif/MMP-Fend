@@ -790,6 +790,8 @@ const handleAddClick = async () => {
       setDeletButton(false);
       fetchPoDetail(page, perPage);
       setSearchText("");
+      setHandleAdd(true);
+      formClear();
     } catch (error) {
        const msg = error.response?.data?.message || "Delete error";
       setErrorMessage(msg);

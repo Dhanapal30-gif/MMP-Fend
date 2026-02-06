@@ -19,7 +19,7 @@ const ReworkerTextFiled7 = ({ formData, setFormData, isFrozen,
         { label: "Reflow", value: "Reflow" },
         { label: "BGA", value: "BGA" },
         { label: "Swap", value: "Swap" },
-        { label: "Thermal GEL", value: "ThermalGEL" }
+        { label: "Thermal GEL", value: "Thermal GEL" }
     ];
     const getOptionObj = (value, options) => {
         return options.find((opt) => opt.value === value) || null;

@@ -5,10 +5,12 @@ import IssuanceTable from "../../components/Issuance/IssuanceTable";
 import { downloadIssuance, downloadPTLIssuance, fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, getPTLIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
-import { savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
+import { rejectedIssuanceTicket, savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { FaFileExcel, FaBars } from "react-icons/fa";
-
+import { TextField,} from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 const Issuance = () => {
 
     const [formData, setFormData] = useState({
@@ -41,6 +43,7 @@ const Issuance = () => {
     const [isUserActive, setIsUserActive] = useState(false)
     const [colourCode, setColourCode] = useState("")
     const [hidePutButton, setHidePutButton] = useState(false)
+    const [hideRejectComment, setHideRejectComment] = useState(false)
     const [hideDeliverButton, setHideDeliverButton] = useState(false)
     const [hideIssueButton, setHideIssueButton] = useState(false)
     const [loading, setLoading] = useState(false);
@@ -51,7 +54,9 @@ const Issuance = () => {
     const [filteredAddData, setFilteredAddData] = useState([]);
     const [showMenu, setShowMenu] = useState(false);
     const [activeTicketType, setActiveTicketType] = useState("DTL"); // default
-
+    const [formData1,setFormData1]=useState({
+        rejectedComment:""
+    })
 
 
     const buildTicketNo = (type, value) => {
@@ -691,6 +696,48 @@ const Issuance = () => {
     };
 
 
+    const handleReject = ()=>{
+        setHideRejectComment(true);
+    }
+
+
+    const handleChangeReject = (e) => {
+    setFormData1({
+        ...formData1,
+        rejectedComment: e.target.value
+    });
+};
+
+    const handleRejectSubmit = () => {
+setHideRejectComment(true);
+    if (!formData1.rejectedComment?.trim()) {
+        setErrorMessage("Reject comment required");
+        setShowErrorPopup(true);
+        return;
+    }
+
+    const ticketno = pickTicketData[0]?.rec_ticket_no;
+
+
+    rejectedIssuanceTicket(ticketno, formData1.rejectedComment)
+        .then(() => {
+            setSuccessMessage("Rejected Successfully");
+            setShowSuccessPopup(true);
+            if (ticketno?.startsWith("PTL")) {
+                        fetchRequestedTickets("PTL");
+                    } else {
+                        fetchRequestedTickets("DTL");
+                    }
+                    setHideDeliverButton(false);
+                    setHidePutButton(false);
+                    setHideIssueButton(true);
+                    setPickTicketData([]);
+                    setShowTable(false);
+                    // fetchData();
+        })
+        .catch(err => console.error(err));
+};
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -714,10 +761,11 @@ const Issuance = () => {
                 <div className='ComCssTable'>
                     {/* <h5 className='ComCssTableName'>Issue List</h5> */}
                     <h5 className='ComCssTableName'>{getTableTitle()}</h5>
-
+ 
                     <div
                         className="d-flex justify-content-end align-items-center mb-3"
                         style={{ marginTop: "9px", display: "flex" }}>
+                       
                         <div style={{ position: "relative", width: "200px" }}>
                             <input
                                 type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
@@ -730,6 +778,7 @@ const Issuance = () => {
                                 </span>
                             )}
                         </div>
+                        
                     </div>
                     <IssuanceShowTable
                         data={filteredAddData}
@@ -770,6 +819,14 @@ const Issuance = () => {
                         </p>
                     )}
                     <div className="ComCssButton9">
+                        
+                           
+                        <button style={{ backgroundColor: 'Red' }} onClick={handleRejectSubmit} >Reject</button>
+
+{/* {hideRejectComment && (
+    <button style={{ backgroundColor: 'Red' }} onClick={handleRejectSubmit } >RejectIssuanceTicket</button>
+
+)} */}
                         {hidePutButton && !isPutButtonHidden && (
                             <button className='ComCssSubmitButton' onClick={handlePut} >Pick</button>
                         )}
@@ -784,6 +841,35 @@ const Issuance = () => {
                             {/* <button className='ComCssSubmitButton' onClick={handleIssue} >Reject</button> */}
 
                     </div>
+                    <ThemeProvider theme={TextFiledTheme}>
+
+                   
+                   {hideRejectComment && (
+<TextField
+    label="Reject Comment"
+    name="rejectedComment"
+    value={formData1.rejectedComment}
+    onChange={handleChangeReject}
+    size="small"
+    sx={{ width: "80%" }}
+/>
+
+                   
+            //         <TextField
+            //   id="outlined-basic"
+            //   label="Reject Comment"
+            //   variant="outlined"
+             
+            //   name="ponumber"
+            //   value={formData1.rejectedComment}
+            //   onChange={handleChange}
+            //   error={Boolean(formErrors.rejectedComment)}
+            //   helperText={formErrors.rejectedComment}
+            //   size="small"
+            //    sx={{ width: "80%" }}
+            // /> 
+            )}
+             </ThemeProvider>
                 </div>
             )}
             <div className='ComCssTable'>

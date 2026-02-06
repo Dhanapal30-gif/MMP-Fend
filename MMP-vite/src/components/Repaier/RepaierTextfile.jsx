@@ -16,7 +16,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
         { label: "Reflow", value: "Reflow" },
         { label: "BGA", value: "BGA" },
         { label: "Swap", value: "Swap" },
-        { label: "Thermal GEL", value: "ThermalGEL" }
+        { label: "Thermal GEL", value: "Thermal GEL" }
     ];
     const getOptionObj = (value, options) => {
         return options.find((opt) => opt.value === value) || null;
@@ -140,11 +140,11 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
 
                 />
 <ComTextFiled
-                    label="Repaire Location"
+                    label="Component Location"
                     name="repairelocation"
                     value={formData.repairelocation}
                     onChange={handleChange}
-                    disabled={isFrozen}
+                    // disabled={isFrozen}
                     error={Boolean(formErrors?.repairelocation)}
                     helperText={formErrors?.repairelocation || ""}
                     className="comTextFiled"
@@ -199,28 +199,10 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                                 />
                             )}
                         /> */}
-                        <Autocomplete
+                        {/* <Autocomplete
                             options={partOptions}
                             value={partOptions.find(opt => opt.value === formData.partcode) || null}
                             getOptionLabel={(option) => option.label || ""}
-
-                            // ⭐ FIX: STOP auto-scroll to selected item
-                            ListboxProps={{
-                                style: {
-                                    scrollBehavior: "auto"
-                                },
-                                onScroll: (e) => {
-                                    // prevent MUI from auto-scrolling to selected item
-                                    e.stopPropagation();
-                                }
-                            }}
-
-                            onOpen={() => {
-                                setTimeout(() => {
-                                    const el = document.querySelector('.MuiAutocomplete-listbox');
-                                    if (el) el.scrollTop = 0;  // force go to top
-                                }, 0);
-                            }}
 
                             onChange={(e, newValue) => {
                                 setFormData(prev => ({
@@ -236,13 +218,50 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    className="comTextFiled"
+                                //    className="comTextFiled"
                                     label="Partcode"
-                                    variant="outlined"
+                                  //  variant="outlined"
                                     size="small"
                                 />
                             )}
-                        />
+                        /> */}
+                        {/* <Autocomplete
+    options={Array.isArray(partOptions) ? partOptions : []}
+    value={formData.partcode || null}
+    getOptionLabel={(o) => o?.partcode || ""}
+    isOptionEqualToValue={(o, v) => o?.partcode === v?.partcode}
+    onChange={(e, newValue) => {
+        setFormData(prev => ({
+            ...prev,
+            partcode: newValue || null,
+            partdescription: newValue?.partdescription || "",
+            racklocation: newValue?.racklocation || "",
+            availableqty: newValue?.quantity || ""
+        }));
+    }}
+    renderInput={(params) => (
+        <TextField {...params} label="Partcode" size="small" />
+    )}
+/> */}
+
+<Autocomplete
+    options={Array.isArray(partOptions) ? partOptions : []}
+    value={partOptions.find(o => o.partcode === formData.partcode) || null}
+    getOptionLabel={(o) => o?.partcode || ""}
+    isOptionEqualToValue={(o, v) => o?.partcode === v?.partcode}
+    onChange={(e, newValue) => {
+        setFormData(prev => ({
+            ...prev,
+            partcode: newValue?.partcode || "",
+            partdescription: newValue?.partdescription || "",
+            racklocation: newValue?.racklocation || "",
+            availableqty: newValue?.quantity || ""
+        }));
+    }}
+    renderInput={(params) => (
+        <TextField {...params} label="Partcode" size="small" />
+    )}
+/>
 
                         <ComTextFiled
                             label="partdescription"
@@ -322,7 +341,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                         )}
                     />
                 )}
-                {formData.type === "ThermalGEL" && (
+                {formData.type === "Thermal GEL" && (
                     <>
                         <ComTextFiled
                             label="Quantity"
@@ -336,7 +355,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     </>
                 )}
                 {(formData.type === "Rework" || formData.type === "RND" || formData.type === "Soldring" || formData.type === "Desoldring"
-                    || formData.type === "Trackchange" || formData.type === "Reflow" || formData.type === "BGA" || formData.type === "ThermalGEL" || formData.type === "Swap") && (
+                    || formData.type === "Trackchange" || formData.type === "Reflow" || formData.type === "BGA" || formData.type === "Thermal GEL" || formData.type === "Swap") && (
                         <>
                             <TextField
                                 label="Comments"
