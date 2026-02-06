@@ -200,9 +200,16 @@ export const savePutawayStockTransferRequest = (formData) => axios.put(savePutSt
 
 
 const fetchReworkerBoard = `${url}/repaierCon/fetchBoard`;
-export const fetchSearchBoard = (search = "") => {
+export const fetchSearchBoard = (search = "",type = "") => {
   return axios.get(fetchReworkerBoard, {
-    params: { search },
+    params: { search,type },
+  });
+};
+
+const fetchReworkerBoardSearch = `${url}/repaierCon/fetchBoardSerialNumber`;
+export const fetchSearchBoardSerialNumber = (search = "",type = "") => {
+  return axios.get(fetchReworkerBoardSearch, {
+    params: { search ,type},
   });
 };
 

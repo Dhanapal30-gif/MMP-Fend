@@ -1320,7 +1320,7 @@ setErrorMessage(msg || "Something went wrong");
           
           <DataTable
           key={resetKey}                 
-  paginationDefaultPage={1} 
+            paginationDefaultPage={1} 
             columns={column}
             data={rcStoreData}
             pagination

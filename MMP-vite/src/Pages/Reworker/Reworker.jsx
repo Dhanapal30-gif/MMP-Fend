@@ -11,6 +11,7 @@ import { fetchBoardSerialNumber, fetchproductPtl, getLocalMaster, saveDoneReques
 import { cancelReworkerBoard, fetchSearchBoard } from '../../Services/Services-Rc';
 import ReworkerTypeBasedhide from "../../components/Reworker/ReworkerTypeBasedhide";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Type } from 'lucide-react';
 
 
 const Reworker = () => {
@@ -38,6 +39,9 @@ const Reworker = () => {
     const [selectedGrnRows, setSelectedGrnRows] = useState([]);
     const [doneSelectButton, setDoneSelectButton] = useState(false);
     const [searchScanText, setSearchScanText] = useState('');
+    const [boardType, setBoardType]=useState([]);
+    const [boardTypeDropdown, setBoardTypeDropdown]=useState(false);
+const [typeList, setTypeList] = useState([]); // dropdown types
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -70,6 +74,7 @@ const Reworker = () => {
                     setSuccessMessage(response.data.message || "Saved successfully");
                     setShowSuccessPopup(true);
                     setSubmitButton(true);
+                    // setRequestButton(true);
 
                     // ✅ Mark rows as done so checkboxes hide
                     setBoardFetch(prev =>
@@ -82,6 +87,7 @@ const Reworker = () => {
 
                     // ✅ Clear selection so "select all" checkbox resets
                     setSelectedGrnRows([]);
+                    
                 }
             })
             .catch(err => console.error(err))
@@ -96,7 +102,7 @@ const Reworker = () => {
         );
     }, [boardFetch]);
 
-    const handleSearchClick = (searchTerm) => {
+    const handleSearchClick = (searchTerm,type) => {
 
         if (!searchTerm) {
             setErrorMessage("Please enter a module serial number.");
@@ -104,7 +110,10 @@ const Reworker = () => {
             return;
         }
 
-        fetchSearchBoard(searchTerm)
+        // setTableData([]);
+        
+       
+        fetchSearchBoard(searchTerm,type)
             .then((response) => {
                 const data = response.data; // directly use response.data
                 if (data && data.length > 0) {
@@ -119,7 +128,7 @@ const Reworker = () => {
                     setBoardFetch(fetchBoardDetail);
                     setTotalRows(fetchBoardDetail.length)
                     //   setBoardFetch(data)
-                    fetchData();
+                    // fetchData();
                     //   setFormData({ ...formData, ...data[0] });
                 } else {
                     // console.warn("No content found:", data);
@@ -134,6 +143,10 @@ const Reworker = () => {
             });
     };
 
+
+//    useEffect(() => {
+//   console.log("TABLE DATA:", boardFetch);
+// }, [boardFetch]);
 
     // const handleQtyChange = (id, value) => {
     //     const updatedData = boardFetch.map(item =>
@@ -170,15 +183,20 @@ const Reworker = () => {
                 ProductGroup: "",
                 ProductName: "",
                 boardserialnumber: "",
-                searchBoardserialNumber: ""
+                searchBoardserialNumber: "",
+                
+                
             }));
             setSearchScanText("");
+            setBoardTypeDropdown(false);
+            setBoardType([]);
         } else if (field === "ProductGroup") {
             setFormData(prev => ({
                 ...prev,
                 ProductGroup: value,
                 ProductName: "",
-                boardserialnumber: ""
+                boardserialnumber: "",
+                
             }));
             setSearchScanText("");
         } else if (field === "ProductName") {
@@ -192,7 +210,7 @@ const Reworker = () => {
             setFormData(prev => ({ ...prev, boardserialnumber: value }));
             setSearchScanText("");
             const searchTerm = value; // ✅ use the current input value
-            handleSearchClick(searchTerm);
+            handleSearchClick(searchTerm,formData.Type);
         }
     };
 
@@ -375,7 +393,8 @@ const Reworker = () => {
             pickingqty: item.availableqty, // match backend field
             reworkername,
             productname: item.productname,
-            boardSerialNo: item.boardserialnumber
+            boardSerialNo: item.boardserialnumber,
+            type: item.type
         }));
 
         try {
@@ -387,9 +406,15 @@ const Reworker = () => {
                 Type: ""
             })
             fetchData();
+            setSearchScanText("");
+            setRequestButton(true);
+            setBoardTypeDropdown([]);
             //    console.log("API success:", response);
         } catch (error) {
-            setErrorMessage("Error sending payload:", error)
+            const msg =
+        error?.response?.data?.message || "Something went wrong";
+
+            setErrorMessage(msg)
             setShowErrorPopup(true)
             //    console.error("Error sending payload:", error);
         } finally {
@@ -442,15 +467,33 @@ const Reworker = () => {
         });
     }
 
-    const showRequest =
-        requestButton &&
-        boardFetch.length > 0 &&
-        // boardFetch[0].is_ptlrequest === "0" &&
-        (boardFetch[0]?.is_ptlrequest === "0" || !boardFetch[0]?.is_ptlrequest) &&
-        (
-            ['Trackchange', 'Reflow'].includes(boardFetch[0]?.type) ||
-            !['Soldring', 'Desoldring'].includes(boardFetch[0]?.type)
-        );
+    // const showRequest =
+    //     requestButton &&
+    //     boardFetch.length > 0 &&
+    //     // boardFetch[0].is_ptlrequest === "0" &&
+    //     (boardFetch[0]?.is_ptlrequest === "0" || !boardFetch[0]?.is_ptlrequest) &&
+    //     (
+    //         ['Trackchange', 'Reflow'].includes(boardFetch[0]?.type) ||
+    //         !['Soldring', 'Desoldring','Thermal GEL'].includes(boardFetch[0]?.type)
+    //     );
+
+//         const showRequest =
+//   Boolean(requestButton) &&
+//   boardFetch?.length > 0 &&
+//   (boardFetch[0]?.is_ptlrequest === "0" ||  boardFetch[0]?.is_ptlrequest == null) &&
+//   ['Rework','SUI','RND','BGA'].includes(boardFetch[0]?.type);
+
+
+const showRequest =
+  requestButton === true &&
+  Array.isArray(boardFetch) &&
+  boardFetch.length > 0 &&
+  boardFetch[0]?.is_ptlrequest == null && // null or undefined only
+  ['REWORK', 'SUI', 'RND', 'BGA'].includes(
+    (boardFetch[0]?.type || '').trim().toUpperCase()
+  );
+
+//   console.log("requestButton", requestButton);
 
     //  console.log("boardFetch.RequestedQty", boardFetch[1]?.RequestedQty);
 
@@ -477,6 +520,16 @@ const Reworker = () => {
                     setLoading={setLoading}
                     setSearchScanText={setSearchScanText}
                     searchScanText={searchScanText}
+                    setRequestButton={setRequestButton}
+                    setSelectedGrnRows={setSelectedGrnRows}
+                    setBoardType={setBoardType}
+                    setBoardTypeDropdown={setBoardTypeDropdown}
+                    boardType={boardType}
+                    boardTypeDropdown={boardTypeDropdown}
+                    setTypeList={setTypeList}
+                    typeList={typeList}
+                    setShowTable={setShowTable}
+                    setTableData={setTableData}
                 // formErrors={formErrors} // ✅ Pass this prop
                 // handlePoChange={handlePoChange}
                 // productOptions={productOptions}
@@ -516,7 +569,7 @@ const Reworker = () => {
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Board Detail</h5>
 
-                    {(boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Trackchange' || boardFetch[0]?.type === 'Reflow' || boardFetch[0]?.type === 'ThermalGEL') ? (
+                    {(boardFetch[0]?.type === 'Soldring' || boardFetch[0]?.type === 'Desoldring' || boardFetch[0]?.type === 'Trackchange' || boardFetch[0]?.type === 'Swap' || boardFetch[0]?.type === 'Reflow' || boardFetch[0]?.type === 'Thermal GEL') ? (
                         <ReworkerTypeBasedhide
                             data={boardFetch}
                             page={0}
@@ -534,6 +587,9 @@ const Reworker = () => {
                             setShowSuccessPopup={setShowSuccessPopup}
                             setRequestButton={setRequestButton}
                             setSubmitButton={setSubmitButton}
+                             selectedGrnRows={selectedGrnRows}   // <-- current selection
+                                setSelectedGrnRows={setSelectedGrnRows} // <-- setter function
+
                         />
                     ) : (
                         <>
@@ -586,7 +642,7 @@ const Reworker = () => {
                             boardFetch.length > 0 &&
                             (
                                 boardFetch[0].is_ptlrequest == 2 ||
-                                ['Soldring', 'SUI', "RND", 'Desoldring', 'Trackchange', 'Reflow', 'Rework', 'ThermalGEL'].includes(boardFetch[0]?.type)
+                                ['Soldring', 'SUI', "RND", 'Desoldring','BGA', 'Trackchange', 'Reflow', 'Rework', 'Thermal GEL'].includes(boardFetch[0]?.type)
                             ) && (
                                 <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
                             )
@@ -646,6 +702,7 @@ const Reworker = () => {
                     </div>
                 </div>
             )}
+            
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}

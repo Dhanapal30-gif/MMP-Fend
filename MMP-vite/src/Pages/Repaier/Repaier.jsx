@@ -101,18 +101,25 @@ const Repaier = () => {
             isValid = false;
         }
 
-        if (!formData.boardserialnumber?.trim()) {
-            errors.boardserialnumber = "Enter Module Serial Number";
-            isValid = false;
-        } else if (formData.boardserialnumber.length !== 11) {
-            errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
-            isValid = false;
-        }
+        // if (!formData.boardserialnumber?.trim()) {
+        //     errors.boardserialnumber = "Enter Module Serial Number";
+        //     isValid = false;
+        // } else if (formData.boardserialnumber.length !== 11) {
+        //     errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+        //     isValid = false;
+        // }
 
+if (!formData.boardserialnumber?.trim()) {
+  errors.boardserialnumber = "Enter Module Serial Number";
+  isValid = false;
+} else if (formData.boardserialnumber.length > 11) {
+  errors.boardserialnumber = "Module Serial Number must not exceed 11 characters";
+  isValid = false;
+}
 
 
         if (
-            ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
+            ["Soldring", "Desoldring", "Trackchange", "Reflow", "Thermal GEL", "Swap"].includes(formData.type) &&
             !formData.repairercomments
         ) {
             errors.repairercomments = "Please enter Comments";
@@ -120,7 +127,7 @@ const Repaier = () => {
         }
 
         if (
-            ["ThermalGEL"].includes(formData.type) &&
+            ["Thermal GEL"].includes(formData.type) &&
             !formData.tgquantity
         ) {
             errors.tgquantity = "Please enter Quantity";
@@ -154,14 +161,21 @@ const Repaier = () => {
 
 
 
-        if (!formData.boardserialnumber?.trim()) {
-            errors.boardserialnumber = "Enter Module Serial Number";
-            isValid = false;
-        } else if (formData.boardserialnumber.length !== 11) {
-            errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
-            isValid = false;
-        }
+        // if (!formData.boardserialnumber?.trim()) {
+        //     errors.boardserialnumber = "Enter Module Serial Number";
+        //     isValid = false;
+        // } else if (formData.boardserialnumber.length !== 11) {
+        //     errors.boardserialnumber = "Module Serial Number must be exactly 11 characters";
+        //     isValid = false;
+        // }
 
+        if (!formData.boardserialnumber?.trim()) {
+  errors.boardserialnumber = "Enter Module Serial Number";
+  isValid = false;
+} else if (formData.boardserialnumber.length > 11) {
+  errors.boardserialnumber = "Module Serial Number must not exceed 11 characters";
+  isValid = false;
+}
         if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
             if (!formData.pickingqty) {
                 errors.pickingqty = "Please Enter Picking Qty";
@@ -170,7 +184,7 @@ const Repaier = () => {
         }
 
         if (
-            ["Soldring", "Desoldring", "Trackchange", "Reflow", "ThermalGEL", "Swap"].includes(formData.type) &&
+            ["Soldring", "Desoldring", "Trackchange", "Reflow", "Thermal GEL", "Swap"].includes(formData.type) &&
             !formData.repairercomments
         ) {
             errors.repairercomments = "Please enter Comments";
@@ -272,13 +286,20 @@ const Repaier = () => {
         productfamily: item.productfamily
     }));
 
-    const partOptions = table2Data.map(item => ({
-        label: `${item.partcode}`,
-        value: item.partcode,
-        partdescription: item.partdescription,
-        racklocation: item.racklocation,
-        availableqty: item.quantity
-    }));
+    // const partOptions = table2Data.map(item => ({
+    //     label: `${item.partcode}`,
+    //     value: item.partcode,
+    //     partdescription: item.partdescription,
+    //     racklocation: item.racklocation,
+    //     availableqty: item.quantity
+    // }));
+
+  const partOptions = table2Data || []  
+  
+useEffect(()=>{
+ console.log("table2Data =", table2Data);
+},[table2Data])
+
 
     const suiNoOptions = table3Data.map(item => ({
         label: `${item.suiNo}`,
@@ -310,7 +331,8 @@ const Repaier = () => {
             SUINo: "",
             Quantity: "",
             productgroup: "",
-            productfamily: ""
+            productfamily: "",
+            repairelocation:""
         }));
     };
 

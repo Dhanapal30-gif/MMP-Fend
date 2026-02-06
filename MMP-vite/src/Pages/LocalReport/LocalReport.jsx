@@ -87,6 +87,22 @@ const LocalReport = () => {
             errors.startDate = "Please Select StartDate";
             isValid = false;
         }
+
+      if (
+  formData.status === "MSC00004" &&
+  (
+    (!formData.startDate || !formData.endDate) &&
+    !formData.download
+  )
+) {
+    setErrorMessage("Select Start & End Date OR Download")
+    setShowErrorPopup(true);
+//   errors.startDate = "Select Start & End Date OR Download";
+//   errors.endDate = "Select Start & End Date OR Download";
+//   errors.download = "Select Download OR Date range";
+  isValid = false;
+}
+
         setFormErrors(errors);
         return isValid;
     };

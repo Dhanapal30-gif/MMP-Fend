@@ -80,6 +80,7 @@ const handleGrnSelect = (rowSelectedId) => {
 
     const columns = generateColumnshidecheckbox({
         fields: [
+            "type",
             "productname",
             "boardserialnumber",
             "partcode",
@@ -96,6 +97,7 @@ const handleGrnSelect = (rowSelectedId) => {
 
         ],
         customConfig: {
+            type: { label: "Reworker Type" },
             productname: { label: "Product Name" },
             boardserialnumber: { label: "Board Serial Number" },
             partcode: { label: "partCode" },
