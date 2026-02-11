@@ -9,6 +9,9 @@ import PTLTable from "../../components/Local-PTL-Master/PTLTable";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { deleteLocalMaster } from '../../Services/Services-Rc';
 import DataTable from "react-data-table-component";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
+
 const PTLMaster = () => {
 
     const [formData, setFormData] = useState({
@@ -42,6 +45,7 @@ const PTLMaster = () => {
     const [showTable, setShowTable] = useState(true);
     const fileInputRef = useRef(null);
     const [fileInputKey, setFileInputKey] = useState(Date.now());
+     const [openMsg, setOpenMsg] = useState(false);
     const duplicateProducts = [];
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -72,8 +76,10 @@ const PTLMaster = () => {
         if (!valiDate()) return;
         setLoading(true);
 
-        const createdby = sessionStorage.getItem("userName") || "System";
-        const updatedby = sessionStorage.getItem("userName") || "System";
+        // const createdby = sessionStorage.getItem("userName") || "System";
+        // const updatedby = sessionStorage.getItem("userName") || "System";
+        const createdby = localStorage.getItem("userName") || "System";
+        const updatedby = localStorage.getItem("userName") || "System";
 
         const submitData = {
             ...formData,
@@ -212,6 +218,20 @@ const PTLMaster = () => {
     // }, [selectedRows])
 
 
+     useEffect(() => {
+            const validate = async () => {
+                const isValid = await checkUserValid();
+                if (!isValid) {
+                    setOpenMsg(true);
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 1000);
+                }
+            };
+            validate();
+           
+        }, []);
+
     const onDeleteClick = () => {
         setConfirmDelete(true);
         setIsEditMode(false);
@@ -230,7 +250,8 @@ const PTLMaster = () => {
         setConfirmDelete(false);
 
         try {
-            const modifiedby = sessionStorage.getItem("userId") || "System";
+            // const modifiedby = sessionStorage.getItem("userId") || "System";
+            const modifiedby = localStorage.getItem("userId") || "System";
             await deleteLocalMaster(selectedRows, modifiedby);
             setSuccessMessage("Data successfullly deleted");
             setShowSuccessPopup(true);
@@ -353,158 +374,160 @@ const PTLMaster = () => {
 
     const handleUpload = (event) => {
         setExcelUploadData([]);
-         setShowTable(false);
-         setUploadTable(true);
+        setShowTable(false);
+        setUploadTable(true);
 
         // setShowRcTable(false);
         // setHandleUpdateButton(false);
         setFormData({
-          partcode: '', partdescription: '', rohsstatus: '',msdstatus:'',technology:'', racklocation: '', quantity: '', unitprice: '', customduty: '', createdby: '',
-          catmovement: '', MOQ: '', TRQty: ''
+            partcode: '', partdescription: '', rohsstatus: '', msdstatus: '', technology: '', racklocation: '', quantity: '', unitprice: '', customduty: '', createdby: '',
+            catmovement: '', MOQ: '', TRQty: ''
         }); setSelectedRows([]);
         // setDeletButton(false);
-    
+
         const file = event.target.files[0];
         if (!file) return;
-    
+
         if (!file.name.startsWith("LocalPTLMaster")) {
-          setErrorMessage("Invalid file. Please upload RcMainMaster.xlsx");
-          setShowErrorPopup(true);
-          event.target.value = null;
-          exceluploadClear();
-          return;
-        }
-    
-        const reader = new FileReader();
-        reader.readAsBinaryString(file);
-        reader.onload = (e) => {
-          const data = e.target.result;
-          const workbook = XLSX.read(data, { type: "binary" });
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    
-          // Validate column headers first
-          const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
-          const expectedColumns = ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
-            "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"];
-    
-          const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
-          const parsedData = XLSX.utils.sheet_to_json(worksheet);
-    
-          if (!parsedData || parsedData.length === 0) {
-            setErrorMessage("No data found in the uploaded file");
+            setErrorMessage("Invalid file. Please upload RcMainMaster.xlsx");
             setShowErrorPopup(true);
             event.target.value = null;
             exceluploadClear();
-            return
-          }
-          setExcelUploadData(parsedData);
-          setTotalRows(parsedData.length);
-        //   setHandleUploadButton(true);
-        //   setHandleSubmitButton(false);
-         
-        //   setUploadTable(false)
-          // setShowProductTable(false);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsBinaryString(file);
+        reader.onload = (e) => {
+            const data = e.target.result;
+            const workbook = XLSX.read(data, { type: "binary" });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Validate column headers first
+            const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
+            const expectedColumns = ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
+                "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"];
+
+            const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+            const parsedData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (!parsedData || parsedData.length === 0) {
+                setErrorMessage("No data found in the uploaded file");
+                setShowErrorPopup(true);
+                event.target.value = null;
+                exceluploadClear();
+                return
+            }
+            setExcelUploadData(parsedData);
+            setTotalRows(parsedData.length);
+            //   setHandleUploadButton(true);
+            //   setHandleSubmitButton(false);
+
+            //   setUploadTable(false)
+            // setShowProductTable(false);
         };
     }
 
 
-    
-//       const excelUpload = (e) => {
-//   e.preventDefault();
 
-//   const createdby = sessionStorage.getItem("userName") || "System";
-//   const modifiedby = sessionStorage.getItem("userName") || "System";
+    //       const excelUpload = (e) => {
+    //   e.preventDefault();
 
-//   const updatedFormData = excelUploadData.map(item => ({
-//     ...item,
-//     createdby,
-//     modifiedby,
-//   }));
+    //   const createdby = sessionStorage.getItem("userName") || "System";
+    //   const modifiedby = sessionStorage.getItem("userName") || "System";
 
-//   setLoading(true);
+    //   const updatedFormData = excelUploadData.map(item => ({
+    //     ...item,
+    //     createdby,
+    //     modifiedby,
+    //   }));
 
-//   saveLocalMasteUpload(updatedFormData)
-//     .then(() => {
-//       setSuccessMessage("Master Data Added Successfully.");
-//       setShowSuccessPopup(true);
-//       setShowTable(true);
-//       setUploadTable(false);
-//       setExcelUploadData([]);
-//        fetchData(page, perPage);
-//     //   fetchMainMaster(page, perPage);
-//     //   setSearchText("");
-    
-    
-//     })
-//     .catch((error) => {
+    //   setLoading(true);
 
-//       if (error.response) {
-//         setErrorMessage(error.response.data?.message || "Server error");
-//         setShowErrorPopup(true);
-//       } else {
-//         setErrorMessage("Network error, please try again");
-//         setShowErrorPopup(true);
-//       }
+    //   saveLocalMasteUpload(updatedFormData)
+    //     .then(() => {
+    //       setSuccessMessage("Master Data Added Successfully.");
+    //       setShowSuccessPopup(true);
+    //       setShowTable(true);
+    //       setUploadTable(false);
+    //       setExcelUploadData([]);
+    //        fetchData(page, perPage);
+    //     //   fetchMainMaster(page, perPage);
+    //     //   setSearchText("");
 
-//     })
-//     .finally(() => {
-//       setLoading(false);
-//     });
-// };
 
-const excelUpload = (e) => {
-  e.preventDefault();
+    //     })
+    //     .catch((error) => {
 
-  // ✅ max 50 rows check
-  if (excelUploadData.length > 50) {
-    alert("Maximum 50 rows only allowed");
-    return;
-  }
+    //       if (error.response) {
+    //         setErrorMessage(error.response.data?.message || "Server error");
+    //         setShowErrorPopup(true);
+    //       } else {
+    //         setErrorMessage("Network error, please try again");
+    //         setShowErrorPopup(true);
+    //       }
 
-  // ✅ quantity empty check
-  const hasEmptyQty = excelUploadData.some(
-    row => !row.quantity || row.quantity === "" || row.quantity === null
-  );
+    //     })
+    //     .finally(() => {
+    //       setLoading(false);
+    //     });
+    // };
 
-  if (hasEmptyQty) {
-    alert("Quantity field cannot be empty");
-    return;
-  }
+    const excelUpload = (e) => {
+        e.preventDefault();
 
-  const createdby = sessionStorage.getItem("userName") || "System";
-  const modifiedby = sessionStorage.getItem("userName") || "System";
+        // ✅ max 50 rows check
+        if (excelUploadData.length > 50) {
+            alert("Maximum 50 rows only allowed");
+            return;
+        }
 
-  const updatedFormData = excelUploadData.map(item => ({
-    ...item,
-    createdby,
-    modifiedby,
-  }));
+        // ✅ quantity empty check
+        const hasEmptyQty = excelUploadData.some(
+            row => !row.quantity || row.quantity === "" || row.quantity === null
+        );
 
-  setLoading(true);
+        if (hasEmptyQty) {
+            alert("Quantity field cannot be empty");
+            return;
+        }
 
-  saveLocalMasteUpload(updatedFormData)
-    .then(() => {
-      setSuccessMessage("Master Data Added Successfully.");
-      setShowSuccessPopup(true);
-      setShowTable(true);
-      setUploadTable(false);
-      setExcelUploadData([]);
-      fetchData(page, perPage);
-    })
-    .catch((error) => {
-      if (error.response) {
-        setErrorMessage(error.response.data?.message || "Server error");
-      } else {
-        setErrorMessage("Network error, please try again");
-      }
-      setShowErrorPopup(true);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-};
+        // const createdby = sessionStorage.getItem("userName") || "System";
+        // const modifiedby = sessionStorage.getItem("userName") || "System";
+        const createdby = localStorage.getItem("userName") || "System";
+        const modifiedby = localStorage.getItem("userName") || "System";
+
+        const updatedFormData = excelUploadData.map(item => ({
+            ...item,
+            createdby,
+            modifiedby,
+        }));
+
+        setLoading(true);
+
+        saveLocalMasteUpload(updatedFormData)
+            .then(() => {
+                setSuccessMessage("Master Data Added Successfully.");
+                setShowSuccessPopup(true);
+                setShowTable(true);
+                setUploadTable(false);
+                setExcelUploadData([]);
+                fetchData(page, perPage);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    setErrorMessage(error.response.data?.message || "Server error");
+                } else {
+                    setErrorMessage("Network error, please try again");
+                }
+                setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
 
 
     return (
@@ -596,11 +619,11 @@ const excelUpload = (e) => {
 
                 </div>
             )}
-{UploadTable && (
-            <div className='ComCssTable'>
- <h5 className='ComCssTableName'>PTL Master Detail</h5>
-                
-                    
+            {UploadTable && (
+                <div className='ComCssTable'>
+                    <h5 className='ComCssTableName'>PTL Master Detail</h5>
+
+
                     <DataTable
                         columns={uploadColumn}
                         data={excelUploadData}
@@ -678,12 +701,12 @@ const excelUpload = (e) => {
                         }}
                     />
 
-                <div className="ComCssButton9">
+                    <div className="ComCssButton9">
                         <button className='ComCssUpdateButton' onClick={excelUpload} >
                             Upload
                         </button>
+                    </div>
                 </div>
-            </div>
             )}
             <CustomDialog
                 open={showSuccessPopup}
@@ -709,6 +732,16 @@ const excelUpload = (e) => {
                 message="Are you sure you want to delete this?"
                 color="primary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
 
     )

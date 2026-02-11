@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import LocalReportTextFiled from "../../components/LocalReport/LocalReportTextFiled";
-import LocalReportTbale from "../../components/LocalReport/LocalReportTbale";
+
+import RecevingReportTextfiled from "../../components/RecevingReport/RecevingReportTextfiled";
+import RecevingReportTable from "../../components/RecevingReport/RecevingReportTable";
 import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
+import { downloadReceivingReportFilter, fetchPartcodeReport, getRecevingReportDetailFilter } from '../../Services/Services_09';
 import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchProduct_Partcode, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
-import { fetchProductAndPartcode } from '../../Services/Services-Rc';
 
-const LocalReport = () => {
-    const [formData, setFormData] = useState({
-        status: "",
-        startDate: "",
-        endDate: "",
-        download: null,
-        repairername: "",
-        reworkername: "",
-        boardserialnumber: ""
-    });
+const RecevingReport = () => {
 
+
+    const [partcodeList, setPartcodeList] = useState([]);
+    const [componentUsageList, setComponentUsageList] = useState([]);
     const [formErrors, setFormErrors] = useState({});
+    const [ponumberList, setPonumberList] = useState([]);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
@@ -28,21 +23,48 @@ const LocalReport = () => {
     const [isFrozen, setIsFrozen] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [isFilterActive, setIsFilterActive] = useState(false);
-    const [repaierReworkerData, setRepaierReworkerData] = useState([]);
-    const [productNameAndPartcode, setProductNameAndPartcode] = useState([]);
-    const [localReportData, setLocalReportData] = useState([]);
-    const [downloadDone, setDownloadDone] = useState(false);
-    const [downloadProgress, setDownloadProgress] = useState(null);
     const [showTable, setShowTable] = useState(false);
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    // console.log("formData", formData);
+    const [downloadDone, setDownloadDone] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(null);
+    const [recevingReportDetail, setRecevingReportDetail] = useState([]);
 
-    const handlePoChange = (field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value === "" ? null : value
-        }));
+    const [formData, setFormData] = useState({
+        partcode: "",
+        componentUsage: "",
+        ponumber: "",
+        partcode: "",
+        startDate: "",
+        endDate: "",
+        download: null,
+
+    });
+
+
+    useEffect(() => {
+        fetchPartcodeList();
+
+    }, []);
+
+    const fetchPartcodeList = () => {
+        fetchPartcodeReport()
+            .then((response) => {
+
+                setPartcodeList(response.data.partList);   // ✅ correct
+
+                const uniqueComponentUsage = [
+                    ...new Set(response.data.partList.map(item => item.componentUsage))
+                ];
+                const uniquePono = [
+                    ...new Set(response.data.poList.map(item => item.pono))
+                ];
+                setPonumberList(uniquePono);
+                setComponentUsageList(uniqueComponentUsage);
+
+                setPoList(response.data.poList); // if needed
+            })
+            .catch((error) => { });
     };
 
 
@@ -61,6 +83,30 @@ const LocalReport = () => {
     };
 
 
+    const handlePoChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value === "" ? null : value
+        }));
+    };
+
+
+    const Clear = () => {
+        // setIsFilterActive(false);
+        setSearchText("");
+        setShowTable(false);
+        // fetchData(page, perPage, debouncedSearch);
+        setFormData({
+            partcode: "",
+            componentUsage: "",
+            ponumber: "",
+            startDate: "",
+            endDate: "",
+            download: null,
+
+        })
+    };
+
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
         useEffect(() => {
@@ -71,9 +117,7 @@ const LocalReport = () => {
     };
 
     const debouncedSearch = useDebounce(searchText, 500);
-    // const userId = sessionStorage.getItem("userId");
     const userId = localStorage.getItem("userId");
-    // console.log("userId", userId);
 
     const valiDate = () => {
         const errors = {};
@@ -88,60 +132,27 @@ const LocalReport = () => {
             isValid = false;
         }
 
-      if (
-  formData.status === "MSC00004" &&
-  (
-    (!formData.startDate || !formData.endDate) &&
-    !formData.download
-  )
-) {
-    setErrorMessage("Select Start & End Date OR Download")
-    setShowErrorPopup(true);
-//   errors.startDate = "Select Start & End Date OR Download";
-//   errors.endDate = "Select Start & End Date OR Download";
-//   errors.download = "Select Download OR Date range";
-  isValid = false;
-}
+        if (
+
+            (!formData.startDate || !formData.endDate) &&
+            !formData.download
+        ) {
+            setErrorMessage("Select Start & End Date OR Download")
+            setShowErrorPopup(true);
+
+            isValid = false;
+        }
 
         setFormErrors(errors);
         return isValid;
     };
 
-    useEffect(() => {
-        fetchRepairName();
-        fetchProductName();
-    }, []);
 
-    const fetchRepairName = () => {
-        fetchRepaier()
-            .then((response) => {
-                setRepaierReworkerData(response.data);
-            })
-            .catch((error) => {
-                // console.error("Error fetching receiving data:", error);
-            })
+    const hasAnyFilter = () => {
+        return Object.values(formData).some(
+            v => v !== null && v !== ""
+        );
     };
-
-    const fetchProductName = () => {
-        fetchProduct_Partcode()
-            .then((response) => {
-                setProductNameAndPartcode(response.data);
-            })
-            .catch((error) => {
-                // console.error("Error fetching receiving data:", error);
-            })
-    };
-
-    const RepaierNameOptions = [...new Set(repaierReworkerData
-        .filter(i => i.type?.toLowerCase() === "repairer")
-        .map(i => i.name?.toLowerCase())
-    )].sort().map(val => ({ label: val, value: val }));
-
-    const ReworkerNameOptions = [...new Set(repaierReworkerData
-        .filter(i => i.type?.toLowerCase() === "reworker")
-        .map(i => i.name?.toLowerCase())
-    )].sort().map(val => ({ label: val, value: val }));
-
 
     useEffect(() => {
         if (showTable) {
@@ -150,77 +161,15 @@ const LocalReport = () => {
     }, [page, perPage, debouncedSearch]);
 
 
-    // const fetchData = (page = 1, size = 10, search = "") => {
-    //     // console.log("searchfetch", search);
-    //     if (search && search.trim() !== "") {
-    //         fetchFilterResult(page, size, search);
-    //     }
-    //     else if (isFilterActive) {
-    //         fetchFilterResult();
-    //     }
-    //     else {
-    //         fetchLocalReport(page, size)
-    //     }
-
-    // };
-
     const fetchData = (page = 1, size = 10, search = "") => {
-        if (isFilterActive) {
-            fetchFilterResult(search);   // ONLY search
-        } else if (search?.trim()) {
-            fetchfindSearch(page, size, search);
-        } else {
-            fetchLocalReport(page, size);
-        }
-    };
 
-    const fetchLocalReport = (page = 1, size = 10) => {
-        setLoading(true);
-        getLocalReport(page - 1, size)
-            .then((response) => {
-                if (response?.data?.content) {
-                    setLocalReportData(response.data.content);
-                    setTotalRows(response.data.totalElements || 0);
-                } else {
-                    console.warn("No content found in response:", response.data);
-                }
-            })
-            .catch((error) => {
-                console.error("Error fetching receiving data:", error);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    };
+        fetchFilterResult(search);   // ONLY search
 
-    const fetchfindSearch = (page = 1, size = 10, search = "") => {
-        setLoading(true)
-        getLocalDetailFind(page - 1, size, search)
-            .then((response) => {
-                if (response?.data?.content) {
-                    setLocalReportData(response.data.content);
-                    setTotalRows(response.data.totalElements || 0);
-                } else {
-                    console.warn("No content found in response:", response.data);
-                }
-            })
-            .catch((error) => {
-                console.error("Error fetching search data:", error);
-            }).finally(() => {
-                setLoading(false); // always stop loader
-            });
-    };
-
-    // console.log("formData", formData);
-    const hasAnyFilter = () => {
-        return Object.values(formData).some(
-            v => v !== null && v !== ""
-        );
     };
 
     const handleFilter = (e) => {
         e.preventDefault();
-        if (!valiDate()) return;
+        // if (!valiDate()) return;
 
         if (!hasAnyFilter() && !searchText?.trim()) {
             setErrorMessage("Please select or enter at least one filter");
@@ -232,22 +181,6 @@ const LocalReport = () => {
         fetchFilterResult();
 
     };
-    // const fetchFilterResult = () => {
-    //     setLoading(true)
-    //     getLocalReportDetailFilter(page - 1, perPage, formData)
-    //         .then((response) => {
-    //             if (response?.data?.content) {
-    //                 setLocalReportData(response.data.content);
-    //                 setTotalRows(response.data.totalElements || 0);
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error in filter API:", error);
-    //         }).finally(() => {
-    //         setLoading(false); // always stop loader
-    //     });
-    // };
-
 
     const fetchFilterResult = (search = "") => {
         setLoading(true);
@@ -256,49 +189,26 @@ const LocalReport = () => {
             search: search?.trim() || null
         };
 
-        getLocalReportDetailFilter(page - 1, perPage, payload)
+        getRecevingReportDetailFilter(page - 1, perPage, payload)
             .then(res => {
-                setLocalReportData(res.data.content || []);
+                setRecevingReportDetail(res.data.content || []);
                 setTotalRows(res.data.totalElements || 0);
             })
             .finally(() => setLoading(false));
     };
 
 
-    const Clear = () => {
-        setIsFilterActive(false);
-        setSearchText("");
-        setShowTable(false);
-        fetchData(page, perPage, debouncedSearch);
-        setFormData({
-            status: "",
-            startDate: "",
-            endDate: "",
-            download: null,
-            repairername: "",
-            reworkername: ""
-        })
-    };
     const exportToExcel = (search = "") => {
         setDownloadDone(false);
         setDownloadProgress(null);
         setLoading(true);
-        let apiCall;  // Declare here
-        // const apiCall = search?.trim() !== "" ? downloadSearchProduct : downloadLocalIndiviual;
-        // if (search?.trim() !== "") {
-        //     apiCall = () => downloadLocalReportSearch(search);
-        // }
-        // else if (isFilterActive) {
-        //     apiCall = () => downloadLocalReportFilter(formData);
-        // }
-        // else {
-        //     apiCall = () => downloadLocalReport();
-        // }
+        let apiCall;
+
         const payload = {
             ...formData,
             search: search?.trim() || null
         };
-apiCall = () => downloadLocalReportFilter(payload);
+        apiCall = () => downloadReceivingReportFilter(payload);
 
         apiCall(search, {
             responseType: 'blob',
@@ -311,7 +221,7 @@ apiCall = () => downloadLocalReportFilter(payload);
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement("a");
                 link.href = url;
-                link.setAttribute("download", "LocalReport.xlsx");
+                link.setAttribute("download", "ReceivingReport.xlsx");
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
@@ -326,24 +236,23 @@ apiCall = () => downloadLocalReportFilter(payload);
             });
     };
 
+    // console.log("compoentUsag", componentUsageList)
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Local Report</p>
+                    <p>Receving Report</p>
                 </div>
-                <LocalReportTextFiled
+                <RecevingReportTextfiled
+                    partcodeList={partcodeList}
                     formData={formData}
                     setFormData={setFormData}
-                    handlePoChange={handlePoChange}
+                    componentUsageList={componentUsageList}
                     handleInputChange={handleInputChange}
-                    isFrozen={isFrozen}
                     formErrors={formErrors}
-                    RepaierNameOptions={RepaierNameOptions}
-                    ReworkerNameOptions={ReworkerNameOptions}
-                    productNameAndPartcode={productNameAndPartcode}
+                    handlePoChange={handlePoChange}
+                    ponumberList={ponumberList}
                 />
-
                 <div className="ReworkerButton9">
                     <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
                     <button className='ComCssClearButton' onClick={Clear}>Clear</button>
@@ -382,8 +291,8 @@ apiCall = () => downloadLocalReportFilter(payload);
                     </div>
                     <>
                         <LoadingOverlay loading={loading} />
-                        <LocalReportTbale
-                            data={localReportData}
+                        <RecevingReportTable
+                            data={recevingReportDetail}
                             page={page}
                             perPage={perPage}
                             totalRows={totalRows}
@@ -391,11 +300,12 @@ apiCall = () => downloadLocalReportFilter(payload);
                             setPerPage={setPerPage}
                         />
 
+
                     </>
 
                 </div>
-            }
 
+            }
             <CustomDialog
                 open={showErrorPopup}
                 onClose={() => setShowErrorPopup(false)}
@@ -404,7 +314,8 @@ apiCall = () => downloadLocalReportFilter(payload);
                 severity="error"
                 color="secondary"
             />
-        </div>)
+        </div>
+    )
 }
 
-export default LocalReport
+export default RecevingReport

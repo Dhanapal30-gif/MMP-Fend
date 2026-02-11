@@ -79,9 +79,10 @@ const LocalndindividualReport = () => {
     };
 
     const debouncedSearch = useDebounce(searchText, 500); // delay in ms
-    const userId = sessionStorage.getItem("userName");
+    // const userId = sessionStorage.getItem("userName");
+    const userId = localStorage.getItem("userName");
     // const userRole = sessionStorage.getItem("userRole");
-const userRole = JSON.parse(sessionStorage.getItem("userRole"));
+const userRole = JSON.parse(localStorage.getItem("userRole"));
 
     // console.log("userId", userId);
 

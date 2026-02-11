@@ -101,8 +101,8 @@ const Technology = () => {
         setAddButton(false)
         setLoading(true);
         try {
+            // const userName = sessionStorage.getItem("userId") || "System";
             const userName = sessionStorage.getItem("userId") || "System";
-
             // Determine if formData is a single object or an array
             let payload = Array.isArray(formData)
                 ? formData.map((row) => ({ ...row, modifiedby: userName }))
@@ -131,8 +131,8 @@ const Technology = () => {
 
         if (!showTable && !valiDate()) return;
 
-        const userName = sessionStorage.getItem("userName") || "System";
-
+        // const userName = sessionStorage.getItem("userName") || "System";
+        const userName = localStorage.getItem("userName") || "System";
         const updatedFormData = tableData.map((row) => ({
             ...row,
             createdby: userName,

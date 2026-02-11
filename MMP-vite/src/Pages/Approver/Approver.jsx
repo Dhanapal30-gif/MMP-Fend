@@ -8,6 +8,8 @@ import { tr } from 'date-fns/locale';
 import { ownerDocument } from '@mui/material';
 import { savePtlApproverTickets } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const Approver = () => {
 
@@ -16,7 +18,8 @@ const Approver = () => {
         requesterType: ""
     });
 
-    const userId = sessionStorage.getItem("userId");
+    // const userId = sessionStorage.getItem("userId");
+    const userId = localStorage.getItem("userId");
     const [approverTicketsL1, setApproverTicketsL1] = useState([]);
     const [approverTicketsL2, setApproverTicketsL2] = useState([]);
     const [approverReturningTicketsL1, setApproverReturningTicketsL1] = useState([]);
@@ -24,7 +27,7 @@ const Approver = () => {
     const [ptlRequesterTickets, setPtlRequesterTickets] = useState([]);
     const [stockTransferTicketsL1, setStockTransferTicketsL1] = useState([]);
     const [stockTransferTicketsL2, setStockTransferTicketsL2] = useState([]);
-
+    const [openMsg, setOpenMsg] = useState(false);
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(0);
     const [perPage, setPerPage] = useState(10);
@@ -53,12 +56,12 @@ const Approver = () => {
 
 
     useEffect(() => {
-    if (formData.rec_ticket_no) {
-        setRejecComment(false);      // ✅ reset reject mode
-        setSelectedGrnRows([]);      // optional but recommended
-        setFormErrors({});           // clear old errors
-    }
-}, [formData.rec_ticket_no]);
+        if (formData.rec_ticket_no) {
+            setRejecComment(false);      // ✅ reset reject mode
+            setSelectedGrnRows([]);      // optional but recommended
+            setFormErrors({});           // clear old errors
+        }
+    }, [formData.rec_ticket_no]);
 
 
     const fetchApproverTicktes = async (userId) => {
@@ -78,6 +81,19 @@ const Approver = () => {
             console.error("Error fetching requester types:", error);
         }
     };
+
+    useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
+    }, []);
 
     // console.log("formdata", formData.rec_ticket_no)
     useEffect(() => {
@@ -446,14 +462,14 @@ const Approver = () => {
                     partcode: row.partcode,
                     recordstatus: "MSC00005",
                     requestQty: row.req_qty || 0,
-                      reject_comments: row.Comment || ""
+                    reject_comments: row.Comment || ""
                 }))
             } else {
                 payload = selectedData.map(row => ({
                     requestTicketNo: row.rec_ticket_no,
                     partCode: row.partcode,
                     recordstatus: "MSC00005",
-                      reject_comments: row.Comment || "",
+                    reject_comments: row.Comment || "",
                     requestQty: row.req_qty || 0,
                 }))
             }
@@ -529,7 +545,7 @@ const Approver = () => {
                         rejectComment={rejectComment}
                     />
                     <div className="ComCssButton9">
-                        
+
                         {!rejectComment && requesterApproveButton && <button className='ComCssRequesterApproveButton' onClick={handleSubmit} >Approve</button>}
                         {!rejectComment && returningApproveButton && <button className='ComCssReturningApproveButton' onClick={handleReturningApprove} >Approve</button>}
                         {!rejectComment && ptlRequestApproveButton && <button className='ComCssPTLApproveButton' onClick={handlePTLApprove} >Approve</button>}
@@ -557,6 +573,16 @@ const Approver = () => {
                 severity="error"
                 color="secondary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

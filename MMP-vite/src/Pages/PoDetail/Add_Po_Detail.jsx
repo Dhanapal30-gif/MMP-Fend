@@ -15,6 +15,8 @@ import dayjs from "dayjs"; // or use native JS date
 import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { ponumberVerifyBackend } from '../../Services/Services-Rc';
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const Add_Po_Detail = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -55,6 +57,7 @@ const Add_Po_Detail = () => {
   const [downloadDone, setDownloadDone] = useState(false);
   const [addSearchText, setAddSearchText] = useState("");
   const [filteredAddData, setFilteredAddData] = useState([]);
+  const [openMsg, setOpenMsg] = useState(false);
   const [formData, setFormData] = useState({
     ordertype: "", potool: "", ponumber: "", podate: "",
     currency: "", vendorname: "", vendorcode: "", partcode: "", unitprice: "", orderqty: "", totalvalue: "",
@@ -192,6 +195,16 @@ const Add_Po_Detail = () => {
       })
   }
   useEffect(() => {
+    const validate = async () => {
+      const isValid = await checkUserValid();
+      if (!isValid) {
+        setOpenMsg(true);
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      }
+    };
+    validate();
     fetchCurrencyMaster();
     fetchRcStoreMaster();
     fetchVendotMaster();
@@ -595,44 +608,44 @@ const Add_Po_Detail = () => {
   //     totalvalueeuro: "",
   //   }));
   // };
-const handleAddClick = async () => {
-  if (!valiDate()) return;
+  const handleAddClick = async () => {
+    if (!valiDate()) return;
 
-  try {
-    const res = await ponumberVerifyBackend(formData.ponumber);
+    try {
+      const res = await ponumberVerifyBackend(formData.ponumber);
 
-    if (res.data.success) {
-      const isDuplicate = tableData.some(
-        item => item.partcode === formData.partcode
-      );
-      if (isDuplicate) {
-        setErrorMessage("Partcode already exists");
+      if (res.data.success) {
+        const isDuplicate = tableData.some(
+          item => item.partcode === formData.partcode
+        );
+        if (isDuplicate) {
+          setErrorMessage("Partcode already exists");
+          setShowErrorPopup(true);
+          return;
+        }
+
+        setShowTable(true);
+        setTableData(prev => [...prev, formData]);
+        setIsFrozen(true);
+        setFormData(prev => ({
+          ...prev,
+          partcode: "",
+          partdescription: "",
+          unitprice: "",
+          orderqty: "",
+          totalvalue: "",
+          totalvalueeuro: "",
+        }));
+      } else {
+        setErrorMessage(res.data.message);
         setShowErrorPopup(true);
-        return;
+        // alert(res.data.message); 
       }
-
-      setShowTable(true);
-      setTableData(prev => [...prev, formData]);
-      setIsFrozen(true);
-      setFormData(prev => ({
-        ...prev,
-        partcode: "",
-        partdescription: "",
-        unitprice: "",
-        orderqty: "",
-        totalvalue: "",
-        totalvalueeuro: "",
-      }));
-    } else {
-      setErrorMessage(res.data.message);
+    } catch (err) {
+      setErrorMessage(err.response?.data?.message || "Server error");
       setShowErrorPopup(true);
-      // alert(res.data.message); 
     }
-  } catch (err) {
-    setErrorMessage(err.response?.data?.message || "Server error"); 
-    setShowErrorPopup(true);
-  }
-};
+  };
 
 
   const handlePageChange = (newPage) => {
@@ -647,8 +660,10 @@ const handleAddClick = async () => {
   const handleSubmit = (e) => {
     setLoading(true);
     e.preventDefault();
-    const createdby = sessionStorage.getItem("userName") || "System";
-    const updatedby = sessionStorage.getItem("userName") || "System";
+    // const createdby = sessionStorage.getItem("userName") || "System";
+    // const updatedby = sessionStorage.getItem("userName") || "System";
+    const createdby = localStorage.getItem("userName") || "System";
+    const updatedby = localStorage.getItem("userName") || "System";
     const updatedFormData = tableData.map((row) => ({
       ...row,
       createdby,
@@ -658,7 +673,7 @@ const handleAddClick = async () => {
       .then((response) => {
         setSuccessMessage(response.data.message);
         setShowSuccessPopup(true);
-                fetchPoDetail(page, perPage);
+        fetchPoDetail(page, perPage);
         setShowTable(false);
         setTableData([]);
         formClear();
@@ -679,18 +694,18 @@ const handleAddClick = async () => {
           setShowErrorPopup(true);
         }
       }).finally(() => {
-            setLoading(false); // always stop loader
-        });
+        setLoading(false); // always stop loader
+      });
   };
 
   const formatToInputDate = (d) => {
-  if (!d) return "";
-  const date = new Date(d);
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`; // format for type="date"
-};
+    if (!d) return "";
+    const date = new Date(d);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`; // format for type="date"
+  };
   const handleEdit = (row) => {
     setHandleAdd(false);
     sethidePonumber(true);
@@ -728,13 +743,14 @@ const handleAddClick = async () => {
     e.preventDefault();
     if (!valiDate()) return;
     setLoading(true);
-    const updatedby = sessionStorage.getItem('userName') || "System";
+    // const updatedby = sessionStorage.getItem('userName') || "System";
+    const updatedby = localStorage.getItem('userName') || "System";
     const updateFormData = {
       ...formData,
       updatedby
     };
     //  const id = formData.id;
-// console.log("ID being sent:", formData.id)
+    // console.log("ID being sent:", formData.id)
 
     updatePoDeatil(id, updateFormData)
       .then((response) => {
@@ -781,8 +797,9 @@ const handleAddClick = async () => {
     setConfirmDelete(false);
 
     try {
-      const modifiedby = sessionStorage.getItem("userId");
-      await deletePoDetail(selectedRows,modifiedby);
+      // const modifiedby = sessionStorage.getItem("userId");
+       const modifiedby = localStorage.getItem("userId");
+      await deletePoDetail(selectedRows, modifiedby);
       setSuccessMessage("Data successfullly deleted");
       setShowSuccessPopup(true);
       setSelectedRows([]);
@@ -793,7 +810,7 @@ const handleAddClick = async () => {
       setHandleAdd(true);
       formClear();
     } catch (error) {
-       const msg = error.response?.data?.message || "Delete error";
+      const msg = error.response?.data?.message || "Delete error";
       setErrorMessage(msg);
       setShowErrorPopup(true);
 
@@ -803,7 +820,7 @@ const handleAddClick = async () => {
   // useEffect(()=>{
   //   console.log("selectedRows",selectedRows)
   // },[selectedRows])
-  
+
   const fetchfind = (page = 1, size = 10, search = "") => {
     setLoading(true);
     getPoDetailFind(page - 1, size, search)
@@ -857,30 +874,36 @@ const handleAddClick = async () => {
       setFilteredAddData(tableData);
     } else {
       const lower = addSearchText.toLowerCase();
-  
+
       const result = tableData.filter((row) =>
         Object.values(row).some((val) =>
           String(val).toLowerCase().includes(lower)
         )
       );
-  
+
       setFilteredAddData(result);
     }
   }, [addSearchText, tableData]);
-  
+
 
   const partCodeMap = useMemo(() => {
-  const map = new Map();
-  rcMainStore.forEach(i => map.set(i.partcode, i));
-  return map;
-}, [rcMainStore]);
+    const map = new Map();
+    rcMainStore.forEach(i => map.set(i.partcode, i));
+    return map;
+  }, [rcMainStore]);
 
-const partDescMap = useMemo(() => {
-  const map = new Map();
-  rcMainStore.forEach(i => map.set(i.partdescription, i));
-  return map;
-}, [rcMainStore]);
+  const partDescMap = useMemo(() => {
+    const map = new Map();
+    rcMainStore.forEach(i => map.set(i.partdescription, i));
+    return map;
+  }, [rcMainStore]);
 
+const handleEnterKey = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleAddClick();
+  }
+};
 
   return (
     <div className='COMCssContainer'>
@@ -905,13 +928,13 @@ const partDescMap = useMemo(() => {
                   error={Boolean(formErrors.ordertype)}
                   helperText={formErrors.ordertype}
                   size="small"
-
+onKeyDown={handleEnterKey} 
                 />
               )}
             />
             <Autocomplete
               disabled={isFrozen}
-              options={["I-BUY", "P20", "SRM", "Nokia Internal Transfer", "RC Internal Transfer","Harvester"]}
+              options={["I-BUY", "P20", "SRM", "Nokia Internal Transfer", "RC Internal Transfer", "Harvester"]}
               getOptionLabel={(option) => (typeof option === "string" ? option : "")}
               value={formData.potool || []}
               onChange={(event, newValue) => setFormData({ ...formData, potool: newValue || [] })}
@@ -923,6 +946,7 @@ const partDescMap = useMemo(() => {
                   error={Boolean(formErrors.potool)}
                   helperText={formErrors.potool}
                   size="small"
+                  onKeyDown={handleEnterKey} 
                 />
               )}
             />
@@ -937,6 +961,7 @@ const partDescMap = useMemo(() => {
               error={Boolean(formErrors.ponumber)}
               helperText={formErrors.ponumber}
               size="small"
+              onKeyDown={handleEnterKey} 
             />
             <TextField
               id="outlined-basic"
@@ -951,6 +976,7 @@ const partDescMap = useMemo(() => {
               error={Boolean(formErrors.podate)}
               helperText={formErrors.podate}
               size="small"  // <-- Reduce height
+              onKeyDown={handleEnterKey} 
             />
             <Autocomplete
               disabled={isFrozen}
@@ -976,6 +1002,7 @@ const partDescMap = useMemo(() => {
                   helperText={formErrors.currency}
                   variant="outlined"
                   size="small"
+                  onKeyDown={handleEnterKey} 
                 />
               )}
             />
@@ -1028,52 +1055,53 @@ const partDescMap = useMemo(() => {
             /> */}
 
             <Autocomplete
-  disabled={isFrozen}
-  ListboxComponent={DropdownCom}
-  PopperComponent={CustomPopper}
-  options={vendorMaster}
-  getOptionLabel={(option) => option.vendorName || ""}
-  value={vendorMaster.find(v => v.vendorName === formData.vendorname) || null}
-  onChange={(e, newValue) => {
-    setFormData({
-      ...formData,
-      vendorname: newValue?.vendorName || "",
-      vendorcode: newValue?.vendorCode || "",
-    });
-  }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Vendor Name"
-      error={Boolean(formErrors.vendorname)}
-      helperText={formErrors.vendorname}
-      size="small"
-    />
-  )}
-/>
+              disabled={isFrozen}
+              ListboxComponent={DropdownCom}
+              PopperComponent={CustomPopper}
+              options={vendorMaster}
+              getOptionLabel={(option) => option.vendorName || ""}
+              value={vendorMaster.find(v => v.vendorName === formData.vendorname) || null}
+              onChange={(e, newValue) => {
+                setFormData({
+                  ...formData,
+                  vendorname: newValue?.vendorName || "",
+                  vendorcode: newValue?.vendorCode || "",
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Vendor Name"
+                  error={Boolean(formErrors.vendorname)}
+                  helperText={formErrors.vendorname}
+                  size="small"
+                  onKeyDown={handleEnterKey} 
+                />
+              )}
+            />
 
-<Autocomplete
-  disabled={isFrozen}
-  options={vendorMaster}
-  ListboxComponent={DropdownCom}
-  getOptionLabel={(option) => option.vendorCode || ""}
-  value={vendorMaster.find(v => v.vendorCode === formData.vendorcode) || null}
-  onChange={(e, newValue) => {
-    setFormData({
-      ...formData,
-      vendorcode: newValue?.vendorCode || "",
-      vendorname: newValue?.vendorName || "",
-    });
-  }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Vendor Code"
-      size="small"
-    />
-  )}
-/>
- {/* 
+            <Autocomplete
+              disabled={isFrozen}
+              options={vendorMaster}
+              ListboxComponent={DropdownCom}
+              getOptionLabel={(option) => option.vendorCode || ""}
+              value={vendorMaster.find(v => v.vendorCode === formData.vendorcode) || null}
+              onChange={(e, newValue) => {
+                setFormData({
+                  ...formData,
+                  vendorcode: newValue?.vendorCode || "",
+                  vendorname: newValue?.vendorName || "",
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Vendor Code"
+                  size="small"
+                />
+              )}
+            />
+            {/* 
             <Autocomplete
               options={rcMainStore}
               getOptionLabel={(option) => option?.partcode || ""}
@@ -1132,55 +1160,57 @@ const partDescMap = useMemo(() => {
               )}
             />
              */}
-             <Autocomplete
-  options={rcMainStore}
-  getOptionLabel={(o) => o?.partcode || ""}
-  isOptionEqualToValue={(o, v) => o.partcode === v.partcode}
-  value={partCodeMap.get(formData.partcode) || null}
-  ListboxComponent={DropdownCom}
-  onChange={(e, v) => {
-    setFormData({
-      ...formData,
-      partcode: v?.partcode || "",
-      partdescription: v?.partdescription || ""
-    });
-  }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Partcode"
-      error={Boolean(formErrors.partcode)}
-      helperText={formErrors.partcode}
-      size="small"
-    />
-  )}
-/>
-<Autocomplete
-  options={rcMainStore}
-  getOptionLabel={(o) => o?.partdescription || ""}
-  isOptionEqualToValue={(o, v) =>
-    o.partdescription === v.partdescription
-  }
-  value={partDescMap.get(formData.partdescription) || null}
-  ListboxComponent={DropdownCom}
-  PopperComponent={CustomPopper}
-  onChange={(e, v) => {
-    setFormData({
-      ...formData,
-      partcode: v?.partcode || "",
-      partdescription: v?.partdescription || ""
-    });
-  }}
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Part Description"
-      error={Boolean(formErrors.partdescription)}
-      helperText={formErrors.partdescription}
-      size="small"
-    />
-  )}
-/>
+            <Autocomplete
+              options={rcMainStore}
+              getOptionLabel={(o) => o?.partcode || ""}
+              isOptionEqualToValue={(o, v) => o.partcode === v.partcode}
+              value={partCodeMap.get(formData.partcode) || null}
+              ListboxComponent={DropdownCom}
+              onChange={(e, v) => {
+                setFormData({
+                  ...formData,
+                  partcode: v?.partcode || "",
+                  partdescription: v?.partdescription || ""
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Partcode"
+                  error={Boolean(formErrors.partcode)}
+                  helperText={formErrors.partcode}
+                  size="small"
+                  onKeyDown={handleEnterKey} 
+                />
+              )}
+            />
+            <Autocomplete
+              options={rcMainStore}
+              getOptionLabel={(o) => o?.partdescription || ""}
+              isOptionEqualToValue={(o, v) =>
+                o.partdescription === v.partdescription
+              }
+              value={partDescMap.get(formData.partdescription) || null}
+              ListboxComponent={DropdownCom}
+              PopperComponent={CustomPopper}
+              onChange={(e, v) => {
+                setFormData({
+                  ...formData,
+                  partcode: v?.partcode || "",
+                  partdescription: v?.partdescription || ""
+                });
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Part Description"
+                  error={Boolean(formErrors.partdescription)}
+                  helperText={formErrors.partdescription}
+                  size="small"
+                  onKeyDown={handleEnterKey} 
+                />
+              )}
+            />
 
 
             {/* <TextField
@@ -1196,28 +1226,30 @@ const partDescMap = useMemo(() => {
             /> */}
 
             <TextField
-  label="Unit Price"
-  variant="outlined"
-  name="unitprice"
-  type="text"
-  value={formData.unitprice}
-  onChange={(e) => {
-    const value = e.target.value;
+              label="Unit Price"
+              variant="outlined"
+              name="unitprice"
+              type="text"
+              
+              value={formData.unitprice}
+              onChange={(e) => {
+                const value = e.target.value;
 
-    // allow digits + single dot + decimals
-    if (/^\d*\.?\d*$/.test(value)) {
-      handleChange(e);
-    }
-  }}
-  onKeyDown={(e) => {
-    if (["-", "+", "e", "E"].includes(e.key)) {
-      e.preventDefault();
-    }
-  }}
-  error={Boolean(formErrors.unitprice)}
-  helperText={formErrors.unitprice}
-  size="small"
-/>
+                // allow digits + single dot + decimals
+                if (/^\d*\.?\d*$/.test(value)) {
+                  handleChange(e);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (["-", "+", "e", "E"].includes(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              error={Boolean(formErrors.unitprice)}
+              helperText={formErrors.unitprice}
+              size="small"
+              
+            />
 
             <TextField
               label="Order Qty"
@@ -1234,7 +1266,7 @@ const partDescMap = useMemo(() => {
               error={Boolean(formErrors.orderqty)}
               helperText={formErrors.orderqty}
               size="small"
-
+onKeyDown={handleEnterKey} 
             />
             <TextField
               label="Total Value"
@@ -1245,6 +1277,7 @@ const partDescMap = useMemo(() => {
               onChange={handleChange}
               //  InputLabelProps={{ shrink: false }}
               size="small"
+              onKeyDown={handleEnterKey} 
             />
             <TextField
               label="Currency Convertion Factor"
@@ -1255,6 +1288,7 @@ const partDescMap = useMemo(() => {
               onChange={handleChange}
               //InputLabelProps={{ shrink: false }}
               size="small"
+              onKeyDown={handleEnterKey} 
             />
             <TextField
               label="Total Value Euro"
@@ -1265,11 +1299,12 @@ const partDescMap = useMemo(() => {
               onChange={handleChange}
               //InputLabelProps={{ shrink: false }}
               size="small"
+              onKeyDown={handleEnterKey} 
             />
           </ThemeProvider>
         </div>
         <div className='ComCssButton9'>
-          {handleAdd && <button className='ComCssAddButton' onClick={handleAddClick} >ADD</button>}
+          {handleAdd && <button type="submit" className='ComCssAddButton' onClick={handleAddClick} >ADD</button>}
           {handleUpdateButton && <button className='ComCssUpdateButton' onClick={(e) => handleUpdate(e, formData.id)}>Update</button>}
           {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
           <button className='ComCssClearButton' onClick={formClear}>Clear</button>
@@ -1281,21 +1316,21 @@ const partDescMap = useMemo(() => {
           <h5 className='ComCssTableName'>ADD PO Details</h5>
 
           <div
-                        className="d-flex justify-content-end align-items-center mb-3"
-                        style={{ marginTop: "9px", display: "flex" }}>
-                        <div style={{ position: "relative", width: "200px" }}>
-                            <input
-                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
-                                placeholder="Search..." value={addSearchText}
-                                onChange={(e) => setAddSearchText(e.target.value)}
-                            />
-                            {searchText && (
-                                <span onClick={() => setAddSearchText("")}
-                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
-                                </span>
-                            )}
-                        </div>
-                    </div>
+            className="d-flex justify-content-end align-items-center mb-3"
+            style={{ marginTop: "9px", display: "flex" }}>
+            <div style={{ position: "relative", width: "200px" }}>
+              <input
+                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                placeholder="Search..." value={addSearchText}
+                onChange={(e) => setAddSearchText(e.target.value)}
+              />
+              {searchText && (
+                <span onClick={() => setAddSearchText("")}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                </span>
+              )}
+            </div>
+          </div>
 
 
           <DataTable
@@ -1411,6 +1446,16 @@ const partDescMap = useMemo(() => {
         message="Are you sure you want to delete this?"
         color="primary"
       />
+      <Snackbar
+        open={openMsg}
+        autoHideDuration={10000}
+        onClose={() => setOpenMsg(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity="error" variant="filled">
+          Session expired or invalid
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

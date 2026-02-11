@@ -19,7 +19,8 @@ const StockTransfer = () => {
         inventory_box_no: "",
     });
 
-    const userId = sessionStorage.getItem("userId");
+    // const userId = sessionStorage.getItem("userId");
+     const userId = localStorage.getItem("userId");
     const [formErrors, setFormErrors] = useState({});
     const [trnasferPrtcode, setTrnasferPrtcode] = useState([]);
     const [showTable, setShowTable] = useState(false);
@@ -114,8 +115,11 @@ const StockTransfer = () => {
 
 
     const handleAddSubmit = async () => {
-        const userId = sessionStorage.getItem("userId") || "System";
-         const userName = sessionStorage.getItem("userName") || "System";
+        // const userId = sessionStorage.getItem("userId") || "System";
+        //  const userName = sessionStorage.getItem("userName") || "System";
+        const userId = localStorage.getItem("userId") || "System";
+         const userName = localStorage.getItem("userName") || "System";
+
         const updatedFormData = tableData.map(row => ({
             ...row,
             createdby: userId,
@@ -239,8 +243,8 @@ const StockTransfer = () => {
 
 
     const exportToExcel = (search = "") => {
-                const userId = sessionStorage.getItem("userName") || "System";
-        
+                // const userId = sessionStorage.getItem("userName") || "System";
+        const userId = localStorage.getItem("userName") || "System";
                 setLoading(true);
         
                
@@ -280,7 +284,7 @@ const StockTransfer = () => {
                     <p>Stock Transfer</p>
                 </div>
                 <div className='ComCssButton9'>
-                    {(formData.transfertype === 'RC-DHL') && (
+                    {/* {(formData.transfertype === 'RC-DHL') && (
                         <button
                             style={{ backgroundColor: 'orange', marginTop: "-50px" }}
                             onClick={() => {
@@ -301,7 +305,7 @@ const StockTransfer = () => {
                                 handleChange("boxNumber", newBoxNumber); // sync formData
                             }}> AddBox
                         </button>
-                    )}
+                    )} */}
 
                 </div>
                 <StockTransferTextFile

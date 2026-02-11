@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import './RcMainStore.css'
-import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, IconButton, Table, TableBody, TableCell, TableHead, TableRow  } from '@mui/material';
+import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, IconButton, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { deleteRc, downloadRc, downloadSearchRc, fetchRc, getRcmainMaster, getRcmainMasterFind, saveBulkRcMain, saveMainMaterial, updateRcSrore } from '../../Services/Services';
 import DataTable from "react-data-table-component";
 import * as XLSX from "xlsx";
@@ -11,7 +11,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { checkUserValid } from "../../components/Com_Component/userUtils";
 import { Add, Remove } from "@mui/icons-material";
+import { Snackbar, Alert } from "@mui/material";
 
 const RcMainStore = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -40,7 +42,9 @@ const RcMainStore = () => {
   const [size, setSize] = useState(10); // Your size control
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [rackRows, setRackRows] = useState([{ racklocation: "" }]);
-const [resetKey, setResetKey] = useState(0);
+  const [resetKey, setResetKey] = useState(0);
+  const [openMsg, setOpenMsg] = useState(false);
+
   const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -79,32 +83,32 @@ const [resetKey, setResetKey] = useState(0);
   //   const { name, value } = e.target;
   //   setFormData({ ...formData, [name]: value });
   // };
-const handleChange = (e) => {
-  const { name, value } = e.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  let updatedValue = value;
+    let updatedValue = value;
 
-  if (name === "ComponentUsage") {
-    const v = value.toLowerCase().replace(/\s+/g, "");
-    if (v === "submodule") {
-      updatedValue = "Sub Module";
+    if (name === "ComponentUsage") {
+      const v = value.toLowerCase().replace(/\s+/g, "");
+      if (v === "submodule") {
+        updatedValue = "Sub Module";
+      }
+      if (v === "thermalgel") {
+        updatedValue = "Thermal Gel";
+      }
+      if (v === "others") {
+        updatedValue = "Others";
+      }
     }
-    if (v === "thermalgel") {
-      updatedValue = "Thermal Gel";
-    }
-    if (v === "others") {
-      updatedValue = "Others";
-    }
-  }
 
-  setFormData({
-    ...formData,
-    [name]: updatedValue
-  });
-};
+    setFormData({
+      ...formData,
+      [name]: updatedValue
+    });
+  };
 
 
-const handleLocationChange = (index, value) => {
+  const handleLocationChange = (index, value) => {
     const updatedRows = [...rackRows];
     updatedRows[index].racklocation = value;
     setRackRows(updatedRows);
@@ -115,7 +119,7 @@ const handleLocationChange = (index, value) => {
       createdby: '', modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '',
       TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
     });
-      setRackRows([{ racklocation: "" }]); 
+    setRackRows([{ racklocation: "" }]);
 
     setFormErrors("");
     setFileInputKey(Date.now());
@@ -136,15 +140,17 @@ const handleLocationChange = (index, value) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!valiDate()) return;
-    const createdby = sessionStorage.getItem("userName") || "System";
-    const modifiedby = sessionStorage.getItem("userName") || "System";
-      const racklocationPayload = rackRows.map(row => row.racklocation).filter(Boolean).join(',');
+    // const createdby = sessionStorage.getItem("userName") || "System";
+    // const modifiedby = sessionStorage.getItem("userName") || "System";
+    const createdby = localStorage.getItem("userName") || "System";
+    const modifiedby = localStorage.getItem("userName") || "System";
+    const racklocationPayload = rackRows.map(row => row.racklocation).filter(Boolean).join(',');
 
     const updatedFormData = {
       ...formData,
       createdby,
       modifiedby,
-          racklocation: racklocationPayload,  // <- updated here
+      racklocation: racklocationPayload,  // <- updated here
 
     };
 
@@ -153,7 +159,7 @@ const handleLocationChange = (index, value) => {
       .then((response) => {
         fetchMainMaster(page, perPage);
         setShowSuccessPopup(true);
-        setResetKey(prev => prev + 1);  
+        setResetKey(prev => prev + 1);
         setPage(1);
         setSuccessMessage("Masterdata Added Successfully")
         formClear();
@@ -209,11 +215,11 @@ const handleLocationChange = (index, value) => {
     //   errors.technology = "Please Enter technology";
     //   isValid = false;
     // }
-     const hasRack = rackRows.some(row => row.racklocation && row.racklocation.trim() !== "");
-  if (!hasRack) {
-    errors.racklocation = "Please enter at least one rack location";
-    isValid = false;
-  }
+    const hasRack = rackRows.some(row => row.racklocation && row.racklocation.trim() !== "");
+    if (!hasRack) {
+      errors.racklocation = "Please enter at least one rack location";
+      isValid = false;
+    }
 
     setFormErrors(errors);
     return isValid; // Now it correctly returns false if any field is empty
@@ -297,7 +303,7 @@ const handleLocationChange = (index, value) => {
     reader.onerror = (error) => {
       // console.error("File read error:", error);
       setErrorMessage("File read error:", error);
-        setShowErrorPopup(true);
+      setShowErrorPopup(true);
     };
   };
 
@@ -440,10 +446,10 @@ const handleLocationChange = (index, value) => {
     });
   };
 
-  const column =[
+  const column = [
     {
       name: (
-        <div style={{ textAlign: 'center',marginLeft:'10px' }}>
+        <div style={{ textAlign: 'center', marginLeft: '10px' }}>
           <label>Select </label>
           <br />
           <input type="checkbox" onChange={handleSelectAll}
@@ -565,67 +571,67 @@ const handleLocationChange = (index, value) => {
 
   ];
 
- const handlePageChange = useCallback((newPage) => {
-  setPage(newPage);
-  fetchMainMaster(newPage, perPage); // call API for new page
-}, [perPage]);
+  const handlePageChange = useCallback((newPage) => {
+    setPage(newPage);
+    fetchMainMaster(newPage, perPage); // call API for new page
+  }, [perPage]);
 
-const handlePerRowsChange = useCallback((newPerPage, page) => {
-  setPerPage(newPerPage);
-  setPage(page);
-  fetchMainMaster(page, newPerPage); // call API for new perPage
-}, []);
+  const handlePerRowsChange = useCallback((newPerPage, page) => {
+    setPerPage(newPerPage);
+    setPage(page);
+    fetchMainMaster(page, newPerPage); // call API for new perPage
+  }, []);
 
   const excelUpload = (e) => {
     e.preventDefault();
-    
-//     const errors = [];
-//   const allowedValues = ["Sub Module", "Othres", "Thermal Gel"];
 
-//     excelUploadData.forEach((row, index) => {
-//   if (!row.partcode || row.partcode.trim() === "") {
-//     errors.push(`Row ${index + 1}: PartCode is required`);
-//   }
-//   if (!row.racklocation || row.racklocation.trim() === "") {
-//     errors.push(`Row ${index + 1}: Racklocation is required`);
-//   }
-//   if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
-//     errors.push(`Row ${index + 1}: componentUsage is required`);
-//   }
-// });
+    //     const errors = [];
+    //   const allowedValues = ["Sub Module", "Othres", "Thermal Gel"];
 
-const errors = [];
-const allowedValues = ["Sub Module", "Othres", "Thermal Gel","PTL"];
+    //     excelUploadData.forEach((row, index) => {
+    //   if (!row.partcode || row.partcode.trim() === "") {
+    //     errors.push(`Row ${index + 1}: PartCode is required`);
+    //   }
+    //   if (!row.racklocation || row.racklocation.trim() === "") {
+    //     errors.push(`Row ${index + 1}: Racklocation is required`);
+    //   }
+    //   if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
+    //     errors.push(`Row ${index + 1}: componentUsage is required`);
+    //   }
+    // });
 
-if (excelUploadData.length > 1000) {
-  errors.push("Cannot upload more than 1000 rows at once.");
-}
-excelUploadData.forEach((row, index) => {
-  // if (!row.partcode || row.partcode.trim() === "") {
-  //   errors.push(`Row ${index + 1}: PartCode is required`);
-  // }
-if (
-  row.partcode === null ||
-  row.partcode === undefined ||
-  String(row.partcode).trim() === ""
-) {
-  errors.push(`Row ${index + 1}: PartCode is required`);
-}
+    const errors = [];
+    const allowedValues = ["Sub Module", "Othres", "Thermal Gel", "PTL"];
 
-  if (!row.racklocation || row.racklocation.trim() === "") {
-    errors.push(`Row ${index + 1}: Racklocation is required`);
-  }
+    if (excelUploadData.length > 1000) {
+      errors.push("Cannot upload more than 1000 rows at once.");
+    }
+    excelUploadData.forEach((row, index) => {
+      // if (!row.partcode || row.partcode.trim() === "") {
+      //   errors.push(`Row ${index + 1}: PartCode is required`);
+      // }
+      if (
+        row.partcode === null ||
+        row.partcode === undefined ||
+        String(row.partcode).trim() === ""
+      ) {
+        errors.push(`Row ${index + 1}: PartCode is required`);
+      }
 
-  if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
-    errors.push(`Row ${index + 1}: componentUsage is required`);
-  } else if (row.ComponentUsage.includes(",")) {
-    errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
-  } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
-    errors.push(
-      `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Othres" or "Thermal Gel" or "PTL"`
-    );
-  }
-});
+      if (!row.racklocation || row.racklocation.trim() === "") {
+        errors.push(`Row ${index + 1}: Racklocation is required`);
+      }
+
+      if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
+        errors.push(`Row ${index + 1}: componentUsage is required`);
+      } else if (row.ComponentUsage.includes(",")) {
+        errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
+      } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
+        errors.push(
+          `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Othres" or "Thermal Gel" or "PTL"`
+        );
+      }
+    });
 
 
     if (errors.length > 0) {
@@ -634,8 +640,10 @@ if (
       return;
     }
 
-    const createdby = sessionStorage.getItem("userName") || "System";
-    const modifiedby = sessionStorage.getItem("userName") || "System";
+    // const createdby = sessionStorage.getItem("userName") || "System";
+    // const modifiedby = sessionStorage.getItem("userName") || "System";
+     const createdby = localStorage.getItem("userName") || "System";
+    const modifiedby = localStorage.getItem("userName") || "System";
     const updatedFormData = excelUploadData.map(item => ({
       ...item,
       createdby,
@@ -652,8 +660,8 @@ if (
         setExcelUploadData([]);
         setHandleUploadButton(false);
         setHandleSubmitButton(true);
-         fetchMainMaster(page, perPage);
-         setSearchText("");
+        fetchMainMaster(page, perPage);
+        setSearchText("");
       })
       .catch((error) => {
         if (error.response) {
@@ -675,7 +683,7 @@ if (
           setErrorMessage("Network error, please try again");
           setShowErrorPopup(true);
         }
-      }).finally(()=>{
+      }).finally(() => {
         setLoading(false)
       })
   }
@@ -720,8 +728,8 @@ if (
       })
       .catch((error) => {
         // console.error("Error fetching data:", error);
-         setErrorMessage("Error fetching data:", error);
-      setShowErrorPopup(true);
+        setErrorMessage("Error fetching data:", error);
+        setShowErrorPopup(true);
       })
       .finally(() => {
         setLoading(false);
@@ -733,15 +741,15 @@ if (
     getRcmainMasterFind(page - 1, size, search)
       .then((response) => {
         const data = response?.data || {};
-        setRcStoreData(data.content );
+        setRcStoreData(data.content);
         setTotalRows(data.totalElements || 0);
         // console.log("findFetch", data.totalElements)
         // console.log("data.content", data.content)
       })
       .catch((error) => {
         // console.error("Error fetching data:", error);
-          setErrorMessage("Error fetching data:", error);
-      setShowErrorPopup(true);
+        setErrorMessage("Error fetching data:", error);
+        setShowErrorPopup(true);
       })
       .finally(() => {
         setLoading(false);
@@ -752,6 +760,22 @@ if (
     fetchData(page, perPage, debouncedSearch);
     fetchRcStore();
   }, [page, perPage, debouncedSearch]);
+
+
+
+  useEffect(() => {
+    const validate = async () => {
+                const isValid = await checkUserValid();
+                if (!isValid) {
+                    setOpenMsg(true);
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 1000); 
+                }
+            };
+    validate();
+
+  }, []);
 
   const fetchData = (page = 1, size = 10, search = "") => {
     if (search && search.trim() !== "") {
@@ -828,8 +852,8 @@ if (
 
     // Convert comma-separated locations into rackRows array
     const initialRackRows = row.racklocation
-        ? row.racklocation.split(",").map(loc => ({ racklocation: loc }))
-        : [{ racklocation: "" }];
+      ? row.racklocation.split(",").map(loc => ({ racklocation: loc }))
+      : [{ racklocation: "" }];
 
     setRackRows(initialRackRows);
 
@@ -859,20 +883,21 @@ if (
     setHandleUploadButton(false);
     setDeletButton(false);
     setSelectedRows([]);
-};
+  };
 
   const handleUpdate = (e, id) => {
     e.preventDefault();
     if (!valiDate()) return;
     setLoading(true);
-    const modifiedby = sessionStorage.getItem("userName") || "System";
-      const racklocationPayload = rackRows.map(row => row.racklocation).filter(Boolean).join(',');
+    // const modifiedby = sessionStorage.getItem("userName") || "System";
+    const modifiedby = localStorage.getItem("userName") || "System";
+    const racklocationPayload = rackRows.map(row => row.racklocation).filter(Boolean).join(',');
 
     const updateFormData = {
       ...formData,
       id,
       modifiedby,
-                racklocation: racklocationPayload,  // <- updated here
+      racklocation: racklocationPayload,  // <- updated here
 
     }
     updateRcSrore(id, updateFormData)
@@ -888,11 +913,11 @@ if (
 
       }).catch((error) => {
         if (error.response) {
-              const msg = error.response.data;
-setErrorMessage(msg || "Something went wrong");
-    setShowErrorPopup(true);
-    }
-        
+          const msg = error.response.data;
+          setErrorMessage(msg || "Something went wrong");
+          setShowErrorPopup(true);
+        }
+
       }).finally(() => {
         setLoading(false);
       });
@@ -982,7 +1007,7 @@ setErrorMessage(msg || "Something went wrong");
               onChange={handleChange}
               size="small"
               className='ProductTexfiled-textfield '
-               error={Boolean(formErrors.partdescription)}
+              error={Boolean(formErrors.partdescription)}
               helperText={formErrors.partdescription}
             />
             <TextField
@@ -1023,8 +1048,8 @@ setErrorMessage(msg || "Something went wrong");
               size="small"
               className='ProductTexfiled-textfield '
             /> */}
-             <Autocomplete
-              options={["Sub Module", "Thermal Gel", "Others","PTL"]}
+            <Autocomplete
+              options={["Sub Module", "Thermal Gel", "Others", "PTL"]}
               getOptionLabel={(option) => (typeof option === "string" ? option : "")}
               value={formData.ComponentUsage || []}
               onChange={(event, newValue) => setFormData({ ...formData, ComponentUsage: newValue || [] })}
@@ -1150,7 +1175,7 @@ setErrorMessage(msg || "Something went wrong");
               name="technology"
               value={formData.technology}
               onChange={handleChange}
-                error={Boolean(formErrors.technology)}
+              error={Boolean(formErrors.technology)}
               helperText={formErrors.technology}
               className='ProductTexfiled-textfield '
             />
@@ -1166,7 +1191,7 @@ setErrorMessage(msg || "Something went wrong");
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
               className='ProductTexfiled-textfield '
             /> */}
-            
+
             {/* <TextField
               id="outlined-basic"
               label="Quantity"
@@ -1216,66 +1241,66 @@ setErrorMessage(msg || "Something went wrong");
                 label="Shelf Life"
                 name="shelflife"
                 type="number"
-  value={formData.shelflife || 0}  
+                value={formData.shelflife || 0}
                 onChange={handleChange}
                 inputProps={{ min: 0 }}
                 variant="outlined"
                 size="small"
                 className='ProductTexfiled-textfield '
-                // error={Boolean(formErrors.shelflife)}
-                //   helperText={formErrors.shelflife}
+              // error={Boolean(formErrors.shelflife)}
+              //   helperText={formErrors.shelflife}
               />
             )}
-            <div   style={{
-    maxHeight: 230,           // scroll after 3 rows
-    overflowY: "auto",        // vertical scroll
-    border: "1px solid #138606ff", // full outer border
-    borderRadius: 4,           // optional rounded corners
-    // padding: 8,               // spacing inside the border
-  }}> {/* Adjust height as needed */}
-  <Table stickyHeader>
-    <TableHead>
-      <TableRow>
-        <TableCell>Rack Location</TableCell>
-        <TableCell>
-          <IconButton onClick={addRow} size="small" color="primary">
-            <Add />
-          </IconButton>
-        </TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {rackRows.map((row, index) => (
-        <TableRow key={index}>
-          <TableCell>
-            <TextField
-              label="Rack Location"
-              variant="outlined"
-              size="small"
-              fullWidth
-              value={row.racklocation}
-              onChange={(e) => handleLocationChange(index, e.target.value)} 
-              error={Boolean(formErrors.racklocation)}      
-              helperText={formErrors.racklocation || ""}   
-              sx={{
-    "& .MuiInputBase-input": { fontSize: "13px" },   // input text
+            <div style={{
+              maxHeight: 230,           // scroll after 3 rows
+              overflowY: "auto",        // vertical scroll
+              border: "1px solid #138606ff", // full outer border
+              borderRadius: 4,           // optional rounded corners
+              // padding: 8,               // spacing inside the border
+            }}> {/* Adjust height as needed */}
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Rack Location</TableCell>
+                    <TableCell>
+                      <IconButton onClick={addRow} size="small" color="primary">
+                        <Add />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rackRows.map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <TextField
+                          label="Rack Location"
+                          variant="outlined"
+                          size="small"
+                          fullWidth
+                          value={row.racklocation}
+                          onChange={(e) => handleLocationChange(index, e.target.value)}
+                          error={Boolean(formErrors.racklocation)}
+                          helperText={formErrors.racklocation || ""}
+                          sx={{
+                            "& .MuiInputBase-input": { fontSize: "13px" },   // input text
 
-    "& .MuiFormHelperText-root": { fontSize: "13px" } // helper text
-  }}
-            />
-          </TableCell>
-          <TableCell>
-            {rackRows.length > 1 && (
-              <IconButton onClick={() => removeRow(index)} size="small"  color="error">
-                <Remove />
-              </IconButton>
-            )}
-          </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</div>
+                            "& .MuiFormHelperText-root": { fontSize: "13px" } // helper text
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {rackRows.length > 1 && (
+                          <IconButton onClick={() => removeRow(index)} size="small" color="error">
+                            <Remove />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
           </ThemeProvider>
         </div>
@@ -1295,108 +1320,108 @@ setErrorMessage(msg || "Something went wrong");
         {showUploadTable && !showRcTable && (
           <h5 className='ComCssTableName'>Upload Master Detail</h5>
         )}
-         {showRcTable && !showUploadTable && (
-        <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-          <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
-            <FaFileExcel /> Export
-          </button>
-          <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-            <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-            {searchText && (
-              <span
-                onClick={() => setSearchText("")}
-                style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
-                ✖
-              </span>
-            )}
+        {showRcTable && !showUploadTable && (
+          <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+            <button className="btn btn-success" onClick={() => exportToExcel(searchText)} >
+              <FaFileExcel /> Export
+            </button>
+            <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+              <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              {searchText && (
+                <span
+                  onClick={() => setSearchText("")}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold" }} >
+                  ✖
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-         )}
+        )}
         {showRcTable && !showUploadTable && (
           <>
-                          <LoadingOverlay loading={loading} />
-          
-          <DataTable
-          key={resetKey}                 
-            paginationDefaultPage={1} 
-            columns={column}
-            data={rcStoreData}
-            pagination
-            paginationServer
-            progressPending={loading}
-            paginationTotalRows={totalRows}
-            onChangeRowsPerPage={handlePerRowsChange}
-            onChangePage={handlePageChange}
-            paginationPerPage={perPage}
-            paginationRowsPerPageOptions={[10, 20, 30, 50]}
-            paginationComponentOptions={{
-              rowsPerPageText: 'Rows per page:',
-              rangeSeparatorText: 'of',
-              noRowsPerPage: false,
-              // selectAllRowsItem: true,
-              // selectAllRowsItemText: 'All',
-            }}
-            customStyles={{
-              headRow: {
-                style: {
-                  background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  textAlign: "center",
-                  minHeight: "50px",
+            <LoadingOverlay loading={loading} />
+
+            <DataTable
+              key={resetKey}
+              paginationDefaultPage={1}
+              columns={column}
+              data={rcStoreData}
+              pagination
+              paginationServer
+              progressPending={loading}
+              paginationTotalRows={totalRows}
+              onChangeRowsPerPage={handlePerRowsChange}
+              onChangePage={handlePageChange}
+              paginationPerPage={perPage}
+              paginationRowsPerPageOptions={[10, 20, 30, 50]}
+              paginationComponentOptions={{
+                rowsPerPageText: 'Rows per page:',
+                rangeSeparatorText: 'of',
+                noRowsPerPage: false,
+                // selectAllRowsItem: true,
+                // selectAllRowsItemText: 'All',
+              }}
+              customStyles={{
+                headRow: {
+                  style: {
+                    background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "14px",
+                    textAlign: "center",
+                    minHeight: "50px",
+                  },
                 },
-              },
-              rows: {
-                style: {
-                  fontSize: "14px",
-                  textAlign: "center",
-                  alignItems: "center", // Centers content vertically
-                  fontFamily: "Arial, Helvetica, sans-serif",
+                rows: {
+                  style: {
+                    fontSize: "14px",
+                    textAlign: "center",
+                    alignItems: "center", // Centers content vertically
+                    fontFamily: "Arial, Helvetica, sans-serif",
+                  },
                 },
-              },
-              cells: {
-                style: {
-                  padding: "5px",  // Removed invalid negative padding
-                  //textAlign: "center",
-                  justifyContent: "center",  // Centers header text
-                  whiteSpace: 'pre-wrap', // wrap text
-                  wordBreak: 'break-word', // allow breaking words
+                cells: {
+                  style: {
+                    padding: "5px",  // Removed invalid negative padding
+                    //textAlign: "center",
+                    justifyContent: "center",  // Centers header text
+                    whiteSpace: 'pre-wrap', // wrap text
+                    wordBreak: 'break-word', // allow breaking words
+                  },
                 },
-              },
-              headCells: {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",  // Centers header text
-                  alignItems: "left",
-                  textAlign: "left",
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
+                headCells: {
+                  style: {
+                    display: "flex",
+                    justifyContent: "center",  // Centers header text
+                    alignItems: "left",
+                    textAlign: "left",
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  },
                 },
-              },
-              pagination: {
-                style: {
-                  border: "1px solid #ddd",
-                  backgroundColor: "#f9f9f9",
-                  color: "#333",
-                  minHeight: "35px",
-                  padding: "5px",
-                  fontSize: "12px",
-                  fontWeight: "bolder",
-                  display: "flex",
-                  justifyContent: "flex-end", // Corrected
-                  alignItems: "center", // Corrected
+                pagination: {
+                  style: {
+                    border: "1px solid #ddd",
+                    backgroundColor: "#f9f9f9",
+                    color: "#333",
+                    minHeight: "35px",
+                    padding: "5px",
+                    fontSize: "12px",
+                    fontWeight: "bolder",
+                    display: "flex",
+                    justifyContent: "flex-end", // Corrected
+                    alignItems: "center", // Corrected
+                  },
                 },
-              },
-            }}
-            fixedHeader
-            fixedHeaderScrollHeight="400px"
-            highlightOnHover
-            className="react-datatable"
+              }}
+              fixedHeader
+              fixedHeaderScrollHeight="400px"
+              highlightOnHover
+              className="react-datatable"
             // conditionalRowStyles={rowHighlightStyle}
-          />
+            />
           </>
         )}
 
@@ -1503,6 +1528,16 @@ setErrorMessage(msg || "Something went wrong");
         message="Are you sure you want to delete this?"
         color="primary"
       />
+      <Snackbar
+        open={openMsg}
+        autoHideDuration={10000}
+        onClose={() => setOpenMsg(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity="error" variant="filled">
+          Session expired or invalid
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

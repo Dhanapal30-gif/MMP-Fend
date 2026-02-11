@@ -99,8 +99,12 @@ const CurencyMaster = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
-        const createdby = sessionStorage.getItem("userId") || "System";
-        const modifiedby = sessionStorage.getItem("userId") || "System";
+        // const createdby = sessionStorage.getItem("userId") || "System";
+        // const modifiedby = sessionStorage.getItem("userId") || "System";
+        const createdby = localStorage.getItem("userId") || "System";
+        const modifiedby = localStorage.getItem("userId") || "System";
+
+
         const updateFormData = {
             ...formData,
             createdby,
@@ -132,7 +136,9 @@ const CurencyMaster = () => {
         e.preventDefault();
         if (!valiDate()) return;
         //setLoading(true);
-        const modifiedby = sessionStorage.getItem('userId') || "System";
+        // const modifiedby = sessionStorage.getItem('userId') || "System";
+        const modifiedby = localStorage.getItem('userId') || "System";
+
         const updateFormData = {
             ...formData,
             id,
@@ -382,7 +388,7 @@ const CurencyMaster = () => {
             .toLowerCase()
             .includes(searchText.toLowerCase())
     );
- useEffect(() => {
+    useEffect(() => {
         setTotalRows(filteredData.length); // important!
     }, [filteredData]);
 
@@ -403,7 +409,7 @@ const CurencyMaster = () => {
 
                         {normal && (
                             <Autocomplete
-                                options={["USD", "CNY", "INR","EURO"]}
+                                options={["USD", "CNY", "INR", "EURO"]}
                                 getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                                 value={formData.currencyname || []}
                                 onChange={(event, newValue) => setFormData({ ...formData, currencyname: newValue || [] })}

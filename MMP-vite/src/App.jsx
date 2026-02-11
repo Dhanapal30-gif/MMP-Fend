@@ -49,6 +49,9 @@ import ForgotPassword from './Pages/UserAuthentication/Login/ForgotPassword';
 import ManualRCRequest from './Pages/ManualRCRequest/ManualRCRequest';
 import ManualDoor from './Pages/Manual Door/ManualDoor';
 import TableMaster from './Pages/TableMaster/TableMaster';
+import RecevingReport from './Pages/RecevingReport/RecevingReport';
+import IssuanceReport from './Pages/IssuanceReport/IssuanceReport';
+
 function App() {
 
   // const [count, setCount] = useState(0)
@@ -111,6 +114,9 @@ function App() {
       { name: "ManualRCRequest", path: "/manualRCRequest" },
       { name: "manualDoor", path: "/ManualDoor" },
        { name: "tableMaster", path: "/TableMaster" },
+       { name: "tableMaster", path: "/TableMaster" },
+       { name: "recevingReport", path: "/RecevingReport" },
+       { name: "issuanceReport", path: "/IssuanceReport" },
     ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -210,7 +216,8 @@ function App() {
           <Route path='/manualRCRequest' element={<ManualRCRequest />} />
           <Route path='/manualDoor' element={<ManualDoor />} />
           <Route path='/tableMaster' element={<TableMaster />} />
-
+          <Route path='/recevingReport' element={<RecevingReport />} />
+          <Route path='/issuanceReport' element={<IssuanceReport />} />
           <Route
             path="/receving"
             element={

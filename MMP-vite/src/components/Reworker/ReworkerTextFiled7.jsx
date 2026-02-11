@@ -63,7 +63,7 @@ const ReworkerTextFiled7 = ({ formData, setFormData, isFrozen,
                     disabled={isFrozen}
                     renderInput={(params) => <TextField {...params} label="Module Serial Number" size="small" />}
                 />
-                {isFrozen && (
+               
                 <TextField
                     label="Comments"
                     name="ReworkerComments"
@@ -72,9 +72,10 @@ const ReworkerTextFiled7 = ({ formData, setFormData, isFrozen,
                     error={Boolean(formErrors?.ReworkerComments)}
                     helperText={formErrors?.ReworkerComments || ""}
                     multiline
+                    disabled={!isFrozen}
                     minRows={1}
                 />
-                )}
+                
             </ThemeProvider>
         </div>
     )

@@ -11,7 +11,10 @@ import { deleteproduct, downloadProduct, downloadSearchProduct, getProductMaster
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
+import { checkUserValid } from "../../components/Com_Component/userUtils";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Snackbar, Alert } from "@mui/material";
+
 
 const ProductFamilyMaster = () => {
   const [formErrors, setFormErrors] = useState({});
@@ -42,6 +45,7 @@ const ProductFamilyMaster = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [resetKey, setResetKey] = useState(0);
+   const [openMsg, setOpenMsg] = useState(false);
 
   const [formData, setFormData] = useState({
     productname: '',
@@ -76,20 +80,20 @@ const ProductFamilyMaster = () => {
   //   );
 
   const s = searchText.toLowerCase();
-const filteredProductMaster = productMaster
-  .filter(v =>
-    v.productname?.toLowerCase().includes(s) ||
-    v.productgroup?.toLowerCase().includes(s) ||
-    v.productfamily?.toLowerCase().includes(s) ||
-    (Array.isArray(v.lineLead) && v.lineLead.join(",").toLowerCase().includes(s)) ||
-    (Array.isArray(v.productEngineer) && v.productEngineer.join(",").toLowerCase().includes(s)) ||
-    v.recordstatus?.toLowerCase().includes(s)
-  )
-  .map(v => ({
-    ...v,
-    lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
-    productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
-  }));
+  const filteredProductMaster = productMaster
+    .filter(v =>
+      v.productname?.toLowerCase().includes(s) ||
+      v.productgroup?.toLowerCase().includes(s) ||
+      v.productfamily?.toLowerCase().includes(s) ||
+      (Array.isArray(v.lineLead) && v.lineLead.join(",").toLowerCase().includes(s)) ||
+      (Array.isArray(v.productEngineer) && v.productEngineer.join(",").toLowerCase().includes(s)) ||
+      v.recordstatus?.toLowerCase().includes(s)
+    )
+    .map(v => ({
+      ...v,
+      lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
+      productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
+    }));
 
 
 
@@ -113,12 +117,20 @@ const filteredProductMaster = productMaster
   //   fetchProduct(page, perPage, debouncedSearch);
   // }, [page, perPage, debouncedSearch]);
   useEffect(() => {
-  fetchProduct();
-}, []);
+    fetchProduct();
+  }, []);
 
 
   useEffect(() => {
     getUserMail();
+    const validate = async () => {
+      const isValid = await checkUserValid();
+      if (!isValid) {
+        alert("Session expired or invalid");
+        window.location.href = "/"; // redirect
+      }
+    };
+    validate();
   }, []);  // Runs only once
 
   useEffect(() => {
@@ -132,8 +144,10 @@ const filteredProductMaster = productMaster
   const handleSubmit = async () => {
     if (!valiDate()) return;
     setLoading(true)
-    const createdby = sessionStorage.getItem("userName") || "System";
-    const modifiedby = sessionStorage.getItem("userName") || "System";
+    // const createdby = sessionStorage.getItem("userName") || "System";
+    // const modifiedby = sessionStorage.getItem("userName") || "System";
+     const createdby = localStorage.getItem("userName") || "System";
+    const modifiedby = localStorage.getItem("userName") || "System";
     const updatedFormData = { ...formData, createdby, modifiedby };
 
     try {
@@ -150,9 +164,9 @@ const filteredProductMaster = productMaster
       });
 
       // Refresh table
-       fetchProduct(1, perPage); // reset to first page
+      fetchProduct(1, perPage); // reset to first page
       setPage(1);
-      setResetKey(prev => prev + 1);  
+      setResetKey(prev => prev + 1);
     } catch (error) {
       if (error.response) {
         const message =
@@ -164,7 +178,7 @@ const filteredProductMaster = productMaster
         setErrorMessage("Network error, please try again");
       }
       setShowErrorPopup(true);
-    }finally{
+    } finally {
       setLoading(false)
     }
   };
@@ -184,7 +198,7 @@ const filteredProductMaster = productMaster
   //     .finally(() => setLoading(false));
   // };
 
-   const fetchProduct = () => {
+  const fetchProduct = () => {
     setLoading(true);
     getProductMasterData() // Pass as separate arguments
       .then((response) => {
@@ -203,28 +217,28 @@ const filteredProductMaster = productMaster
   const handlePageChange = (newPage) => {
     setPage(newPage);
   };
-const filteredProductData = productMaster.filter(row =>
-  Object.values(row).some(value => {
-    if (typeof value === "string") {
-      return value.toLowerCase().includes(s);
-    }
+  const filteredProductData = productMaster.filter(row =>
+    Object.values(row).some(value => {
+      if (typeof value === "string") {
+        return value.toLowerCase().includes(s);
+      }
 
-    if (Array.isArray(value)) {
-      return value.join(",").toLowerCase().includes(s);
-    }
+      if (Array.isArray(value)) {
+        return value.join(",").toLowerCase().includes(s);
+      }
 
-    return false;
-  })
-);
+      return false;
+    })
+  );
   const paginatedData = excelUploadData.slice(
     (page - 1) * perPage,
     page * perPage
   );
 
   const paginatedProductData = filteredProductData.slice(
-        (page - 1) * perPage,
-        page * perPage
-    );
+    (page - 1) * perPage,
+    page * perPage
+  );
   const handlePerRowsChange = (newPerPage, newPage) => {
     setPerPage(newPerPage);
     setPage(newPage);
@@ -313,15 +327,15 @@ const filteredProductData = productMaster.filter(row =>
     //     : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
     // },
     {
-  name: "Line Lead",
-  selector: row =>
-    Array.isArray(row.lineLead)
-      ? row.lineLead.map(email => (
-          <div key={email}>{email}</div>
-        ))
-      : "",
-  width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
-},
+      name: "Line Lead",
+      selector: row =>
+        Array.isArray(row.lineLead)
+          ? row.lineLead.map(email => (
+            <div key={email}>{email}</div>
+          ))
+          : "",
+      width: `${calculateColumnWidth(productMaster, 'lineLead')}`,
+    },
 
     // {
     //   name: "Product Engineer",
@@ -330,15 +344,15 @@ const filteredProductData = productMaster.filter(row =>
     //     : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
     // },
     {
-  name: "Product Engineer",
-  selector: row =>
-    Array.isArray(row.productEngineer)
-      ? row.productEngineer.map(email => (
-          <div key={email}>{email}</div>
-        ))
-      : "",
-  width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
-},
+      name: "Product Engineer",
+      selector: row =>
+        Array.isArray(row.productEngineer)
+          ? row.productEngineer.map(email => (
+            <div key={email}>{email}</div>
+          ))
+          : "",
+      width: `${calculateColumnWidth(productMaster, 'productEngineer')}`,
+    },
 
     {
       name: "Status", selector: row => row.recordstatus, width: "199px",
@@ -396,49 +410,49 @@ const filteredProductData = productMaster.filter(row =>
       recordstatus: ""
     }];
 
-    /*
-  const exportToExcel = (search = "") => {
-    console.log("searchTeaxt", search)
-    if (search && search.trim() !== "") {
-      setLoading(true);
-      downloadSearchProduct(search) // <- pass search here
-        .then((response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "products.xlsx");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        })
-        .catch((error) => {
-          console.error("Download failed:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(true);
-      downloadProduct()
-        .then((response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "products.xlsx");
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        })
-        .catch((error) => {
-          console.error("Download failed:", error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  };
+  /*
+const exportToExcel = (search = "") => {
+  console.log("searchTeaxt", search)
+  if (search && search.trim() !== "") {
+    setLoading(true);
+    downloadSearchProduct(search) // <- pass search here
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "products.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        console.error("Download failed:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  } else {
+    setLoading(true);
+    downloadProduct()
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "products.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        console.error("Download failed:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+};
  
-  */
+*/
   const formClear = () => {
     setFormData({ productname: '', productgroup: '', productfamily: '', createdBy: '', lineLead: '', productEngineer: '', status: '' });
     setExcelUploadData([]);
@@ -484,7 +498,8 @@ const filteredProductData = productMaster.filter(row =>
     e.preventDefault();
     if (!valiDate()) return;
     setLoading(true);
-    const modifiedby = sessionStorage.getItem("userName") || "System";
+    // const modifiedby = sessionStorage.getItem("userName") || "System";
+    const modifiedby = localStorage.getItem("userName") || "System";
     const updatedFormData = {
       ...formData,
       id,
@@ -626,8 +641,12 @@ const filteredProductData = productMaster.filter(row =>
       setShowErrorPopup(true);
       return;
     }
-    const createdby = sessionStorage.getItem("userName") || "System";
-    const modifiedby = sessionStorage.getItem("userName") || "System";
+    // const createdby = sessionStorage.getItem("userName") || "System";
+    // const modifiedby = sessionStorage.getItem("userName") || "System";
+
+    const createdby = localStorage.getItem("userName") || "System";
+    const modifiedby = localStorage.getItem("userName") || "System";
+ 
     const updatedFormData = excelUploadData.map(item => ({
       ...item,
       createdby,
@@ -721,22 +740,22 @@ const filteredProductData = productMaster.filter(row =>
   }
 
   const exportToExcel = (searchText = "") => {
-  const dataToExport =
-    searchText && searchText.trim() !== "" ? filteredProductMaster : productMaster;
+    const dataToExport =
+      searchText && searchText.trim() !== "" ? filteredProductMaster : productMaster;
 
-  if (!Array.isArray(dataToExport) || dataToExport.length === 0) return;
+    if (!Array.isArray(dataToExport) || dataToExport.length === 0) return;
 
-  const formattedData = dataToExport.map(({ id, ...v }) => ({
-    ...v,
-    lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
-    productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
-  }));
+    const formattedData = dataToExport.map(({ id, ...v }) => ({
+      ...v,
+      lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
+      productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
+    }));
 
-  const sheet = XLSX.utils.json_to_sheet(formattedData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, sheet, "ProductMaster");
-  XLSX.writeFile(workbook, "ProductMaster.xlsx");
-};
+    const sheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "ProductMaster");
+    XLSX.writeFile(workbook, "ProductMaster.xlsx");
+  };
 
 
   return (
@@ -878,8 +897,8 @@ const filteredProductData = productMaster.filter(row =>
           <>
             <LoadingOverlay loading={loading} />
             <DataTable
-                 key={resetKey}                 
-  paginationDefaultPage={1} 
+              key={resetKey}
+              paginationDefaultPage={1}
               columns={columns}
               data={filteredProductData}
               pagination
@@ -1009,6 +1028,16 @@ const filteredProductData = productMaster.filter(row =>
         message="Are you sure you want to delete this?"
         color="primary"
       />
+      <Snackbar
+        open={openMsg}
+        autoHideDuration={10000}
+        onClose={() => setOpenMsg(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity="error" variant="filled">
+          Session expired or invalid
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

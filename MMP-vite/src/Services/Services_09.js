@@ -294,6 +294,15 @@ export const getLocalReportDetailFilter = (page = 0, size = 10, formData) => {
   return axios.post(`${Get_LocalReportDetailFilter}?page=${page}&size=${size}`, formData);
 };
 
+const Get_RecevingReportDetailFilter = `${url}/RecevingReportCon/fetchLocalReportFilter`;
+export const getRecevingReportDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_RecevingReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
+
+const Get_IssuanceReportDetailFilter = `${url}/RecevingReportCon/fetchIssuanceReportFilter`;
+export const getIssuanceReportDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_IssuanceReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
 
 
 const Get_PTLPutawayTicket = `${url}/localPutawayCon/fetchPTLStorePutawayTicket`;
@@ -477,3 +486,18 @@ export const rejectedIssuanceTicket = (ticketno,comment ) => {
 const saveLocal_Bulk =`${url}/LocalMaster/bulk_Save`
 export const saveLocalMasteUpload = (excelUploadData) =>axios.post(saveLocal_Bulk,excelUploadData)
 
+
+
+const checkUserTocken = `${url}/userAuth/checkUser`
+export const checkUserSession = (formData7) => axios.post(checkUserTocken, formData7);
+
+
+const get_PartocdeList = `${url}/RecevingReportCon/getPartcode`;
+export const fetchPartcodeReport = () => axios.get(get_PartocdeList);
+
+
+const Get_DownloadReceivingReportFilter = `${url}/RecevingReportCon/downloadLocalReportFilter-excel`;
+export const downloadReceivingReportFilter = (formData) =>
+  axios.post(Get_DownloadReceivingReportFilter, formData, {
+    responseType: "blob",
+  });

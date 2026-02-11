@@ -7,6 +7,8 @@ import PTLOpreatorTable from "../../components/PTLOpreatorRequest/PTLOpreatorTab
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import DataTable from "react-data-table-component";
 import { FaFileExcel, FaBars } from "react-icons/fa";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const PTLRequest = () => {
     const [rcMainStore, setRcMainStore] = useState([]);
@@ -27,9 +29,9 @@ const PTLRequest = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [requestDeatil, setRequestDetail] = useState([]);
     const [downloadProgress, setDownloadProgress] = useState(null);
-        const [addSearchText, setAddSearchText] = useState("");
-const [filteredAddData, setFilteredAddData] = useState([]);
-
+    const [addSearchText, setAddSearchText] = useState("");
+    const [filteredAddData, setFilteredAddData] = useState([]);
+    const [openMsg, setOpenMsg] = useState(false);
 
     const [formData, setFormData] = useState({
         partcode: "",
@@ -82,6 +84,16 @@ const [filteredAddData, setFilteredAddData] = useState([]);
         return isValid;
     }
     useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
         fetchRcStoreMaster();
 
     }, []);
@@ -102,12 +114,12 @@ const [filteredAddData, setFilteredAddData] = useState([]);
     };
 
     const handleAddClick = () => {
-        
+
         if (tableData.length >= 15) {
-        setErrorMessage("Cannot add more than 15 Component");
-        setShowErrorPopup(true);
-        return;
-    }
+            setErrorMessage("Cannot add more than 15 Component");
+            setShowErrorPopup(true);
+            return;
+        }
         if (tableData.some(item => item.partcode === formData.partcode)) {
             setErrorMessage("Partcode Already Added")
             setShowErrorPopup(true);
@@ -128,16 +140,18 @@ const [filteredAddData, setFilteredAddData] = useState([]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
 
-        
-        const userId = sessionStorage.getItem("userId");
+
+
+        // const userId = sessionStorage.getItem("userId");
+        const userId = localStorage.getItem("userId");
         if (!userId) {
-    alert("Please relogin");
-    return;
-  }
-  setLoading(true);
-         const userName = sessionStorage.getItem("userName") || "System";
+            alert("Please relogin");
+            return;
+        }
+        setLoading(true);
+        // const userName = sessionStorage.getItem("userName") || "System";
+        const userName = localStorage.getItem("userName") || "System";
         let updatedFormData;
 
 
@@ -183,40 +197,40 @@ const [filteredAddData, setFilteredAddData] = useState([]);
             });
     };
 
-      const useDebounce = (value, delay) => {
-            const [debouncedValue, setDebouncedValue] = useState(value);
-            useEffect(() => {
-                const handler = setTimeout(() => setDebouncedValue(value), delay);
-                return () => clearTimeout(handler);
-            }, [value, delay]);
-            return debouncedValue;
-        };
-    
-        const debouncedSearch = useDebounce(searchText, 500);
-    
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
+
+    const debouncedSearch = useDebounce(searchText, 500);
+
     useEffect(() => {
-        fetchRequestDetails(page, perPage,debouncedSearch);
-    }, [page, perPage,debouncedSearch]);
+        fetchRequestDetails(page, perPage, debouncedSearch);
+    }, [page, perPage, debouncedSearch]);
 
-   const fetchRequestDetails = (page, perPage , search = "") => {
-    setLoading(true);
+    const fetchRequestDetails = (page, perPage, search = "") => {
+        setLoading(true);
 
-    fetchPTLRequestDetail(search,page, perPage)
-        .then((response) => {
-            if (response?.data?.content) {
-                setRequestDetail(response.data.content);
-                setTotalRows(response.data.totalElements || 0);
-            } else {
-                console.warn("No content found in response:", response.data);
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching receiving data:", error);
-        })
-        .finally(() => setLoading(false)); // ensures loading is turned off after promise settles
-}
+        fetchPTLRequestDetail(search, page, perPage)
+            .then((response) => {
+                if (response?.data?.content) {
+                    setRequestDetail(response.data.content);
+                    setTotalRows(response.data.totalElements || 0);
+                } else {
+                    console.warn("No content found in response:", response.data);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching receiving data:", error);
+            })
+            .finally(() => setLoading(false)); // ensures loading is turned off after promise settles
+    }
 
- const exportToExcel = (search = "") => {
+    const exportToExcel = (search = "") => {
         // const userId = sessionStorage.getItem("userName") || "System";
 
         setDownloadDone(false);
@@ -253,21 +267,21 @@ const [filteredAddData, setFilteredAddData] = useState([]);
             });
     };
 
-    
+
     useEffect(() => {
-      if (!addSearchText) {
-        setFilteredAddData(tableData);
-      } else {
-        const lower = addSearchText.toLowerCase();
-    
-        const result = tableData.filter((row) =>
-          Object.values(row).some((val) =>
-            String(val).toLowerCase().includes(lower)
-          )
-        );
-    
-        setFilteredAddData(result);
-      }
+        if (!addSearchText) {
+            setFilteredAddData(tableData);
+        } else {
+            const lower = addSearchText.toLowerCase();
+
+            const result = tableData.filter((row) =>
+                Object.values(row).some((val) =>
+                    String(val).toLowerCase().includes(lower)
+                )
+            );
+
+            setFilteredAddData(result);
+        }
     }, [addSearchText, tableData]);
     return (
         <div className='ComCssContainer'>
@@ -294,7 +308,7 @@ const [filteredAddData, setFilteredAddData] = useState([]);
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>ADD Board</h5>
-                     <div
+                    <div
                         className="d-flex justify-content-end align-items-center mb-3"
                         style={{ marginTop: "9px", display: "flex" }}>
                         <div style={{ position: "relative", width: "200px" }}>
@@ -390,6 +404,16 @@ const [filteredAddData, setFilteredAddData] = useState([]);
                 severity="error"
                 color="secondary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
 
     )

@@ -1,4 +1,4 @@
-import React, { useState, useEffect ,useCallback} from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
@@ -13,6 +13,8 @@ import * as XLSX from "xlsx";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 import { FaFileExcel } from "react-icons/fa";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const Receving = () => {
   const [ponumber, setPonumber] = useState([]);
@@ -35,9 +37,10 @@ const Receving = () => {
   const [updateButton, setUpdateButton] = useState(false);
   const [deleteButton, setDeleteButton] = useState(false);
   const [loading, setLoading] = useState(false);
-const [addSearchText, setAddSearchText] = useState("");
+  const [addSearchText, setAddSearchText] = useState("");
   const [filteredAddData, setFilteredAddData] = useState([]);
   const [selectedDeleteRows, setSelectedDeleteRows] = useState([]);
+  const [openMsg, setOpenMsg] = useState(false);
   const [formData, setFormData] = useState({
     ponumber: "", vendorname: "", currency: "", postingdate: "", rcBactchCode: "",
     invoiceNo: "", invoiceDate: "", receivingDate: ""
@@ -55,15 +58,15 @@ const [addSearchText, setAddSearchText] = useState("");
   //     )
   //   );
   // };
-const handleFieldChange = useCallback((key, field, value) => {
-  setPoDetail(prev =>
-    prev.map(row =>
-      `${row.ponumber}-${row.partcode}` === key
-        ? { ...row, [field]: value }
-        : row
-    )
-  );
-}, []);
+  const handleFieldChange = useCallback((key, field, value) => {
+    setPoDetail(prev =>
+      prev.map(row =>
+        `${row.ponumber}-${row.partcode}` === key
+          ? { ...row, [field]: value }
+          : row
+      )
+    );
+  }, []);
 
 
   //receving ticket no fetching
@@ -127,6 +130,16 @@ const handleFieldChange = useCallback((key, field, value) => {
   };
 
   useEffect(() => {
+    const validate = async () => {
+      const isValid = await checkUserValid();
+      if (!isValid) {
+        setOpenMsg(true);
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      }
+    };
+    validate();
     fetchPoNumberData(setPonumber);
   }, [])
 
@@ -162,14 +175,14 @@ const handleFieldChange = useCallback((key, field, value) => {
 
 
 
-const toBackendDateTime = (d) => {
-  if (!d) return null;
-  const date = new Date(d); // "dd/mm/yyyy" from form
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd} 00:00:00.000`; // backend format
-};
+  const toBackendDateTime = (d) => {
+    if (!d) return null;
+    const date = new Date(d); // "dd/mm/yyyy" from form
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} 00:00:00.000`; // backend format
+  };
 
   const handleAction = (e) => {
     e.preventDefault();
@@ -187,8 +200,8 @@ const toBackendDateTime = (d) => {
       selectedKeys.has(`${row.ponumber}-${row.partcode}`)
     );
 
-    const username = sessionStorage.getItem("userName") || "System";
-
+    // const username = sessionStorage.getItem("userName") || "System";
+    const username = localStorage.getItem("userName") || "System";
     if (submitButton) {
       setLoading(true);
 
@@ -212,18 +225,18 @@ const toBackendDateTime = (d) => {
       setShowErrorPopup(false);
       setShowSuccessPopup(false);
       // Merge formData + poDetail[0] into single object
-       const mergedData = {
-    ...poDetail[0],
-    ...formData,
-    invoiceDate: toBackendDateTime(formData.invoiceDate),
-    postingdate: toBackendDateTime(formData.postingdate),
-    receivingDate: toBackendDateTime(formData.receivingDate),
-    exp_date: toBackendDateTime(formData.exp_date),
-    updatedby: username,
-  };
+      const mergedData = {
+        ...poDetail[0],
+        ...formData,
+        invoiceDate: toBackendDateTime(formData.invoiceDate),
+        postingdate: toBackendDateTime(formData.postingdate),
+        receivingDate: toBackendDateTime(formData.receivingDate),
+        exp_date: toBackendDateTime(formData.exp_date),
+        updatedby: username,
+      };
 
       const id = formData.id;
-      console.log("id:",id)
+      console.log("id:", id)
       setLoading(true);
 
       updateRecDeatil(id, mergedData)
@@ -243,7 +256,7 @@ const toBackendDateTime = (d) => {
     setSuccessMessage(response.data.message);
     setShowSuccessPopup(true);
     setShowErrorPopup(false);
-      fetchPoNumberData(setPonumber);
+    fetchPoNumberData(setPonumber);
 
     setShowRecevingTable(false);
     setPoDetail([]);
@@ -295,7 +308,7 @@ const toBackendDateTime = (d) => {
 
   const fetchFindData = async (page = 1, size = 10, search = "") => {
     setLoading(true); // loader start
-      // await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+    // await new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
     try {
       if (search && search.trim() !== "") {
@@ -335,58 +348,58 @@ const toBackendDateTime = (d) => {
   }
 
 
-const toDDMMYYYY = (dateStr) => {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-
-const formatToInputDate = (d) => {
-  if (!d) return "";
-  const date = new Date(d);
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`; // format for type="date"
-};
-
-const handleEdit = (rowData) => {
-  setShowRecevingTable(true);
-  setSubmitButton(false);
-  setUpdateButton(true);
-
-  setFormData({
-    id: rowData.id || "",
-    ponumber: rowData.ponumber,
-    vendorname: rowData.vendorname,
-    postingdate: formatToInputDate(rowData.postingdate),
-    currency: rowData.currency,
-    ccf: rowData.ccf,
-    invoiceNo: rowData.invoiceNo,
-    invoiceDate: formatToInputDate(rowData.invoiceDate),
-    exp_date: formatToInputDate(rowData.exp_date),
-    receivingDate: formatToInputDate(rowData.receivingDate),
-    rcBactchCode: rowData.rcBactchCode,
-  });
-
-  const combinedRow = {
-    partcode: rowData.partcode,
-    partdescription: rowData.partdescription,
-    orderqty: rowData.orderqty || "",
-    openOrderQty: rowData.orderqty - rowData.recevingQty || "",
-    UOM: rowData.UOM || "",
-    tyc: rowData.TYC,
-    recevingQty: rowData.recevingQty,
-    totalValue: rowData.totalValue,
-    totalValueEuro: rowData.totalValueEuro,
-    exp_date: formatToInputDate(rowData.exp_date),
+  const toDDMMYYYY = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
-  setPoDetail([combinedRow]);
-};
+  const formatToInputDate = (d) => {
+    if (!d) return "";
+    const date = new Date(d);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`; // format for type="date"
+  };
+
+  const handleEdit = (rowData) => {
+    setShowRecevingTable(true);
+    setSubmitButton(false);
+    setUpdateButton(true);
+
+    setFormData({
+      id: rowData.id || "",
+      ponumber: rowData.ponumber,
+      vendorname: rowData.vendorname,
+      postingdate: formatToInputDate(rowData.postingdate),
+      currency: rowData.currency,
+      ccf: rowData.ccf,
+      invoiceNo: rowData.invoiceNo,
+      invoiceDate: formatToInputDate(rowData.invoiceDate),
+      exp_date: formatToInputDate(rowData.exp_date),
+      receivingDate: formatToInputDate(rowData.receivingDate),
+      rcBactchCode: rowData.rcBactchCode,
+    });
+
+    const combinedRow = {
+      partcode: rowData.partcode,
+      partdescription: rowData.partdescription,
+      orderqty: rowData.orderqty || "",
+      openOrderQty: rowData.orderqty - rowData.recevingQty || "",
+      UOM: rowData.UOM || "",
+      tyc: rowData.TYC,
+      recevingQty: rowData.recevingQty,
+      totalValue: rowData.totalValue,
+      totalValueEuro: rowData.totalValueEuro,
+      exp_date: formatToInputDate(rowData.exp_date),
+    };
+
+    setPoDetail([combinedRow]);
+  };
 
 
   const handleRowSelect = (id) => {
@@ -439,17 +452,17 @@ const handleEdit = (rowData) => {
       setFilteredAddData(poDetail);
     } else {
       const lower = addSearchText.toLowerCase();
-  
+
       const result = poDetail.filter((row) =>
         Object.values(row).some((val) =>
           String(val).toLowerCase().includes(lower)
         )
       );
-  
+
       setFilteredAddData(result);
     }
   }, [addSearchText, poDetail]);
-  
+
   return (
     <div className='ComCssContainer'>
       <div className='ComCssInput'>
@@ -535,22 +548,22 @@ const handleEdit = (rowData) => {
 
             <div className='RecevingTable'>
 
-          <div
-                        className="d-flex justify-content-end align-items-center mb-3"
-                        style={{ marginTop: "9px", display: "flex" }}>
-                        <div style={{ position: "relative", width: "200px" }}>
-                            <input
-                                type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
-                                placeholder="Search..." value={addSearchText}
-                                onChange={(e) => setAddSearchText(e.target.value)}
-                            />
-                            {searchText && (
-                                <span onClick={() => setAddSearchText("")}
-                                    style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
-                                </span>
-                            )}
-                        </div>
-                    </div>
+              <div
+                className="d-flex justify-content-end align-items-center mb-3"
+                style={{ marginTop: "9px", display: "flex" }}>
+                <div style={{ position: "relative", width: "200px" }}>
+                  <input
+                    type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
+                    placeholder="Search..." value={addSearchText}
+                    onChange={(e) => setAddSearchText(e.target.value)}
+                  />
+                  {searchText && (
+                    <span onClick={() => setAddSearchText("")}
+                      style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#aaa", fontWeight: "bold", }}> ✖
+                    </span>
+                  )}
+                </div>
+              </div>
 
               <RecevingTable
                 // poDetail={poDetail}
@@ -642,6 +655,16 @@ const handleEdit = (rowData) => {
         message="Are you sure you want to delete this?"
         color="primary"
       />
+      <Snackbar
+        open={openMsg}
+        autoHideDuration={10000}
+        onClose={() => setOpenMsg(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity="error" variant="filled">
+          Session expired or invalid
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
