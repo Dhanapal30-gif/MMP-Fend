@@ -4,19 +4,21 @@ import RepaierAddTable from "../../components/Repaier/RepaierAddTable";
 
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
+import { checkUserValid } from "../../components/Com_Component/userUtils";
+// import NotificationCode from "../../components/Com_Component/NotificationCode";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchproductPtl, getLocalMaster, savePTLRepaier, savePTLStore } from '../../Services/Services_09';
 import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
-
+import { Snackbar, Alert } from "@mui/material";
 const Repaier = () => {
     const [formData, setFormData] = useState({
         productname: "",
         // productfamily: "",
         // productgroup: "",
         boardserialnumber: "",
-        repairelocation:"",
+        repairelocation: "",
         type: "",
         partcode: "",
         partdescription: "",
@@ -49,7 +51,7 @@ const Repaier = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [isFrozen, setIsFrozen] = useState(false);
     const [suiData, setSuiData] = useState([]);
-
+    const [openMsg, setOpenMsg] = useState(false);
     const handleChange = (e) => {
         const { name, value } = e.target;
         const numericValue = value.replace(/\D/g, "");
@@ -109,13 +111,13 @@ const Repaier = () => {
         //     isValid = false;
         // }
 
-if (!formData.boardserialnumber?.trim()) {
-  errors.boardserialnumber = "Enter Module Serial Number";
-  isValid = false;
-} else if (formData.boardserialnumber.length > 11) {
-  errors.boardserialnumber = "Module Serial Number must not exceed 11 characters";
-  isValid = false;
-}
+        if (!formData.boardserialnumber?.trim()) {
+            errors.boardserialnumber = "Enter Module Serial Number";
+            isValid = false;
+        } else if (formData.boardserialnumber.length > 11) {
+            errors.boardserialnumber = "Module Serial Number must not exceed 11 characters";
+            isValid = false;
+        }
 
 
         if (
@@ -170,12 +172,12 @@ if (!formData.boardserialnumber?.trim()) {
         // }
 
         if (!formData.boardserialnumber?.trim()) {
-  errors.boardserialnumber = "Enter Module Serial Number";
-  isValid = false;
-} else if (formData.boardserialnumber.length > 11) {
-  errors.boardserialnumber = "Module Serial Number must not exceed 11 characters";
-  isValid = false;
-}
+            errors.boardserialnumber = "Enter Module Serial Number";
+            isValid = false;
+        } else if (formData.boardserialnumber.length > 11) {
+            errors.boardserialnumber = "Module Serial Number must not exceed 11 characters";
+            isValid = false;
+        }
         if (formData.type === "RND" || formData.type === "Rework" || formData.type === "BGA") {
             if (!formData.pickingqty) {
                 errors.pickingqty = "Please Enter Picking Qty";
@@ -198,11 +200,11 @@ if (!formData.boardserialnumber?.trim()) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-            setLoading(true);
+        setLoading(true);
 
         // const userName = sessionStorage.getItem("userId") ;
-                const userName = localStorage.getItem("userName");
-// console.log("userName", userName);
+        const userName = localStorage.getItem("userName");
+        // console.log("userName", userName);
         let updatedFormData;
 
         if (showTable) {
@@ -251,13 +253,23 @@ if (!formData.boardserialnumber?.trim()) {
                 const errMsg = error?.response?.data?.message || "Network error, please try again";
                 setErrorMessage(errMsg);
                 setShowErrorPopup(true);
-            }) .finally(() => {
-    setLoading(false);
-});
+            }).finally(() => {
+                setLoading(false);
+            });
     };
-
+    
 
     useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000); 
+            }
+        };
+        validate();
         fetchData();
     }, []);
 
@@ -294,11 +306,11 @@ if (!formData.boardserialnumber?.trim()) {
     //     availableqty: item.quantity
     // }));
 
-  const partOptions = table2Data || []  
-  
-useEffect(()=>{
- console.log("table2Data =", table2Data);
-},[table2Data])
+    const partOptions = table2Data || []
+
+    // useEffect(()=>{
+    //  console.log("table2Data =", table2Data);
+    // },[table2Data])
 
 
     const suiNoOptions = table3Data.map(item => ({
@@ -332,7 +344,7 @@ useEffect(()=>{
             Quantity: "",
             productgroup: "",
             productfamily: "",
-            repairelocation:""
+            repairelocation: ""
         }));
     };
 
@@ -341,7 +353,7 @@ useEffect(()=>{
             setShowTable(true);
         }
     }, [tableData]);
-    
+
     // console.log("showTable:", showTable);
     // console.log("tableData:", tableData);
 
@@ -360,7 +372,7 @@ useEffect(()=>{
             repairercomments: "",
             SUINo: "",
             Quantity: "",
-            repairelocation:"",
+            repairelocation: "",
         });
         setExtraFields({
             productGroup: "",
@@ -434,7 +446,7 @@ useEffect(()=>{
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>ADD Board</h5>
-                                <LoadingOverlay loading={loading} />
+                    <LoadingOverlay loading={loading} />
 
                     <RepaierAddTable
                         data={tableData}
@@ -450,12 +462,12 @@ useEffect(()=>{
                         setTableData={setTableData}
                     />
                     <div className="ComCssButton9">
-                        {tableData.length !=0 &&
-                        <>
-                        <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
-                     <button className='ComCssClearButton' onClick={handleClear}> Cancel </button>
-                      </>
-                         }
+                        {tableData.length != 0 &&
+                            <>
+                                <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>Submit</button>
+                                <button className='ComCssClearButton' onClick={handleClear}> Cancel </button>
+                            </>
+                        }
 
                     </div>
                 </div>
@@ -476,6 +488,17 @@ useEffect(()=>{
                 severity="error"
                 color="secondary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
+
         </div>
     )
 }

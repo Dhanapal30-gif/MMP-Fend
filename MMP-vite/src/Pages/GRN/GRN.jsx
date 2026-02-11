@@ -12,6 +12,8 @@ import { deleteRecDetail, saveGRN, updateGRNDetail } from '../../Services/Servic
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { FaTimesCircle } from "react-icons/fa";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const GRN = () => {
     const [formData, setFormData] = useState({ ponumber: "", partcode: "", receivingDate: "", recevingTicketNo: "", grnNumber: "", GRDate: "" });
@@ -28,6 +30,7 @@ const GRN = () => {
     const [loading, setLoading] = useState(false);
     const [editingRowId, setEditingRowId] = useState(null);
     const [formErrors, setFormErrors] = useState({});
+    const [openMsg, setOpenMsg] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [poOptions, setPoOptions] = useState([]);
     const [partOptions, setPartOptions] = useState([]);
@@ -55,10 +58,25 @@ const GRN = () => {
 
     const handleChange = (name, value) => {
         setSelectedGrnRows([])
-        const actualValue = value?.label || value; 
+        const actualValue = value?.label || value;
         setFormData(prev => ({ ...prev, [name]: actualValue }));
     };
 
+
+    useEffect(() => {
+            const validate = async () => {
+                const isValid = await checkUserValid();
+                if (!isValid) {
+                    setOpenMsg(true);
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 1000); 
+                }
+            };
+            validate();
+        }, []);
+
+        
     useEffect(() => {
         fetchPendingGrn(setGRNPen, setShowErrorPopup);
     }, []);
@@ -178,8 +196,8 @@ const GRN = () => {
         const formatDateTime = (dateStr) =>
             dateStr ? new Date(dateStr).toISOString().split('Z')[0] : null;
 
-        const username = sessionStorage.getItem("userName") || "System";
-
+        // const username = sessionStorage.getItem("userName") || "System";
+        const username = localStorage.getItem("userName") || "System";
         if (!isEditMode) {
             if (selectedGrnRows.length === 0) {
                 setErrorMessage("Please select at least one row");
@@ -217,7 +235,7 @@ const GRN = () => {
                             setSelectedGrnRows([]);
                             setIsEditMode(false);
                             // fetchPendingGrn();
-                                fetchPendingGrn(setGRNPen, setShowErrorPopup); // ✅ THIS UPDATES DROPDOWN
+                            fetchPendingGrn(setGRNPen, setShowErrorPopup); // ✅ THIS UPDATES DROPDOWN
                             fetchFindData();
                         },
                     });
@@ -230,7 +248,7 @@ const GRN = () => {
                     });
                 });
         } else {
-             if (selectedGrnRows.length === 0) {
+            if (selectedGrnRows.length === 0) {
                 setErrorMessage("Please select at least one row");
                 setShowErrorPopup(true);
                 return;
@@ -253,7 +271,7 @@ const GRN = () => {
                         response,
                         setSuccessMessage,
                         setShowSuccessPopup,
-                    
+
                         afterSuccess: () => {
                             setFormData({});
                             setSelectedRows([]);
@@ -613,6 +631,16 @@ const GRN = () => {
                 message="Are you sure you want to delete this?"
                 color="primary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
         // </div>
     )

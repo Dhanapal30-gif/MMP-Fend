@@ -11,6 +11,8 @@ import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { deleteLocalPutaway } from '../../Services/Services-Rc';
 import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const LocalPutaway = () => {
     const [formData, setFormData] = useState({
@@ -47,13 +49,13 @@ const LocalPutaway = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [selectedRows,setSelectedRows]=useState([])
-        const [deletButton, setDeletButton] = useState();
-        const [confirmDelete, setConfirmDelete] = useState(false);
-        const [isTicetFreze, setIsTicetFreze]=useState(false);
-        const [ptlPutawayTicketList, setPTLPutawayTicketList]=useState([])
-        const [pTLPutawayTicketDetails, setPTLPutawayTicketDetails]=useState([])
-    
+    const [selectedRows, setSelectedRows] = useState([])
+    const [deletButton, setDeletButton] = useState();
+    const [confirmDelete, setConfirmDelete] = useState(false);
+    const [isTicetFreze, setIsTicetFreze] = useState(false);
+    const [ptlPutawayTicketList, setPTLPutawayTicketList] = useState([])
+    const [pTLPutawayTicketDetails, setPTLPutawayTicketDetails] = useState([])
+const [openMsg, setOpenMsg] = useState(false);
     // console.log("ptldata", ptldata);
     const handlePoChange = (field, value) => {
         setFormData(prev => ({
@@ -104,6 +106,16 @@ const LocalPutaway = () => {
 
 
     useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
         fetchData();
         fetchPutawayTicket();
 
@@ -115,13 +127,13 @@ const LocalPutaway = () => {
     }, [page, perPage, debouncedSearch]);
 
     useEffect(() => {
-  if (formData.ticket) {
-    fetchPutawayTicketDetail(formData.ticket);
-  }
-}, [formData.ticket]);
+        if (formData.ticket) {
+            fetchPutawayTicketDetail(formData.ticket);
+        }
+    }, [formData.ticket]);
 
 
- const fetchPutawayTicketDetail = (ticket) => {
+    const fetchPutawayTicketDetail = (ticket) => {
         setLoading(true);
         fetchPTLPutawayTicketDetail(ticket)
             .then((response) => {
@@ -135,7 +147,7 @@ const LocalPutaway = () => {
                 setLoading(false);
             })
     };
-    
+
     console.log("pTLPutawayTicketDetails", pTLPutawayTicketDetails)
 
     const fetchPutawayDetailTable = (page = 1, size = 10, search = "") => {
@@ -174,7 +186,7 @@ const LocalPutaway = () => {
             })
     };
 
-    
+
 
     const fetchPutawayDetail = (page = 1, size = 10) => {
         setLoading(true);
@@ -212,22 +224,23 @@ const LocalPutaway = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        const modifiedby = sessionStorage.getItem("userId") || "System";
+        // const modifiedby = sessionStorage.getItem("userId") || "System";
+        const modifiedby = localStorage.getItem("userId") || "System";
         let updatedFormData;
-        if(isEditMode){
-      const { modifiedby, createddate, modifieddate, ...rest } = formData;
+        if (isEditMode) {
+            const { modifiedby, createddate, modifieddate, ...rest } = formData;
 
-    updatedFormData = {
-        ...rest,    // <- use rest, not formData
-        id: formData.id,
-    };
-        }else{
-         updatedFormData = {
-            ...formData,
-            modifiedby,
-            createdby: modifiedby,
-        };
-    }
+            updatedFormData = {
+                ...rest,    // <- use rest, not formData
+                id: formData.id,
+            };
+        } else {
+            updatedFormData = {
+                ...formData,
+                modifiedby,
+                createdby: modifiedby,
+            };
+        }
         savePutaway(updatedFormData)
             .then((response) => {
                 // fetchMainMaster(page, perPage);
@@ -257,21 +270,22 @@ const LocalPutaway = () => {
     const handlePTLTicketSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        const createdby = sessionStorage.getItem("userId") || "System";
+        // const createdby = sessionStorage.getItem("userId") || "System";
+         const createdby = localStorage.getItem("userId") || "System";
         let updatedFormData;
-            
-         const updatedData = (pTLPutawayTicketDetails.data || []).map(row => ({
-        createdby,
-        partcode: row.partcode,
-        quantity: row.requestQty,    // use edited value
-        racklocation: row.racklocation,
-        partdescription: row.partdescription,
-        // ptlreqticketno: row.ptlreqticketno
-    }));
-    const ticketNo = pTLPutawayTicketDetails.data[0]?.ptlreqticketno;
-     
 
-        saveTicketPutaway(updatedData,ticketNo)
+        const updatedData = (pTLPutawayTicketDetails.data || []).map(row => ({
+            createdby,
+            partcode: row.partcode,
+            quantity: row.requestQty,    // use edited value
+            racklocation: row.racklocation,
+            partdescription: row.partdescription,
+            // ptlreqticketno: row.ptlreqticketno
+        }));
+        const ticketNo = pTLPutawayTicketDetails.data[0]?.ptlreqticketno;
+
+
+        saveTicketPutaway(updatedData, ticketNo)
             .then((response) => {
                 // fetchMainMaster(page, perPage);
                 setSuccessMessage(response.data.message || "Masterdata Added Successfully");
@@ -301,27 +315,28 @@ const LocalPutaway = () => {
     const handlePut = (e) => {
         e.preventDefault();
         // if (!valiDate()) return;
-        const createdby = sessionStorage.getItem("userName") || "System";
+        // const createdby = sessionStorage.getItem("userName") || "System";
+         const createdby = localStorage.getItem("userName") || "System";
         const updatedFormData = {
             ...formData,
             createdby,
         };
-         const updatedData = (pTLPutawayTicketDetails.data || []).map(row => ({
-        createdby,
-        partcode: row.partcode,
-        quantity: row.requestQty,    // use edited value
-        racklocation: row.racklocation
-    }));
-            // const payload = isTicetFreze ? updatedData : updatedFormData;
-      const payload = isTicetFreze ? updatedData : [{
-        createdby,
-        partcode: formData.partcode,
-        quantity: formData.quantity,
-        racklocation: formData.racklocation,
-        availableQuantity: formData.availableQuantity,
-        partdescription: formData.partdescription
-    }];  
-    savePutLocation(payload)
+        const updatedData = (pTLPutawayTicketDetails.data || []).map(row => ({
+            createdby,
+            partcode: row.partcode,
+            quantity: row.requestQty,    // use edited value
+            racklocation: row.racklocation
+        }));
+        // const payload = isTicetFreze ? updatedData : updatedFormData;
+        const payload = isTicetFreze ? updatedData : [{
+            createdby,
+            partcode: formData.partcode,
+            quantity: formData.quantity,
+            racklocation: formData.racklocation,
+            availableQuantity: formData.availableQuantity,
+            partdescription: formData.partdescription
+        }];
+        savePutLocation(payload)
             .then((response) => {
                 setSubmitButton(true);
                 setPutButton(false)
@@ -393,18 +408,18 @@ const LocalPutaway = () => {
             });
     };
 
-   const handleEdit = (row) => {
-    setIsEditMode(true);
-    setIsFrozen(true);
-    setFormData({
-        ...row,
-        quantity: row.putawayqty, // map column to formData field
-    });
-    setIsEditMode(true);
-};
+    const handleEdit = (row) => {
+        setIsEditMode(true);
+        setIsFrozen(true);
+        setFormData({
+            ...row,
+            quantity: row.putawayqty, // map column to formData field
+        });
+        setIsEditMode(true);
+    };
 
 
-  const onDeleteClick = () => {
+    const onDeleteClick = () => {
         setConfirmDelete(true);
     };
     // console.log("fpoprmdata",formData)
@@ -419,45 +434,46 @@ const LocalPutaway = () => {
 
 
     const handleDelete = async () => {
-            setConfirmDelete(false);
-            try {
-                const modifiedby = sessionStorage.getItem("userId");
-                await deleteLocalPutaway(selectedRows,modifiedby);
-                setSuccessMessage("Data successfullly deleted");
-                setShowSuccessPopup(true);
-                setSelectedRows([]);
-                // setHandleSubmitButton(true);
-                setDeletButton(false);
-                fetchData(page, perPage);
-            } catch (error) {
-                setErrorMessage(`Delete error: ${error?.message || error}`);
-                setShowErrorPopup(true);
-            }
-    
-        }
-        const handleFrezeFiled=()=>{
-            setIsTicetFreze(true)
-            setPutButton(false)
-            setSubmitButton(false)
+        setConfirmDelete(false);
+        try {
+            // const modifiedby = sessionStorage.getItem("userId");
+            const modifiedby = localStorage.getItem("userId");
+            await deleteLocalPutaway(selectedRows, modifiedby);
+            setSuccessMessage("Data successfullly deleted");
+            setShowSuccessPopup(true);
+            setSelectedRows([]);
+            // setHandleSubmitButton(true);
+            setDeletButton(false);
+            fetchData(page, perPage);
+        } catch (error) {
+            setErrorMessage(`Delete error: ${error?.message || error}`);
+            setShowErrorPopup(true);
         }
 
-        const [data, setData]=useState([])
+    }
+    const handleFrezeFiled = () => {
+        setIsTicetFreze(true)
+        setPutButton(false)
+        setSubmitButton(false)
+    }
 
-        const handleQtyChange = (rowIndex, value) => {
-  const updatedData = [...pTLPutawayTicketDetails.data]; // or tableData state
-  const approved = updatedData[rowIndex].approved1_qty || 0;
-  const qty = Number(value);
+    const [data, setData] = useState([])
 
-  if (qty > approved) {
-    setErrorMessage("Cannot enter more than Approved Qty")
-    setShowErrorPopup(true);
-    // alert("Cannot enter more than Approved Qty");
-    return;
-  }
+    const handleQtyChange = (rowIndex, value) => {
+        const updatedData = [...pTLPutawayTicketDetails.data]; // or tableData state
+        const approved = updatedData[rowIndex].approved1_qty || 0;
+        const qty = Number(value);
 
-  updatedData[rowIndex].requestQty = qty;
-  setData(updatedData); // update state
-};
+        if (qty > approved) {
+            setErrorMessage("Cannot enter more than Approved Qty")
+            setShowErrorPopup(true);
+            // alert("Cannot enter more than Approved Qty");
+            return;
+        }
+
+        updatedData[rowIndex].requestQty = qty;
+        setData(updatedData); // update state
+    };
 
 
     return (
@@ -465,10 +481,10 @@ const LocalPutaway = () => {
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
                     <div className="ComCssButton9">
-                    <button className='ComCssExcelUploadButton' onClick={handleFrezeFiled}>Tickets</button>
-                        </div>
-                    <p>Putaway</p> 
-                       
+                        <button className='ComCssExcelUploadButton' onClick={handleFrezeFiled}>Tickets</button>
+                    </div>
+                    <p>Putaway</p>
+
                 </div>
 
                 <PutawayTextFiled
@@ -493,7 +509,7 @@ const LocalPutaway = () => {
                     {isTicetFreze &&
                         <button className='ComCssSubmitButton' onClick={handlePTLTicketSubmit}>Submit</button>
                     }
-                     {isEditMode && (
+                    {isEditMode && (
 
                         <button className='ComCssUpdateButton' onClick={handleSubmit} >
                             Update
@@ -502,7 +518,7 @@ const LocalPutaway = () => {
                     {formData.quantity &&
                         <button className='ComCssUpdateButton' onClick={handlePut}>Put</button>
                     }
-                     {putButton &&
+                    {putButton &&
                         <button className='ComCssUpdateButton' onClick={handlePut}>Put</button>
                     }
                     {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
@@ -513,22 +529,22 @@ const LocalPutaway = () => {
 
             </div>
             {isTicetFreze &&
-              <div className='ComCssTable'>
-                <h5 className='ComCssTableName'>Putaway TicketDetails</h5>
-             <LocalPutawayTicketTable
-                    data={pTLPutawayTicketDetails.data || []}
-                    page={page}
-                    perPage={perPage}
-                    totalRows={pTLPutawayTicketDetails.length}
-                    loading={loading}
-                    setPage={setPage}
-                    setPerPage={setPerPage}
-                    setData={setData}
-                    formErrors={formErrors}
-                    handleQtyChange={handleQtyChange} 
-                />
+                <div className='ComCssTable'>
+                    <h5 className='ComCssTableName'>Putaway TicketDetails</h5>
+                    <LocalPutawayTicketTable
+                        data={pTLPutawayTicketDetails.data || []}
+                        page={page}
+                        perPage={perPage}
+                        totalRows={pTLPutawayTicketDetails.length}
+                        loading={loading}
+                        setPage={setPage}
+                        setPerPage={setPerPage}
+                        setData={setData}
+                        formErrors={formErrors}
+                        handleQtyChange={handleQtyChange}
+                    />
                 </div>
-}
+            }
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Putaway Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
@@ -546,45 +562,45 @@ const LocalPutaway = () => {
                                 )}
                     </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
-  <input
-    type="text"
-    className="form-control"
-    style={{ height: "30px", paddingRight: "55px" }}
-    placeholder="Search..."
-    value={searchText}
-    onChange={(e) => setSearchText(e.target.value)}
-  />
+                        <input
+                            type="text"
+                            className="form-control"
+                            style={{ height: "30px", paddingRight: "55px" }}
+                            placeholder="Search..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                        />
 
-  {searchText && (
-    <span
-      onClick={() => setSearchText("")}
-      style={{
-        position: "absolute",
-        right: "30px",
-        top: "50%",
-        transform: "translateY(-50%)",
-        cursor: "pointer",
-        color: "#aaa",
-        fontWeight: "bold"
-      }}
-    >
-      ✖
-    </span>
-  )}
+                        {searchText && (
+                            <span
+                                onClick={() => setSearchText("")}
+                                style={{
+                                    position: "absolute",
+                                    right: "30px",
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    cursor: "pointer",
+                                    color: "#aaa",
+                                    fontWeight: "bold"
+                                }}
+                            >
+                                ✖
+                            </span>
+                        )}
 
-  <span
-    // onClick={handleSearchClick}
-    style={{
-      position: "absolute",
-      right: "8px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      cursor: "pointer"
-    }}
-  >
-    🔍
-  </span>
-</div>
+                        <span
+                            // onClick={handleSearchClick}
+                            style={{
+                                position: "absolute",
+                                right: "8px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                cursor: "pointer"
+                            }}
+                        >
+                            🔍
+                        </span>
+                    </div>
 
 
                 </div>
@@ -604,10 +620,10 @@ const LocalPutaway = () => {
                     setDeletButton={setDeletButton}
                 />
 
-               
+
 
             </div>
-              
+
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}
@@ -625,13 +641,24 @@ const LocalPutaway = () => {
                 color="secondary"
             />
             <CustomDialog
-                            open={confirmDelete}
-                            onClose={handleCancel}
-                            onConfirm={handleDelete}
-                            title="Confirm"
-                            message="Are you sure you want to delete this?"
-                            color="primary"
-                        />
+                open={confirmDelete}
+                onClose={handleCancel}
+                onConfirm={handleDelete}
+                title="Confirm"
+                message="Are you sure you want to delete this?"
+                color="primary"
+            />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
+
         </div>
     )
 }

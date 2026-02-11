@@ -7,7 +7,10 @@ import { generateColumns } from '../../components/Com_Component/generateColumns'
 import { useNavigate } from "react-router-dom";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { FaFileExcel } from "react-icons/fa";
+import { checkUserValid } from "../../components/Com_Component/userUtils";
 import * as XLSX from "xlsx";
+import { Snackbar, Alert } from "@mui/material";
+
 const UserDetail = () => {
 
     const [editFormdata, setEditFormData] = useState({
@@ -31,7 +34,7 @@ const UserDetail = () => {
     const [perPage, setPerPage] = useState(10);
     const [searchText, setSearchText] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const [openMsg, setOpenMsg] = useState(false);
     const [page, setPage] = useState(1);
     const [onEdit, setOnEdit] = useState(false)
     const fields = [
@@ -244,6 +247,16 @@ const UserDetail = () => {
     );
 
     useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
         fetchUser();
 
     }, []);
@@ -318,6 +331,16 @@ const UserDetail = () => {
                 onPageChange={setPage}
                 onPerPageChange={setPerPage}
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
 
             {/* <CreateAccount
                 editFormdata={editFormdata}

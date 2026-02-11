@@ -10,6 +10,8 @@ import { saveGRN } from '../../Services/Services_09.js';
 import { checkAvailable, downloadRequester, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, saveRequester } from '../../Services/Services-Rc.js';
 import { ContactSupportOutlined } from '@mui/icons-material';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const Requester = () => {
     const [formData, setFormData] = useState({
@@ -49,9 +51,9 @@ const Requester = () => {
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
     const [searchText, setSearchText] = useState("");
-        const [addSearchText, setAddSearchText] = useState("");
+    const [addSearchText, setAddSearchText] = useState("");
     const [downloadProgress, setDownloadProgress] = useState(null);
-
+    const [openMsg, setOpenMsg] = useState(false);
 
     const orderTypeOption = [
         { label: "Repair", value: "Repair" },
@@ -61,6 +63,7 @@ const Requester = () => {
         { label: "Sub Module", value: "Sub Module" },
         { label: "Others", value: "Others" },
         { label: "ThermalGel", value: "ThermalGel" },
+        { label: "PTL", value: "PTL" },
     ];
 
     useEffect(() => {
@@ -199,7 +202,8 @@ const Requester = () => {
         setFormErrors(errors);
         return isValid;
     };
-    const userId = sessionStorage.getItem("userId");
+    // const userId = sessionStorage.getItem("userId");
+    const userId = localStorage.getItem("userId");
 
     // console.log("requestType", requestType)
     // console.log("productandPartcode", productandPartcode)
@@ -211,7 +215,18 @@ const Requester = () => {
         }
     }, [userId]);
 
-
+    useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
+    }, []);
 
     useEffect(() => {
         const orderTypeValue =
@@ -341,11 +356,11 @@ const Requester = () => {
     };
 
     const handleAdd = () => {
-         if (tableData.length >= 15) {
-        setErrorMessage("Cannot add more than 15 Component");
-        setShowErrorPopup(true);
-        return;
-    }
+        if (tableData.length >= 15) {
+            setErrorMessage("Cannot add more than 15 Component");
+            setShowErrorPopup(true);
+            return;
+        }
         if (!valiDate()) return;
         const currentPartCode = typeof formData.partCode === "object"
             ? formData.partCode.partcode || formData.partCode.label
@@ -455,21 +470,21 @@ const Requester = () => {
     };
 
 
-     const formClearSubmit = () => {
+    const formClearSubmit = () => {
         setFormData(prev => ({
-                    requestFor: prev.requestFor,       
-                    requesterType: prev.requesterType,
-                    orderType: prev.orderType,
-                    productName: null,
-                    productGroup: "", partCode: null,
-                    partDescription: null,
-                    requestQty: "",
-                    compatibilityPartCode: "",
-                    faultySerialNumber: "",
-                    faultyUnitModuleSerialNo: "",
-                    requestercomments: "",
-                   }));
-           
+            requestFor: prev.requestFor,
+            requesterType: prev.requesterType,
+            orderType: prev.orderType,
+            productName: null,
+            productGroup: "", partCode: null,
+            partDescription: null,
+            requestQty: "",
+            compatibilityPartCode: "",
+            faultySerialNumber: "",
+            faultyUnitModuleSerialNo: "",
+            requestercomments: "",
+        }));
+
         setFormErrors({});
     };
     useEffect(() => {
@@ -492,11 +507,11 @@ const Requester = () => {
         })
     }
 
-//     useEffect(() => {
-//   if (tableData.length > 0) {
-//     setShowTable(false);
-//   }
-// }, [tableData]);
+    //     useEffect(() => {
+    //   if (tableData.length > 0) {
+    //     setShowTable(false);
+    //   }
+    // }, [tableData]);
 
 
     //     const checkAvailable = (partcodeQtyMap) => {
@@ -566,84 +581,85 @@ const Requester = () => {
     //             });
     //     }
     // };
-   
+
 
     const handleSubmit = async () => {
-   
 
-    // 1. Prepare data for the SINGLE API call
-    const userName = sessionStorage.getItem("userId");
-     if (!userName) {
-    alert("Please relogin");
-    return;
-  }
-   setLoading(true);
-        const createdName = sessionStorage.getItem("userName") || "System";
 
-    // The data prepared here is the final payload for the save API.
-    const updatedFormData = tableData.map((row) => ({
-        ...row,
-        requesterType: row.requesterType?.value || row.requesterType, 
-        createdby: userName,
-        modifiedby: userName,
-        createdName: createdName
-    }));
-    
-    // --- REMOVE THE checkAvilability CALL AND THE IF STATEMENT ---
-    
-    try {
-        // 2. Call the SINGLE, ATOMIC save API
-        // This saveRequester API now handles:
-        // A) Ticket number generation (atomic sequence)
-        // B) Availability check (inside the transaction)
-        // C) Inventory update (protected by Optimistic Locking)
-        const response = await saveRequester(updatedFormData);
+        // 1. Prepare data for the SINGLE API call
+        // const userName = sessionStorage.getItem("userId");
+        const userName = localStorage.getItem("userId");
+        if (!userName) {
+            alert("Please relogin");
+            return;
+        }
+        setLoading(true);
+        // const createdName = sessionStorage.getItem("userName") || "System";
+         const createdName = localStorage.getItem("userName") || "System";
+        // The data prepared here is the final payload for the save API.
+        const updatedFormData = tableData.map((row) => ({
+            ...row,
+            requesterType: row.requesterType?.value || row.requesterType,
+            createdby: userName,
+            modifiedby: userName,
+            createdName: createdName
+        }));
 
-        // 3. Handle SUCCESS (HTTP 200)
-        if (response.status === 200 && response.data?.success) {
-            const { message } = response.data;
-            setSuccessMessage(message || "Saved successfully");
-            setShowSuccessPopup(true);
-            formClearSubmit();
-            // Clear UI state
-            setTableData([]);
-            setShowTable(false);
-            setIsFrozen(false);
-            setSearchText("");
-            fetchRequester(); // Refresh data view
+        // --- REMOVE THE checkAvilability CALL AND THE IF STATEMENT ---
 
-        } else {
-            // Handle logical success but internal server-defined failure (less common, but safe)
-            setErrorMessage(response.data?.message || "An unknown error occurred.");
+        try {
+            // 2. Call the SINGLE, ATOMIC save API
+            // This saveRequester API now handles:
+            // A) Ticket number generation (atomic sequence)
+            // B) Availability check (inside the transaction)
+            // C) Inventory update (protected by Optimistic Locking)
+            const response = await saveRequester(updatedFormData);
+
+            // 3. Handle SUCCESS (HTTP 200)
+            if (response.status === 200 && response.data?.success) {
+                const { message } = response.data;
+                setSuccessMessage(message || "Saved successfully");
+                setShowSuccessPopup(true);
+                formClearSubmit();
+                // Clear UI state
+                setTableData([]);
+                setShowTable(false);
+                setIsFrozen(false);
+                setSearchText("");
+                fetchRequester(); // Refresh data view
+
+            } else {
+                // Handle logical success but internal server-defined failure (less common, but safe)
+                setErrorMessage(response.data?.message || "An unknown error occurred.");
+                setShowErrorPopup(true);
+            }
+
+        } catch (error) {
+            // 4. Handle CRITICAL ERRORS (e.g., HTTP 409 Conflict, 500 Internal Error)
+
+            const responseData = error?.response?.data;
+            const errMsg = responseData?.message;
+
+            // This handles INSUFFICIENT STOCK and OPTIMISTIC LOCK failures from the server
+            if (error.response?.status === 409 || error.response?.status === 400) {
+                // Check your server response for specific insufficient stock message
+                setErrorMessage(errMsg || "Request failed due to stock change or conflict.");
+            } else {
+                // Generic server or network error
+                setErrorMessage(errMsg || "Network or unexpected server error occurred.");
+            }
+
             setShowErrorPopup(true);
-        }
 
-    } catch (error) {
-        // 4. Handle CRITICAL ERRORS (e.g., HTTP 409 Conflict, 500 Internal Error)
-        
-        const responseData = error?.response?.data;
-        const errMsg = responseData?.message;
-        
-        // This handles INSUFFICIENT STOCK and OPTIMISTIC LOCK failures from the server
-        if (error.response?.status === 409 || error.response?.status === 400) {
-            // Check your server response for specific insufficient stock message
-            setErrorMessage(errMsg || "Request failed due to stock change or conflict.");
-        } else {
-            // Generic server or network error
-            setErrorMessage(errMsg || "Network or unexpected server error occurred.");
+        } finally {
+            setLoading(false);
         }
-        
-        setShowErrorPopup(true);
-
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     const fetchRequester = async () => {
         setLoading(true);
-        const userId = sessionStorage.getItem("userId") || "System";
-
+        // const userId = sessionStorage.getItem("userId") || "System";
+        const userId = localStorage.getItem("userId") || "System";
         try {
             await fetchRequesterDetail(page, perPage, userId, setRequesterDetail, setTotalRows);
         } catch (err) {
@@ -664,7 +680,8 @@ const Requester = () => {
     const fetchfindSearch = async (page, size, search) => {
         setLoading(true);
         try {
-            const userId = sessionStorage.getItem("userId") || "System";
+            // const userId = sessionStorage.getItem("userId") || "System";
+            const userId = localStorage.getItem("userId") || "System";
             await fetchRequesterSearch(page, userId, size, search, setRequesterDetail, setTotalRows);
         } catch (error) {
             console.error("Error fetching requester:", error);
@@ -709,48 +726,48 @@ const Requester = () => {
     // };
 
     const fetchData = async (page, perPage, search = "") => {
-  setLoading(true);
-  try {
-    const s = search?.trim().toLowerCase();
+        setLoading(true);
+        try {
+            const s = search?.trim().toLowerCase();
 
-    if (s) {
-      let codes = [];
+            if (s) {
+                let codes = [];
 
-       if (
-    s.includes("materialissuance") ||
-    s.includes("material issuance") ||
-    s.includes("issue") ||
-    s.includes("issuance") ||
-    s === "materialissuance-pending"
-  ) {
-    codes = ["MSC00006"];
-  } else if (s === "l1" || s === "l1-pending") {
-        codes = ["MSC00001"];
-      } else if (s === "l2" || s === "l2-pending") {
-        codes = ["MSC00004"];
-      }
-else if (s.includes("deliver") || s.includes("delivery")) {
-        codes = ["MSC00007"];
-      }
-      if (codes.length > 0) {
-        await fetchfindSearch(page, perPage, codes);
-      } else {
-        await fetchfindSearch(page, perPage, search);
-      }
-    } else {
-      await fetchRequester();
-    }
-  } catch (err) {
-    console.error("Error fetching putaway data:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+                if (
+                    s.includes("materialissuance") ||
+                    s.includes("material issuance") ||
+                    s.includes("issue") ||
+                    s.includes("issuance") ||
+                    s === "materialissuance-pending"
+                ) {
+                    codes = ["MSC00006"];
+                } else if (s === "l1" || s === "l1-pending") {
+                    codes = ["MSC00001"];
+                } else if (s === "l2" || s === "l2-pending") {
+                    codes = ["MSC00004"];
+                }
+                else if (s.includes("deliver") || s.includes("delivery")) {
+                    codes = ["MSC00007"];
+                }
+                if (codes.length > 0) {
+                    await fetchfindSearch(page, perPage, codes);
+                } else {
+                    await fetchfindSearch(page, perPage, search);
+                }
+            } else {
+                await fetchRequester();
+            }
+        } catch (err) {
+            console.error("Error fetching putaway data:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const exportToExcel = (search = "") => {
-        const userId = sessionStorage.getItem("userId") || "System";
-
+        // const userId = sessionStorage.getItem("userId") || "System";
+         const userId = localStorage.getItem("userId") || "System";
         setDownloadDone(false);
         setDownloadProgress(null);
         setLoading(true);
@@ -786,23 +803,23 @@ else if (s.includes("deliver") || s.includes("delivery")) {
     };
 
 
-const [filteredData, setFilteredData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
 
-useEffect(() => {
-  if (!addSearchText) {
-    setFilteredData(tableData);
-  } else {
-    const lower = addSearchText.toLowerCase();
+    useEffect(() => {
+        if (!addSearchText) {
+            setFilteredData(tableData);
+        } else {
+            const lower = addSearchText.toLowerCase();
 
-    const result = tableData.filter((row) =>
-      Object.values(row).some((val) =>
-        String(val).toLowerCase().includes(lower)
-      )
-    );
+            const result = tableData.filter((row) =>
+                Object.values(row).some((val) =>
+                    String(val).toLowerCase().includes(lower)
+                )
+            );
 
-    setFilteredData(result);
-  }
-}, [addSearchText, tableData]);
+            setFilteredData(result);
+        }
+    }, [addSearchText, tableData]);
     // console.log("search", searchText)
     return (
         <div className='ComCssContainer'>
@@ -931,6 +948,16 @@ useEffect(() => {
                 severity="error"
                 color="secondary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
     )
 

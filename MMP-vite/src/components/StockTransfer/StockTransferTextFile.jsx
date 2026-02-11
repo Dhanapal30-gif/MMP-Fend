@@ -109,7 +109,7 @@ const StockTransferTextFile = ({
                         helperText={formErrors?.transferqty || ""}
                     />
                 )}
-                {(formData.transfertype === 'RC-DHL') && (
+                {/* {(formData.transfertype === 'RC-DHL') && (
 
                     <ComTextFiled
                         label="Inventory box number"
@@ -118,7 +118,7 @@ const StockTransferTextFile = ({
                         onChange={(e) => setBoxNumber(e.target.value)}
                     />
 
-                )}
+                )} */}
 
                 {(formData.transfertype === 'RC-DHL') && (
                     <ComTextFiled

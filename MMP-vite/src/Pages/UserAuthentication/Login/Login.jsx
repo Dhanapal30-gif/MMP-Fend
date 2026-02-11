@@ -64,8 +64,9 @@ const Login = ({ setUserId ,setIsLoggedIn }) => {
             localStorage.setItem("isLoggedIn", "true");
             localStorage.setItem("userName", data.empName);
             // localStorage.setItem("allowedScreens", JSON.stringify(response.allowedScreens));
-localStorage.setItem("userRole", JSON.stringify(data.userrole));
-
+            localStorage.setItem("userRole", JSON.stringify(data.userrole));
+            localStorage.setItem("passwordToken", data.passwordToken);
+             localStorage.setItem("userId", data.empId);
             setIsLoggedIn(true);
             setUserId(data.empId);
 
@@ -84,7 +85,7 @@ localStorage.setItem("userRole", JSON.stringify(data.userrole));
                   localStorage.setItem("allowedScreens", JSON.stringify(allowedScreens)); // ✅ ADD THIS
 
                 setScreen(allowedScreens); // mounted component
-                console.log("allowedScreens:", allowedScreens);
+                // console.log("allowedScreens:", allowedScreens);
 
             }
             // Navigate to home AFTER fetching screens

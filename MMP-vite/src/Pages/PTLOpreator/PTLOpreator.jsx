@@ -10,6 +10,8 @@ import TextFiledTheme from '../../components/Com_Component/TextFiledTheme'; // a
 import { Autocomplete, TextField } from "@mui/material";
 import { fetchPTLBoard, savePickequest, savePTLSubmit } from '../../Services/Services_09';
 import CryptoJS from "crypto-js";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const PTLOpreator = () => {
     const [formData, setFormData] = useState({
@@ -27,8 +29,9 @@ const PTLOpreator = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-      const [selectedRows, setSelectedRows] = useState([]);
-      const [pickedRows, setPickedRows] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [pickedRows, setPickedRows] = useState([]);
+    const [openMsg, setOpenMsg] = useState(false);
     //   const [pickButton,setPickButton] =useState(true);
 
     useEffect(() => {
@@ -42,6 +45,21 @@ const PTLOpreator = () => {
     }, []);
 
 
+
+
+    useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
+        
+    }, []);
     const fetchData = async () => {
         try {
             const response = await fetchPTLBoard();
@@ -92,7 +110,7 @@ const PTLOpreator = () => {
         const payload = filteredData.map(item => ({
             id: item.id,   // use selectedid if that's your row ID
             pickingqty: item.pickingqty, // match backend field
-            partcode:item.partcode
+            partcode: item.partcode
         }));
 
         //   console.log("payload", payload);
@@ -104,7 +122,7 @@ const PTLOpreator = () => {
             setShowSuccessPopup(true)
             // fetchData();
             setShowTable(false)
-            setSelectedRows([]); 
+            setSelectedRows([]);
             setpickButton(true);
             // console.log("API success:", response);
         } catch (error) {
@@ -113,49 +131,49 @@ const PTLOpreator = () => {
             // console.error("Error sending payload:", error);
         }
     };
-const selectedRowData = filteredData.find(
-  r => r.id === selectedRows[0]
-);
+    const selectedRowData = filteredData.find(
+        r => r.id === selectedRows[0]
+    );
 
-     const SECRET_KEY = "1234567890123456"; // same as backend
-     const handlePick = () => {
-  const selectedData = filteredData.filter(row =>
-    selectedRows.includes(row.id)
-  );
+    const SECRET_KEY = "1234567890123456"; // same as backend
+    const handlePick = () => {
+        const selectedData = filteredData.filter(row =>
+            selectedRows.includes(row.id)
+        );
 
-  const formData = selectedData.map(row => ({
-    Qty: row.pickingqty,
-    LocationName: row.racklocation,
-    PartNO: row.partcode,
-    Description: row.partdescription
-  }));
+        const formData = selectedData.map(row => ({
+            Qty: row.pickingqty,
+            LocationName: row.racklocation,
+            PartNO: row.partcode,
+            Description: row.partdescription
+        }));
 
-  const jsonString = JSON.stringify(formData);
+        const jsonString = JSON.stringify(formData);
 
-  const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
-  const encrypted = CryptoJS.AES.encrypt(jsonString, key, {
-    mode: CryptoJS.mode.ECB,
-    padding: CryptoJS.pad.Pkcs7
-  }).toString();
+        const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+        const encrypted = CryptoJS.AES.encrypt(jsonString, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        }).toString();
 
-  savePickequest(encrypted).then(res => {
-    const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+        savePickequest(encrypted).then(res => {
+            const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
 
-  const decrypted = CryptoJS.AES.decrypt(res.data, key, {
-    mode: CryptoJS.mode.ECB,
-    padding: CryptoJS.pad.Pkcs7
-  }).toString(CryptoJS.enc.Utf8);
+            const decrypted = CryptoJS.AES.decrypt(res.data, key, {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            }).toString(CryptoJS.enc.Utf8);
 
-  const parsed = JSON.parse(decrypted);
-setpickButton(false);
-  setSuccessMessage(parsed.message);
-  
-    setShowSuccessPopup(true);
+            const parsed = JSON.parse(decrypted);
+            setpickButton(false);
+            setSuccessMessage(parsed.message);
 
-  });
-};
+            setShowSuccessPopup(true);
 
-    
+        });
+    };
+
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -232,17 +250,17 @@ setpickButton(false);
 
                     />
                     <div className="ComCssButton9">
-                         {selectedRows.length > 0 && selectedRowData && (
-                        <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
-                       )}
-                        {selectedRows.length > 0 &&  selectedRowData && pickButton && (
-  <button
-    className="ComCssSubmitButton"
-    onClick={handlePick}
-  >
-    Pick
-  </button>
-)}
+                        {selectedRows.length > 0 && selectedRowData && (
+                            <button className='ComCssSubmitButton' onClick={handleSubmit}>Submit</button>
+                        )}
+                        {selectedRows.length > 0 && selectedRowData && pickButton && (
+                            <button
+                                className="ComCssSubmitButton"
+                                onClick={handlePick}
+                            >
+                                Pick
+                            </button>
+                        )}
 
 
                     </div>

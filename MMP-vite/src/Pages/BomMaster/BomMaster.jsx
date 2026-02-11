@@ -15,7 +15,9 @@ import DropdownCom from '../../components/Com_Component/DropdownCom'
 import Popper from '@mui/material/Popper';
 import './BOM.css'
 import { ThemeProvider } from '@mui/material/styles';
+import { checkUserValid } from "../../components/Com_Component/userUtils";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Snackbar, Alert } from "@mui/material";
 
 const BomMaster = () => {
     const [formErrors, setFormErrors] = useState({});
@@ -45,6 +47,8 @@ const BomMaster = () => {
     const formRef = useRef(null);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [resetKey, setResetKey] = useState(0);
+     const [openMsg, setOpenMsg] = useState(false);
+     
     const [formData, setFormData] = useState({
         partcode: "",
         createdby: "",
@@ -242,8 +246,10 @@ const BomMaster = () => {
         if (!valiDate()) return;
         setLoading(true)
 
-        const createdby = sessionStorage.getItem("userName") || "System";
-        const updatedby = sessionStorage.getItem("userName") || "System";
+        // const createdby = sessionStorage.getItem("userName") || "System";
+        // const updatedby = sessionStorage.getItem("userName") || "System";
+        const createdby = localStorage.getItem("userName") || "System";
+        const updatedby = localStorage.getItem("userName") || "System";
         const updatedFormData = {
             ...formData,
             createdby,
@@ -254,7 +260,7 @@ const BomMaster = () => {
                 //alert("Product added Successfully");
                 setSuccessMessage("Bom Master Created");
                 setShowSuccessPopup(true);
-                 setResetKey(prev => prev + 1);  
+                setResetKey(prev => prev + 1);
                 fetchBomMaster()
                 formClear();
             })
@@ -477,7 +483,16 @@ const BomMaster = () => {
                 // console.log("product", response.data);
             })
     }
+
     useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                alert("Session expired or invalid");
+                window.location.href = "/"; // redirect
+            }
+        };
+        validate();
         fetchProduct();
     }, [])
 
@@ -537,8 +552,10 @@ const BomMaster = () => {
             setShowErrorPopup(true);
             return;
         }
-        const createdby = sessionStorage.getItem("userName") || "System";
-        const updatedby = sessionStorage.getItem("userName") || "System";
+        // const createdby = sessionStorage.getItem("userName") || "System";
+        // const updatedby = sessionStorage.getItem("userName") || "System";
+        const createdby = localStorage.getItem("userName") || "System";
+        const updatedby = localStorage.getItem("userName") || "System";
         const updatedFormData = excelUploadData.map(item => ({
             ...item,
             createdby,
@@ -597,7 +614,9 @@ const BomMaster = () => {
         e.preventDefault();
         if (!valiDate()) return;
         setLoading(true);
-        const updatedby = sessionStorage.getItem('userName') || "System";
+        // const updatedby = sessionStorage.getItem('userName') || "System";
+              const updatedby = localStorage.getItem('userName') || "System";
+
         const updateFormData = {
             ...formData,
             intsysid,
@@ -854,8 +873,8 @@ const BomMaster = () => {
                     {deletButton && <button className='ComCssDeleteButton' onClick={onDeleteClick}   >Delete</button>}
                     <button className='ComCssClearButton' onClick={formClear}>
                         Clear
-                    </button>                
-                    </div>
+                    </button>
+                </div>
             </div>
             <div className='ComCssTable'>
                 {showBomTable && !showUploadTable && (
@@ -1028,6 +1047,16 @@ const BomMaster = () => {
                 message="Are you sure you want to delete this?"
                 color="primary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

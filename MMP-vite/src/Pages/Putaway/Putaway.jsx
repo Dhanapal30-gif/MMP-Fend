@@ -12,6 +12,8 @@ import { fetchPutawayTicket, fetchPutawayCloseDetail, fetchPutawayPendingDetail,
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { deletePutawayTicket, fetchpickTicketDetails, fetchTransferTicket, fetchTransferTicketDetail, putawayProcess, saveLEDRequest, savePutawayRequest, savePutawayRetRequest, savePutawayStockTransferRequest } from '../../Services/Services-Rc.js';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 const Putaway = () => {
     const [formData, setFormData] = useState({
@@ -44,9 +46,9 @@ const Putaway = () => {
     const [isPutProcess, setIsPutProcess] = useState(false)
     const [rc_DHLProcess, setRc_DHLProcess] = useState(false)
     const [putawayRc_DHL, setPutawayRc_DHL] = useState([])
- const [addSearchText, setAddSearchText] = useState("");
-  const [filteredAddData, setFilteredAddData] = useState([]);
-
+    const [addSearchText, setAddSearchText] = useState("");
+    const [filteredAddData, setFilteredAddData] = useState([]);
+    const [openMsg, setOpenMsg] = useState(false);
     const [isUserActive, setIsUserActive] = useState(false)
     const [pageClose, setPageClose] = useState(0);
     const [perPageClose, setPerPageClose] = useState(10);
@@ -56,7 +58,7 @@ const Putaway = () => {
     const [submittedIds, setSubmittedIds] = useState([]); // track IDs only
     const [rackLocationList, setRackLocationList] = useState([]);
     const [donloadClosed, setDonwloadCosed] = useState(false)
-    const [putButtonHide,setPutButtonHide]=useState(false)
+    const [putButtonHide, setPutButtonHide] = useState(false)
 
     const handleGRNQtyChange = (rowId, field, value) => {
         setPutawayProcessDetail(prev =>
@@ -149,6 +151,22 @@ const Putaway = () => {
             setLoading(false); // stop loader after API finishes
         }
     };
+
+
+
+
+    useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
+    }, []);
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -582,7 +600,7 @@ const Putaway = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-const [putIds,setPutIds]=useState([])
+    const [putIds, setPutIds] = useState([])
 
     const handlePut = (e) => {
         e.preventDefault();
@@ -617,7 +635,7 @@ const [putIds,setPutIds]=useState([])
                 Product_Code: row.partcode,
                 Product_Name: row.partdescription,
                 ticketno: row.recevingTicketNo,
-            
+
             }));
         } else if (returningPutProcess) {
             submitData = filteredData.map((row) => ({
@@ -648,36 +666,36 @@ const [putIds,setPutIds]=useState([])
                 setSubmittedIds(prev => [...prev, ...newSelectedRows]); // update submitted IDs
                 // setPutButtonHide(true),
 
-                    handleSuccessCommon({
-                        response,
-                        setSuccessMessage,
-                        setShowSuccessPopup,
-                    });
+                handleSuccessCommon({
+                    response,
+                    setSuccessMessage,
+                    setShowSuccessPopup,
+                });
                 setIsUserActive(true);
 
             })
-    //     saveLEDRequest(submitData)
-    // .then((response) => {
-    //     // Extract color
-    //     const match = response.data.message?.match(/following (\w+) light/);
-    //     if (match) setColourCode(match[1]);
+            //     saveLEDRequest(submitData)
+            // .then((response) => {
+            //     // Extract color
+            //     const match = response.data.message?.match(/following (\w+) light/);
+            //     if (match) setColourCode(match[1]);
 
-    //     // Extract IDs from message
-    //     const idsMatch = response.data.message?.match(/Put IDs: ([0-9,]+)/);
-    //     if (idsMatch) {
-    //         const putIds = idsMatch[1].split(",").map(Number);
-    //         setPutIds(prev => [...prev, ...putIds]);
-    //     }
+            //     // Extract IDs from message
+            //     const idsMatch = response.data.message?.match(/Put IDs: ([0-9,]+)/);
+            //     if (idsMatch) {
+            //         const putIds = idsMatch[1].split(",").map(Number);
+            //         setPutIds(prev => [...prev, ...putIds]);
+            //     }
 
-    //     setSubmittedIds(prev => [...prev, ...newSelectedRows]);
+            //     setSubmittedIds(prev => [...prev, ...newSelectedRows]);
 
-    //     handleSuccessCommon({
-    //         response,
-    //         setSuccessMessage,
-    //         setShowSuccessPopup,
-    //     });
-    //     setIsUserActive(true);
-    // })
+            //     handleSuccessCommon({
+            //         response,
+            //         setSuccessMessage,
+            //         setShowSuccessPopup,
+            //     });
+            //     setIsUserActive(true);
+            // })
             .catch((error) => {
                 handleErrorCommon({
                     error,
@@ -687,7 +705,7 @@ const [putIds,setPutIds]=useState([])
             });
     };
 
-    console.log("putIds",putIds)
+    console.log("putIds", putIds)
 
 
     const handleSubmituyuyt = (e) => {
@@ -697,7 +715,8 @@ const [putIds,setPutIds]=useState([])
             setShowErrorPopup(true);
             return;
         }
-        const username = sessionStorage.getItem("userName") || "System";
+        // const username = sessionStorage.getItem("userName") || "System";
+         const username = localStorage.getItem("userName") || "System";
         const selectedKeys = new Set(selectedRows1);
         const filteredData = putawayProcessDetail.filter((row) => selectedKeys.has(row.selectedid));
         const submitData = [];
@@ -885,7 +904,8 @@ const [putIds,setPutIds]=useState([])
             setShowErrorPopup(true);
             return;
         }
-        const username = sessionStorage.getItem("userName") || "System";
+        // const username = sessionStorage.getItem("userName") || "System";
+        const username = localStorage.getItem("userName") || "System";
         const selectedKeys = new Set(selectedRows1);
         const filteredData = putawayProcessDetail.filter((row) => selectedKeys.has(row.selectedid));
         let submitData = [];
@@ -1020,20 +1040,20 @@ const [putIds,setPutIds]=useState([])
 
     useEffect(() => {
         if (!addSearchText) {
-          setFilteredAddData(putawayProcessDetail);
+            setFilteredAddData(putawayProcessDetail);
         } else {
-          const lower = addSearchText.toLowerCase();
-      
-          const result = putawayProcessDetail.filter((row) =>
-            Object.values(row).some((val) =>
-              String(val).toLowerCase().includes(lower)
-            )
-          );
-      
-          setFilteredAddData(result);
+            const lower = addSearchText.toLowerCase();
+
+            const result = putawayProcessDetail.filter((row) =>
+                Object.values(row).some((val) =>
+                    String(val).toLowerCase().includes(lower)
+                )
+            );
+
+            setFilteredAddData(result);
         }
-      }, [addSearchText, putawayProcessDetail]);
-      
+    }, [addSearchText, putawayProcessDetail]);
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -1192,7 +1212,7 @@ const [putIds,setPutIds]=useState([])
                         {showMenu && (
                             <div className="ComCssButtonMenu">
                                 <button className='ComCssExportButton' onClick={() => { exportToExcel(hiddenButton, searchText); setShowMenu(false); }}>
-                                    <FaFileExcel /> 
+                                    <FaFileExcel />
                                 </button>
                                 {hiddenButton !== "pending" && (
                                     <button
@@ -1282,6 +1302,16 @@ const [putIds,setPutIds]=useState([])
                 message="Are you sure you want to delete this?"
                 color="primary"
             /> */}
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
     );
 };

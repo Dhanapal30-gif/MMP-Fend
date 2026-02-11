@@ -72,6 +72,11 @@ const RequesterTextFiled = ({
             }));
     }, [formData.productName, productandPartcode]);
 
+    console.log("formData", formData);
+    console.log("userId", userId);
+console.log("requestFor",formData.requestFor);
+console.log("requestFor?.value",formData.requestFor?.value);
+
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
@@ -249,7 +254,34 @@ const RequesterTextFiled = ({
                         )}
                     />
                 )}
+     {
+ formData?.requestFor?.value?.toLowerCase() === "scrap request" && (
 
+                    <Autocomplete
+                        options={requestTypeOption} // ternary
+                        readOnly={isFrozen}
+
+                        value={formData.requesterType || null}
+                        getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                        }
+                        isOptionEqualToValue={(option, value) => option === value}
+                        onChange={(e, newValue) => {
+                            handleChange("requesterType", newValue || "");
+                            handleChange("productName", null);
+                            handleChange("partCode", null);
+                            handleChange("productGroup", "");
+                            handleChange("productFamily", "");
+                        }}
+
+                        renderInput={(params) => (
+                            <TextField {...params} label="Requester Type"
+                                error={Boolean(formErrors?.requesterType)}
+                                helperText={formErrors?.requesterType || ""}
+                                variant="outlined" size="small" />
+                        )}
+                    />
+                )}
 
 
                 {userId.toLowerCase() !== "admin" && (
@@ -278,6 +310,8 @@ const RequesterTextFiled = ({
                         )}
                     />
                 )}
+
+           
                 <Autocomplete
                     options={uniqueProducts}
                     value={formData.productName || null}

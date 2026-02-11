@@ -44,14 +44,31 @@ const IssuanceShowTable = ({
     const initNSN = {};
 
     // If savedQty exists, use it as default, else empty string
-    row.batches.forEach(batch => {
-      const savedBatch = row.batchesQty?.find(
-        bq => bq.batchCode === batch.batchCode && bq.location === batch.location
-      );
-      init[batch.location] = savedBatch ? savedBatch.savedQty : "";
-      initComments[batch.location] = savedBatch ? savedBatch.issued_comments : "";
-      initNSN[batch.location] = savedBatch ? savedBatch.nsn : "";
-    });
+    // row.batches.forEach(batch => {
+    //   const savedBatch = row.batchesQty?.find(
+    //     bq => bq.batchCode === batch.batchCode && bq.location === batch.location
+    //   );
+    //   init[batch.location] = savedBatch ? savedBatch.savedQty : "";
+    //   initComments[batch.location] = savedBatch ? savedBatch.issued_comments : "";
+    //   initNSN[batch.location] = savedBatch ? savedBatch.nsn : "";
+    // });
+
+//     row.batches.forEach(batch => {
+//   const key = batch.location + "_" + batch.batchCode; // unique key
+//   const savedBatch = row.batchesQty?.find(
+//     bq => bq.batchCode === batch.batchCode && bq.location === batch.location
+//   );
+//   init[key] = savedBatch ? savedBatch.savedQty : "";
+// });
+
+
+row.batches.forEach(batch => {
+  const key = batch.location + "_" + batch.batchCode; // same as TextField key
+  const savedBatch = row.batchesQty?.find(bq => bq.location === key);
+  init[key] = savedBatch ? savedBatch.savedQty : "";
+  initComments[key] = savedBatch ? savedBatch.issued_comments : "";
+  initNSN[key] = savedBatch ? savedBatch.nsn : "";
+});
 
     setLocationQty(init);
     // setActiveRow(prev => ({ ...row, batchesQty: [] }));
@@ -495,7 +512,7 @@ const IssuanceShowTable = ({
                     <TableRow key={idx} sx={{ '&:nth-of-type(odd)': { bgcolor: '#f9f9f9' }, bgcolor: disabled ? '#ffcdd2' : 'inherit' }}>
                       <TableCell>{batch.location}</TableCell>
                       <TableCell>
-                        <TextField
+                        {/* <TextField
                           type="number"
                           value={locationQty[batch.location] || ""}
                           onChange={(e) => {
@@ -520,7 +537,31 @@ const IssuanceShowTable = ({
                           }}
                           size="small"
                           sx={{ width: '110px', borderRadius: 2 }}
-                        />
+                        /> */}
+
+<TextField
+  type="number"
+  value={locationQty[batch.location + "_" + batch.batchCode] || ""}
+  onChange={(e) => {
+    let val = e.target.value;
+    if (val === "" || /^\d*$/.test(val)) {
+      const numVal = val === "" ? 0 : Number(val);
+      if (numVal > batch.AvailableQty) {
+        setErrorMessage(`Cannot exceed Available qty (${batch.AvailableQty}) for this batch`);
+        setShowErrorPopup(true);
+        return;
+      }
+      const key = batch.location + "_" + batch.batchCode;
+      setLocationQty(prev => ({ ...prev, [key]: val }));
+    }
+  }}
+  inputProps={{
+    min: 0,
+    max: batch.allocatedQty,
+  }}
+  size="small"
+  sx={{ width: '110px', borderRadius: 2 }}
+/>
 
                       </TableCell>
 

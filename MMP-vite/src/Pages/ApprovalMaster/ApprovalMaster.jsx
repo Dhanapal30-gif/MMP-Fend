@@ -204,8 +204,11 @@ const ApprovalMaster = () => {
         e.preventDefault();
 
         if (!Validate()) return; // Stop execution if validation fails
-        const createdby = sessionStorage.getItem("userName") || "System";
-        const updatedby = sessionStorage.getItem("userName") || "System";
+        // const createdby = sessionStorage.getItem("userName") || "System";
+        // const updatedby = sessionStorage.getItem("userName") || "System";
+        const createdby = localStorage.getItem("userName") || "System";
+        const updatedby = localStorage.getItem("userName") || "System";
+
         const updatedFormData = {
             ...formData,
             createdby,
@@ -559,8 +562,11 @@ const ApprovalMaster = () => {
         //         errors.push("Product Name is required");
         //     }
         // });
-        const createdby = sessionStorage.getItem("userName") || "System";
-        const updatedby = sessionStorage.getItem("userName") || "System";
+        // const createdby = sessionStorage.getItem("userName") || "System";
+        // const updatedby = sessionStorage.getItem("userName") || "System";
+         const createdby = localStorage.getItem("userName") || "System";
+        const updatedby = localStorage.getItem("userName") || "System";
+
         const updatedFormData = excelUploadData.map(item => ({
             ...item,
             createdby,
@@ -629,7 +635,8 @@ const ApprovalMaster = () => {
         e.preventDefault();
         if (!Validate()) return;
         setLoading(true);
-        const updatedby = sessionStorage.getItem('userName') || "System";
+        // const updatedby = sessionStorage.getItem('userName') || "System";
+        const updatedby = localStorage.getItem('userName') || "System";
         const updateFormData = {
             ...formData,
             id,

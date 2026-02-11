@@ -12,6 +12,8 @@ import { cancelReworkerBoard, fetchSearchBoard } from '../../Services/Services-R
 import ReworkerTypeBasedhide from "../../components/Reworker/ReworkerTypeBasedhide";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { Type } from 'lucide-react';
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
 
 
 const Reworker = () => {
@@ -39,10 +41,10 @@ const Reworker = () => {
     const [selectedGrnRows, setSelectedGrnRows] = useState([]);
     const [doneSelectButton, setDoneSelectButton] = useState(false);
     const [searchScanText, setSearchScanText] = useState('');
-    const [boardType, setBoardType]=useState([]);
-    const [boardTypeDropdown, setBoardTypeDropdown]=useState(false);
-const [typeList, setTypeList] = useState([]); // dropdown types
-
+    const [boardType, setBoardType] = useState([]);
+    const [boardTypeDropdown, setBoardTypeDropdown] = useState(false);
+    const [typeList, setTypeList] = useState([]); // dropdown types
+    const [openMsg, setOpenMsg] = useState(false);
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -87,7 +89,7 @@ const [typeList, setTypeList] = useState([]); // dropdown types
 
                     // ✅ Clear selection so "select all" checkbox resets
                     setSelectedGrnRows([]);
-                    
+
                 }
             })
             .catch(err => console.error(err))
@@ -102,7 +104,7 @@ const [typeList, setTypeList] = useState([]); // dropdown types
         );
     }, [boardFetch]);
 
-    const handleSearchClick = (searchTerm,type) => {
+    const handleSearchClick = (searchTerm, type) => {
 
         if (!searchTerm) {
             setErrorMessage("Please enter a module serial number.");
@@ -111,9 +113,9 @@ const [typeList, setTypeList] = useState([]); // dropdown types
         }
 
         // setTableData([]);
-        
-       
-        fetchSearchBoard(searchTerm,type)
+
+
+        fetchSearchBoard(searchTerm, type)
             .then((response) => {
                 const data = response.data; // directly use response.data
                 if (data && data.length > 0) {
@@ -144,9 +146,9 @@ const [typeList, setTypeList] = useState([]); // dropdown types
     };
 
 
-//    useEffect(() => {
-//   console.log("TABLE DATA:", boardFetch);
-// }, [boardFetch]);
+    //    useEffect(() => {
+    //   console.log("TABLE DATA:", boardFetch);
+    // }, [boardFetch]);
 
     // const handleQtyChange = (id, value) => {
     //     const updatedData = boardFetch.map(item =>
@@ -184,8 +186,8 @@ const [typeList, setTypeList] = useState([]); // dropdown types
                 ProductName: "",
                 boardserialnumber: "",
                 searchBoardserialNumber: "",
-                
-                
+
+
             }));
             setSearchScanText("");
             setBoardTypeDropdown(false);
@@ -196,7 +198,7 @@ const [typeList, setTypeList] = useState([]); // dropdown types
                 ProductGroup: value,
                 ProductName: "",
                 boardserialnumber: "",
-                
+
             }));
             setSearchScanText("");
         } else if (field === "ProductName") {
@@ -210,12 +212,22 @@ const [typeList, setTypeList] = useState([]); // dropdown types
             setFormData(prev => ({ ...prev, boardserialnumber: value }));
             setSearchScanText("");
             const searchTerm = value; // ✅ use the current input value
-            handleSearchClick(searchTerm,formData.Type);
+            handleSearchClick(searchTerm, formData.Type);
         }
     };
 
 
     useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
         fetchData();
     }, []);
 
@@ -304,12 +316,12 @@ const [typeList, setTypeList] = useState([]); // dropdown types
     const cancelValiDate = () => {
         const errors = {};
         let isValid = true;
-        if (isFrozen) {
-            if (!formData.ReworkerComments || formData.ReworkerComments.trim() === "") {
-                errors.ReworkerComments = "Reworker Comments is required";
-                isValid = false;
-            }
+        // if (isFrozen) {
+        if (!formData.ReworkerComments?.trim()) {
+            errors.ReworkerComments = "Reworker Comments is required";
+            isValid = false;
         }
+        // }
         setFormErrors(errors); // if you’re using error state
         return isValid;
     };
@@ -333,7 +345,8 @@ const [typeList, setTypeList] = useState([]); // dropdown types
     const handlePTLRequest = (e) => {
         e.preventDefault();
         if (!valiDate()) return;
-        const userName = sessionStorage.getItem("userName");
+        // const userName = sessionStorage.getItem("userName");
+        const userName = localStorage.getItem("userName");
         const updatedFilteredData = boardFetch.map((row) => ({
             ...row,
             modifiedby: userName,
@@ -386,7 +399,8 @@ const [typeList, setTypeList] = useState([]); // dropdown types
     const handleSubmit = async () => {
         setLoading(true);
         setConfirmSubmit(false);
-        const reworkername = sessionStorage.getItem("userName")
+        // const reworkername = sessionStorage.getItem("userName")
+        const reworkername = localStorage.getItem("userName")
 
         const payload = boardFetch.map(item => ({
             id: item.id,   // use selectedid if that's your row ID
@@ -412,7 +426,7 @@ const [typeList, setTypeList] = useState([]); // dropdown types
             //    console.log("API success:", response);
         } catch (error) {
             const msg =
-        error?.response?.data?.message || "Something went wrong";
+                error?.response?.data?.message || "Something went wrong";
 
             setErrorMessage(msg)
             setShowErrorPopup(true)
@@ -422,39 +436,49 @@ const [typeList, setTypeList] = useState([]); // dropdown types
         }
     };
 
-   const handleCancelBoard = async () => {
-  try {
-    setIsFrozen(true);
-    setSubmitButton(false);
-    setClearButton(true);
+    const handleCancelBoard = async () => {
+        try {
+            setIsFrozen(true);
+            setSubmitButton(false);
+            setClearButton(true);
 
-    const isValid = cancelValiDate();
-    if (!isValid) {
-      console.warn("Validation failed. Cannot cancel.");
-      return;
-    }
+            const isValid = cancelValiDate();
+            if (!isValid) {
+                console.warn("Validation failed. Cannot cancel.");
+                return;
+            }
 
-    const payload = [
-      ...new Set(boardFetch.map(item => item.boardserialnumber))
-    ].map(boardSerialNo => ({ boardSerialNo }));
+            // const payload = [
+            //     ...new Set(boardFetch.map(item => item.boardserialnumber))
+            // ].map(boardSerialNo => ({ boardSerialNo }));
+            const payload = [
+                ...new Set(boardFetch.map(item => item.boardserialnumber))
+            ].map(boardSerialNo => ({
+                boardSerialNo,
+                comments: formData.ReworkerComments
+            }));
 
-    const res = await cancelReworkerBoard(payload);
+            // const res = await cancelReworkerBoard(payload);
 
-    if (res?.data?.success) {
-      setSuccessMessage(res.data.message);
-      setShowSuccessPopup(true);
-      setShowTable(false);
-      setFormData({ Type: "" });
-      fetchData();
-      setIsFrozen(false)
-    } else {
-      console.error("Cancel failed:", res?.data?.message);
-    }
+            //    let cancelComnets= formData.ReworkerComments;
+            const res = await cancelReworkerBoard(payload);
 
-  } catch (error) {
-    console.error("Cancel board failed:", error?.response?.data?.message || error.message);
-  }
-};
+            if (res?.data?.success) {
+                setSuccessMessage(res.data.message);
+                setShowSuccessPopup(true);
+                setShowTable(false);
+                setFormData({ Type: "" });
+                fetchData();
+                setSearchScanText("");
+                setIsFrozen(false)
+            } else {
+                console.error("Cancel failed:", res?.data?.message);
+            }
+
+        } catch (error) {
+            console.error("Cancel board failed:", error?.response?.data?.message || error.message);
+        }
+    };
 
     const handleClear = () => {
         setFormErrors({});
@@ -477,23 +501,23 @@ const [typeList, setTypeList] = useState([]); // dropdown types
     //         !['Soldring', 'Desoldring','Thermal GEL'].includes(boardFetch[0]?.type)
     //     );
 
-//         const showRequest =
-//   Boolean(requestButton) &&
-//   boardFetch?.length > 0 &&
-//   (boardFetch[0]?.is_ptlrequest === "0" ||  boardFetch[0]?.is_ptlrequest == null) &&
-//   ['Rework','SUI','RND','BGA'].includes(boardFetch[0]?.type);
+    //         const showRequest =
+    //   Boolean(requestButton) &&
+    //   boardFetch?.length > 0 &&
+    //   (boardFetch[0]?.is_ptlrequest === "0" ||  boardFetch[0]?.is_ptlrequest == null) &&
+    //   ['Rework','SUI','RND','BGA'].includes(boardFetch[0]?.type);
 
 
-const showRequest =
-  requestButton === true &&
-  Array.isArray(boardFetch) &&
-  boardFetch.length > 0 &&
-  boardFetch[0]?.is_ptlrequest == null && // null or undefined only
-  ['REWORK', 'SUI', 'RND', 'BGA'].includes(
-    (boardFetch[0]?.type || '').trim().toUpperCase()
-  );
+    const showRequest =
+        requestButton === true &&
+        Array.isArray(boardFetch) &&
+        boardFetch.length > 0 &&
+        boardFetch[0]?.is_ptlrequest == null && // null or undefined only
+        ['REWORK', 'SUI', 'RND', 'BGA'].includes(
+            (boardFetch[0]?.type || '').trim().toUpperCase()
+        );
 
-//   console.log("requestButton", requestButton);
+    //   console.log("requestButton", requestButton);
 
     //  console.log("boardFetch.RequestedQty", boardFetch[1]?.RequestedQty);
 
@@ -587,8 +611,8 @@ const showRequest =
                             setShowSuccessPopup={setShowSuccessPopup}
                             setRequestButton={setRequestButton}
                             setSubmitButton={setSubmitButton}
-                             selectedGrnRows={selectedGrnRows}   // <-- current selection
-                                setSelectedGrnRows={setSelectedGrnRows} // <-- setter function
+                            selectedGrnRows={selectedGrnRows}   // <-- current selection
+                            setSelectedGrnRows={setSelectedGrnRows} // <-- setter function
 
                         />
                     ) : (
@@ -642,7 +666,7 @@ const showRequest =
                             boardFetch.length > 0 &&
                             (
                                 boardFetch[0].is_ptlrequest == 2 ||
-                                ['Soldring', 'SUI', "RND", 'Desoldring','BGA', 'Trackchange', 'Reflow', 'Rework', 'Thermal GEL'].includes(boardFetch[0]?.type)
+                                ['Soldring', 'SUI', "RND", 'Desoldring', 'BGA', 'Trackchange', 'Reflow', 'Rework', 'Thermal GEL'].includes(boardFetch[0]?.type)
                             ) && (
                                 <button style={{ backgroundColor: 'Red' }} onClick={handleCancelBoard}>CancelBoard</button>
                             )
@@ -702,7 +726,7 @@ const showRequest =
                     </div>
                 </div>
             )}
-            
+
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}
@@ -727,6 +751,16 @@ const showRequest =
                 message="Are you sure you want to Submit this?"
                 color="primary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>)
 }
 

@@ -18,9 +18,11 @@ const Returning = () => {
         returnQty: ""
     });
 
-    const userId = sessionStorage.getItem("userId");
-      const userName = sessionStorage.getItem("userName");
-    
+    // const userId = sessionStorage.getItem("userId");
+    //   const userName = sessionStorage.getItem("userName");
+     const userId = localStorage.getItem("userId");
+      const userName = localStorage.getItem("userName");
+
     const [formErrors, setFormErrors] = useState({});
     const [returningData, setReturningData] = useState([]);
     const [showTable, setShowTable] = useState(false);

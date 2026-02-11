@@ -166,12 +166,12 @@ export default function NotificationList({ userId, setNotificationCount }) {
         fontFamily: "Roboto, sans-serif",
       }}
     >
-      {list.length > 10 && (
+      {list.length > 5 && (
         <div
           onClick={handleCloseAll}
           style={{
-            padding: 7,
-            background: "#d32f2f",
+            padding: 3,
+            background: "#fa2222",
             color: "#fff",
             borderRadius: 8,
             cursor: "pointer",

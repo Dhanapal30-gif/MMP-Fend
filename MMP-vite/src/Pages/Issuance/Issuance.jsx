@@ -8,9 +8,13 @@ import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { rejectedIssuanceTicket, savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { FaFileExcel, FaBars } from "react-icons/fa";
-import { TextField,} from '@mui/material';
+import { TextField, } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
+import { Snackbar, Alert } from "@mui/material";
+import { checkUserValid } from '../../components/Com_Component/userUtils';
+
+
 const Issuance = () => {
 
     const [formData, setFormData] = useState({
@@ -53,9 +57,10 @@ const Issuance = () => {
     const [addSearchText, setAddSearchText] = useState("");
     const [filteredAddData, setFilteredAddData] = useState([]);
     const [showMenu, setShowMenu] = useState(false);
+    const [openMsg, setOpenMsg] = useState(false);
     const [activeTicketType, setActiveTicketType] = useState("DTL"); // default
-    const [formData1,setFormData1]=useState({
-        rejectedComment:""
+    const [formData1, setFormData1] = useState({
+        rejectedComment: ""
     })
 
 
@@ -133,6 +138,20 @@ const Issuance = () => {
         setHiddenButton("closed");
         setDonwloadCosed(true);
     }
+
+    useEffect(() => {
+        const validate = async () => {
+            const isValid = await checkUserValid();
+            if (!isValid) {
+                setOpenMsg(true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            }
+        };
+        validate();
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -489,12 +508,12 @@ const Issuance = () => {
             recTicketNo = row.rec_ticket_no;
             return [{
                 recTicketNo: row.rec_ticket_no,
-                partcode: row.partcode    
+                partcode: row.partcode
             }];
         });
 
         recTicketNo = pickTicketData[0]?.rec_ticket_no;
-        
+
         // console.log("recTicketNo", recTicketNo);
         // console.log("recTicketNo", recTicketNo);
         if (recTicketNo && recTicketNo.startsWith("PTL")) {
@@ -586,12 +605,12 @@ const Issuance = () => {
     // }, [page, perPage, debouncedSearch]);
 
     useEffect(() => {
-    if (activeTicketType === "DTL") {
-        fetchData(page, perPage, debouncedSearch);
-    } else if (activeTicketType === "PTL") {
-        fetchptlData(page, perPage, debouncedSearch);
-    }
-}, [page, perPage, debouncedSearch, activeTicketType]);
+        if (activeTicketType === "DTL") {
+            fetchData(page, perPage, debouncedSearch);
+        } else if (activeTicketType === "PTL") {
+            fetchptlData(page, perPage, debouncedSearch);
+        }
+    }, [page, perPage, debouncedSearch, activeTicketType]);
 
 
     const fetchData = (page = 0, size = 10, search = "") => {
@@ -649,8 +668,8 @@ const Issuance = () => {
     }, [addSearchText, pickTicketData]);
 
     const exportToExcel = (search = "") => {
-        const userId = sessionStorage.getItem("userName") || "System";
-
+        // const userId = sessionStorage.getItem("userName") || "System";
+        const userId = localStorage.getItem("userName") || "System";
         // setDownloadDone(false);
         // setDownloadProgress(null);
         setLoading(true);
@@ -659,10 +678,10 @@ const Issuance = () => {
 
         // apiCall = () => downloadIssuance(search);
 
-         apiCall =
-        activeTicketType === "DTL"
-            ? () => downloadIssuance(search)
-            : () => downloadPTLIssuance(search);
+        apiCall =
+            activeTicketType === "DTL"
+                ? () => downloadIssuance(search)
+                : () => downloadPTLIssuance(search);
         // Call apiCall without arguments, since it’s already a function returning a Promise
         apiCall()
             .then(response => {
@@ -696,47 +715,47 @@ const Issuance = () => {
     };
 
 
-    const handleReject = ()=>{
+    const handleReject = () => {
         setHideRejectComment(true);
     }
 
 
     const handleChangeReject = (e) => {
-    setFormData1({
-        ...formData1,
-        rejectedComment: e.target.value
-    });
-};
+        setFormData1({
+            ...formData1,
+            rejectedComment: e.target.value
+        });
+    };
 
     const handleRejectSubmit = () => {
-setHideRejectComment(true);
-    if (!formData1.rejectedComment?.trim()) {
-        setErrorMessage("Reject comment required");
-        setShowErrorPopup(true);
-        return;
-    }
+        setHideRejectComment(true);
+        if (!formData1.rejectedComment?.trim()) {
+            setErrorMessage("Reject comment required");
+            setShowErrorPopup(true);
+            return;
+        }
 
-    const ticketno = pickTicketData[0]?.rec_ticket_no;
+        const ticketno = pickTicketData[0]?.rec_ticket_no;
 
 
-    rejectedIssuanceTicket(ticketno, formData1.rejectedComment)
-        .then(() => {
-            setSuccessMessage("Rejected Successfully");
-            setShowSuccessPopup(true);
-            if (ticketno?.startsWith("PTL")) {
-                        fetchRequestedTickets("PTL");
-                    } else {
-                        fetchRequestedTickets("DTL");
-                    }
-                    setHideDeliverButton(false);
-                    setHidePutButton(false);
-                    setHideIssueButton(true);
-                    setPickTicketData([]);
-                    setShowTable(false);
-                    // fetchData();
-        })
-        .catch(err => console.error(err));
-};
+        rejectedIssuanceTicket(ticketno, formData1.rejectedComment)
+            .then(() => {
+                setSuccessMessage("Rejected Successfully");
+                setShowSuccessPopup(true);
+                if (ticketno?.startsWith("PTL")) {
+                    fetchRequestedTickets("PTL");
+                } else {
+                    fetchRequestedTickets("DTL");
+                }
+                setHideDeliverButton(false);
+                setHidePutButton(false);
+                setHideIssueButton(true);
+                setPickTicketData([]);
+                setShowTable(false);
+                // fetchData();
+            })
+            .catch(err => console.error(err));
+    };
 
     return (
         <div className='ComCssContainer'>
@@ -761,11 +780,11 @@ setHideRejectComment(true);
                 <div className='ComCssTable'>
                     {/* <h5 className='ComCssTableName'>Issue List</h5> */}
                     <h5 className='ComCssTableName'>{getTableTitle()}</h5>
- 
+
                     <div
                         className="d-flex justify-content-end align-items-center mb-3"
                         style={{ marginTop: "9px", display: "flex" }}>
-                       
+
                         <div style={{ position: "relative", width: "200px" }}>
                             <input
                                 type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }}
@@ -778,7 +797,7 @@ setHideRejectComment(true);
                                 </span>
                             )}
                         </div>
-                        
+
                     </div>
                     <IssuanceShowTable
                         data={filteredAddData}
@@ -819,11 +838,11 @@ setHideRejectComment(true);
                         </p>
                     )}
                     <div className="ComCssButton9">
-                        
-                           
+
+
                         <button style={{ backgroundColor: 'Red' }} onClick={handleRejectSubmit} >Reject</button>
 
-{/* {hideRejectComment && (
+                        {/* {hideRejectComment && (
     <button style={{ backgroundColor: 'Red' }} onClick={handleRejectSubmit } >RejectIssuanceTicket</button>
 
 )} */}
@@ -838,43 +857,43 @@ setHideRejectComment(true);
                         {hideIssueButton && (
                             <button className='ComCssSubmitButton' onClick={handleIssue} >Issue</button>
                         )}
-                            {/* <button className='ComCssSubmitButton' onClick={handleIssue} >Reject</button> */}
+                        {/* <button className='ComCssSubmitButton' onClick={handleIssue} >Reject</button> */}
 
                     </div>
                     <ThemeProvider theme={TextFiledTheme}>
 
-                   
-                   {hideRejectComment && (
-<TextField
-    label="Reject Comment"
-    name="rejectedComment"
-    value={formData1.rejectedComment}
-    onChange={handleChangeReject}
-    size="small"
-    sx={{ width: "80%" }}
-/>
 
-                   
-            //         <TextField
-            //   id="outlined-basic"
-            //   label="Reject Comment"
-            //   variant="outlined"
-             
-            //   name="ponumber"
-            //   value={formData1.rejectedComment}
-            //   onChange={handleChange}
-            //   error={Boolean(formErrors.rejectedComment)}
-            //   helperText={formErrors.rejectedComment}
-            //   size="small"
-            //    sx={{ width: "80%" }}
-            // /> 
-            )}
-             </ThemeProvider>
+                        {hideRejectComment && (
+                            <TextField
+                                label="Reject Comment"
+                                name="rejectedComment"
+                                value={formData1.rejectedComment}
+                                onChange={handleChangeReject}
+                                size="small"
+                                sx={{ width: "80%" }}
+                            />
+
+
+                            //         <TextField
+                            //   id="outlined-basic"
+                            //   label="Reject Comment"
+                            //   variant="outlined"
+
+                            //   name="ponumber"
+                            //   value={formData1.rejectedComment}
+                            //   onChange={handleChange}
+                            //   error={Boolean(formErrors.rejectedComment)}
+                            //   helperText={formErrors.rejectedComment}
+                            //   size="small"
+                            //    sx={{ width: "80%" }}
+                            // /> 
+                        )}
+                    </ThemeProvider>
                 </div>
             )}
             <div className='ComCssTable'>
                 {/* <h5 className='ComCssTableName'>Issued Tickets</h5> */}
-                
+
                 <h5 className='ComCssTableName'>
                     {activeTicketType === "DTL" && "DTL Issued Tickets"}
                     {activeTicketType === "PTL" && "PTL Issued Tickets"}
@@ -956,6 +975,16 @@ setHideRejectComment(true);
                 severity="error"
                 color="secondary"
             />
+            <Snackbar
+                open={openMsg}
+                autoHideDuration={10000}
+                onClose={() => setOpenMsg(false)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+                <Alert severity="error" variant="filled">
+                    Session expired or invalid
+                </Alert>
+            </Snackbar>
         </div>
     )
 }

@@ -223,8 +223,8 @@ const CompatabilityMaster = () => {
         setLoading(true);
 
         try {
-            const userName = sessionStorage.getItem("userId") || "System";
-
+            // const userName = sessionStorage.getItem("userId") || "System";
+            const userName = localStorage.getItem("userId") || "System";
             // Determine if formData is a single object or an array
             // let payload = Array.isArray(formData)
             //     ? formData.map((row) => ({ ...row, modifiedby: userName }))
@@ -274,7 +274,8 @@ const CompatabilityMaster = () => {
         setLoading(true);
 
         try {
-            const userName = sessionStorage.getItem("userId") || "System";
+            // const userName = sessionStorage.getItem("userId") || "System";
+            const userName = localStorage.getItem("userId") || "System";
             let updatedFormData = [];
             if (showTable) {
 
@@ -455,7 +456,8 @@ const CompatabilityMaster = () => {
     const handleDelete = async () => {
         setConfirmDelete(false);
         try {
-            const modifiedby = sessionStorage.getItem("userId");
+            // const modifiedby = sessionStorage.getItem("userId");
+            const modifiedby = localStorage.getItem("userId");
             await deleteCompatability(selectedRows,modifiedby);
             setSuccessMessage("Data successfullly deleted");
             setShowSuccessPopup(true);

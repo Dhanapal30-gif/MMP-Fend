@@ -37,23 +37,30 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
   //   setUserRole(role);
   // }, []);
 
+  // useEffect(() => {
+  //   if (!isLoggedIn) {
+  //     setEmpName("");
+  //     setUserRole([]);
+  //     return;
+  //   }
+
+  //     const sessionName =localStorage.getItem("userName") || "";
+  //   const roleStr = sessionStorage.getItem("userRole") || "[]";
+  //   setEmpName(sessionName);
+  //   setUserRole(JSON.parse(roleStr));
+  // }, [isLoggedIn]);   
+
+
   useEffect(() => {
-    if (!isLoggedIn) {
-      setEmpName("");
-      setUserRole([]);
-      return;
-    }
+  const sessionName = localStorage.getItem("userName") || "";
+  const roleStr = localStorage.getItem("userRole") || "[]";
 
-    const sessionName =
-      sessionStorage.getItem("userName") ||
-      localStorage.getItem("userName") ||
-      "";
+  setEmpName(sessionName);
+  setUserRole(JSON.parse(roleStr));
+}, []);
 
-    const roleStr = sessionStorage.getItem("userRole") || "[]";
 
-    setEmpName(sessionName);
-    setUserRole(JSON.parse(roleStr));
-  }, [isLoggedIn]);   // 👈 THIS IS THE FIX
+// console.log("setEmpName",empName)
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
@@ -200,7 +207,8 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
           </div>
 
           <div className="avatar-container">
-            {isLoggedIn && (
+            {/* {isLoggedIn && ( */}
+            {empName  && (
               <>
                 <div className="avatar-wrapper">
                   <Avatar
@@ -354,6 +362,8 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("LocalSummary Report")) && (<li><Link to="/localSummaryReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Summary Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("recevingReport")) && (<li><Link to="/recevingReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Receving Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("issuanceReport")) && (<li><Link to="/issuanceReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance Report</Link></li>)}
                     </ul>
                   )}
                 </li>
