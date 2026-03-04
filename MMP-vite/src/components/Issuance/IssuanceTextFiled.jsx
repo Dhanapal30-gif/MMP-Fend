@@ -29,7 +29,7 @@ const IssuanceTextFiled = ({
         return options.find((opt) => opt.value === value) || null;
     };
 
-console.log("delivertivketlist",deliverTicketList)
+// console.log("delivertivketlist",deliverTicketList)
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>

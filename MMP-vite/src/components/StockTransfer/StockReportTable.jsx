@@ -28,9 +28,14 @@ const StockReportTable = ({
     fields: [
       // "select",
       "partcode",
+      "partdescription",
+      "componentusage",
       "location",
       "batchCode",
-      "qty"
+       "unitprice",
+      "qty",
+      "total_value",
+     
    
     ],
     data,
@@ -38,9 +43,14 @@ const StockReportTable = ({
 
     customConfig: {
       partcode: { label: "PartCode" },
+      partdescription: { label: "Part Description" },
+      componentusage: { label: "Component Usage" },
       location: { label: "Location" },
       batchCode: { label: "BatchCode" },
       qty: { label: "Qty" },
+      total_value: { label: "Total Value" },
+      unitprice: { label: "Unit Value" },
+
     },
     customCellRenderers: {
     

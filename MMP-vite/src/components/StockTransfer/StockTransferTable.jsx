@@ -16,11 +16,12 @@ const StockTransferTable = ({
 }) => {
     const fields = [
         "RTN",
-        "TransferType",
+        "fromLocation",
+        "transferLocation",
         "OrderType",
         "Partcode",
         "TransferQty",
-        "Inventory_BoxNo",
+        // "Inventory_BoxNo",
         "RecordStatus"
 
     ];

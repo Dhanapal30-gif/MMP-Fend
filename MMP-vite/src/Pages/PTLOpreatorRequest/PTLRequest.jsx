@@ -162,6 +162,7 @@ const PTLRequest = () => {
                 createdby: userId,
                 modifiedby: userId,
                 createdName: userName,
+                requestertype:"PTL"
                 // repairername: userName
             };
         });

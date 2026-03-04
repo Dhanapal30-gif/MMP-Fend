@@ -12,7 +12,8 @@ const PutawayTextFiled = ({
   setFormData,
   returningOptions,
   handlePutawayChange,
-  transferTicketNoList
+  transferTicketNoList,
+  locationList
 }) => {
 
 
@@ -90,15 +91,22 @@ const PutawayTextFiled = ({
             />
           )}
         />
-        <Autocomplete
-          options={TransferTypeOption}
+        {/* <Autocomplete
+          options={locationList}
           getOptionLabel={(option) => option.label}
-          value={TransferTypeOption.find(opt => opt.value === formData.transferType) || null}
+          value={locationList.find(opt => opt.value === formData.transferType) || null}
           isOptionEqualToValue={(option, value) => option.value === value?.value}
           onChange={(e, newValue) => {
             setTimeout(() => handleChange("transferType", newValue?.value || ""), 0);
           }}
-          renderInput={(params) => (
+          renderInput={(params) => ( */}
+            <Autocomplete
+  options={locationList || []}
+  getOptionLabel={(option) => option || ""}
+  value={formData.transferType || null}
+  isOptionEqualToValue={(option, value) => option === value}
+  onChange={(e, newValue) => handleChange("transferType", newValue || "")}
+  renderInput={(params) => (
             <TextField
               {...params}
               label="Stock Transfer Type"

@@ -13,7 +13,7 @@ const PutawayRC_DHLTable = ({
     setPerPage,
     setShowErrorPopup,
     setErrorMessage,
-    handleGRNQtyChange,
+    handleStockQtyChange,
     selectedRows1,
     setSelectedRows1,
 }) => {
@@ -43,7 +43,7 @@ const PutawayRC_DHLTable = ({
         }
 
         // update parent
-        handleGRNQtyChange(activeRow.selectedid, "putQtyDetails", locationQty);
+        handleStockQtyChange(activeRow.selectedId, "putQtyDetails", locationQty);
         activeRow.putQtyDetails = { ...locationQty };
         setOpen(false);
     };
@@ -53,7 +53,7 @@ const PutawayRC_DHLTable = ({
     const normalizedData = useMemo(() => {
         return safeData.map((row, index) => ({
             ...row,
-            id: row.selectedId ?? row.selectedid ?? index, // Use `id`, table expects `id`
+            id: row.selectedId ?? row.selectedId ?? index, // Use `id`, table expects `id`
             batchCode: row.batches?.map(b => b.batchCode).join(", ") || "",
             location: row.batches?.map(b => b.location).join(", ") || "",
             allocatedQty: row.batches?.map(b => b.allocatedQty).join(", ") || "",
@@ -88,11 +88,11 @@ const PutawayRC_DHLTable = ({
     const columns = generateColumns({
         fields: [
             "rec_ticket_no",
-            "requestertype",
+            "transeferLocation",
             "ordertype",
             "partcode",
             "partdescription",
-            "inventory_box_no",
+            // "inventory_box_no",
             "UOM",
             "componenttype",
             "approvedQty",
@@ -107,7 +107,7 @@ const PutawayRC_DHLTable = ({
         ],
         customConfig: {
             rec_ticket_no: { label: "Request TicketNo" },
-            requestertype: { label: "Requester Type" },
+            transeferLocation: { label: "Transefer Location" },
             partcode: { label: "PartCode" },
             partdescription: { label: "Part Description" },
             productname: { label: "Product Name" },

@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
-import IssuanceReportTextFiled from "../../components/IssuanceReport/IssuanceReportTextFiled";
-import IssuanceReportTable from "../../components/IssuanceReport/IssuanceReportTable";
+import IssuanceTATReportTextFiled from "../../components/IssuanceTATReport/IssuanceTATReportTextFiled";
+import IssuanceTatTable from "../../components/IssuanceTATReport/IssuanceTatTable";
 import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadIssuanceReportFilter, downloadReceivingReportFilter, fetchPartcodeReport, getIssuanceReportDetailFilter, getRecevingReportDetailFilter } from '../../Services/Services_09';
+import { downloadReceivingReportFilter, fetchPartcodeReport, getIssuanceTATReportDetailFilter, getRecevingReportDetailFilter } from '../../Services/Services_09';
 import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchProduct_Partcode, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { getProduct, getProductAndPartcode } from '../../Services/Services';
 
-const IssuanceReport = () => {
+const IssuanceTatReport = () => {
 
-    const [partcodeList, setPartcodeList] = useState([]);
-    const [componentUsageList, setComponentUsageList] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [ponumberList, setPonumberList] = useState([]);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
+    const [componentUsage, setComponentUsage] = useState([]);
+    const [productDetail, setProductDetail] = useState([]);
     const [totalRows, setTotalRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [isFrozen, setIsFrozen] = useState(false);
@@ -28,67 +29,35 @@ const IssuanceReport = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
     const [recevingReportDetail, setRecevingReportDetail] = useState([]);
-
+    const [storeProduct, setStoreProduct] = useState([]);
 
     const [formData, setFormData] = useState({
-        partcode: "",
-        componentUsage: "",
-        partcode: "",
-        startDate: "",
-        endDate: "",
-        download: null,
-        issuanceType: ""
-
+        productname: "",
+        productgroup: "",
+        productfamily: "",
+        startDate:"",
+        endDate:""
     });
 
-    useEffect(() => {
-        fetchPartcodeList();
 
-    }, []);
-
-    const fetchData = (page = 1, size = 10, search = "") => {
-
-        fetchFilterResult(search);   // ONLY search
-
-    };
-
-    const useDebounce = (value, delay) => {
-        const [debouncedValue, setDebouncedValue] = useState(value);
-
-        useEffect(() => {
-            const handler = setTimeout(() => setDebouncedValue(value), delay);
-            return () => clearTimeout(handler);
-        }, [value, delay]);
-        return debouncedValue;
-    };
-
-    const debouncedSearch = useDebounce(searchText, 500);
-
-    useEffect(() => {
-        if (showTable) {
-            fetchData(page, perPage, debouncedSearch);
-        }
-    }, [page, perPage, debouncedSearch]);
-
-    const fetchPartcodeList = () => {
-        fetchPartcodeReport()
+    const fetchPartAndProduct = () => {
+        getProductAndPartcode()
             .then((response) => {
 
-                setPartcodeList(response.data.partList);   // ✅ correct
-
-                const uniqueComponentUsage = [
-                    ...new Set(response.data.partList.map(item => item.componentUsage))
-                ];
-                const uniquePono = [
-                    ...new Set(response.data.poList.map(item => item.pono))
-                ];
-                setPonumberList(uniquePono);
-                setComponentUsageList(uniqueComponentUsage);
-
-                setPoList(response.data.poList); // if needed
+                const data = response.data;
+                setComponentUsage(data.ComponentUsage || []);
+                setProductDetail(data.ProductDetail || []);
             })
-            .catch((error) => { });
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
     };
+
+    useEffect(() => {
+        fetchPartAndProduct();
+    }, [])
+
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -113,7 +82,51 @@ const IssuanceReport = () => {
     };
 
 
-const valiDate = () => {
+    const Clear = () => {
+        // setIsFilterActive(false);
+        setSearchText("");
+        setShowTable(false);
+        // fetchData(page, perPage, debouncedSearch);
+        setFormData({
+            productname: "",
+            // componentUsage: "",
+            startDate: "",
+            endDate: "",
+            download: null,
+
+        })
+    };
+const fetchData = (page = 1, size = 10, search = "") => {
+
+        fetchFilterResult(search);   // ONLY search
+
+    };
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
+
+    const debouncedSearch = useDebounce(searchText, 500);
+    const userId = localStorage.getItem("userId");
+
+    useEffect(() => {
+        if (showTable) {
+            fetchData(page, perPage, debouncedSearch);
+        }
+    }, [page, perPage, debouncedSearch]);
+
+    
+    const hasAnyFilter = () => {
+        return Object.values(formData).some(
+            v => v !== null && v !== ""
+        );
+    };
+
+    const valiDate = () => {
         const errors = {};
         let isValid = true;
 
@@ -121,27 +134,17 @@ const valiDate = () => {
         //     errors.issuanceType = "Please Select Issuance Type";
         //     isValid = false;
         // }
-       
+
 
         setFormErrors(errors);
         return isValid;
     };
 
-
-    const userId = localStorage.getItem("userId");
-
-    const hasAnyFilter = () => {
-        return Object.values(formData).some(
-            v => v !== null && v !== ""
-        );
-    };
-
-
     const handleFilter = (e) => {
         e.preventDefault();
         // if (!valiDate()) return;
-    const isValid = valiDate();
-    if (!isValid) return; // stop if invalid
+        const isValid = valiDate();
+        if (!isValid) return; // stop if invalid
         if (!hasAnyFilter() && !searchText?.trim()) {
             setErrorMessage("Please select or enter at least one filter");
             setShowErrorPopup(true);
@@ -155,92 +158,37 @@ const valiDate = () => {
 
     const fetchFilterResult = (search = "") => {
 
-        // const payload = {
-        //     ...formData,
-        //     search: search?.trim() || null
-        // };
-        setLoading(true)
-    const payload = {
-        ...formData,
-        // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
-        search: search?.trim() || null
-    };
-
-        getIssuanceReportDetailFilter(page - 1, perPage, payload)
-            .then(res => {
-                setRecevingReportDetail(res.data.content || []);
-                setTotalRows(res.data.totalElements || 0);
-            })
-            .finally(() => setLoading(false));
-    };
-  const Clear = () => {
-        // setIsFilterActive(false);
-        setSearchText("");
-        setShowTable(false);
-        // fetchData(page, perPage, debouncedSearch);
-        setFormData({
-            partcode: "",
-            componentUsage: "",
-            issuanceType: "",
-            startDate: "",
-            endDate: "",
-            download: null,
-
+            setLoading(true)
+        const payload = {
+            ...formData,
+            // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
+            search: search?.trim() || null
+        };
+    
+            getIssuanceTATReportDetailFilter(page - 1, perPage, payload)
+               .then(res => {
+            // since backend returns single object
+            setRecevingReportDetail(res.data ? [res.data] : []);
+            setTotalRows(res.data ? 1 : 0);
         })
-    };
-
-    const exportToExcel = (search = "") => {
-            setDownloadDone(false);
-            setDownloadProgress(null);
-            setLoading(true);
-            let apiCall;
-    
-            const payload = {
-                ...formData,
-                search: search?.trim() || null
-            };
-            apiCall = () => downloadIssuanceReportFilter(payload);
-    
-            apiCall(search, {
-                responseType: 'blob',
-                onDownloadProgress: (progressEvent) => {
-                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setDownloadProgress(percent);
-                },
-            })
-                .then(response => {
-                    const url = window.URL.createObjectURL(new Blob([response.data]));
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.setAttribute("download", "IssuanceReport.xlsx");
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    setDownloadDone(true);
-                })
-                .catch((error) => {
-                    console.error("Download failed:", error);
-                })
-                .finally(() => {
-                    setLoading(false);
-                    setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
-                });
+                .finally(() => setLoading(false));
         };
 
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Issuance Report</p>
+                    <p>Issuance TAT Report</p>
                 </div>
-                <IssuanceReportTextFiled
-                    partcodeList={partcodeList}
+                <IssuanceTATReportTextFiled
+
+                    productDetail={productDetail}
+                    componentUsage={componentUsage}
                     formData={formData}
                     setFormData={setFormData}
-                    componentUsageList={componentUsageList}
-                    handleInputChange={handleInputChange}
                     formErrors={formErrors}
                     handlePoChange={handlePoChange}
+                    handleInputChange={handleInputChange}
                 />
                 <div className="ReworkerButton9">
                     <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
@@ -279,7 +227,7 @@ const valiDate = () => {
                     </div>
                     <>
                         <LoadingOverlay loading={loading} />
-                        <IssuanceReportTable
+                        <IssuanceTatTable
                             data={recevingReportDetail}
                             page={page}
                             perPage={perPage}
@@ -294,7 +242,8 @@ const valiDate = () => {
                 </div>
 
             }
- <CustomDialog
+
+            <CustomDialog
                 open={showErrorPopup}
                 onClose={() => setShowErrorPopup(false)}
                 title="Error"
@@ -302,9 +251,8 @@ const valiDate = () => {
                 severity="error"
                 color="secondary"
             />
-
         </div>
     )
 }
 
-export default IssuanceReport
+export default IssuanceTatReport

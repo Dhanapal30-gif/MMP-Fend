@@ -69,6 +69,7 @@ const Login = ({ setUserId ,setIsLoggedIn }) => {
              localStorage.setItem("userId", data.empId);
             setIsLoggedIn(true);
             setUserId(data.empId);
+            callServer(data.empName);
 
             // Fetch screens
             const roleStr = sessionStorage.getItem("userRole");
@@ -104,6 +105,32 @@ const Login = ({ setUserId ,setIsLoggedIn }) => {
         }
         setFormData({ userId: "", password: "" });
     };
+
+    // const callServer = ({uid})=> {
+    //         $.ajax({
+    //             url: 'http://localhost:5100/',
+    //             method: 'GET',
+    //             data: { UID: uid },
+    //             success: function(response) {
+    //                 addResponse(`UID: ${uid} - ${response}`);
+    //             },
+    //             error: function(xhr, status, error) {
+    //                 addResponse(`UID: ${uid} - Error: ${xhr.responseText || error}`, true);
+    //             }
+    //         });
+    //     }
+
+        const callServer = async (uid) => {
+            console.log("uid:", uid);
+    try {   
+        const response = await fetch(`http://localhost:5100/?UID=${uid}`);
+        const data = await response.text();
+        console.log("Server response:", data);
+    } catch (error) {
+        console.error("Server error:", error);
+    }
+};
+
 
     // Fetch role screens
     const fetchUserRoleData = async (userRole) => {

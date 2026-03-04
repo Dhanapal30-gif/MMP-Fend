@@ -5,20 +5,22 @@ import { generateColumns } from '../../components/Com_Component/generateColumns'
 import { FaTimesCircle } from "react-icons/fa";
 
 const fields = [
-    "transfertype",
+    "fromLocation",
+    "transferLocation",
     "ordertype",
     "partcode",
-    "transferqty",
+    "transfer_ReqQty",
     "inventory_box_no",
     "comments"
 
 ];
 
 const customConfig = {
-    transfertype: { label: "Trcansfer Type" },
+    fromLocation: { label: "From Location" },
+    transferLocation:{label:"Transfer Location"},
     ordertype: { label: "Order Type" },
     partcode: { label: "Part Code" },
-    transferqty: { label: "Transfer Qty" },
+    transfer_ReqQty: { label: "Transfer Qty" },
     inventory_box_no: { label: "Inventory Box Number" },
     comments: { label: "Comment" },
 };

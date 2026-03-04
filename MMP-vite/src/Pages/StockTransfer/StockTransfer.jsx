@@ -5,9 +5,8 @@ import StockRc_DHLAddTable from "../../components/StockTransfer/StockRc_DHLAddTa
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchRequesterDetail, fetchRequesterSearch } from "../../components/Requester/RequesterActions.js";
-
 import { FaFileExcel, FaBars } from "react-icons/fa";
-import { saveGRN } from '../../Services/Services_09.js';
+import { fetchTransferLocation, saveGRN } from '../../Services/Services_09.js';
 import { checkAvailable, downloadRequester, downloadStockTransfer, fetchAvailableAndCompatabilityQty, fetchProductAndPartcode, fetchRequesterType, fetchRetPartcode, fetchStockTransferAll, fetchTransferPartcode, saveRequester, saveReturning, saveStockTransfer } from '../../Services/Services-Rc.js';
 import { ContactSupportOutlined } from '@mui/icons-material';
 
@@ -16,11 +15,12 @@ const StockTransfer = () => {
     const [formData, setFormData] = useState({
         ordertype: "",
         partcode: "",
-        inventory_box_no: "",
+        fromLocation: "",
+        transferLocation: ""
     });
 
     // const userId = sessionStorage.getItem("userId");
-     const userId = localStorage.getItem("userId");
+    const userId = localStorage.getItem("userId");
     const [formErrors, setFormErrors] = useState({});
     const [trnasferPrtcode, setTrnasferPrtcode] = useState([]);
     const [showTable, setShowTable] = useState(false);
@@ -38,25 +38,57 @@ const StockTransfer = () => {
     const [downloadDone, setDownloadDone] = useState(false);
     const defaultBoxNumber = "MN-05-2025-378"; // initial default
     const [stockTransferDetail, setStockTransferDetail] = useState([]);
+    const [locationList, setLocationList] = useState([]);
 
     const handleChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => {
+            const updated = { ...prev, [field]: value };
+
+            // Reset transferLocation if fromLocation is same
+            if (field === "fromLocation" && value === prev.transferLocation) {
+                updated.transferLocation = "";
+            }
+
+            return updated;
+        });
     };
 
     useEffect(() => {
-        if (!formData.ordertype) return;
+        if (!formData.fromLocation || !formData.ordertype) return;
 
-        fetchTransferPartcode(formData.ordertype)
+        fetchTransferPartcode(formData.fromLocation, formData.ordertype)
             .then(res => setTrnasferPrtcode(res.data || []))
             .catch(err => console.error(err));
-    }, [formData.ordertype]);
+    }, [formData.fromLocation, formData.ordertype]);
+
+    useEffect(() => {
+        fetchLocationMaster();
+    }, []);
+
+
+    const fetchLocationMaster = () => {
+        fetchTransferLocation()
+            .then((response) => {
+                const partList = response.data?.partList || []; // use response.data
+                const locationList = partList.map(item => ({
+                    label: item,
+                    value: item
+                }));
+                console.log("Location List for Dropdown:", locationList);
+                setLocationList(locationList);
+            })
+            .catch((error) => {
+                console.error("Error fetching location:", error);
+            });
+    };
+
 
     const valiDate = () => {
         const errors = {};
         let isValid = true;
 
-        if (!formData.transfertype) {
-            errors.transfertype = "select transferType";
+        if (!formData.fromLocation) {
+            errors.fromLocation = "select fromLocation";
             isValid = false;
         }
         if (!formData.ordertype) {
@@ -68,13 +100,14 @@ const StockTransfer = () => {
             errors.partcode = "select partcode";
             isValid = false;
         }
-        if (formData.transfertype === 'DHL-RC') {
-            if (!formData.trnasferQty) {
-                errors.trnasferQty = "Enter Trnasfer Qty";
+        if (formData.fromLocation !== 'Internal Transfer') {
+            if (!formData.transfer_ReqQty) {
+                errors.transfer_ReqQty = "Enter transfer_ReqQty";
                 isValid = false;
             }
         }
-        if (formData.transfertype === 'DHL-RC') {
+
+        if (formData.fromLocation !== 'Internal Transfer') {
             if (!formData.comments) {
                 errors.comments = "Enter comment";
                 isValid = false;
@@ -87,13 +120,27 @@ const StockTransfer = () => {
     const handleSubmit = async () => {
         if (!valiDate()) return;
         try {
+            // const payload = [
+            //     {
+            //         ...formData,
+            //         createdby: userId,
+            //         updatedby: userId,
+            //         formData.fromLocation ="Internal Transfer" 
+            //     }
+            // ];
+
             const payload = [
                 {
                     ...formData,
                     createdby: userId,
                     updatedby: userId,
+                    transferLocation: formData.fromLocation === "Internal Transfer"
+                        ? formData.fromLocation
+                        : formData.transferLocation,
+                    fromLocation: ""  // clear fromLocation so it’s not sent
                 }
             ];
+
 
             const response = await saveStockTransfer(payload); // ensure this posts JSON
 
@@ -118,7 +165,7 @@ const StockTransfer = () => {
         // const userId = sessionStorage.getItem("userId") || "System";
         //  const userName = sessionStorage.getItem("userName") || "System";
         const userId = localStorage.getItem("userId") || "System";
-         const userName = localStorage.getItem("userName") || "System";
+        const userName = localStorage.getItem("userName") || "System";
 
         const updatedFormData = tableData.map(row => ({
             ...row,
@@ -165,8 +212,8 @@ const StockTransfer = () => {
     }, [page, perPage, debouncedSearch]);
 
 
-    const fetchStockAll = (page, size,search="") => {
-        fetchStockTransferAll(page, size,search)
+    const fetchStockAll = (page, size, search = "") => {
+        fetchStockTransferAll(page, size, search)
             .then((response) => {
                 if (response?.data?.content) {
                     setStockTransferDetail(response.data.content); // use correct state setter
@@ -243,40 +290,42 @@ const StockTransfer = () => {
 
 
     const exportToExcel = (search = "") => {
-                // const userId = sessionStorage.getItem("userName") || "System";
+        // const userId = sessionStorage.getItem("userName") || "System";
         const userId = localStorage.getItem("userName") || "System";
-                setLoading(true);
-        
-               
-        
-                 const apiCall = () => {
+        setLoading(true);
+
+
+
+        const apiCall = () => {
             if (search?.trim() !== "") {
                 return downloadStockTransfer(search);
             } else {
                 return downloadStockTransfer(""); // or another API for no search
             }
         };
-    
-               
-                apiCall()
-                    .then(response => {
-                        const url = window.URL.createObjectURL(new Blob([response.data]));
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.setAttribute("download", "StockManual Update.xlsx");
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                        // setDownloadDone(true);
-                    })
-                    .catch((error) => {
-                        console.error("Download failed:", error);
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                        setTimeout(() => setDownloadDone(false), 5000);
-                    });
-            };
+
+
+        apiCall()
+            .then(response => {
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", "StockManual Update.xlsx");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                // setDownloadDone(true);
+            })
+            .catch((error) => {
+                console.error("Download failed:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+                setTimeout(() => setDownloadDone(false), 5000);
+            });
+    };
+
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -314,11 +363,12 @@ const StockTransfer = () => {
                     formErrors={formErrors}
                     trnasferPrtcode={trnasferPrtcode}
                     inventory_box_no={inventory_box_no}
+                    locationList={locationList}
                 />
 
                 <div className="ReworkerButton9">
-                    {(formData.transfertype === 'RC-DHL') && (<button className='ComCssSubmitButton' onClick={handleAdd} >ADD</button>)}
-                    {(formData.transfertype !== 'RC-DHL') && (<button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>)}
+                    {(formData.fromLocation !== 'Internal Transfer') && (<button className='ComCssSubmitButton' onClick={handleAdd} >ADD</button>)}
+                    {(formData.fromLocation === 'Internal Transfer') && (<button className='ComCssSubmitButton' onClick={handleSubmit} >Submit</button>)}
                     <button className='ComCssClearButton' onClick={handleClear} >Clear</button>
                 </div>
 
@@ -338,6 +388,7 @@ const StockTransfer = () => {
                         setFormData={setFormData}
                         setIsFrozen={setIsFrozen}
                         setTableData={setTableData}
+
                     />
                     <div className="ComCssButton9">
                         <button className='ComCssSubmitButton' onClick={handleAddSubmit} >Submit</button>

@@ -6,7 +6,8 @@ import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, TextField } from "@mui/material";
 
-const IssuanceReportTextFiled = ({
+
+const StorckReportDetailTextFiled = ({
     formData,
     setFormData,
     partcodeList,
@@ -14,7 +15,9 @@ const IssuanceReportTextFiled = ({
     handleInputChange,
     formErrors,
     handlePoChange,
-    ponumberList
+    ponumberList,
+    locationList,
+    handleChange
 }) => {
 
     const getDateRange = (label) => {
@@ -56,86 +59,63 @@ const IssuanceReportTextFiled = ({
         label,
         value: getDateRange(label)
     }));
-     const getDownloadValue = () => {
+
+    const getDownloadValue = () => {
         if (!formData.download || typeof formData.download !== "object") return null;
 
         return download.find((opt) =>
             JSON.stringify(opt.value) === JSON.stringify(formData.download)
         ) || null;
     };
-    const issuanceOptions = [
-    { issuanceType: "DTL" },
-    { issuanceType: "PTL" }
-];
 
-  return (
-    <div className="ComCssTexfiled">
-        <ThemeProvider theme={TextFiledTheme}>
-            {/* <Autocomplete
-    options={issuanceOptions}
-    getOptionLabel={(option) => option.issuanceType || ""}
-    value={issuanceOptions.find(p => p.issuanceType === formData.issuanceType) || null}
-    onChange={(e, newValue) => {
-        setFormData(prev => ({
-            ...prev,
-            issuanceType: newValue?.issuanceType || ""
-        }));
-    }}
-    renderInput={(params) => (
-        <TextField {...params} 
-         error={Boolean(formErrors?.issuanceType)}
-                    helperText={formErrors?.issuanceType || ""}
-                    label="Issuance Type" size="small" />
-    )}
-/> */}
 
-              <Autocomplete
+    return (
+        <div className="ComCssTexfiled">
+            <ThemeProvider theme={TextFiledTheme}>
+                <Autocomplete
                     options={partcodeList || []}
                     getOptionLabel={(option) => option.partcode || ""}
-                    value={partcodeList.find(p => p.partcode === formData.partcode) || null}
-                    // onChange={(e, newValue) => {
-                    //     setFormData(prev => ({
-                    //         ...prev,
-                    //         partcode: newValue?.partcode || "",
-                    //         partdescription: newValue?.partdescription || "",
-                    //         // componentUsage: newValue?.componentUsage || ""
-                    //     }));
-                    // }}
+                    value={(partcodeList || []).find(p => p.partcode === formData?.partcode) || null}
                     onChange={(e, newValue) => {
-    setFormData(prev => ({
-        ...prev,
-        partcode: newValue?.partcode || "",
-        partdescription: newValue?.partdescription || "",
-        componentUsage: newValue?.componentUsage || "",
-       issuanceType: prev.issuanceType || ""
-    }));
-}}
-
+                        setFormData(prev => ({
+                            ...prev,
+                            partcode: newValue?.partcode || "",
+                            partdescription: newValue?.partdescription || "",
+                            // componentUsage: newValue?.componentUsage || ""
+                        }));
+                    }}
                     renderInput={(params) => (
                         <TextField {...params} label="Partcode" size="small" />
                     )}
                 />
-
                 <TextField
                     label="Part Description"
                     size="small"
-                    value={formData.partdescription || ""}
-
+                    value={formData?.partdescription || ""}
                 />
 
                 <Autocomplete
-                    options={componentUsageList || []}
-                    getOptionLabel={(option) => option || ""}
-                    value={formData.componentUsage || null}
-                    onChange={(e, val) =>
-                        setFormData(prev => ({ ...prev, componentUsage: val || "" }))
-                    }
+                    options={locationList}
+                    value={locationList.find(opt => opt.value === formData.fromLocation) || null}
+                    onChange={(e, newValue) => handleChange("fromLocation", newValue?.value || "")}
                     renderInput={(params) => (
-                        <TextField {...params} label="Component Usage" size="small" />
+                        <TextField {...params} label="From Location"
+                            error={Boolean(formErrors?.fromLocation)}
+                            helperText={formErrors?.fromLocation || ""} />
                     )}
                 />
-                
 
+<Autocomplete
+    options={locationList.filter(opt => opt.value !== formData.fromLocation)} // exclude selected "from"
+    value={locationList.find(opt => opt.value === formData.transferLocation) || null}
+    onChange={(e, newValue) => handleChange("transferLocation", newValue?.value || "")}
+    renderInput={(params) => (
+        <TextField {...params} label="Transfer Location" 
+        error={Boolean(formErrors?.transferLocation)}
+                            helperText={formErrors?.transferLocation || ""}
+                            />
+    )}
+/>
                 <ComTextFiled
                     label="Start Date"
                     name="startDate"
@@ -174,10 +154,10 @@ const IssuanceReportTextFiled = ({
 
                     renderInput={(params) => <TextField {...params} label="Download" size="small" />}
                 />
+            </ThemeProvider>
 
-        </ThemeProvider>
-         </div>
-  )
+        </div>
+    )
 }
 
-export default IssuanceReportTextFiled
+export default StorckReportDetailTextFiled

@@ -51,6 +51,11 @@ import ManualDoor from './Pages/Manual Door/ManualDoor';
 import TableMaster from './Pages/TableMaster/TableMaster';
 import RecevingReport from './Pages/RecevingReport/RecevingReport';
 import IssuanceReport from './Pages/IssuanceReport/IssuanceReport';
+import StockTransferReport from './Pages/StockReport/StockTransferReport';
+import StockTransferOverview from './Pages/StockReport/StockTransferOverview';
+import  ProductRepairQtyMaster from './Pages/ProductRepairQtyMaster/ProductRepairQtyMaster';
+import MaterialMovementReport from './Pages/MaterialMovementReport/MaterialMovementReport';
+import IssuanceTatReport from './Pages/IssuanceTATReport/issuanceTatReport';
 
 function App() {
 
@@ -117,7 +122,12 @@ function App() {
        { name: "tableMaster", path: "/TableMaster" },
        { name: "recevingReport", path: "/RecevingReport" },
        { name: "issuanceReport", path: "/IssuanceReport" },
-    ];
+       { name: "stockTransferReport", path: "/StockTransferReport" },
+       { name: "stockTransferOverview", path: "/StockTransferOverview" },
+       { name: "productRepairQtyMaster", path: "/ProductRepairQtyMaster" },
+       { name: "materialMovementReport", path: "/MaterialMovementReport" },
+       { name: "IssuanceTatReport", path: "/IssuanceTatReport" },
+      ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
     } catch (err) {
@@ -218,8 +228,14 @@ function App() {
           <Route path='/tableMaster' element={<TableMaster />} />
           <Route path='/recevingReport' element={<RecevingReport />} />
           <Route path='/issuanceReport' element={<IssuanceReport />} />
+          <Route path='/stockTransferReport' element={<StockTransferReport />} />
+          <Route path='/stockTransferOverview' element={<StockTransferOverview />} />
+          <Route path='/productRepairQtyMaster' element={<ProductRepairQtyMaster />} />
+          <Route path='/materialMovementReport' element={<MaterialMovementReport />} />
+          <Route path='/issuanceTatReport' element={<IssuanceTatReport />} />
+
           <Route
-            path="/receving"
+            path="/receving" 
             element={
               <PrivateRoute>
                 <Receving />

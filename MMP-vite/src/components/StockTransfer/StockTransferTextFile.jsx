@@ -10,7 +10,8 @@ const StockTransferTextFile = ({
     handleChange,
     trnasferPrtcode,
     formErrors,
-    inventory_box_no
+    inventory_box_no,
+    locationList
 }) => {
     const statusOptions = [
         { label: "Open", value: "Open" },
@@ -42,7 +43,7 @@ const StockTransferTextFile = ({
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
-                <Autocomplete
+                {/* <Autocomplete
                     options={TransferTypeOption}
                     getOptionLabel={(option) => option.label}
                     value={TransferTypeOption.find(opt => opt.value === formData.transfertype) || null}
@@ -56,14 +57,63 @@ const StockTransferTextFile = ({
                                 borderRadius: "8px"
                             }} />
                     )}
-                />
+                /> */}
+             <Autocomplete
+    options={locationList}
+    value={locationList.find(opt => opt.value === formData.fromLocation) || null}
+    onChange={(e, newValue) => handleChange("fromLocation", newValue?.value || "")}
+    renderInput={(params) => (
+        <TextField {...params} label="From Location" 
+        error={Boolean(formErrors?.fromLocation)}
+                            helperText={formErrors?.fromLocation || ""}/>
+    )}
+/>
+{/* <Autocomplete
+    options={locationList.filter(opt => opt.value !== formData.fromLocation)} // exclude selected "from"
+    value={locationList.find(opt => opt.value === formData.transferLocation) || null}
+    onChange={(e, newValue) => handleChange("transferLocation", newValue?.value || "")}
+    renderInput={(params) => (
+        <TextField {...params} label="Transfer Location" 
+        error={Boolean(formErrors?.transferLocation)}
+                            helperText={formErrors?.transferLocation || ""}
+                            />
+    )}
+/> */}
+{formData.fromLocation !=='Internal Transfer' && (
+      
+
+
+
+<Autocomplete
+    options={
+        locationList
+            .filter(opt => 
+                opt.value !== "Internal Transfer" &&
+                opt.value !== formData.fromLocation
+            )
+    }
+    value={locationList.find(opt => opt.value === formData.transferLocation) || null}
+    onChange={(e, newValue) => handleChange("transferLocation", newValue?.value || "")}
+    renderInput={(params) => (
+        <TextField
+            {...params}
+            label="Transfer Location"
+            error={Boolean(formErrors?.transferLocation)}
+            helperText={formErrors?.transferLocation || ""}
+        />
+    )}
+/>
+
+)}
+
+
                 <Autocomplete
                     options={OrderTypeOption}
                     getOptionLabel={(option) => option.label}
                     value={OrderTypeOption.find(opt => opt.value === formData.ordertype) || null}
                     onChange={(e, newValue) => handleChange("ordertype", newValue?.value || "")}
                     renderInput={(params) => (
-                        <TextField {...params} label="ordertype"
+                        <TextField {...params} label="Order Type"
                             error={Boolean(formErrors?.ordertype)}
                             helperText={formErrors?.ordertype || ""}
 
@@ -98,16 +148,28 @@ const StockTransferTextFile = ({
                             }} />
                     )}
                 />
-                {(formData.transfertype === 'RC-DHL') && (
-                    <ComTextFiled
-                        label="Trnasfer Qty"
-                        name="transferqty"
-                        value={formData.transferqty || ""}
-                        type="number"
-                        onChange={(e) => handleChange("transferqty", e.target.value)}
-                        error={Boolean(formErrors?.transferqty)}
-                        helperText={formErrors?.transferqty || ""}
-                    />
+                {formData.fromLocation !=='Internal Transfer' && (
+                   <ComTextFiled
+    label="Transfer ReqQty"
+    name="transfer_ReqQty"
+    type="number"
+    value={formData.transfer_ReqQty || ""}
+    onChange={(e) => {
+        const value = Number(e.target.value);
+        const part = trnasferPrtcode.find(p => p.partcode === formData.partcode);
+        const availableQty = part ? Number(part.availableQty) : 0;
+
+        // Limit value to availableQty
+        if (value <= availableQty) {
+            handleChange("transfer_ReqQty", value);
+        } else {
+            handleChange("transfer_ReqQty", availableQty);
+        }
+    }}
+    error={Boolean(formErrors?.transfer_ReqQty)}
+    helperText={formErrors?.transfer_ReqQty || ""}
+/>
+
                 )}
                 {/* {(formData.transfertype === 'RC-DHL') && (
 
@@ -120,7 +182,7 @@ const StockTransferTextFile = ({
 
                 )} */}
 
-                {(formData.transfertype === 'RC-DHL') && (
+                {formData.fromLocation !=='Internal Transfer' && (
                     <ComTextFiled
                         label="Comment"
                         name="comments"
