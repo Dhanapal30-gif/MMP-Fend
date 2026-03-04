@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-import IssuanceReportTextFiled from "../../components/IssuanceReport/IssuanceReportTextFiled";
-import IssuanceReportTable from "../../components/IssuanceReport/IssuanceReportTable";
+import StockReportOverviewTextfiled from "../../components/StockReport/StockReportOverviewTextfiled";
+import StockOverviewTable from "../../components/StockReport/StockOverviewTable";
 import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadIssuanceReportFilter, downloadReceivingReportFilter, fetchPartcodeReport, getIssuanceReportDetailFilter, getRecevingReportDetailFilter } from '../../Services/Services_09';
-import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchProduct_Partcode, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { downloadStockOverviewReportFilter, fetchPartcodeReport, fetchTransferLocation, getStockReportDetailFilter, getStockReportOverViewFilter, } from '../../Services/Services_09';
 
-const IssuanceReport = () => {
+const StockTransferOverview = () => {
 
     const [partcodeList, setPartcodeList] = useState([]);
     const [componentUsageList, setComponentUsageList] = useState([]);
@@ -27,65 +26,46 @@ const IssuanceReport = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
-    const [recevingReportDetail, setRecevingReportDetail] = useState([]);
-
+    const [stockReportDetail, setStockReportDetail] = useState([]);
+    const [locationList, setLocationList] = useState([]);
 
     const [formData, setFormData] = useState({
         partcode: "",
         componentUsage: "",
+        ponumber: "",
         partcode: "",
         startDate: "",
         endDate: "",
         download: null,
-        issuanceType: ""
 
     });
 
     useEffect(() => {
         fetchPartcodeList();
-
+        fetchLocationMaster();
     }, []);
 
-    const fetchData = (page = 1, size = 10, search = "") => {
-
-        fetchFilterResult(search);   // ONLY search
-
+    const fetchLocationMaster = () => {
+        fetchTransferLocation()
+            .then((response) => {
+                const partList = response.data?.partList || []; // use response.data
+                const locationList = partList.map(item => ({
+                    label: item,
+                    value: item
+                }));
+                console.log("Location List for Dropdown:", locationList);
+                setLocationList(locationList);
+            })
+            .catch((error) => {
+                console.error("Error fetching location:", error);
+            });
     };
-
-    const useDebounce = (value, delay) => {
-        const [debouncedValue, setDebouncedValue] = useState(value);
-
-        useEffect(() => {
-            const handler = setTimeout(() => setDebouncedValue(value), delay);
-            return () => clearTimeout(handler);
-        }, [value, delay]);
-        return debouncedValue;
-    };
-
-    const debouncedSearch = useDebounce(searchText, 500);
-
-    useEffect(() => {
-        if (showTable) {
-            fetchData(page, perPage, debouncedSearch);
-        }
-    }, [page, perPage, debouncedSearch]);
 
     const fetchPartcodeList = () => {
         fetchPartcodeReport()
             .then((response) => {
 
                 setPartcodeList(response.data.partList);   // ✅ correct
-
-                const uniqueComponentUsage = [
-                    ...new Set(response.data.partList.map(item => item.componentUsage))
-                ];
-                const uniquePono = [
-                    ...new Set(response.data.poList.map(item => item.pono))
-                ];
-                setPonumberList(uniquePono);
-                setComponentUsageList(uniqueComponentUsage);
-
-                setPoList(response.data.poList); // if needed
             })
             .catch((error) => { });
     };
@@ -111,37 +91,91 @@ const IssuanceReport = () => {
             [field]: value === "" ? null : value
         }));
     };
-
-
-const valiDate = () => {
-        const errors = {};
-        let isValid = true;
-
-        // if (!formData.issuanceType) {
-        //     errors.issuanceType = "Please Select Issuance Type";
-        //     isValid = false;
-        // }
-       
-
-        setFormErrors(errors);
-        return isValid;
-    };
-
-
-    const userId = localStorage.getItem("userId");
-
     const hasAnyFilter = () => {
         return Object.values(formData).some(
             v => v !== null && v !== ""
         );
     };
 
+    const Clear = () => {
+        // setIsFilterActive(false);
+        setSearchText("");
+        setShowTable(false);
+        // fetchData(page, perPage, debouncedSearch);
+        setFormData({
+            partcode: "",
+            componentUsage: "",
+            ponumber: "",
+            startDate: "",
+            endDate: "",
+            download: null,
+
+        })
+    };
+
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
+
+    const debouncedSearch = useDebounce(searchText, 500);
+    const userId = localStorage.getItem("userId");
+
+     useEffect(() => {
+            if (showTable) {
+                fetchData(page, perPage, debouncedSearch);
+            }
+        }, [page, perPage, debouncedSearch]);
+    
+    
+        const fetchData = (page = 1, size = 10, search = "") => {
+    
+            fetchFilterResult(search);   // ONLY search
+    
+        };
+ 
+
+        const valiDate = () => {
+    const errors = {};
+    let isValid = true;
+
+    // Individual start/end date checks
+    if (formData.startDate && !formData.endDate) {
+        errors.endDate = "Please select End Date";
+        isValid = false;
+    }
+    if (!formData.startDate && formData.endDate) {
+        errors.startDate = "Please select Start Date";
+        isValid = false;
+    }
+
+    // Either start+end OR download must exist
+    if ((!formData.startDate || !formData.endDate) && !formData.download) {
+        // Only show popup if not already invalid
+        if (isValid) {
+            setErrorMessage("Select Start & End Date OR Download");
+            setShowErrorPopup(true);
+        }
+        isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+};
+
+
 
     const handleFilter = (e) => {
+        // if(formData.startDate==="" || formData.endDate==""){
+        //     please select startdate and 
+        // }
         e.preventDefault();
         // if (!valiDate()) return;
-    const isValid = valiDate();
-    if (!isValid) return; // stop if invalid
+
         if (!hasAnyFilter() && !searchText?.trim()) {
             setErrorMessage("Please select or enter at least one filter");
             setShowErrorPopup(true);
@@ -154,40 +188,21 @@ const valiDate = () => {
     };
 
     const fetchFilterResult = (search = "") => {
+        setLoading(true);
+        const payload = {
+            ...formData,
+            search: search?.trim() || null
+        };
 
-        // const payload = {
-        //     ...formData,
-        //     search: search?.trim() || null
-        // };
-        setLoading(true)
-    const payload = {
-        ...formData,
-        // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
-        search: search?.trim() || null
-    };
-
-        getIssuanceReportDetailFilter(page - 1, perPage, payload)
+        getStockReportOverViewFilter(page - 1, perPage, payload)
             .then(res => {
-                setRecevingReportDetail(res.data.content || []);
+                setStockReportDetail(res.data.content || []);
                 setTotalRows(res.data.totalElements || 0);
             })
             .finally(() => setLoading(false));
     };
-  const Clear = () => {
-        // setIsFilterActive(false);
-        setSearchText("");
-        setShowTable(false);
-        // fetchData(page, perPage, debouncedSearch);
-        setFormData({
-            partcode: "",
-            componentUsage: "",
-            issuanceType: "",
-            startDate: "",
-            endDate: "",
-            download: null,
 
-        })
-    };
+
 
     const exportToExcel = (search = "") => {
             setDownloadDone(false);
@@ -199,7 +214,7 @@ const valiDate = () => {
                 ...formData,
                 search: search?.trim() || null
             };
-            apiCall = () => downloadIssuanceReportFilter(payload);
+            apiCall = () => downloadStockOverviewReportFilter(payload);
     
             apiCall(search, {
                 responseType: 'blob',
@@ -212,7 +227,7 @@ const valiDate = () => {
                     const url = window.URL.createObjectURL(new Blob([response.data]));
                     const link = document.createElement("a");
                     link.href = url;
-                    link.setAttribute("download", "IssuanceReport.xlsx");
+                    link.setAttribute("download", "StockOverviewReport.xlsx");
                     document.body.appendChild(link);
                     link.click();
                     link.remove();
@@ -231,19 +246,20 @@ const valiDate = () => {
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Issuance Report</p>
+                    <p>Stock Overview Report</p>
                 </div>
-                <IssuanceReportTextFiled
+                <StockReportOverviewTextfiled
                     partcodeList={partcodeList}
                     formData={formData}
                     setFormData={setFormData}
-                    componentUsageList={componentUsageList}
                     handleInputChange={handleInputChange}
                     formErrors={formErrors}
                     handlePoChange={handlePoChange}
+                    ponumberList={ponumberList}
+                    locationList={locationList}
                 />
                 <div className="ReworkerButton9">
-                    <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
+                    <button className='ComCssSubmitButton' onClick={handleFilter} >Search</button>
                     <button className='ComCssClearButton' onClick={Clear}>Clear</button>
                 </div>
             </div>
@@ -279,8 +295,8 @@ const valiDate = () => {
                     </div>
                     <>
                         <LoadingOverlay loading={loading} />
-                        <IssuanceReportTable
-                            data={recevingReportDetail}
+                        <StockOverviewTable
+                            data={stockReportDetail}
                             page={page}
                             perPage={perPage}
                             totalRows={totalRows}
@@ -294,17 +310,8 @@ const valiDate = () => {
                 </div>
 
             }
- <CustomDialog
-                open={showErrorPopup}
-                onClose={() => setShowErrorPopup(false)}
-                title="Error"
-                message={errorMessage}
-                severity="error"
-                color="secondary"
-            />
-
         </div>
     )
 }
 
-export default IssuanceReport
+export default StockTransferOverview

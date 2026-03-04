@@ -154,6 +154,9 @@ export const getPartcode = () => axios.get(Get_RcPartcode);
 const Get_Product = `${url}/Bom/getProduct`;
 export const getProduct = () => axios.get(Get_Product);
 
+const Get_PartProduct = `${url}/issuanceTAT/getPartAndProduct`;
+export const getProductAndPartcode = () => axios.get(Get_PartProduct);
+
 const save_Bom = `${url}/Bom/SaveBom`
 export const saveBomMaster = (formData) => axios.post(save_Bom, formData);
 

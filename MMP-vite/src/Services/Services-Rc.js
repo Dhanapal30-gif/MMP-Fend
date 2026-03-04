@@ -166,9 +166,9 @@ export const fetchOpenReportFDetail = (userId) => {
 
 
 const fetchTransferPartcodeList = `${url}/StockTransferCon/fetchTransferPartcode`;
-export const fetchTransferPartcode = (orderType) =>
+export const fetchTransferPartcode = (fromLocation,orderType) =>
   axios.get(fetchTransferPartcodeList, {
-    params: { orderType },
+    params: { fromLocation, orderType },
   });
 
 const saveStockTransferList = `${url}/StockTransferCon/saveStockTransfer`
@@ -417,3 +417,7 @@ const cancelReworker = `${url}/repaierCon/cancelReworkerBoard`;
 export const cancelReworkerBoard = (payload) => {
   return axios.post(cancelReworker, payload);
 };
+
+
+const savePutStockTransfer = `${url}/StockTransferCon/saveStockTransferProcess`
+export const savePutawayStockTransferR = (formData) => axios.post(savePutStockTransfer, formData);

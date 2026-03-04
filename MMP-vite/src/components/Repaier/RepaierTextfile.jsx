@@ -140,7 +140,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
 
                 />
 <ComTextFiled
-                    label="Component Location"
+                    label="Schematic Location"
                     name="repairelocation"
                     value={formData.repairelocation}
                     onChange={handleChange}

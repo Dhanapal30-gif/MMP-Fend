@@ -62,9 +62,23 @@ const IssuanceShowTable = ({
 // });
 
 
+// row.batches.forEach(batch => {
+//   const key = batch.location + "_" + batch.batchCode; // same as TextField key
+//   const savedBatch = row.batchesQty?.find(bq => bq.location === key);
+//   init[key] = savedBatch ? savedBatch.savedQty : "";
+//   initComments[key] = savedBatch ? savedBatch.issued_comments : "";
+//   initNSN[key] = savedBatch ? savedBatch.nsn : "";
+// });
+
 row.batches.forEach(batch => {
-  const key = batch.location + "_" + batch.batchCode; // same as TextField key
-  const savedBatch = row.batchesQty?.find(bq => bq.location === key);
+  const key = batch.location + "_" + batch.batchCode;
+
+  const savedBatch = row.batchesQty?.find(
+    bq =>
+      bq.location === batch.location &&
+      bq.batchCode === batch.batchCode
+  );
+
   init[key] = savedBatch ? savedBatch.savedQty : "";
   initComments[key] = savedBatch ? savedBatch.issued_comments : "";
   initNSN[key] = savedBatch ? savedBatch.nsn : "";
@@ -100,18 +114,37 @@ row.batches.forEach(batch => {
 
 
     // Prepare payload
-    const payload = Object.keys(locationQty).map(loc => ({
-      location: loc,
-      issueqty: Number(locationQty[loc] || 0),
-      batchcode: activeRow?.batches?.find(b => b.location === loc)?.batchCode || "",
+    // const payload = Object.keys(locationQty).map(loc => ({
+    //   location: loc,
+    //   issueqty: Number(locationQty[loc] || 0),
+    //   batchcode: activeRow?.batches?.find(b => b.location === loc)?.batchCode || "",
+    //   partcode: activeRow?.partcode || "",
+    //   issued_comments: formData.Comments,
+    //   nsn: formData.newSerialNumber,
+    //   rtn: activeRow?.rec_ticket_no || "", // <-- added here
+    //   createdby: sessionStorage.getItem("userId") || "System",
+    //   updatedby: sessionStorage.getItem("userId") || "System"
+
+    // }));
+
+    // Prepare payload (FIXED)
+const payload = Object.keys(locationQty)
+  .filter(key => Number(locationQty[key]) > 0) // send only qty > 0
+  .map(key => {
+    const [location, batchcode] = key.split("_"); // split correctly
+
+    return {
+      location: location,                 // only location
+      batchcode: batchcode,               // only batchcode
+      issueqty: Number(locationQty[key]),
       partcode: activeRow?.partcode || "",
       issued_comments: formData.Comments,
       nsn: formData.newSerialNumber,
-      rtn: activeRow?.rec_ticket_no || "", // <-- added here
+      rtn: activeRow?.rec_ticket_no || "",
       createdby: sessionStorage.getItem("userId") || "System",
       updatedby: sessionStorage.getItem("userId") || "System"
-
-    }));
+    };
+  });
 
     console.log("Payload to send:", payload);
     setLoading(true); // start loader

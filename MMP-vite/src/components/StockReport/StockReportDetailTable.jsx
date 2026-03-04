@@ -2,7 +2,6 @@ import React from 'react';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns'; // make sure this import is correct
 
-
 const formatDateArray = (arr) => {
     if (!arr || !Array.isArray(arr)) return "";
 
@@ -13,61 +12,41 @@ const formatDateArray = (arr) => {
     return `${year}-${pad(month)}-${pad(day)}`;
 };
 
-
-
 const fields = [
-    "rec_ticket_no",
-    "pono",
     "partcode",
     "partdescription",
-    "uom",
-    "tyc",
-    "rcbatchcode",
-    "racklocation",
-    "vendorname",
-    "invoiceno",
-    "postingdate",
-    "podate",
-    "exp_date",
-    "unitprice",
-    "totalvalueeuro",
-    "orderqty",
-    "rec_qty",
-    "openorderqty",
-    "grno",
-    "grdate",
-    "receivingdate",
+    "ticketNo",
+    "transationDate",
+    "fromLocation",
+    "transferLocation",
+    "batchcode",
+    "transfer_ReqQty",
+    "transferQty",
+    "unitvalue",
+    "totalvalue",
+
 
 ];
 
-const customConfig = {
 
-    rec_ticket_no: { label: "Receiving Ticket No" },
-    pono: { label: "PO Number" },
+const customConfig = {
     partcode: { label: "PartCode" },
     partdescription: { label: "Part Description" },
-    uom: { label: "UOM" },
-    tyc: { label: "TYC" },
-    rcbatchcode: { label: "Batch Code" },
-    racklocation: { label: "Rack Location" },
-    vendorname: { label: "Vendor Name" },
-    invoiceno: { label: "Invoice No" },
-    postingdate: { label: "Posting Date" },
-    podate: { label: "PO Date" },
-    exp_date: { label: "Exp Date" },
-    totalvalueeuro: { label: "Totalvalue Euro" },
-    openorderqty: { label: "Open Order Qty" },
-    rec_qty: { label: "Received Qty" },
-    orderqty: { label: "Order Qty" },
-    unitprice: { label: "Unit Price" },
-    grno: { label: "GR No" },
-    grdate: { label: "GR Date" },
-    receivingdate: { label: "Receiving Date" },
+    ticketNo: { label: "Ticket No" },
+    transationDate: { label: "Transaction Date" },
+    fromLocation: { label: "From Location" },
+    transferLocation: { label: "Transfer Location" },
+    batchcode: { label: "Batch Code" },
+    transfer_ReqQty: { label: "Transfer Req Qty" },
+    transferQty: { label: "Transfer Qty" },
+    unitvalue: { label: "Unit Value" },
+    totalvalue: { label: "Total Value" },
 
+    
 
 }
 
-const RecevingReportTable = ({
+export const StockReportDetailTable = ({
     data = [],
     page,
     perPage,
@@ -80,15 +59,13 @@ const RecevingReportTable = ({
     const processedData = React.useMemo(() => {
         return data.map((item) => ({
             ...item,
-            postingdate: formatDateArray(item.postingdate),
+            transationDate: formatDateArray(item.transationDate),
             podate: formatDateArray(item.podate),
             exp_date: formatDateArray(item.exp_date),
             grdate: formatDateArray(item.grdate),
             receivingdate: formatDateArray(item.receivingdate),
         }));
     }, [data]);
-
-
 
     const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
 
@@ -106,4 +83,6 @@ const RecevingReportTable = ({
     )
 }
 
-export default RecevingReportTable
+
+
+export default StockReportDetailTable

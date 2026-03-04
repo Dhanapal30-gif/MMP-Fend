@@ -23,7 +23,8 @@ const Issuance = () => {
         deliverTicket: "",
         Comments: "",
         issueTicket: "",
-        newSerialNumber: ""
+        newSerialNumber: "",
+        receiverName:""
     });
 
 
@@ -409,6 +410,7 @@ const Issuance = () => {
                     setHideDeliverButton(false);
                     setHidePutButton(false);
                     setHideIssueButton(true);
+                        setLoading(false);
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
@@ -423,7 +425,7 @@ const Issuance = () => {
                     setHideDeliverButton(false);
                     setHidePutButton(false);
                     setHideIssueButton(true);
-
+ setLoading(false);
                     const ticketNoSubmitted = submitData[0].recTicketNo;
 
                     setFormData(prev => ({ ...prev, issueTicket: ticketNoSubmitted }));
@@ -536,7 +538,8 @@ const Issuance = () => {
             const submitDataWithExtras = submitData.map(item => ({
                 ...item,
                 nsn: formData.newSerialNumber,
-                issued_comments: formData.Comments
+                issued_comments: formData.Comments,
+                // receiverName:formData.receiverName
             }));
             saveIssue(submitDataWithExtras)
                 .then((response) => {
@@ -552,6 +555,7 @@ const Issuance = () => {
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
+                 setLoading(false);
                 }).finally(() => {
                     setLoading(false); // <-- fixed .finally usage
                 });

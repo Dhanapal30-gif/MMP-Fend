@@ -10,10 +10,11 @@ import CustomDialog from "../../components/Com_Component/CustomDialog";
 import { commonHandleAction, handleSuccessCommon, handleErrorCommon } from "../../components/Com_Component/commonHandleAction ";
 import { fetchPutawayTicket, fetchPutawayCloseDetail, fetchPutawayPendingDetail, fetchPutawayPartiallyDetail, fetchPutawayAllDetail, PutawayProcessDetail, download, PutawayReturningProcessDetail, fetchPutawayAllDetailSearch } from '../../components/Putaway/PutawayActions.js';
 import { FaFileExcel, FaBars } from "react-icons/fa";
-import { deletePutawayTicket, fetchpickTicketDetails, fetchTransferTicket, fetchTransferTicketDetail, putawayProcess, saveLEDRequest, savePutawayRequest, savePutawayRetRequest, savePutawayStockTransferRequest } from '../../Services/Services-Rc.js';
+import { deletePutawayTicket, fetchpickTicketDetails, fetchTransferTicket, fetchTransferTicketDetail, putawayProcess, saveLEDRequest, savePutawayRequest, savePutawayRetRequest, savePutawayStockTransferR, savePutawayStockTransferRequest } from '../../Services/Services-Rc.js';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { Snackbar, Alert } from "@mui/material";
 import { checkUserValid } from '../../components/Com_Component/userUtils';
+import { fetchStockLocationList } from '../../Services/Services_09.js';
 
 const Putaway = () => {
     const [formData, setFormData] = useState({
@@ -59,6 +60,7 @@ const Putaway = () => {
     const [rackLocationList, setRackLocationList] = useState([]);
     const [donloadClosed, setDonwloadCosed] = useState(false)
     const [putButtonHide, setPutButtonHide] = useState(false)
+    const [locationList, setLocationList] = useState([]);
 
     const handleGRNQtyChange = (rowId, field, value) => {
         setPutawayProcessDetail(prev =>
@@ -68,6 +70,13 @@ const Putaway = () => {
         );
     };
 
+    const handleStockQtyChange = (rowId, field, value) => {
+        setPutawayRc_DHL(prev =>
+            prev.map(row =>
+                row.selectedId === rowId ? { ...row, [field]: value } : row
+            )
+        );
+    };
     const handlePutawayChange = (field, value) => {
         setFormData((prev) => ({
             ...prev,
@@ -114,7 +123,20 @@ const Putaway = () => {
     useEffect(() => {
         setLoading(true)
         fetchPutawayTicket(setPutawayTicket);
+        fetchTranseferLocation();
     }, []);
+
+
+    const fetchTranseferLocation = () => {
+        fetchStockLocationList()
+            .then((response) => {
+
+                setLocationList(response.data.transferLocationList);   // ✅ correct
+
+
+            })
+            .catch((error) => { });
+    };
 
     const fetchPutawayPending = () => {
         setPage(0); // reset to first page
@@ -347,93 +369,156 @@ const Putaway = () => {
         }
     };
 
-    // const fetchStockTransferProcess = async (ticketNo,transferType) => {
-    //     console.log("Fetching", formData.transferType)
-    //         let response;
+//     const fetchStockTransferProcess = async (ticketNo, transferType) => {
+//         console.log("FetchingtransferType", formData.transferType)
+//         let response;
 
-    //     try {
-    //         // const response = await fetchTransferTicketDetail(ticketNo); // API call
-    //         if (formData?.transferType === "RC-DHL") {
-    //       let rec_ticket_no= ticketNo
-    //         response = await fetchpickTicketDetails(rec_ticket_no);
-    //         //  setIsRC_DHLProcess(true);
-    //         // setIsPutProcess(false); // ensure other flag is false
-    //     } else {
-    //         response = await fetchTransferTicketDetail(ticketNo);
-    //         //  setIsRC_DHLProcess(false);
-    //         // setIsPutProcess(true); // ensure other flag is false
-    //     }
-    //         // Get transferDetails safely
-    //         const data = Array.isArray(response?.transferDetails)
-    //             ? response.transferDetails
-    //             : Array.isArray(response?.data?.transferDetails)
-    //                 ? response.data.transferDetails
-    //                 : [];
-    //         // console.log("Fetched transferDetails:", data);
 
-    //         if (data.length === 0) {
-    //             setPutawayProcessDetail([]);
-    //             setTotalRows(0);
-    //             // console.log("No data available");
-    //             return;
-    //         }
+//         try {
+//  let rec_ticket_no = ticketNo
+//             // const response = await fetchTransferTicketDetail(ticketNo); // API call
+//             if (formData?.transferType === "Internal Transfer") {
 
-    //         // Add IDs and flags
-    //         const withIds = data.map((item, index) => ({
-    //             ...item,
-    //             selectedid: item.selectedid ?? item.id ?? index,
-    //             setHiddenPutButton: !!item.user,
-    //         }));
-    //         // Log all Partcodes separately
-    //         const location = Array.isArray(response?.rackLocationList)
-    //             ? response.rackLocationList
-    //             : Array.isArray(response?.data?.rackLocationList)
-    //                 ? response.data.rackLocationList
-    //                 : [];
-    //         // console.log("All Partcodes:", location);
+               
+//                 response = await fetchTransferTicketDetail(ticketNo);
+             
+//             } else {
+//                 response = await fetchpickTicketDetails(rec_ticket_no);
+//             }
 
-    //         // Update states
-    //         setPutawayProcessDetail(withIds);
-    //         setTotalRows(withIds.length);
-    //         setRackLocationList(location)
-    //         // Process flags
-    //         setIsPutProcess(true);
-    //         setRecevingPutProcess(false);
-    //         setReturningPutProcess(false);
+//             //     // const response = await fetchTransferTicketDetail(ticketNo); // API call
+//             //     if (formData?.transferType === "RC-DHL") {
+//             //   let rec_ticket_no= ticketNo
+//             //     response = await fetchpickTicketDetails(rec_ticket_no);
+//             //     //  setIsRC_DHLProcess(true);
+//             //     // setIsPutProcess(false); // ensure other flag is false
+//             // } else if(formData?.transferType == "Internal Transfer") {
+//             //     response = await fetchTransferTicketDetail(ticketNo);
+//             //     //  setIsRC_DHLProcess(false);
+//             //     // setIsPutProcess(true); // ensure other flag is false
+//             // }
+//             // Get transferDetails safely
+//             const data = Array.isArray(response?.transferDetails)
+//                 ? response.transferDetails
+//                 : Array.isArray(response?.data?.transferDetails)
+//                     ? response.data.transferDetails
+//                     : [];
+//             // console.log("Fetched transferDetails:", data);
 
-    //         // Handle active users for color coding
-    //         const users = withIds.map(i => i.user).filter(u => u != null && u !== "");
-    //         const uniqueUsers = [...new Set(users)];
-    //         let colour = null;
-    //         if (uniqueUsers.length > 0) {
-    //             switch (uniqueUsers[0]) {
-    //                 case 1: colour = "green"; break;
-    //                 case 2: colour = "blue"; break;
-    //                 case 3: colour = "red"; break;
-    //                 case 4: colour = "yellow"; break;
-    //                 default: colour = "green";
-    //             }
-    //             setIsUserActive(true);
-    //         } else {
-    //             setIsUserActive(false);
-    //         }
-    //         setColourCode(colour);
+//             if (data.length === 0) {
+//                 setPutawayProcessDetail([]);
+//                 setTotalRows(0);
+//                 // console.log("No data available");
+//                 return;
+//             }
 
-    //     } catch (err) {
-    //         // console.error("Error fetching stock transfer detail:", err);
-    //         setPutawayProcessDetail([]);
-    //         setTotalRows(0);
-    //     }
-    // };
+//             // Add IDs and flags
+//             const withIds = data.map((item, index) => ({
+//                 ...item,
+//                 selectedid: item.selectedid ?? item.id ?? index,
+//                 setHiddenPutButton: !!item.user,
+//             }));
+//             // Log all Partcodes separately
+//             const location = Array.isArray(response?.rackLocationList)
+//                 ? response.rackLocationList
+//                 : Array.isArray(response?.data?.rackLocationList)
+//                     ? response.data.rackLocationList
+//                     : [];
+//             // console.log("All Partcodes:", location);
+
+//             // Update states
+//             setPutawayProcessDetail(withIds);
+//             setTotalRows(withIds.length);
+//             setRackLocationList(location)
+//             // Process flags
+//             setIsPutProcess(true);
+//             setRecevingPutProcess(false);
+//             setReturningPutProcess(false);
+
+//             // Handle active users for color coding
+//             const users = withIds.map(i => i.user).filter(u => u != null && u !== "");
+//             const uniqueUsers = [...new Set(users)];
+//             let colour = null;
+//             if (uniqueUsers.length > 0) {
+//                 switch (uniqueUsers[0]) {
+//                     case 1: colour = "green"; break;
+//                     case 2: colour = "blue"; break;
+//                     case 3: colour = "red"; break;
+//                     case 4: colour = "yellow"; break;
+//                     default: colour = "green";
+//                 }
+//                 setIsUserActive(true);
+//             } else {
+//                 setIsUserActive(false);
+//             }
+//             setColourCode(colour);
+
+//         } catch (err) {
+//             // console.error("Error fetching stock transfer detail:", err);
+//             setPutawayProcessDetail([]);
+//             setTotalRows(0);
+//         }
+//     };
 
     const fetchStockTransferProcess = async (ticketNo) => {
-        // console.log("Fetching", formData.transferType)
+        console.log("Fetching", formData.transferType)
 
         setLoading(true)
         let response;
         try {
-            if (formData?.transferType === "RC-DHL") {
+            if (formData?.transferType === "Internal Transfer") {
+               
+                 let rec_ticket_no = ticketNo
+                response = await fetchTransferTicketDetail(rec_ticket_no);
+                const data = Array.isArray(response?.transferDetails)
+                    ? response.transferDetails
+                    : Array.isArray(response?.data?.transferDetails)
+                        ? response.data.transferDetails
+                        : [];
+                if (data.length === 0) {
+                    setPutawayProcessDetail([]);
+                    setTotalRows(0);
+                    return;
+                }
+                // Add IDs and flags
+                const withIds = data.map((item, index) => ({
+                    ...item,
+                    selectedid: item.selectedid ?? item.id ?? index,
+                    setHiddenPutButton: !!item.user,
+                }));
+                const location = Array.isArray(response?.rackLocationList)
+                    ? response.rackLocationList
+                    : Array.isArray(response?.data?.rackLocationList)
+                        ? response.data.rackLocationList
+                        : [];
+                setPutawayProcessDetail(withIds);
+                setTotalRows(withIds.length);
+                setRackLocationList(location)
                 setIsPutProcess(true);
+                setRecevingPutProcess(false);
+                setReturningPutProcess(false);
+                setRc_DHLProcess(false);
+                // Handle active users for color coding
+                const users = withIds.map(i => i.user).filter(u => u != null && u !== "");
+                const uniqueUsers = [...new Set(users)];
+                let colour = null;
+                if (uniqueUsers.length > 0) {
+                    switch (uniqueUsers[0]) {
+                        case 0: colour = null; break; // or any default for 0
+                        case 1: colour = "green"; break;
+                        case 2: colour = "red"; break;
+                        case 3: colour = "blue"; break;
+                        case 4: colour = "yellow"; break;
+                        default: colour = "green";
+                    }
+                    setIsUserActive(true);
+                } else {
+                    setIsUserActive(false);
+                }
+                setColourCode(colour);
+
+            } else {
+                 setIsPutProcess(true);
                 let rec_ticket_no = ticketNo
                 response = await fetchpickTicketDetails(rec_ticket_no);
 
@@ -480,54 +565,7 @@ const Putaway = () => {
                     setIsUserActive(false);
                 }
                 setColourCode(colour);
-
-            } else {
-                response = await fetchTransferTicketDetail(ticketNo);
-                const data = Array.isArray(response?.transferDetails)
-                    ? response.transferDetails
-                    : Array.isArray(response?.data?.transferDetails)
-                        ? response.data.transferDetails
-                        : [];
-                if (data.length === 0) {
-                    setPutawayProcessDetail([]);
-                    setTotalRows(0);
-                    return;
-                }
-                // Add IDs and flags
-                const withIds = data.map((item, index) => ({
-                    ...item,
-                    selectedid: item.selectedid ?? item.id ?? index,
-                    setHiddenPutButton: !!item.user,
-                }));
-                const location = Array.isArray(response?.rackLocationList)
-                    ? response.rackLocationList
-                    : Array.isArray(response?.data?.rackLocationList)
-                        ? response.data.rackLocationList
-                        : [];
-                setPutawayProcessDetail(withIds);
-                setTotalRows(withIds.length);
-                setRackLocationList(location)
-                setIsPutProcess(true);
-                setRecevingPutProcess(false);
-                setReturningPutProcess(false);
-                // Handle active users for color coding
-                const users = withIds.map(i => i.user).filter(u => u != null && u !== "");
-                const uniqueUsers = [...new Set(users)];
-                let colour = null;
-                if (uniqueUsers.length > 0) {
-                    switch (uniqueUsers[0]) {
-                        case 0: colour = null; break; // or any default for 0
-                        case 1: colour = "green"; break;
-                        case 2: colour = "red"; break;
-                        case 3: colour = "blue"; break;
-                        case 4: colour = "yellow"; break;
-                        default: colour = "green";
-                    }
-                    setIsUserActive(true);
-                } else {
-                    setIsUserActive(false);
-                }
-                setColourCode(colour);
+                
             }
         }
         // Get transferDetails safely
@@ -538,8 +576,8 @@ const Putaway = () => {
             setLoading(false)
         }
     };
-    // console.log("setIsPutProcess", isPutProcess)
-    // console.log("setrc_DHLProcess", putawayRc_DHL)
+    console.log("setIsPutProcess", isPutProcess)
+    console.log("setrc_DHLProcess", putawayRc_DHL)
 
     useEffect(() => {
         if (formData?.RecevingTicketNo) {
@@ -716,7 +754,7 @@ const Putaway = () => {
             return;
         }
         // const username = sessionStorage.getItem("userName") || "System";
-         const username = localStorage.getItem("userName") || "System";
+        const username = localStorage.getItem("userName") || "System";
         const selectedKeys = new Set(selectedRows1);
         const filteredData = putawayProcessDetail.filter((row) => selectedKeys.has(row.selectedid));
         const submitData = [];
@@ -776,8 +814,101 @@ const Putaway = () => {
     };
 
     const handleStockSubmit = (e) => {
-        setErrorMessage("Under developement");
-        setShowErrorPopup(true);
+
+        e.preventDefault();
+        if (selectedRows1.length === 0) {
+            setErrorMessage("Please select at least one row");
+            setShowErrorPopup(true);
+            return;
+        }
+        // setPutawayRc_DHL
+        // const username = sessionStorage.getItem("userName") || "System";
+        const username = localStorage.getItem("userName") || "System";
+        const selectedKeys = new Set(selectedRows1);
+        const filteredData = putawayRc_DHL.filter((row) => selectedKeys.has(row.selectedId));
+
+        let submitData = [];
+        // let hasQty = false; // <- flag to check if any qty > 0
+
+        // Only selected rows
+        const selectedRowsData = putawayRc_DHL.filter(row =>
+            selectedKeys.has(row.selectedId)
+        );
+
+        // New final payload with savedRows (dialogRows)
+        const finalPayload = selectedRowsData.map(row => ({
+            ...row,
+            putawayDetails: savedRows[row.selectedId] || [] // Only saved split-level data
+        }));
+        // Check that all selected rows have at least one qty > 0
+        const allRowsHaveQty = filteredData.every((row) => {
+            const putQtyDetails = row.putQtyDetails || {};
+            return Object.values(putQtyDetails).some(qty => Number(qty || 0) > 0);
+        });
+
+        if (!allRowsHaveQty) {
+            setErrorMessage("Please enter quantity for all selected rows!");
+            setShowErrorPopup(true);
+            return;
+        }
+        // console.log("submitData", submitData)
+
+        filteredData.forEach((row) => {
+            const putQtyDetails = row.putQtyDetails || {};
+
+            Object.keys(putQtyDetails).forEach((loc) => {
+
+                const qty = Number(putQtyDetails[loc] || 0);
+
+                if (qty > 0) {
+
+                    const batch = row.batches?.find(b => b.location === loc); // ✅ here
+
+                    submitData.push({
+                        location: loc,
+                        qty: qty,
+                        batchcode: batch?.batchCode,
+                        partcode: row.partcode,
+                        recevingTicketNo: row.rec_ticket_no,
+                        createdby: username,
+                        updatedby: username,
+                        fromLocation: row.fromLocation,
+                        transferLocation: row.transeferLocation,
+                    });
+                }
+            });
+        });
+        const recevingTicketNo = filteredData[0]?.rec_ticket_no || formData.RecevingTicketNo;
+
+        const payload = {
+            recevingTicketNo: recevingTicketNo,     // 👈 separate param
+            transferList: submitData                       // 👈 only list data
+        };
+        //  savePutawayStockTransferR(payload);
+        const apiCall = savePutawayStockTransferR(payload);
+
+        apiCall
+            .then((response) => {
+                handleSuccessCommon({
+                    response,
+                    setSuccessMessage,
+                    setShowSuccessPopup,
+                });
+                setIsPutProcess(false);
+                setFormData({ RecevingTicketNo: "" });
+                fetchPutawayTicket(setPutawayTicket);
+                setSelectedRows1([]);
+                setRc_DHLProcess(false);
+            })
+            .catch((error) => {
+                handleErrorCommon({
+                    error,
+                    setErrorMessage,
+                    setShowErrorPopup,
+                });
+            });
+        // setErrorMessage("Under developement");
+        //  setShowErrorPopup(true);
     }
     /////////////////////
     // const handleSubmit = (e) => {
@@ -1067,6 +1198,7 @@ const Putaway = () => {
                     poDropdownOptions={putawayTicket.ReceivingTicket_No}
                     returningOptions={putawayTicket.ReturningTicket_No}
                     transferTicketNoList={transferTicketNoList}
+                    locationList={locationList}
                 />
             </div>
             {isPutProcess && (
@@ -1166,7 +1298,7 @@ const Putaway = () => {
                             formErrors={formErrors}
                             setSelectedRows1={setSelectedRows1}
                             setFormPutPrecssData={setFormPutPrecssData}
-                            handleGRNQtyChange={handleGRNQtyChange}
+                            handleStockQtyChange={handleStockQtyChange}
                             rackLocationList={rackLocationList}
                             setErrorMessage={setErrorMessage}
                             setSuccessMessage={setSuccessMessage}

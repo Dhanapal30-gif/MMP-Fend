@@ -136,7 +136,7 @@ const StockReport = () => {
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Stock Report</p>
+                    <p>Stock Detailed Report</p>
                 </div>
 
                 <div className="ReworkerButton9">

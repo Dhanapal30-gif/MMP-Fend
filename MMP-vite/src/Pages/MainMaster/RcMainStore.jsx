@@ -601,7 +601,7 @@ const RcMainStore = () => {
     // });
 
     const errors = [];
-    const allowedValues = ["Sub Module", "Othres", "Thermal Gel", "PTL"];
+    const allowedValues = ["Sub Module", "Others", "Thermal Gel", "PTL"];
 
     if (excelUploadData.length > 1000) {
       errors.push("Cannot upload more than 1000 rows at once.");
@@ -610,6 +610,7 @@ const RcMainStore = () => {
       // if (!row.partcode || row.partcode.trim() === "") {
       //   errors.push(`Row ${index + 1}: PartCode is required`);
       // }
+      // console.log("row.ComponentUsage",row.ComponentUsage)
       if (
         row.partcode === null ||
         row.partcode === undefined ||
@@ -981,8 +982,8 @@ const RcMainStore = () => {
         </div>
         <div className='ComCssUpload'>
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
-          < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
-          <button onClick={handleDownloadExcel}> Excel Download </button>
+          {/* < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button> */}
+          {/* <button onClick={handleDownloadExcel}> Excel Download </button> */}
         </div>
         <div className='RcStoreTexfiled'>
           <ThemeProvider theme={TextFiledTheme}>

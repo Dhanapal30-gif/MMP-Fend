@@ -6,7 +6,9 @@ import { InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Autocomplete, TextField } from "@mui/material";
 
-const IssuanceReportTextFiled = ({
+
+
+const MaterialMovementTextFiled = ({
     formData,
     setFormData,
     partcodeList,
@@ -16,7 +18,6 @@ const IssuanceReportTextFiled = ({
     handlePoChange,
     ponumberList
 }) => {
-
     const getDateRange = (label) => {
         const endDate = new Date();
         const startDate = new Date();
@@ -46,6 +47,8 @@ const IssuanceReportTextFiled = ({
         };
     };
 
+
+
     const download = [
         "Last 1 Month",
         "Last 3 Month",
@@ -56,61 +59,38 @@ const IssuanceReportTextFiled = ({
         label,
         value: getDateRange(label)
     }));
-     const getDownloadValue = () => {
+
+    const getDownloadValue = () => {
         if (!formData.download || typeof formData.download !== "object") return null;
 
         return download.find((opt) =>
             JSON.stringify(opt.value) === JSON.stringify(formData.download)
         ) || null;
     };
-    const issuanceOptions = [
-    { issuanceType: "DTL" },
-    { issuanceType: "PTL" }
-];
 
-  return (
-    <div className="ComCssTexfiled">
-        <ThemeProvider theme={TextFiledTheme}>
-            {/* <Autocomplete
-    options={issuanceOptions}
-    getOptionLabel={(option) => option.issuanceType || ""}
-    value={issuanceOptions.find(p => p.issuanceType === formData.issuanceType) || null}
-    onChange={(e, newValue) => {
-        setFormData(prev => ({
-            ...prev,
-            issuanceType: newValue?.issuanceType || ""
-        }));
-    }}
-    renderInput={(params) => (
-        <TextField {...params} 
-         error={Boolean(formErrors?.issuanceType)}
-                    helperText={formErrors?.issuanceType || ""}
-                    label="Issuance Type" size="small" />
-    )}
-/> */}
+    const movementTypeOption = [
+        "Receive",
+        "Issuance",
+        "Returning",
+        "Stock Transfer"
+    ];
 
-              <Autocomplete
+
+    return (
+        <div className="ComCssTexfiled">
+            <ThemeProvider theme={TextFiledTheme}>
+                {/* <Autocomplete
                     options={partcodeList || []}
                     getOptionLabel={(option) => option.partcode || ""}
                     value={partcodeList.find(p => p.partcode === formData.partcode) || null}
-                    // onChange={(e, newValue) => {
-                    //     setFormData(prev => ({
-                    //         ...prev,
-                    //         partcode: newValue?.partcode || "",
-                    //         partdescription: newValue?.partdescription || "",
-                    //         // componentUsage: newValue?.componentUsage || ""
-                    //     }));
-                    // }}
                     onChange={(e, newValue) => {
-    setFormData(prev => ({
-        ...prev,
-        partcode: newValue?.partcode || "",
-        partdescription: newValue?.partdescription || "",
-        componentUsage: newValue?.componentUsage || "",
-       issuanceType: prev.issuanceType || ""
-    }));
-}}
-
+                        setFormData(prev => ({
+                            ...prev,
+                            partcode: newValue?.partcode || "",
+                            partdescription: newValue?.partdescription || "",
+                            // componentUsage: newValue?.componentUsage || ""
+                        }));
+                    }}
                     renderInput={(params) => (
                         <TextField {...params} label="Partcode" size="small" />
                     )}
@@ -120,21 +100,65 @@ const IssuanceReportTextFiled = ({
                     label="Part Description"
                     size="small"
                     value={formData.partdescription || ""}
+                /> */}
 
-                />
+                {/* <Autocomplete
+    multiple
+    options={partcodeList || []}
+    getOptionLabel={(option) => option.partcode || ""}
+    value={partcodeList.filter(p => 
+        formData.partcode?.includes(p.partcode)
+    )}
+    onChange={(e, newValue) => {
+        setFormData(prev => ({
+            ...prev,
+            partcode: newValue.map(item => item.partcode) // array of partcodes
+        }));
+    }}
+    renderInput={(params) => (
+        <TextField {...params} label="Partcode" size="small" />
+    )}
+/> */}
+
+<Autocomplete
+    options={partcodeList || []}
+    getOptionLabel={(option) => option.partcode || ""}
+    value={
+        partcodeList.find(p => p.partcode === formData.partcode) || null
+    }
+    onChange={(e, newValue) => {
+        setFormData(prev => ({
+            ...prev,
+            partcode: newValue ? newValue.partcode : null
+        }));
+    }}
+    renderInput={(params) => (
+        <TextField {...params} label="Partcode" size="small" />
+    )}
+/>
 
                 <Autocomplete
-                    options={componentUsageList || []}
-                    getOptionLabel={(option) => option || ""}
-                    value={formData.componentUsage || null}
-                    onChange={(e, val) =>
-                        setFormData(prev => ({ ...prev, componentUsage: val || "" }))
-                    }
-                    renderInput={(params) => (
-                        <TextField {...params} label="Component Usage" size="small" />
-                    )}
-                />
-                
+  options={movementTypeOption}
+  getOptionLabel={(option) => option}
+  value={
+    movementTypeOption.includes(formData.movementType)
+      ? formData.movementType
+      : null
+  }
+  onChange={(e, val) =>
+    handlePoChange("movementType", val || "")
+  }
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Movement Type"
+      size="small"
+        error={Boolean(formErrors?.movementType)}
+                    helperText={formErrors?.movementType || ""}
+    />
+  )}
+/>
+
 
                 <ComTextFiled
                     label="Start Date"
@@ -175,9 +199,9 @@ const IssuanceReportTextFiled = ({
                     renderInput={(params) => <TextField {...params} label="Download" size="small" />}
                 />
 
-        </ThemeProvider>
-         </div>
-  )
+            </ThemeProvider>
+        </div>
+    )
 }
 
-export default IssuanceReportTextFiled
+export default MaterialMovementTextFiled

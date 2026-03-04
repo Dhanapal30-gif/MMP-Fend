@@ -299,11 +299,36 @@ export const getRecevingReportDetailFilter = (page = 0, size = 10, formData) => 
   return axios.post(`${Get_RecevingReportDetailFilter}?page=${page}&size=${size}`, formData);
 };
 
+
+const Get_movementReportDetailFilter = `${url}/MaterialMovementReportCon/fetchMaterialMovementReportFilter`;
+export const getMovementReportDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_movementReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
+
+
+const Get_StockReportDetailFilter = `${url}/StockTransferCon/fetchStockTransferReportFilter`;
+export const getStockReportDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_StockReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
+
+
+const Get_StockReportOverviewFilter = `${url}/StockTransferCon/fetchStockTransferReportFilterOverview`;
+export const getStockReportOverViewFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_StockReportOverviewFilter}?page=${page}&size=${size}`, formData);
+};
+
+
 const Get_IssuanceReportDetailFilter = `${url}/RecevingReportCon/fetchIssuanceReportFilter`;
 export const getIssuanceReportDetailFilter = (page = 0, size = 10, formData) => {
   return axios.post(`${Get_IssuanceReportDetailFilter}?page=${page}&size=${size}`, formData);
 };
 
+
+
+const Get_IssuanceTATReportDetailFilter = `${url}/issuanceTAT/fetchIssuanceTATAverage`;
+export const getIssuanceTATReportDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_IssuanceTATReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
 
 const Get_PTLPutawayTicket = `${url}/localPutawayCon/fetchPTLStorePutawayTicket`;
 export const fetchPTLPutawayTicket = () => axios.get(Get_PTLPutawayTicket);
@@ -495,9 +520,43 @@ export const checkUserSession = (formData7) => axios.post(checkUserTocken, formD
 const get_PartocdeList = `${url}/RecevingReportCon/getPartcode`;
 export const fetchPartcodeReport = () => axios.get(get_PartocdeList);
 
+const get_StockLocationList = `${url}/StockTransferCon/getLocationType`;
+export const fetchStockLocationList = () => axios.get(get_StockLocationList);
+
 
 const Get_DownloadReceivingReportFilter = `${url}/RecevingReportCon/downloadLocalReportFilter-excel`;
 export const downloadReceivingReportFilter = (formData) =>
   axios.post(Get_DownloadReceivingReportFilter, formData, {
     responseType: "blob",
   });
+
+  const Get_DownloadMovementReportFilter = `${url}/MaterialMovementReportCon/downloadMovementReportFilter-excel`;
+export const downloadMovementReportFilter = (formData) =>
+  axios.post(Get_DownloadMovementReportFilter, formData, {
+    responseType: "blob",
+  });
+
+
+  
+const Get_DownloadIssaunceReportFilter = `${url}/RecevingReportCon/downloadIssuanceReportFilter-excel`;
+export const downloadIssuanceReportFilter = (formData) =>
+  axios.post(Get_DownloadIssaunceReportFilter, formData, {
+    responseType: "blob",
+  });
+
+    const Get_DownloadStockTransferReportFilter = `${url}/StockTransferCon/downloadStockTransferReportFilter-excel`;
+export const downloadStockTransferReportFilter = (formData) =>
+  axios.post(Get_DownloadStockTransferReportFilter, formData, {
+    responseType: "blob",
+  });
+
+
+
+  const Get_DownloadStockOverviewReportFilter = `${url}/StockTransferCon/downloadStockOverviewReportFilter-excel`;
+export const downloadStockOverviewReportFilter = (formData) =>
+  axios.post(Get_DownloadStockOverviewReportFilter, formData, {
+    responseType: "blob",
+  });
+
+  const get_TransferLocationList = `${url}/TransferLocation/getLocationlist`;
+export const fetchTransferLocation = () => axios.get(get_TransferLocationList);

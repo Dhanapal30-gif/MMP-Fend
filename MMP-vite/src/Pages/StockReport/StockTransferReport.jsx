@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-import IssuanceReportTextFiled from "../../components/IssuanceReport/IssuanceReportTextFiled";
-import IssuanceReportTable from "../../components/IssuanceReport/IssuanceReportTable";
+import StorckReportDetailTextFiled from "../../components/StockReport/StorckReportDetailTextFiled";
+import StockReportDetailTable from "../../components/StockReport/StockReportDetailTable";
 import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadIssuanceReportFilter, downloadReceivingReportFilter, fetchPartcodeReport, getIssuanceReportDetailFilter, getRecevingReportDetailFilter } from '../../Services/Services_09';
-import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchProduct_Partcode, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
+import { downloadStockTransferReportFilter, fetchPartcodeReport, fetchTransferLocation, getStockReportDetailFilter,  } from '../../Services/Services_09';
 
-const IssuanceReport = () => {
+const StockTransferReport = () => {
 
     const [partcodeList, setPartcodeList] = useState([]);
     const [componentUsageList, setComponentUsageList] = useState([]);
@@ -27,69 +26,61 @@ const IssuanceReport = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [downloadDone, setDownloadDone] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(null);
-    const [recevingReportDetail, setRecevingReportDetail] = useState([]);
-
+    const [stockReportDetail, setStockReportDetail] = useState([]);
+    const [locationList, setLocationList] = useState([]);
 
     const [formData, setFormData] = useState({
         partcode: "",
         componentUsage: "",
-        partcode: "",
+        ponumber: "",
         startDate: "",
         endDate: "",
         download: null,
-        issuanceType: ""
 
     });
 
     useEffect(() => {
         fetchPartcodeList();
-
+        fetchLocationMaster();
     }, []);
 
-    const fetchData = (page = 1, size = 10, search = "") => {
+ const handleChange = (field, value) => {
+    setFormData(prev => {
+        const updated = { ...prev, [field]: value };
 
-        fetchFilterResult(search);   // ONLY search
-
-    };
-
-    const useDebounce = (value, delay) => {
-        const [debouncedValue, setDebouncedValue] = useState(value);
-
-        useEffect(() => {
-            const handler = setTimeout(() => setDebouncedValue(value), delay);
-            return () => clearTimeout(handler);
-        }, [value, delay]);
-        return debouncedValue;
-    };
-
-    const debouncedSearch = useDebounce(searchText, 500);
-
-    useEffect(() => {
-        if (showTable) {
-            fetchData(page, perPage, debouncedSearch);
+        // Reset transferLocation if fromLocation is same
+        if (field === "fromLocation" && value === prev.transferLocation) {
+            updated.transferLocation = "";
         }
-    }, [page, perPage, debouncedSearch]);
+
+        return updated;
+    });
+};
+
+    const fetchLocationMaster = () => {
+        fetchTransferLocation()
+            .then((response) => {
+                const partList = response.data?.partList || []; // use response.data
+                const locationList = partList.map(item => ({
+                    label: item,
+                    value: item
+                }));
+                console.log("Location List for Dropdown:", locationList);
+                setLocationList(locationList);
+            })
+            .catch((error) => {
+                console.error("Error fetching location:", error);
+            });
+    };
 
     const fetchPartcodeList = () => {
         fetchPartcodeReport()
             .then((response) => {
 
                 setPartcodeList(response.data.partList);   // ✅ correct
-
-                const uniqueComponentUsage = [
-                    ...new Set(response.data.partList.map(item => item.componentUsage))
-                ];
-                const uniquePono = [
-                    ...new Set(response.data.poList.map(item => item.pono))
-                ];
-                setPonumberList(uniquePono);
-                setComponentUsageList(uniqueComponentUsage);
-
-                setPoList(response.data.poList); // if needed
             })
             .catch((error) => { });
     };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
@@ -112,22 +103,32 @@ const IssuanceReport = () => {
         }));
     };
 
+    const Clear = () => {
+        // setIsFilterActive(false);
+        setSearchText("");
+        setShowTable(false);
+        // fetchData(page, perPage, debouncedSearch);
+        setFormData({
+            partcode: "",
+            componentUsage: "",
+            ponumber: "",
+            startDate: "",
+            endDate: "",
+            download: null,
 
-const valiDate = () => {
-        const errors = {};
-        let isValid = true;
-
-        // if (!formData.issuanceType) {
-        //     errors.issuanceType = "Please Select Issuance Type";
-        //     isValid = false;
-        // }
-       
-
-        setFormErrors(errors);
-        return isValid;
+        })
     };
 
+    const useDebounce = (value, delay) => {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    };
 
+    const debouncedSearch = useDebounce(searchText, 500);
     const userId = localStorage.getItem("userId");
 
     const hasAnyFilter = () => {
@@ -136,12 +137,23 @@ const valiDate = () => {
         );
     };
 
-
+    
+        useEffect(() => {
+                if (showTable) {
+                    fetchData(page, perPage, debouncedSearch);
+                }
+            }, [page, perPage, debouncedSearch]);
+        
+        
+            const fetchData = (page = 1, size = 10, search = "") => {
+        
+                fetchFilterResult(search);   // ONLY search
+        
+            };
     const handleFilter = (e) => {
         e.preventDefault();
         // if (!valiDate()) return;
-    const isValid = valiDate();
-    if (!isValid) return; // stop if invalid
+
         if (!hasAnyFilter() && !searchText?.trim()) {
             setErrorMessage("Please select or enter at least one filter");
             setShowErrorPopup(true);
@@ -154,99 +166,85 @@ const valiDate = () => {
     };
 
     const fetchFilterResult = (search = "") => {
+        setLoading(true);
+        const payload = {
+            ...formData,
+            search: search?.trim() || null
+        };
 
-        // const payload = {
-        //     ...formData,
-        //     search: search?.trim() || null
-        // };
-        setLoading(true)
-    const payload = {
-        ...formData,
-        // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
-        search: search?.trim() || null
-    };
-
-        getIssuanceReportDetailFilter(page - 1, perPage, payload)
+        getStockReportDetailFilter(page - 1, perPage, payload)
             .then(res => {
-                setRecevingReportDetail(res.data.content || []);
+                setStockReportDetail(res.data.content || []);
                 setTotalRows(res.data.totalElements || 0);
             })
             .finally(() => setLoading(false));
     };
-  const Clear = () => {
-        // setIsFilterActive(false);
-        setSearchText("");
-        setShowTable(false);
-        // fetchData(page, perPage, debouncedSearch);
-        setFormData({
-            partcode: "",
-            componentUsage: "",
-            issuanceType: "",
-            startDate: "",
-            endDate: "",
-            download: null,
 
-        })
-    };
 
-    const exportToExcel = (search = "") => {
-            setDownloadDone(false);
-            setDownloadProgress(null);
-            setLoading(true);
-            let apiCall;
     
-            const payload = {
-                ...formData,
-                search: search?.trim() || null
-            };
-            apiCall = () => downloadIssuanceReportFilter(payload);
+     const exportToExcel = (search = "") => {
+        setDownloadDone(false);
+        setDownloadProgress(null);
+        setLoading(true);
     
-            apiCall(search, {
-                responseType: 'blob',
-                onDownloadProgress: (progressEvent) => {
-                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setDownloadProgress(percent);
-                },
-            })
-                .then(response => {
-                    const url = window.URL.createObjectURL(new Blob([response.data]));
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.setAttribute("download", "IssuanceReport.xlsx");
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    setDownloadDone(true);
-                })
-                .catch((error) => {
-                    console.error("Download failed:", error);
-                })
-                .finally(() => {
-                    setLoading(false);
-                    setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
-                });
+        // ✅ Ensure partcode is always an array
+        const payload = {
+            ...formData,
+            // partcode: Array.isArray(formData.partcode) ? formData.partcode : [],
+            search: search?.trim() || null
         };
+    
+        downloadStockTransferReportFilter(payload, {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setDownloadProgress(percent);
+            },
+        })
+        .then(response => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "MovementReport.xlsx");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setDownloadDone(true);
+        })
+        .catch((error) => {
+            console.error("Download failed:", error);
+        })
+        .finally(() => {
+            setLoading(false);
+            setTimeout(() => setDownloadDone(false), 5000);
+        });
+    };
+    
 
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Issuance Report</p>
+                    <p>Stock Transfer Report</p>
                 </div>
-                <IssuanceReportTextFiled
+                <StorckReportDetailTextFiled
                     partcodeList={partcodeList}
                     formData={formData}
                     setFormData={setFormData}
-                    componentUsageList={componentUsageList}
                     handleInputChange={handleInputChange}
                     formErrors={formErrors}
                     handlePoChange={handlePoChange}
+                    ponumberList={ponumberList}
+                    locationList={locationList}
+                    handleChange={handleChange}
                 />
                 <div className="ReworkerButton9">
                     <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
                     <button className='ComCssClearButton' onClick={Clear}>Clear</button>
                 </div>
             </div>
+
+
             {showTable &&
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Report Detail</h5>
@@ -279,32 +277,21 @@ const valiDate = () => {
                     </div>
                     <>
                         <LoadingOverlay loading={loading} />
-                        <IssuanceReportTable
-                            data={recevingReportDetail}
+                        <StockReportDetailTable
+                            data={stockReportDetail}
                             page={page}
                             perPage={perPage}
                             totalRows={totalRows}
                             setPage={setPage}
                             setPerPage={setPerPage}
                         />
-
-
                     </>
-
                 </div>
-
             }
- <CustomDialog
-                open={showErrorPopup}
-                onClose={() => setShowErrorPopup(false)}
-                title="Error"
-                message={errorMessage}
-                severity="error"
-                color="secondary"
-            />
-
         </div>
+
+
     )
 }
 
-export default IssuanceReport
+export default StockTransferReport

@@ -14,58 +14,40 @@ const formatDateArray = (arr) => {
 };
 
 
-
 const fields = [
-    "partcode",
-    "partdescription",
-    "uom",
-        "racklocation",
-
-    "tyc",
-        "requestertype",
-
     "productname",
     "productgroup",
     "productfamily",
-    "fmsn",
-    "nsn",
-    "rec_ticket_no",
+    "componentUsage",
+    "requestTime",
+    "approved_l1_date",
     "approved_l2_date",
-    "createdon",
-  
-    "req_qty",
-    "issueqty",
-    "issueValue",
-      "issuance_date",
-      "issued_comments",
-
+    "issuance_date",
+    "approver_1_TAT",
+    "approver_2_TAT",
+    "storeTAT",
+    "overallTAT",
 ];
 
 
 const customConfig = {
-    partcode: { label: "PartCode" },
-    partdescription: { label: "Part Description" },
-    uom: { label: "UOM" },
-    racklocation: { label: "Rack Location" },
-    tyc: { label: "TYC" },
-    requestertype: { label: "Component Usage" },
-    productname: { label: "Product Name" },
-    productgroup: { label: "Product Group" },
-    productfamily:{label:"Product Family"},
-    fmsn: { label: "Faulty ModuleSerialNo" },
-    nsn: { label: "Replacement ModuleSerialNo" },
-    rec_ticket_no: { label: "Ticket No" },
-    approved_l2_date: { label: "Tkt Approved date" },
-    createdon: { label: "Ticket Posting Date" },
-    req_qty: { label: "Req Qty" },
-    issueqty: { label: "Issue Qty" },
-    issueValue: { label: "Issue Value" },
-    issuance_date: { label: "LastUsed" },
-    issued_comments:{label:"ReciverName"}
-}
+  productname: { label: "Product Name" },
+  productgroup: { label: "Product Group" },
+  productfamily: { label: "Product Family" },
+  componentUsage: { label: "Component Usage" },
+  requestTime: { label: "Request Time" },
+  approved_l1_date: { label: "Approver 1 Date" },
+  approved_l2_date: { label: "Approver 2 Date" },
+  issuance_date: { label: "Issuance Date" },
+  approver_1_TAT: { label: "Approver 1 TAT" },
+  approver_2_TAT: { label: "Approver 2 TAT" },
+  storeTAT: { label: "Store TAT" },
+  overallTAT: { label: "Overall TAT" },
+};
 
 
-const IssuanceReportTable = ({
+
+const IssuanceTatTable = ({
     data = [],
     page,
     perPage,
@@ -74,17 +56,17 @@ const IssuanceReportTable = ({
     setPage,
     setPerPage,
 }) => {
+
     const processedData = React.useMemo(() => {
         return data.map((item) => ({
             ...item,
+            approved_l1_date: formatDateArray(item.approved_l2_date),
             approved_l2_date: formatDateArray(item.approved_l2_date),
-            createdon: formatDateArray(item.createdon),
+           // requestTime: formatDateArray(item.requestTime),
             issuance_date: formatDateArray(item.issuance_date),
-            grdate: formatDateArray(item.grdate),
             receivingdate: formatDateArray(item.receivingdate),
         }));
     }, [data]);
-
 
     const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
 
@@ -103,4 +85,4 @@ const IssuanceReportTable = ({
     )
 }
 
-export default IssuanceReportTable
+export default IssuanceTatTable
