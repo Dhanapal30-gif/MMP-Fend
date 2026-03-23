@@ -11,7 +11,8 @@ const StockTransferTextFile = ({
     trnasferPrtcode,
     formErrors,
     inventory_box_no,
-    locationList
+    locationList,
+    isFrozen
 }) => {
     const statusOptions = [
         { label: "Open", value: "Open" },
@@ -59,6 +60,7 @@ const StockTransferTextFile = ({
                     )}
                 /> */}
              <Autocomplete
+             disabled={isFrozen}
     options={locationList}
     value={locationList.find(opt => opt.value === formData.fromLocation) || null}
     onChange={(e, newValue) => handleChange("fromLocation", newValue?.value || "")}
@@ -85,6 +87,7 @@ const StockTransferTextFile = ({
 
 
 <Autocomplete
+disabled={isFrozen}
     options={
         locationList
             .filter(opt => 
@@ -108,6 +111,7 @@ const StockTransferTextFile = ({
 
 
                 <Autocomplete
+                disabled={isFrozen}
                     options={OrderTypeOption}
                     getOptionLabel={(option) => option.label}
                     value={OrderTypeOption.find(opt => opt.value === formData.ordertype) || null}

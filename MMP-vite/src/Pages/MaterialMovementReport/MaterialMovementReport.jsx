@@ -79,8 +79,8 @@ const MaterialMovementReport = () => {
             startDate: "",
             endDate: "",
             download: null,
-
         })
+        setFormErrors({})
     };
 
     const useDebounce = (value, delay) => {
@@ -129,28 +129,29 @@ const MaterialMovementReport = () => {
             errors.endDate = "Please Select EndDate";
             isValid = false;
         }
-        if (!formData.startDate && formData.endDate) {
+        if (formData.endDate && !formData.startDate) {
             errors.startDate = "Please Select StartDate";
             isValid = false;
         }
 
-       if (!formData.movementType) {
-            errors.movementType = "Please Select movementType";
-            isValid = false;
-        }
+    //    if (!formData.movementType) {
+    //         errors.movementType = "Please Select movementType";
+    //         isValid = false;
+    //     }
 
         setFormErrors(errors);
         return isValid;
     };
     const handleFilter = (e) => {
             e.preventDefault();
-            if (!valiDate()) return;
+            
     
             if (!hasAnyFilter() && !searchText?.trim()) {
                 setErrorMessage("Please select or enter at least one filter");
                 setShowErrorPopup(true);
                 return;
             }
+            if (!valiDate()) return;
             setShowTable(true);
             setIsFilterActive(true);
             fetchFilterResult();
@@ -160,14 +161,22 @@ const MaterialMovementReport = () => {
         const fetchFilterResult = (search = "") => {
     setLoading(true);
 
-    const payload = {
-        ...formData,
-        partcode: Array.isArray(formData.partcode)
-            ? formData.partcode
-            : [],   // 👈 FIX HERE
-        search: search?.trim() || null
-    };
+// const payload = {
+//     ...formData,
+//     partcode: Array.isArray(formData.partcode) && formData.partcode.length > 0
+//         ? formData.partcode
+//         : null,  // null means no filter
+//     search: search?.trim() || null
+// };
 
+const payload = {
+    ...formData,
+    partcode:
+        Array.isArray(formData.partcode)
+            ? (formData.partcode.length > 0 ? formData.partcode : null)
+            : (formData.partcode || null),
+    search: search?.trim() || null
+};
     getMovementReportDetailFilter(page - 1, perPage, payload)
         .then(res => {
             setRecevingReportDetail(res.data.content || []);
@@ -184,12 +193,16 @@ const MaterialMovementReport = () => {
     setLoading(true);
 
     // ✅ Ensure partcode is always an array
-    const payload = {
-        ...formData,
-        partcode: Array.isArray(formData.partcode) ? formData.partcode : [],
-        search: search?.trim() || null
-    };
-
+    // const payload = {
+    //     ...formData,
+    //     partcode: Array.isArray(formData.partcode) ? formData.partcode : [],
+    //     search: search?.trim() || null
+    // };
+const payload = {
+  ...formData,
+  partcode: formData.partcode?.length ? formData.partcode : null,
+  search: search?.trim() || null
+};
     downloadMovementReportFilter(payload, {
         responseType: 'blob',
         onDownloadProgress: (progressEvent) => {
@@ -259,7 +272,7 @@ const MaterialMovementReport = () => {
                                                     </>
                                                 )}
                                     </button>
-                                    <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                                    {/* <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                                         <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                                             onChange={(e) => setSearchText(e.target.value)}
                                         />
@@ -270,7 +283,7 @@ const MaterialMovementReport = () => {
                                                 ✖
                                             </span>
                                         )}
-                                    </div>
+                                    </div> */}
                                 </div>
                                 <>
                                     <LoadingOverlay loading={loading} />
@@ -289,6 +302,15 @@ const MaterialMovementReport = () => {
                             </div>
             
                         }
+
+                         <CustomDialog
+                                        open={showErrorPopup}
+                                        onClose={() => setShowErrorPopup(false)}
+                                        title="Error"
+                                        message={errorMessage}
+                                        severity="error"
+                                        color="secondary"
+                                    />
         </div>
     )
 }

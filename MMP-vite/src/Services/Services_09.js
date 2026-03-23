@@ -300,6 +300,11 @@ export const getRecevingReportDetailFilter = (page = 0, size = 10, formData) => 
 };
 
 
+const Get_LocalSummaryReportDetailFilter = `${url}/repaierCon/fetchLocalSummaryReportFilter`;
+export const getLocalSummaryReportDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_LocalSummaryReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
+
 const Get_movementReportDetailFilter = `${url}/MaterialMovementReportCon/fetchMaterialMovementReportFilter`;
 export const getMovementReportDetailFilter = (page = 0, size = 10, formData) => {
   return axios.post(`${Get_movementReportDetailFilter}?page=${page}&size=${size}`, formData);
@@ -328,6 +333,13 @@ export const getIssuanceReportDetailFilter = (page = 0, size = 10, formData) => 
 const Get_IssuanceTATReportDetailFilter = `${url}/issuanceTAT/fetchIssuanceTATAverage`;
 export const getIssuanceTATReportDetailFilter = (page = 0, size = 10, formData) => {
   return axios.post(`${Get_IssuanceTATReportDetailFilter}?page=${page}&size=${size}`, formData);
+};
+
+
+
+const Get_UnitcomponenetReportDetailFilter = `${url}/unitcomponent/fetchunitcomponentReportFilter`;
+export const getUnitcompoenentDetailFilter = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_UnitcomponenetReportDetailFilter}?page=${page}&size=${size}`, formData);
 };
 
 const Get_PTLPutawayTicket = `${url}/localPutawayCon/fetchPTLStorePutawayTicket`;
@@ -529,6 +541,20 @@ export const downloadReceivingReportFilter = (formData) =>
   axios.post(Get_DownloadReceivingReportFilter, formData, {
     responseType: "blob",
   });
+
+
+  const Get_DownloadIssuanceTatReportFilter = `${url}/issuanceTAT/downloadIssuanceTatReportFilter-excel`;
+export const downloadIssuanceTATReportFilter = (formData) =>
+  axios.post(Get_DownloadIssuanceTatReportFilter, formData, {
+    responseType: "blob",
+  });
+
+  const Get_DownloadLocalSummaryReportFilter = `${url}/repaierCon/downloadLocalSummaryReportFilter-excel`;
+export const downloadLocalSummaryReportFilter = (formData) =>
+  axios.post(Get_DownloadLocalSummaryReportFilter, formData, {
+    responseType: "blob",
+  });
+
 
   const Get_DownloadMovementReportFilter = `${url}/MaterialMovementReportCon/downloadMovementReportFilter-excel`;
 export const downloadMovementReportFilter = (formData) =>

@@ -142,7 +142,6 @@ const RecevingReport = () => {
 
             isValid = false;
         }
-
         setFormErrors(errors);
         return isValid;
     };
@@ -162,20 +161,18 @@ const RecevingReport = () => {
 
 
     const fetchData = (page = 1, size = 10, search = "") => {
-
         fetchFilterResult(search);   // ONLY search
-
     };
 
     const handleFilter = (e) => {
         e.preventDefault();
         // if (!valiDate()) return;
-
         if (!hasAnyFilter() && !searchText?.trim()) {
             setErrorMessage("Please select or enter at least one filter");
             setShowErrorPopup(true);
             return;
         }
+        setSearchText("");
         setShowTable(true);
         setIsFilterActive(true);
         fetchFilterResult();
@@ -188,7 +185,6 @@ const RecevingReport = () => {
             ...formData,
             search: search?.trim() || null
         };
-
         getRecevingReportDetailFilter(page - 1, perPage, payload)
             .then(res => {
                 setRecevingReportDetail(res.data.content || []);
@@ -196,7 +192,6 @@ const RecevingReport = () => {
             })
             .finally(() => setLoading(false));
     };
-
 
     const exportToExcel = (search = "") => {
         setDownloadDone(false);
@@ -236,7 +231,6 @@ const RecevingReport = () => {
             });
     };
 
-    // console.log("compoentUsag", componentUsageList)
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -257,7 +251,6 @@ const RecevingReport = () => {
                     <button className='ComCssSubmitButton' onClick={handleFilter}>Search</button>
                     <button className='ComCssClearButton' onClick={Clear}>Clear</button>
                 </div>
-
             </div>
             {showTable &&
                 <div className='ComCssTable'>
@@ -299,12 +292,8 @@ const RecevingReport = () => {
                             setPage={setPage}
                             setPerPage={setPerPage}
                         />
-
-
                     </>
-
                 </div>
-
             }
             <CustomDialog
                 open={showErrorPopup}

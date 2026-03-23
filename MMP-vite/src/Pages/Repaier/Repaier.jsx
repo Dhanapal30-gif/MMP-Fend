@@ -238,8 +238,20 @@ const Repaier = () => {
                     setShowSuccessPopup(true);
                     setTableData([]);
                     setShowTable(false);
-                    setIsFrozen(false);
-                    handleClear();
+                    if (updatedFormData.type !== "Thermal GEL") {
+                        setIsFrozen(false);
+                        handleClear();
+                    }
+                    else if (updatedFormData.type === "Thermal GEL") {
+                        setFormData(prev => ({
+                            ...prev,
+                            tgquantity: "",
+                            boardserialnumber: ""
+                        }));
+                        setIsFrozen(true);
+                    }
+                    // setIsFrozen(false);
+                    // handleClear();
                     // if (typeof handleClear === "function") handleClear();
                 } else {
                     setErrorMessage(response.data?.message || "Unknown error");

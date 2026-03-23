@@ -13,15 +13,17 @@ const formatDateArray = (arr) => {
 };
 
 const fields = [
+    "transationDate",
     "partcode",
     "partdescription",
     "ticketNo",
-    "transationDate",
+    
     "fromLocation",
     "transferLocation",
-    "batchcode",
+
     "transfer_ReqQty",
     "transferQty",
+        "batchcode",
     "unitvalue",
     "totalvalue",
 
@@ -40,7 +42,7 @@ const customConfig = {
     transfer_ReqQty: { label: "Transfer Req Qty" },
     transferQty: { label: "Transfer Qty" },
     unitvalue: { label: "Unit Value" },
-    totalvalue: { label: "Total Value" },
+    totalvalue: { label: "Total Value Euro" },
 
     
 

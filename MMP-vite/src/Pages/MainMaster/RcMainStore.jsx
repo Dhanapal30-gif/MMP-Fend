@@ -629,7 +629,7 @@ const RcMainStore = () => {
         errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
       } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
         errors.push(
-          `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Othres" or "Thermal Gel" or "PTL"`
+          `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Others" or "Thermal Gel" or "PTL"`
         );
       }
     });
@@ -982,8 +982,8 @@ const RcMainStore = () => {
         </div>
         <div className='ComCssUpload'>
           <input type="file" key={fileInputKey} accept=".xlsx, .xls" id="fileInput" onChange={handleUpload} style={{ display: 'none' }} />
-          {/* < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button> */}
-          {/* <button onClick={handleDownloadExcel}> Excel Download </button> */}
+          < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button> 
+           <button onClick={handleDownloadExcel}> Excel Download </button>
         </div>
         <div className='RcStoreTexfiled'>
           <ThemeProvider theme={TextFiledTheme}>

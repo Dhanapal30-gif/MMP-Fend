@@ -193,6 +193,9 @@ body {
   z-index: -1;
 }
 
+
+
+
 /* 🌀 Animation */
 @keyframes spin {
   to {
@@ -227,6 +230,19 @@ body {
     /* Space between rows */
 }
 
+.dashboardHeader{
+  flex-direction: column;
+  border: 2px solid #e3edd9;
+  box-shadow: 0 4px 12px rgba(71, 235, 41, 0.1);
+  border-radius: 15px;
+  background-color: #12de1d;
+  width: 98%;
+  margin-top: 10px;
+  margin-left: 15px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+}
 .ComCssFiledName {
   font-size: 15.9px;
   font-weight: bold;

@@ -88,7 +88,7 @@ const PutawayRetProcessTable = ({
             "putQty",
 
             "location",
-            "Batchcode",
+            "batchcode",
             "createdBy"
 
         ],

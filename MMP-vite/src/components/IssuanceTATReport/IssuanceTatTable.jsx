@@ -19,10 +19,10 @@ const fields = [
     "productgroup",
     "productfamily",
     "componentUsage",
-    "requestTime",
-    "approved_l1_date",
-    "approved_l2_date",
-    "issuance_date",
+    // "requestTime",
+    // "approved_l1_date",
+    // "approved_l2_date",
+    // "issuance_date",
     "approver_1_TAT",
     "approver_2_TAT",
     "storeTAT",
@@ -60,10 +60,10 @@ const IssuanceTatTable = ({
     const processedData = React.useMemo(() => {
         return data.map((item) => ({
             ...item,
-            approved_l1_date: formatDateArray(item.approved_l2_date),
-            approved_l2_date: formatDateArray(item.approved_l2_date),
+            // approved_l1_date: formatDateArray(item.approved_l2_date),
+            // approved_l2_date: formatDateArray(item.approved_l2_date),
            // requestTime: formatDateArray(item.requestTime),
-            issuance_date: formatDateArray(item.issuance_date),
+            // issuance_date: formatDateArray(item.issuance_date),
             receivingdate: formatDateArray(item.receivingdate),
         }));
     }, [data]);

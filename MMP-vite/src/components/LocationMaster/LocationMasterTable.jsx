@@ -2,6 +2,7 @@ import React from 'react';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns'; // make sure this import is correct
 
+
 const formatDateArray = (arr) => {
     if (!arr || !Array.isArray(arr)) return "";
 
@@ -14,36 +15,24 @@ const formatDateArray = (arr) => {
 
 
 const fields = [
+    "locationName",
+    "createdby",
+    // "createdon",
+    "updatedby",
+    // "updatedon",
 
-    "postingdate",
-    "partcode",
-    "partdescription",
-    "uom",
-    "movementType",
-    "materialDocumentNo",
-    "transcationQty",
-    "amount",
-    "postingRefernce",
-    "pono",
-    "comment"
 ];
 
 const customConfig = {
-    partcode: { lable: "partcode" },
-    partdescription: { label: "Part Description" },
-    uom: { label: "UOM" },
-    materialDocumentNo: { label: "Material Document No" },
-    pono: { label: "Pono" },
-    postingdate: { label: "Posting Date" },
-    transcationQty: { label: "Transcation Qty" },
-    amount: { label: "Total Value   €" },
-    comment: { label: "comment" },
-    postingRefernce: { label: "Posting Refernce" },
-    movementType: { label: "Movement Type" }
+    locationName: { label: "LocationName" },
+    createdby: { label: "Createdby" },
+    createdon: { label: "Createdon" },
+    updatedby: { label: "Updatedby" },
+    updatedon: { label: "ipdatedon" }
 }
 
 
-const MaterialMovementTable = ({
+const LocationMasterTable = ({
     data = [],
     page,
     perPage,
@@ -52,21 +41,15 @@ const MaterialMovementTable = ({
     setPage,
     setPerPage,
 }) => {
-
     const processedData = React.useMemo(() => {
         return data.map((item) => ({
             ...item,
-            postingdate: formatDateArray(item.postingdate),
-            podate: formatDateArray(item.podate),
-            exp_date: formatDateArray(item.exp_date),
-            grdate: formatDateArray(item.grdate),
             receivingdate: formatDateArray(item.receivingdate),
+            issuanceDate: formatDateArray(item.issuanceDate),
         }));
     }, [data]);
 
     const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
-
-
 
 
     return (
@@ -83,4 +66,4 @@ const MaterialMovementTable = ({
     )
 }
 
-export default MaterialMovementTable
+export default LocationMasterTable

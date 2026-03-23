@@ -94,7 +94,7 @@ export const fetchRecevingData = (setData) => {
 export const download = (search = "") => {
     
     if (search && search.trim() !== "") {
-          setLoading(true);
+          // setLoading(true);
           downloadSearchRecDetail(search) // <- pass search here
             .then((response) => {
               const url = window.URL.createObjectURL(new Blob([response.data]));

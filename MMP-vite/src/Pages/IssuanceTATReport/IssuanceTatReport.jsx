@@ -6,7 +6,7 @@ import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadReceivingReportFilter, fetchPartcodeReport, getIssuanceTATReportDetailFilter, getRecevingReportDetailFilter } from '../../Services/Services_09';
+import { downloadIssuanceTATReportFilter, downloadReceivingReportFilter, fetchPartcodeReport, getIssuanceTATReportDetailFilter, getRecevingReportDetailFilter } from '../../Services/Services_09';
 import { downloadLocalReport, downloadLocalReportFilter, downloadLocalReportSearch, fetchBoardSerialNumber, fetchProduct_Partcode, fetchproductPtl, fetchRepaier, getindiviualDetailFilter, getindiviualDetailFind, getLocalDetailFind, getLocalINdiviual, getLocalMaster, getLocalReport, getLocalReportDetailFilter, savePTLRepaier, savePTLRequest, savePTLStore } from '../../Services/Services_09';
 import { getProduct, getProductAndPartcode } from '../../Services/Services';
 
@@ -95,6 +95,7 @@ const IssuanceTatReport = () => {
             download: null,
 
         })
+        setFormErrors({});
     };
 const fetchData = (page = 1, size = 10, search = "") => {
 
@@ -130,11 +131,16 @@ const fetchData = (page = 1, size = 10, search = "") => {
         const errors = {};
         let isValid = true;
 
-        // if (!formData.issuanceType) {
-        //     errors.issuanceType = "Please Select Issuance Type";
-        //     isValid = false;
-        // }
 
+        if (formData.endDate && !formData.startDate ) {
+            errors.startDate = "Please Select StartDate";
+            isValid = false;
+        }
+
+        if (formData.startDate && !formData.endDate ) {
+            errors.endDate = "Please Select EndDate";
+            isValid = false;
+        }
 
         setFormErrors(errors);
         return isValid;
@@ -156,23 +162,79 @@ const fetchData = (page = 1, size = 10, search = "") => {
 
     };
 
-    const fetchFilterResult = (search = "") => {
+    // const fetchFilterResult = (search = "") => {
 
-            setLoading(true)
-        const payload = {
-            ...formData,
-            // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
-            search: search?.trim() || null
-        };
+    //         setLoading(true)
+    //     const payload = {
+    //         ...formData,
+    //         // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
+    //         search: search?.trim() || null
+    //     };
     
-            getIssuanceTATReportDetailFilter(page - 1, perPage, payload)
-               .then(res => {
-            // since backend returns single object
-            setRecevingReportDetail(res.data ? [res.data] : []);
-            setTotalRows(res.data ? 1 : 0);
+    //         getIssuanceTATReportDetailFilter(page - 1, perPage, payload)
+    //            .then(res => {
+    //         // since backend returns single object
+    //         // setRecevingReportDetail(res.data ? [res.data] : []);
+    //         setRecevingReportDetail(res.data || []);
+    //         setTotalRows(res.data ? 1 : 0);
+    //     })
+    //             .finally(() => setLoading(false));
+    //     };
+
+const fetchFilterResult = (search = "") => {
+
+    setLoading(true);
+
+    const payload = {
+        ...formData,
+        search: search?.trim() || null
+    };
+
+    getIssuanceTATReportDetailFilter(page - 1, perPage, payload)
+        .then(res => {
+            setRecevingReportDetail(res.data.content || []);   // ✅ FIX
+            setTotalRows(res.data.totalElements || 0);          // ✅ FIX
         })
-                .finally(() => setLoading(false));
-        };
+        .finally(() => setLoading(false));
+};
+        const exportToExcel = (search = "") => {
+                setDownloadDone(false);
+                setDownloadProgress(null);
+                setLoading(true);
+                let apiCall;
+        
+                const payload = {
+                    ...formData,
+                    search: search?.trim() || null
+                };
+                apiCall = () => downloadIssuanceTATReportFilter(payload);
+        
+                apiCall(search, {
+                    responseType: 'blob',
+                    onDownloadProgress: (progressEvent) => {
+                        const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        setDownloadProgress(percent);
+                    },
+                })
+                    .then(response => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.setAttribute("download", "IssuanceTATReport.xlsx");
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setDownloadDone(true);
+                    })
+                    .catch((error) => {
+                        console.error("Download failed:", error);
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                        setTimeout(() => setDownloadDone(false), 5000); // Reset "Done" after 3s
+                    });
+            };
+
 
     return (
         <div className='ComCssContainer'>
@@ -212,7 +274,7 @@ const fetchData = (page = 1, size = 10, search = "") => {
                                         </>
                                     )}
                         </button>
-                        <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                        {/* <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                             <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
                             />
@@ -223,7 +285,7 @@ const fetchData = (page = 1, size = 10, search = "") => {
                                     ✖
                                 </span>
                             )}
-                        </div>
+                        </div> */}
                     </div>
                     <>
                         <LoadingOverlay loading={loading} />

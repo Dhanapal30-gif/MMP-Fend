@@ -106,7 +106,7 @@ const StockReportOverviewTextfiled = ({
                     )}
                 />
 
-                <ComTextFiled
+                {/* <ComTextFiled
                     label="Start Date"
                     name="startDate"
                     type="date"
@@ -143,7 +143,7 @@ const StockReportOverviewTextfiled = ({
                     }}
 
                     renderInput={(params) => <TextField {...params} label="Download" size="small" />}
-                />
+                /> */}
             </ThemeProvider>
         </div>
     )

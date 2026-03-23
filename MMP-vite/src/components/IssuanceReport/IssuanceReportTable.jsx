@@ -32,7 +32,7 @@ const fields = [
     "rec_ticket_no",
     "approved_l2_date",
     "createdon",
-  
+    "batchcode",
     "req_qty",
     "issueqty",
     "issueValue",
@@ -53,15 +53,17 @@ const customConfig = {
     productgroup: { label: "Product Group" },
     productfamily:{label:"Product Family"},
     fmsn: { label: "Faulty ModuleSerialNo" },
-    nsn: { label: "Replacement ModuleSerialNo" },
+    nsn: { label: "Replacement ModuleSerial No" },
     rec_ticket_no: { label: "Ticket No" },
-    approved_l2_date: { label: "Tkt Approved date" },
-    createdon: { label: "Ticket Posting Date" },
+    approved_l2_date: { label: " Approved date" },
+    createdon: { label: " Posting Date" },
     req_qty: { label: "Req Qty" },
     issueqty: { label: "Issue Qty" },
-    issueValue: { label: "Issue Value" },
+    issueValue: { label: "Total Value  €" },
     issuance_date: { label: "LastUsed" },
-    issued_comments:{label:"ReciverName"}
+    batchcode:{label:"Batchcode"},
+    issued_comments:{label:"ReciverName"},
+    
 }
 
 

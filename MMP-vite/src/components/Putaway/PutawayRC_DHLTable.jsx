@@ -22,32 +22,62 @@ const PutawayRC_DHLTable = ({
     const [activeRow, setActiveRow] = useState(null);
     const [locationQty, setLocationQty] = useState({}); // {loc1: 5, loc2: 3}
 
-    const handleOpen = (row) => {
-        setActiveRow(row);
-        // preload existing values if any
-        const parts = row.location?.split(",") || [];
-        const init = {};
-        parts.forEach(loc => {
-            init[loc.trim()] = row.putQtyDetails?.[loc.trim()] || "";
+    // const handleOpen = (row) => {
+    //     setActiveRow(row);
+    //     // preload existing values if any
+    //     const parts = row.location?.split(",") || [];
+    //     const init = {};
+    //     parts.forEach(loc => {
+    //         init[loc.trim()] = row.putQtyDetails?.[loc.trim()] || "";
+    //     });
+    //     setLocationQty(init);
+    //     setOpen(true);
+    // };
+const handleOpen = (row) => {
+    setActiveRow(row);
+
+    const init = {};
+
+    if (row.putQtyDetails) {
+        Object.entries(row.putQtyDetails).forEach(([key, val]) => {
+            init[key] = {
+                batchCode: val.batchCode,
+                location: val.location,
+                qty: val.qty
+            };
         });
-        setLocationQty(init);
-        setOpen(true);
-    };
+    }
 
-    const handleSave = () => {
-        const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
-        if (!hasQty) {
-            setErrorMessage("Please enter quantity for at least one location!");
-            setShowErrorPopup(true);
-            return;
-        }
+    setLocationQty(init);
+    setOpen(true);
+};
+    // const handleSave = () => {
+    //     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
+    //     if (!hasQty) {
+    //         setErrorMessage("Please enter quantity for at least one location!");
+    //         setShowErrorPopup(true);
+    //         return;
+    //     }
 
-        // update parent
-        handleStockQtyChange(activeRow.selectedId, "putQtyDetails", locationQty);
-        activeRow.putQtyDetails = { ...locationQty };
-        setOpen(false);
-    };
+    //     // update parent
+    //     handleStockQtyChange(activeRow.selectedId, "putQtyDetails", locationQty);
+    //     activeRow.putQtyDetails = { ...locationQty };
+    //     setOpen(false);
+    // };
+const handleSave = () => {
+    const hasQty = Object.values(locationQty).some(val => Number(val?.qty) > 0);
 
+    if (!hasQty) {
+        setErrorMessage("Please enter quantity for at least one location!");
+        setShowErrorPopup(true);
+        return;
+    }
+
+    handleStockQtyChange(activeRow.selectedId, "putQtyDetails", locationQty);
+    activeRow.putQtyDetails = { ...locationQty };
+
+    setOpen(false);
+};
     const safeData = Array.isArray(data) ? data : [];
 
     const normalizedData = useMemo(() => {
@@ -235,7 +265,7 @@ const PutawayRC_DHLTable = ({
                     }}
                 >
                     <span>Partcode: {activeRow?.partcode}</span>
-                    <span>Inventory Box No: {activeRow?.inventory_box_no}</span>
+                    {/* <span>Inventory Box No: {activeRow?.inventory_box_no}</span> */}
 
                     <span>Approved Qty: {activeRow?.approvedQty}</span>
 
@@ -263,7 +293,7 @@ const PutawayRC_DHLTable = ({
                                         <TableRow key={idx} sx={{ '&:nth-of-type(odd)': { bgcolor: '#f9f9f9' }, bgcolor: disabled ? '#ffcdd2' : 'inherit' }}>
                                             <TableCell>{batch.location}</TableCell>
                                             <TableCell>
-                                                <TextField
+                                                {/* <TextField
                                                     type="number"
                                                     value={locationQty[batch.location] || ""}
                                                     onChange={(e) => {
@@ -287,8 +317,63 @@ const PutawayRC_DHLTable = ({
                                                     }}
                                                     size="small"
                                                     sx={{ width: '110px', borderRadius: 2 }}
-                                                />
+                                                /> */}
+{/* 
+                                                <TextField
+  type="number"
+  value={locationQty[`${activeRow.selectedId}_${idx}`] || ""}
+onChange={(e) => {
+    let val = e.target.value;
+    if (val === "" || /^\d*$/.test(val)) {
+        const numVal = val === "" ? 0 : Number(val);
+        if (numVal > batch.allocatedQty) {
+            setErrorMessage(`Cannot exceed allocated qty (${batch.allocatedQty}) for this batch`);
+            setShowErrorPopup(true);
+            return;
+        }
+        setLocationQty(prev => ({
+            ...prev,
+            [`${activeRow.selectedId}_${idx}`]: val
+        }));
+    }
+}}
+  inputProps={{
+    min: 0,
+    max: batch.allocatedQty,
+  }}
+  size="small"
+  sx={{ width: '110px', borderRadius: 2 }}
+/> */}
 
+<TextField
+  type="number"
+  value={locationQty[idx]?.qty || ""}
+  onChange={(e) => {
+    let val = e.target.value;
+
+    if (val === "" || /^\d*$/.test(val)) {
+      const numVal = val === "" ? 0 : Number(val);
+
+      if (numVal > batch.allocatedQty) {
+        setErrorMessage(`Cannot exceed allocated qty (${batch.allocatedQty})`);
+        setShowErrorPopup(true);
+        return;
+      }
+
+      setLocationQty(prev => ({
+        ...prev,
+        [idx]: {
+          batchCode: batch.batchCode,
+          location: batch.location,
+          qty: val
+        }
+      }));
+    }
+  }}
+  inputProps={{ min: 0, max: batch.allocatedQty }}
+  size="small"
+  sx={{ width: '110px', borderRadius: 2 }}
+/>
                                             </TableCell>
                                             <TableCell>{batch.allocatedQty}</TableCell>
                                             <TableCell>{batch.AvailableQty}</TableCell>

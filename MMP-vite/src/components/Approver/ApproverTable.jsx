@@ -48,7 +48,9 @@ const hideForReturning = [
   "approved_l1_date",
   "inventory_box_no",
   "createdon",
-  "ordertype"
+  "ordertype",
+  "faultySerialNumber",
+   "fmsn",
 
 ];
 

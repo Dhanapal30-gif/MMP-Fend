@@ -141,7 +141,7 @@ const StockReport = () => {
 
                 <div className="ReworkerButton9">
                     {/* <button className='ComCssSubmitButton'   onClick={() => fetchStockPartcodeData(page, perPage, debouncedSearch)}  >Stock-Partcode</button> */}
-                    {stockPartcodeButton &&
+                    {/* {stockPartcodeButton &&
                         <button
                             className="ComCssSubmitButton"
                             onClick={() => {
@@ -152,7 +152,7 @@ const StockReport = () => {
                         >
                             Stock-Partcode
                         </button>
-                    }
+                    } */}
                     {stockLocationButton && 
                         <button className='ComCssClearButton' onClick={() => { { fetchStockData(1, perPage, debouncedSearch) } }}>Stock-Location </button>
                     }

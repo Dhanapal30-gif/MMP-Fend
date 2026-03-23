@@ -205,7 +205,7 @@ const StockTransferReport = () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", "MovementReport.xlsx");
+            link.setAttribute("download", "StockTransferReport.xlsx");
             document.body.appendChild(link);
             link.click();
             link.remove();
