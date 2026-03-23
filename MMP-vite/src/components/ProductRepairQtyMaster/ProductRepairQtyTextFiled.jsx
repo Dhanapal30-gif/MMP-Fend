@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import ComTextFiled from '../Com_Component/ComTextFiled';
 import TextFiledTheme from '../Com_Component/TextFiledTheme';
@@ -20,6 +20,15 @@ const ProductRepairQtyTextFiled = ({
     locationList,
     handleChange
 }) => {
+
+    useEffect(() => {
+        if (!formData.dateyear) {
+            const now = new Date();
+            const monthStr = now.toISOString().slice(0, 7); // "YYYY-MM"
+            setFormData(prev => ({ ...prev, dateyear: monthStr }));
+        }
+    }, [formData.dateyear, setFormData]);
+
     return (
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
@@ -49,6 +58,8 @@ const ProductRepairQtyTextFiled = ({
                             // error={Boolean(formErrors.productname)}
                             // helperText={formErrors.productname}
                             size="small"
+                              error={Boolean(formErrors?.productname)}
+                    helperText={formErrors?.productname || ""}
                         />
                     )}
                 />
@@ -61,6 +72,7 @@ const ProductRepairQtyTextFiled = ({
                     className='ProductTexfiled-textfield '
                     onChange={handleChange}
                     size="small"
+                    InputLabelProps={{ shrink: true }}
                 />
                 <TextField
                     id="outlined-basic"
@@ -71,6 +83,7 @@ const ProductRepairQtyTextFiled = ({
                     className='ProductTexfiled-textfield '
                     onChange={handleChange}
                     size="small"
+                    InputLabelProps={{ shrink: true }}
                 />
 
                 {/* <TextField
@@ -84,7 +97,7 @@ const ProductRepairQtyTextFiled = ({
                     className='ProductTexfiled-textfield '
                 /> */}
 
-                 <TextField
+                 {/* <TextField
     label="Effective Date"
     type="date"
     variant="outlined"
@@ -95,16 +108,28 @@ const ProductRepairQtyTextFiled = ({
     }
     size="small"
     InputLabelProps={{ shrink: true }}
-/>
+/> */}
 
+<TextField
+                    label="Month & Year"
+                    type="month"
+                    size="small"
+                    fullWidth
+                    value={formData.dateyear || ""}
+                    onChange={(e) =>
+                        setFormData(prev => ({ ...prev, dateyear: e.target.value }))
+                        
+                 
+                    }
+                />
                 <ComTextFiled
                     label="Total RepairedQty"
                     name="totalRepairedQty"
                     type="number"
-                    value={formData.comments || ""}
-                    onChange={(e) => handleChange("comments", e.target.value)}
-                    error={Boolean(formErrors?.comment)}
-                    helperText={formErrors?.comments || ""}
+                    value={formData.totalRepairedQty || ""}
+                    onChange={(e) => handleChange("totalRepairedQty", e.target.value)}
+                    error={Boolean(formErrors?.totalRepairedQty)}
+                    helperText={formErrors?.totalRepairedQty || ""}
                 />
                 <ComTextFiled
                     label="Repaired Ok"

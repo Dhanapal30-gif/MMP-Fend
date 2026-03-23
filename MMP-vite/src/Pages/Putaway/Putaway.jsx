@@ -521,7 +521,7 @@ const Putaway = () => {
                  setIsPutProcess(true);
                 let rec_ticket_no = ticketNo
                 response = await fetchpickTicketDetails(rec_ticket_no);
-
+                //alert("uytuyhiuyh")
                 // Data is directly in response.data
                 const data = Array.isArray(response?.data) ? response.data : [];
                 if (data.length === 0) {
@@ -821,6 +821,8 @@ const Putaway = () => {
             setShowErrorPopup(true);
             return;
         }
+
+        // alert("handleSubmit")
         // setPutawayRc_DHL
         // const username = sessionStorage.getItem("userName") || "System";
         const username = localStorage.getItem("userName") || "System";
@@ -841,11 +843,15 @@ const Putaway = () => {
             putawayDetails: savedRows[row.selectedId] || [] // Only saved split-level data
         }));
         // Check that all selected rows have at least one qty > 0
-        const allRowsHaveQty = filteredData.every((row) => {
-            const putQtyDetails = row.putQtyDetails || {};
-            return Object.values(putQtyDetails).some(qty => Number(qty || 0) > 0);
-        });
+        // const allRowsHaveQty = filteredData.every((row) => {
+        //     const putQtyDetails = row.putQtyDetails || {};
+        //     return Object.values(putQtyDetails).some(qty => Number(qty || 0) > 0);
+        // });
 
+        const allRowsHaveQty = filteredData.every((row) => {
+    const putQtyDetails = row.putQtyDetails || {};
+    return Object.values(putQtyDetails).some(v => Number(v?.qty) > 0);
+});
         if (!allRowsHaveQty) {
             setErrorMessage("Please enter quantity for all selected rows!");
             setShowErrorPopup(true);
@@ -853,31 +859,30 @@ const Putaway = () => {
         }
         // console.log("submitData", submitData)
 
-        filteredData.forEach((row) => {
-            const putQtyDetails = row.putQtyDetails || {};
+       filteredData.forEach((row) => {
+    const putQtyDetails = row.putQtyDetails || {};
 
-            Object.keys(putQtyDetails).forEach((loc) => {
+    Object.values(putQtyDetails).forEach((item) => {
 
-                const qty = Number(putQtyDetails[loc] || 0);
+        const qty = Number(item?.qty || 0);
 
-                if (qty > 0) {
+        if (qty > 0) {
 
-                    const batch = row.batches?.find(b => b.location === loc); // ✅ here
-
-                    submitData.push({
-                        location: loc,
-                        qty: qty,
-                        batchcode: batch?.batchCode,
-                        partcode: row.partcode,
-                        recevingTicketNo: row.rec_ticket_no,
-                        createdby: username,
-                        updatedby: username,
-                        fromLocation: row.fromLocation,
-                        transferLocation: row.transeferLocation,
-                    });
-                }
+            submitData.push({
+                location: item.location,
+                qty: qty,
+                batchcode: item.batchCode,
+                partcode: row.partcode,
+                recevingTicketNo: row.rec_ticket_no,
+                createdby: username,
+                updatedby: username,
+                fromLocation: row.fromLocation,
+                transferLocation: row.transeferLocation,
             });
-        });
+
+        }
+    });
+});
         const recevingTicketNo = filteredData[0]?.rec_ticket_no || formData.RecevingTicketNo;
 
         const payload = {
@@ -1035,6 +1040,7 @@ const Putaway = () => {
             setShowErrorPopup(true);
             return;
         }
+        // alert("handleSubmit")
         // const username = sessionStorage.getItem("userName") || "System";
         const username = localStorage.getItem("userName") || "System";
         const selectedKeys = new Set(selectedRows1);
@@ -1160,7 +1166,7 @@ const Putaway = () => {
             setTotalRows((prev) => prev - 1);
         } catch (err) {
             console.error(err);
-            alert('Failed to delete ticket');
+            //alert('Failed to delete ticket');
         }
     };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns'; // make sure this import is correct
 
+
 const formatDateArray = (arr) => {
     if (!arr || !Array.isArray(arr)) return "";
 
@@ -12,38 +13,36 @@ const formatDateArray = (arr) => {
     return `${year}-${pad(month)}-${pad(day)}`;
 };
 
-
 const fields = [
-
-    "postingdate",
-    "partcode",
-    "partdescription",
-    "uom",
-    "movementType",
-    "materialDocumentNo",
-    "transcationQty",
-    "amount",
-    "postingRefernce",
-    "pono",
-    "comment"
+    "productname",
+    "productgroup",
+    "productfamily",
+    "dateyear",
+    "repairedOk",
+    "scrap",
+    "totalrepairedQty",
+    "pickedqty",
+    "issuedqty",
+    "totalqty", 
+    "averageCostPerUnit"
+  
 ];
 
 const customConfig = {
-    partcode: { lable: "partcode" },
-    partdescription: { label: "Part Description" },
-    uom: { label: "UOM" },
-    materialDocumentNo: { label: "Material Document No" },
-    pono: { label: "Pono" },
-    postingdate: { label: "Posting Date" },
-    transcationQty: { label: "Transcation Qty" },
-    amount: { label: "Total Value   €" },
-    comment: { label: "comment" },
-    postingRefernce: { label: "Posting Refernce" },
-    movementType: { label: "Movement Type" }
+    productname: { label: "ProductName" },
+    productgroup: { label: "ProductGroup" },
+    productfamily: { label: "ProductFamily" },
+    dateyear: { label: "Date_year" },
+    repairedOk: { label: "Repaired Ok" },
+    scrap: { label: "Scrap" },
+    totalrepairedQty: { label: "Total Repaired Qty" },
+    issuedqty: { label: "DTL Qty" },
+    pickedqty:{label:"PTL Qty"},
+    totalqty:{label:"Total Qty"},
+    averageCostPerUnit:{label:"AverageCost Per_Unit"}
+
 }
-
-
-const MaterialMovementTable = ({
+const UnitComponentTable = ({
     data = [],
     page,
     perPage,
@@ -53,21 +52,19 @@ const MaterialMovementTable = ({
     setPerPage,
 }) => {
 
+
     const processedData = React.useMemo(() => {
         return data.map((item) => ({
             ...item,
-            postingdate: formatDateArray(item.postingdate),
-            podate: formatDateArray(item.podate),
-            exp_date: formatDateArray(item.exp_date),
-            grdate: formatDateArray(item.grdate),
             receivingdate: formatDateArray(item.receivingdate),
+            issuanceDate: formatDateArray(item.issuanceDate),
+            // exp_date: formatDateArray(item.exp_date),
+            // grdate: formatDateArray(item.grdate),
+            // receivingdate: formatDateArray(item.receivingdate),
         }));
     }, [data]);
 
     const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
-
-
-
 
     return (
         <CommonDataTable
@@ -79,8 +76,7 @@ const MaterialMovementTable = ({
             loading={loading}
             onPageChange={setPage}
             onPerPageChange={setPerPage}
-        />
-    )
+        />)
 }
 
-export default MaterialMovementTable
+export default UnitComponentTable

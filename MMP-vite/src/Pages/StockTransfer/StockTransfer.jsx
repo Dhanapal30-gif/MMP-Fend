@@ -74,7 +74,7 @@ const StockTransfer = () => {
                     label: item,
                     value: item
                 }));
-                console.log("Location List for Dropdown:", locationList);
+                // console.log("Location List for Dropdown:", locationList);
                 setLocationList(locationList);
             })
             .catch((error) => {
@@ -183,6 +183,7 @@ const StockTransfer = () => {
                 fetchStockAll();
                 setTableData([]); // clear table after save
                 setShowTable(false);
+                if (isFrozen) setIsFrozen(false);
             } else {
                 setErrorMessage(response?.data?.message || "Unknown error");
                 setShowErrorPopup(true);
@@ -229,42 +230,86 @@ const StockTransfer = () => {
 
     const [inventory_box_no, setBoxNumber] = useState("MN-05-2025-378");
 
-    const handleAdd = () => {
-        if (!valiDate()) return;
-        const currentPartCode = typeof formData.partcode === "object"
+    // const handleAdd = () => {
+    //     if (!valiDate()) return;
+    //     const currentPartCode = typeof formData.partcode === "object"
+    //         ? formData.partcode.partcode || formData.partcode.label
+    //         : formData.partcode;
+
+    //     // Get actual boxNumber (from formData or default state)
+    //     const currentBoxNumber = formData.inventory_box_no || inventory_box_no;
+
+    //     // Check duplicates
+    //     const isDuplicateInBox = tableData.some(item => {
+    //         const itemPartCode = typeof item.partcode === "object"
+    //             ? item.partcode.partcode || item.partcode.label
+    //             : item.partcode;
+    //         return item.boxNumber === currentBoxNumber && itemPartCode === currentPartCode;
+    //     });
+
+    //     if (isDuplicateInBox) {
+    //         setErrorMessage(`Partcode "${currentPartCode}" already added in Box ${currentBoxNumber}`);
+    //         setShowErrorPopup(true);
+    //         return;
+    //     }
+    //     // Add new row
+    //     const newRow = {
+    //         ...formData,
+    //         partcode: currentPartCode,      // store partcode as string
+    //         inventory_box_no: currentBoxNumber,    // store correct box number
+    //         _id: Date.now() + Math.random()
+    //     };
+
+    //     setTableData(prev => [...prev, newRow]);
+    //     // Optional: clear partcode field after add
+    //        if (!isFrozen) setIsFrozen(true);
+    //     setFormData(prev => ({ ...prev, partcode: "",transfer_ReqQty:"" }));
+    // };
+const handleAdd = () => {
+    if (!valiDate()) return;
+
+    const currentPartCode =
+        typeof formData.partcode === "object"
             ? formData.partcode.partcode || formData.partcode.label
             : formData.partcode;
 
-        // Get actual boxNumber (from formData or default state)
-        const currentBoxNumber = formData.inventory_box_no || inventory_box_no;
+    const currentBoxNumber = formData.inventory_box_no || inventory_box_no;
 
-        // Check duplicates
-        const isDuplicateInBox = tableData.some(item => {
-            const itemPartCode = typeof item.partcode === "object"
+    const isDuplicateInBox = tableData.some(item => {
+        const itemPartCode =
+            typeof item.partcode === "object"
                 ? item.partcode.partcode || item.partcode.label
                 : item.partcode;
-            return item.boxNumber === currentBoxNumber && itemPartCode === currentPartCode;
-        });
 
-        if (isDuplicateInBox) {
-            setErrorMessage(`Partcode "${currentPartCode}" already added in Box ${currentBoxNumber}`);
-            setShowErrorPopup(true);
-            return;
-        }
-        // Add new row
-        const newRow = {
-            ...formData,
-            partcode: currentPartCode,      // store partcode as string
-            inventory_box_no: currentBoxNumber,    // store correct box number
-            _id: Date.now() + Math.random()
-        };
+        return (
+            item.inventory_box_no === currentBoxNumber &&
+            itemPartCode === currentPartCode
+        );
+    });
 
-        setTableData(prev => [...prev, newRow]);
-        // Optional: clear partcode field after add
-        setFormData(prev => ({ ...prev, partcode: "" }));
+    if (isDuplicateInBox) {
+        setErrorMessage(`Partcode "${currentPartCode}" already added in Box ${currentBoxNumber}`);
+        setShowErrorPopup(true);
+        return;
+    }
+
+    const newRow = {
+        ...formData,
+        partcode: currentPartCode,
+        inventory_box_no: currentBoxNumber,
+        _id: Date.now() + Math.random()
     };
 
+    setTableData(prev => [...prev, newRow]);
 
+    if (!isFrozen) setIsFrozen(true);
+
+    setFormData(prev => ({
+        ...prev,
+        partcode: "",
+        transfer_ReqQty: ""
+    }));
+};
     useEffect(() => {
         if (tableData.length > 0) {
             setShowTable(true);
@@ -281,6 +326,7 @@ const StockTransfer = () => {
             inventory_box_no: defaultBoxNumber, // must have boxNumber
             comments: "",
         })
+        setTrnasferPrtcode([]);
     }
     const handleCancel = () => {
         setTableData([]);
@@ -364,6 +410,7 @@ const StockTransfer = () => {
                     trnasferPrtcode={trnasferPrtcode}
                     inventory_box_no={inventory_box_no}
                     locationList={locationList}
+                    isFrozen={isFrozen}
                 />
 
                 <div className="ReworkerButton9">

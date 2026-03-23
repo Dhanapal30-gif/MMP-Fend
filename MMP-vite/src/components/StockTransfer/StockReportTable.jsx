@@ -30,13 +30,12 @@ const StockReportTable = ({
       "partcode",
       "partdescription",
       "componentusage",
+      "storage_location_transfer",
       "location",
+       "qty",
       "batchCode",
-       "unitprice",
-      "qty",
+       "unitprice",    
       "total_value",
-     
-   
     ],
     data,
    
@@ -45,12 +44,13 @@ const StockReportTable = ({
       partcode: { label: "PartCode" },
       partdescription: { label: "Part Description" },
       componentusage: { label: "Component Usage" },
-      location: { label: "Location" },
+      storage_location_transfer:{label:"Storage location"},
+      location: { label: "Rack Location" },
       batchCode: { label: "BatchCode" },
       qty: { label: "Qty" },
-      total_value: { label: "Total Value" },
-      unitprice: { label: "Unit Value" },
-
+      total_value: { label: "Total Value  €" },
+      unitprice: { label: "Unit Value €" },
+      
     },
     customCellRenderers: {
     

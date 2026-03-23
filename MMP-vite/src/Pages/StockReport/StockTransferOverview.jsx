@@ -43,6 +43,8 @@ const StockTransferOverview = () => {
     useEffect(() => {
         fetchPartcodeList();
         fetchLocationMaster();
+        // handleFilter();
+        fetchFilterResult();
     }, []);
 
     const fetchLocationMaster = () => {
@@ -99,8 +101,9 @@ const StockTransferOverview = () => {
 
     const Clear = () => {
         // setIsFilterActive(false);
-        setSearchText("");
-        setShowTable(false);
+        // setSearchText("");
+         fetchFilterResult();
+        // setShowTable(false);
         // fetchData(page, perPage, debouncedSearch);
         setFormData({
             partcode: "",
@@ -109,8 +112,8 @@ const StockTransferOverview = () => {
             startDate: "",
             endDate: "",
             download: null,
-
         })
+       
     };
 
     const useDebounce = (value, delay) => {
@@ -176,11 +179,11 @@ const StockTransferOverview = () => {
         e.preventDefault();
         // if (!valiDate()) return;
 
-        if (!hasAnyFilter() && !searchText?.trim()) {
-            setErrorMessage("Please select or enter at least one filter");
-            setShowErrorPopup(true);
-            return;
-        }
+        // if (!hasAnyFilter() && !searchText?.trim()) {
+        //     setErrorMessage("Please select or enter at least one filter");
+        //     setShowErrorPopup(true);
+        //     return;
+        // }
         setShowTable(true);
         setIsFilterActive(true);
         fetchFilterResult();
@@ -189,6 +192,7 @@ const StockTransferOverview = () => {
 
     const fetchFilterResult = (search = "") => {
         setLoading(true);
+        setShowTable(true)
         const payload = {
             ...formData,
             search: search?.trim() || null
@@ -242,6 +246,7 @@ const StockTransferOverview = () => {
                 });
         };
 
+        
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -280,7 +285,7 @@ const StockTransferOverview = () => {
                                         </>
                                     )}
                         </button>
-                        <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
+                        {/* <div style={{ position: "relative", display: "inline-block", width: "200px" }}>
                             <input type="text" className="form-control" style={{ height: "30px", paddingRight: "30px" }} placeholder="Search..." value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
                             />
@@ -291,7 +296,7 @@ const StockTransferOverview = () => {
                                     ✖
                                 </span>
                             )}
-                        </div>
+                        </div> */}
                     </div>
                     <>
                         <LoadingOverlay loading={loading} />

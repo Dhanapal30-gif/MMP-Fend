@@ -154,11 +154,25 @@ export const getPartcode = () => axios.get(Get_RcPartcode);
 const Get_Product = `${url}/Bom/getProduct`;
 export const getProduct = () => axios.get(Get_Product);
 
+
+const Get_LocationMaster = `${url}/locatiopnMasterCon/fetchLocationMaster`;
+export const getLocationMaster = () => axios.get(Get_LocationMaster);
+
+
 const Get_PartProduct = `${url}/issuanceTAT/getPartAndProduct`;
 export const getProductAndPartcode = () => axios.get(Get_PartProduct);
 
 const save_Bom = `${url}/Bom/SaveBom`
 export const saveBomMaster = (formData) => axios.post(save_Bom, formData);
+
+const save_ProductQtymaster = `${url}/unitcomponent/saveProdutQty`
+export const saveProductQtyMaster = (formData) => axios.post(save_ProductQtymaster, formData);
+
+
+const save_Locationmaster = `${url}/locatiopnMasterCon/saveLocation`
+export const saveLocationMaster = (formData) => axios.post(save_Locationmaster, formData);
+
+
 
 const save_BomUpload = `${url}/Bom/bulck_upload`
 export const saveBomMasterUpload = (formData) => axios.post(save_BomUpload, formData);
@@ -174,6 +188,11 @@ export const saveBomMasterUpload = (formData) => axios.post(save_BomUpload, form
   const get_BomMaste = `${url}/Bom/fetchBomMaster`;
 export const getBoMaster = (page = 0, size = 10,search = "")=>{
   return axios.get(get_BomMaste, { params: { page, size,search: search || undefined }, });
+} 
+
+  const get_ProductMasterQty = `${url}/unitcomponent/fetchProdutQty`;
+export const getProductQtyMaster = (page = 0, size = 10,search = "")=>{
+  return axios.get(get_ProductMasterQty, { params: { page, size,search: search || undefined }, });
 } 
 
 const update_Bom = `${url}/Bom/updateBom`;

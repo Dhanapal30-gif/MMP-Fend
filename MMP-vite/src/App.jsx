@@ -56,6 +56,9 @@ import StockTransferOverview from './Pages/StockReport/StockTransferOverview';
 import  ProductRepairQtyMaster from './Pages/ProductRepairQtyMaster/ProductRepairQtyMaster';
 import MaterialMovementReport from './Pages/MaterialMovementReport/MaterialMovementReport';
 import IssuanceTatReport from './Pages/IssuanceTATReport/issuanceTatReport';
+import UnitConsumptionCostReport from './Pages/UnitConsumptionCostReport/UnitConsumptionCostReport';
+import LocationMaster from './Pages/LocationMaster/LocationMaster';
+import ReworkerSummaryDashboard from './Pages/ReworkerSummaryDashboard/ReworkerSummaryDashboard';
 
 function App() {
 
@@ -127,6 +130,9 @@ function App() {
        { name: "productRepairQtyMaster", path: "/ProductRepairQtyMaster" },
        { name: "materialMovementReport", path: "/MaterialMovementReport" },
        { name: "IssuanceTatReport", path: "/IssuanceTatReport" },
+       { name: "UnitConsumptionCostReport", path: "/UnitConsumptionCostReport" },
+       { name: "locationMaster", path: "/LocationMaster" },
+        { name: "reworkerSummaryDashboard", path: "/ReworkerSummaryDashboard" },
       ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -233,7 +239,9 @@ function App() {
           <Route path='/productRepairQtyMaster' element={<ProductRepairQtyMaster />} />
           <Route path='/materialMovementReport' element={<MaterialMovementReport />} />
           <Route path='/issuanceTatReport' element={<IssuanceTatReport />} />
-
+          <Route path='/unitConsumptionCostReport' element={<UnitConsumptionCostReport />} />
+          <Route path='/locationMaster' element={<LocationMaster />} />
+          <Route path='/reworkerSummaryDashboard' element={<ReworkerSummaryDashboard />} />
           <Route
             path="/receving" 
             element={

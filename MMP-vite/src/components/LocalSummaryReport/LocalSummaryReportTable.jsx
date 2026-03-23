@@ -8,48 +8,67 @@ import { saveDoneRequest, savePickequest } from '../../Services/Services_09';
 import CryptoJS from "crypto-js";
 
 
+
+const formatDateTime = (value) => {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    const day = date.toLocaleString('en-GB', { day: '2-digit' });
+    const month = date.toLocaleString('en-GB', { month: 'short' });
+    const year = date.getFullYear();
+
+    const time = date.toLocaleString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+
+    return `${day} ${month} ${year} at ${time}`;
+};
+
+
 const fields = [
-    "requestTicketNo",
-    "requesterType",
-    "requestFor",
-    "orderType",
-    "productName",
-    "productGroup",
-    "productFamily",
-    "partCode",
-    "partDescription",
-    "UOM",
-    "typeOfComponents",
-    "componanetUsage",
-    "compatibilityPartcode",
+    "type",
+    "productname",
+    "boardserialnumber",
     "requestQty",
-    "approved1Qty",
-    "approved2Qty",
-    "faultySerialNo",
-    "faultyUnitModuleSerialNo",
-    "status"
+    "pickedqty",
+    "repairername",
+    "reworkername",
+    "shift",
+    "recordstatus",
+    "date",
+    "repairIntime",
+    "repairIntime",
+    "rewokerComponentReqtime",
+    "ciomppemntissuetime",
+    "reworkerouttime",
+    "compoentissuancehours",
+    "reworkerhours",
+    "totalhours",
+    
+
 ];
 
 const customConfig = {
-    requestTicketNo: { label: "Request TicketNo" },
-    requesterType: { label: "RequesterType" },
-    requestFor: { label: "Request For" },
-    orderType: { label: "Order Type" },
-    productName: { label: "Product Name" },
-    productGroup: { label: "Product Group" },
-    productFamily: { label: "Product Family" },
-    partCode: { label: "PartCode" },
-    partDescription: { label: "PartDescription" },
-    UOM: { label: "UOM" },
-    typeOfComponents: { label: "TypeOf Components" },
-    componanetUsage: { label: "ComponanetUsage" },
-    compatibilityPartcode: { label: "Compatibility Partcode" },
+    type: { label: "Type" },
+    productname: { label: "Product Name" },
+    boardserialnumber: { label: "Module Serial No" },
     requestQty: { label: "Request Qty" },
-    approved1Qty: { label: "Approved1Qty" },
-    approved2Qty: { label: "Approved2Qty" },
-    faultySerialNo: { label: "Faulty SerialNo" },
-    faultyUnitModuleSerialNo: { label: "Faulty UnitModule SerialNo" },
-
+    pickedqty: { label: "Picked Qty" },
+    repairername: { label: "Repair" },
+    reworkername: { label: "Reworker" },
+    shift: { label: "Shift" },
+    recordstatus: { label: "Status" },
+    date: { label: "Date" },
+    repairIntime: { label: "Repair In Time" },
+    rewokerComponentReqtime: { label: "Reworker Component Req Time" },
+    ciomppemntissuetime: { label: "Component Issue Time" },
+    reworkerouttime: { label: "Reworker Out Time" },
+    compoentissuancehours: { label: "Component Issue Hours" },
+    reworkerhours: { label: "Rework Hours" },
+    totalhours: { label: "Board Total Hours" },
 };
 
 
@@ -60,75 +79,68 @@ const LocalSummaryReportTable = ({
     totalRows,
     loading,
     setPage,
-    setPerPage,
-    handleQtyChange,
-    formData,
-    pickButton,
-    setpickButton,
-    setSuccessMessage,
-    setShowSuccessPopup
+    setPerPage
 }) => {
 
-    //  const columns = generateColumns({
-    //         fields: [
-    //           "requestTicketNo",
-    //           "requesterType",
-    //           "requestFor",
-    //           "orderType",
-    //           "productName",
-    //           "productGroup",
-    //           "productFamily",
-    //           "partCode",
-    //           "partDescription",
-    //           "UOM",
-    //           "typeOfComponents",
-    //           "componanetUsage",
-    //           "compatibilityPartcode",
-    //           "requestQty",
-    //           "approved1Qty",
-    //           "approved2Qty",
-    //           "faultySerialNo",
-    //           "faultyUnitModuleSerialNo"
+ const formatHours = (value) => {
+    if (!value) return "";
 
-    //         ]
+    const [hh, mm] = value.split(":");
+    return `${parseInt(hh, 10)}:${mm}`;
+};
 
+const formatDate = (value) => {
+    if (!value) return "";
+    const d = new Date(value);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+const processedData = React.useMemo(() => {
+    if (!Array.isArray(data)) return [];
 
-    //       })   
-    // Generate columns and prepend Cancel column manually
-    const columns = React.useMemo(() => {
-        return generateColumns({ fields, customConfig });
-    }, [fields, customConfig]);
+    return data.map((item) => ({
+        ...item,
+        repairIntime: formatDateTime(item.repairIntime),
+        rewokerComponentReqtime: formatDateTime(item.rewokerComponentReqtime),
+        ciomppemntissuetime: formatDateTime(item.ciomppemntissuetime),
+        reworkerouttime: formatDateTime(item.reworkerouttime),
+        totalhours: formatHours(item.totalhours),
+        reworkerhours: formatHours(item.reworkerhours),
+        compoentissuancehours: formatHours(item.compoentissuancehours),
+          date: formatDate(item.repairIntime),
+    }));
+}, [data]);
 
-    // Flatten {label, value} objects
-    const normalizedData = React.useMemo(() => {
-        return data.map(row => {
-            const newRow = { ...row };
-            Object.keys(newRow).forEach(key => {
-                if (typeof newRow[key] === "object" && newRow[key] !== null) {
-                    newRow[key] = newRow[key].label ?? JSON.stringify(newRow[key]);
-                }
-            });
-            return newRow;
-        });
-    }, [data]);
-
+    const columns = React.useMemo(() => generateColumns({ fields, customConfig, data: processedData }), [fields, customConfig, processedData]);
 
     return (
-        <CommonDataTable
+        // <CommonDataTable
+        //     columns={columns}
+        //     data={data}
+        //     page={page}
+        //     pagination
+        //     paginationServer
+        //     perPage={perPage}
+        //     totalRows={totalRows}
+        //     loading={loading}
+        //     // onPageChange={setPage}
+        //       onPageChange={(p) => setPage(p - 1)}   // <-- subtract 1
+        //     onPerPageChange={setPerPage}
+        // />
+    <CommonDataTable
             columns={columns}
-            data={data}
+            data={processedData}
             page={page}
-            pagination
-            paginationServer
             perPage={perPage}
             totalRows={totalRows}
             loading={loading}
-            // onPageChange={setPage}
-              onPageChange={(p) => setPage(p - 1)}   // <-- subtract 1
-
+            onPageChange={setPage}
             onPerPageChange={setPerPage}
-
-        />)
+        />
+        
+    )
 }
 
 export default LocalSummaryReportTable

@@ -16,20 +16,28 @@ const StockTransferTable = ({
 }) => {
     const fields = [
         "RTN",
-        "fromLocation",
-        "transferLocation",
-        "OrderType",
         "Partcode",
+        "fromLocation",
+        "xtransferLocation",
+        "OrderType",
+
         "TransferQty",
         // "Inventory_BoxNo",
         "RecordStatus"
 
     ];
-   
+
+    const customConfig = {
+        RTN: { label: "TicketNo" },
+        fromLocation: { label: "From Location" },
+        xtransferLocations: { label: "Transfer Location" },
+        RecordStatus:{label:"Status "}
+
+    }
     // Generate columns and prepend Cancel column manually
     const columns = React.useMemo(() => {
-        return generateColumns({ fields });
-    }, [fields]);
+        return generateColumns({ fields, customConfig });
+    }, [fields, customConfig]);
 
     // Flatten {label, value} objects
     const normalizedData = React.useMemo(() => {

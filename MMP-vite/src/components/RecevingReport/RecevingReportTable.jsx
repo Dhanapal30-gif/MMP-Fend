@@ -16,6 +16,7 @@ const formatDateArray = (arr) => {
 
 
 const fields = [
+    "postingdate",
     "rec_ticket_no",
     "pono",
     "partcode",
@@ -26,10 +27,12 @@ const fields = [
     "racklocation",
     "vendorname",
     "invoiceno",
-    "postingdate",
+    
     "podate",
     "exp_date",
+    "currency",
     "unitprice",
+    "unitpriceper1qty",
     "totalvalueeuro",
     "orderqty",
     "rec_qty",
@@ -55,16 +58,16 @@ const customConfig = {
     postingdate: { label: "Posting Date" },
     podate: { label: "PO Date" },
     exp_date: { label: "Exp Date" },
-    totalvalueeuro: { label: "Totalvalue Euro" },
+    totalvalueeuro: { label: "Totalvalue  €" },
     openorderqty: { label: "Open Order Qty" },
     rec_qty: { label: "Received Qty" },
     orderqty: { label: "Order Qty" },
+    currency:{label:"Currency"},
     unitprice: { label: "Unit Price" },
     grno: { label: "GR No" },
     grdate: { label: "GR Date" },
     receivingdate: { label: "Receiving Date" },
-
-
+    unitpriceper1qty:{label:"Unitprice  €"}
 }
 
 const RecevingReportTable = ({

@@ -8,7 +8,7 @@ const fields = [
     "ordertype",
     "RequesterType",
     "partcode",
-    "partdescription",
+    // "partdescription",
     "rec_ticket_no",
     "returnQty",
         "comment",

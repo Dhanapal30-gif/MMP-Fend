@@ -108,54 +108,54 @@ const Returning = () => {
 
     const [filteredData, setFilteredData] = useState(returningData);
 
-    const handleDropdownChange = (field, value) => {
-    if (!value) return;
+//     const handleDropdownChange = (field, value) => {
+//     if (!value) return;
 
-    let selectedRecord;
+//     let selectedRecord;
 
-    if (field === "partcode") {
-        selectedRecord = returningData.find(item => item.partcode === value);
-    } else if (field === "partdescription") {
-        selectedRecord = returningData.find(item => item.partdescription === value);
-    } else if (field === "rec_ticket_no") {
-        selectedRecord = returningData.find(item => item.rec_ticket_no === value);
-    } else if (field === "ordertype") {
-        selectedRecord = returningData.find(item => item.ordertype === value);
-    } else if (field === "RequesterType") {  // ✅ add this
-        selectedRecord = returningData.find(item => item.RequesterType === value);
-    }
+//     if (field === "partcode") {
+//         selectedRecord = returningData.find(item => item.partcode === value);
+//     } else if (field === "partdescription") {
+//         selectedRecord = returningData.find(item => item.partdescription === value);
+//     } else if (field === "rec_ticket_no") {
+//         selectedRecord = returningData.find(item => item.rec_ticket_no === value);
+//     } else if (field === "ordertype") {
+//         selectedRecord = returningData.find(item => item.ordertype === value);
+//     } else if (field === "RequesterType") {  // ✅ add this
+//         selectedRecord = returningData.find(item => item.RequesterType === value);
+//     }
 
-    if (!selectedRecord) return;
+//     if (!selectedRecord) return;
 
-    // always fetch IssueQty by rec_ticket_no
-    const ticketRecord = returningData.find(item => item.rec_ticket_no === selectedRecord.rec_ticket_no);
+//     // always fetch IssueQty by rec_ticket_no
+//     const ticketRecord = returningData.find(item => item.rec_ticket_no === selectedRecord.rec_ticket_no);
 
-    setFormData(prev => ({
-        ...prev,
-        partcode: selectedRecord.partcode,
-        partdescription: selectedRecord.partdescription,
-        rec_ticket_no: selectedRecord.rec_ticket_no,
-        ordertype: selectedRecord.ordertype,
-        RequesterType: selectedRecord.RequesterType, // ✅ add this
-        IssueQty: ticketRecord?.IssueQty ?? 0,  // fetched by ticket no
-        returnQty: ""
-    }));
-};
+//     setFormData(prev => ({
+//         ...prev,
+//         partcode: selectedRecord.partcode,
+//         partdescription: selectedRecord.partdescription,
+//         rec_ticket_no: selectedRecord.rec_ticket_no,
+//         ordertype: selectedRecord.ordertype,
+//         RequesterType: selectedRecord.RequesterType, // ✅ add this
+//         IssueQty: ticketRecord?.IssueQty ?? 0,  // fetched by ticket no
+//         returnQty: ""
+//     }));
+// };
 
-    const handleReturnQtyChange = (value) => {
-        if (value === "") {
-            setFormData(prev => ({ ...prev, returnQty: "" }));
-            return;
-        }
-        if (!/^\d+$/.test(value)) return;
+    // const handleReturnQtyChange = (value) => {
+    //     if (value === "") {
+    //         setFormData(prev => ({ ...prev, returnQty: "" }));
+    //         return;
+    //     }
+    //     if (!/^\d+$/.test(value)) return;
 
-        const numValue = Number(value);
-        const issueQty = Number(formData.IssueQty) || 0;
+    //     const numValue = Number(value);
+    //     const issueQty = Number(formData.IssueQty) || 0;
 
-        if (numValue > issueQty) return;
+    //     if (numValue > issueQty) return;
 
-        setFormData(prev => ({ ...prev, returnQty: value }));
-    };
+    //     setFormData(prev => ({ ...prev, returnQty: value }));
+    // };
     useEffect(() => {
         setFilteredData(returningData);
     }, [returningData]);
@@ -236,12 +236,17 @@ const Returning = () => {
   }
     try {
         // Prepare updated data
-        const updatedFormData = tableData.map(row => ({
-            ...row,
-            createdby: userId,
-            updatedby: userId,     
-            createdName: userName,       
-        }));
+        const updatedFormData = tableData.map((row) => {
+  const { RequesterType, ...rest } = row;   // remove old key
+
+  return {
+    ...rest,
+    requesterType: RequesterType,   // new key
+    createdby: userId,
+    updatedby: userId,
+    createdName: userName
+  };
+});
 
         // Call API
         const response = await saveReturning(updatedFormData);
@@ -300,6 +305,43 @@ useEffect(() => {
     setFilteredAddData(result);
   }
 }, [addSearchText, tableData]);
+
+const handleDropdownChange = (field, value) => {
+
+  let updated = { ...formData, [field]: value };
+
+  if (field === "rec_ticket_no") {
+
+    const ticket = returningData.find(
+      (i) =>
+        i.rec_ticket_no === value &&
+        i.partcode === formData.partcode
+    );
+
+    updated.IssueQty = ticket?.IssueQty || 0;
+  }
+
+  setFormData(updated);
+};
+
+const handleReturnQtyChange = (val) => {
+
+  if (Number(val) > Number(formData.IssueQty)) {
+    setFormErrors({
+      ...formErrors,
+      returnQty: "Return qty cannot exceed Issue Qty"
+    });
+    return;
+  }
+
+  setFormErrors({ ...formErrors, returnQty: "" });
+
+  setFormData({
+    ...formData,
+    returnQty: val
+  });
+};
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>

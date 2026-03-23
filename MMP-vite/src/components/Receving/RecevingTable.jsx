@@ -84,6 +84,13 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, se
     //     updatedData.forEach((row, idx) => handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet));
     // }, [filteredAddData]);
 
+    const formatDate = (date) => {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, '0'); // months 0-11
+    const day = String(d.getDate()).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+};
 
     useEffect(() => {
         // Flag to track if any state change occurred in this run
@@ -281,7 +288,7 @@ const key = `${row.ponumber}-${row.partcode}`;
         }
         ,
         {
-            name: "TotalValue",
+            name: "Total Value",
             cell: (row, index) => (
                 <TextField
                     variant="outlined"
@@ -319,7 +326,7 @@ const key = `${row.ponumber}-${row.partcode}`;
         }
         ,
         {
-            name: "TotalValue Euro",
+            name: "Total Value €",
             selector: row => row.totalValueEuro,
             width: `${calculateColumnWidth('totalValueEuro')}px`
         }
@@ -366,66 +373,128 @@ const key = `${row.ponumber}-${row.partcode}`;
         //     }
         // }
 
-        {
-            name: "Expiry Date",
-            cell: (row) => {
-                const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
-                const isDisabled = expApplicable === "notapplicable";
+        // {
+        //     name: "Expiry Date",
+        //     cell: (row) => {
+        //         const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        //         const isDisabled = expApplicable === "notapplicable";
 
-                // --- 1. Calculate the ABSOLUTE MINIMUM Date (2 Months from Today) ---
+        //         // --- 1. Calculate the ABSOLUTE MINIMUM Date (2 Months from Today) ---
 
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+        //         const today = new Date();
+        //         today.setHours(0, 0, 0, 0);
 
-                // Clone today's date for the minimum calculation
-                const finalMinDate = new Date(today);
+        //         // Clone today's date for the minimum calculation
+        //         const finalMinDate = new Date(today);
 
-                // Set the minimum selectable date to exactly 2 months from today
-                finalMinDate.setMonth(finalMinDate.getMonth() + 2);
+        //         // Set the minimum selectable date to exactly 2 months from today
+        //         finalMinDate.setMonth(finalMinDate.getMonth() + 2);
 
-                // Convert the final minimum date to the required 'YYYY-MM-DD' string format
-                const minExpiryDate = finalMinDate.toISOString().split("T")[0];
+        //         // Convert the final minimum date to the required 'YYYY-MM-DD' string format
+        //         const minExpiryDate = finalMinDate.toISOString().split("T")[0];
 
-                // --- 2. Calculate the MAXIMUM Date (2 Months after the Minimum Date) ---
+        //         // --- 2. Calculate the MAXIMUM Date (2 Months after the Minimum Date) ---
 
-                // Clone the final minimum date
-                const finalMaxDate = new Date(finalMinDate);
+        //         // Clone the final minimum date
+        //         const finalMaxDate = new Date(finalMinDate);
 
-                // Add exactly 2 more months to define the maximum boundary
-                finalMaxDate.setMonth(finalMaxDate.getMonth() + 2);
+        //         // Add exactly 2 more months to define the maximum boundary
+        //         finalMaxDate.setMonth(finalMaxDate.getMonth() + 2);
 
-                // Convert the final maximum date to the required 'YYYY-MM-DD' string format
-                const maxExpiryDate = finalMaxDate.toISOString().split("T")[0];
+        //         // Convert the final maximum date to the required 'YYYY-MM-DD' string format
+        //         const maxExpiryDate = finalMaxDate.toISOString().split("T")[0];
 
-                // --- 3. Render the TextField with both 'min' and 'max' attributes ---
+        //         // --- 3. Render the TextField with both 'min' and 'max' attributes ---
 
-                return (
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        value={row.exp_date || ""}
-                        onChange={(e) => {
-                            if (expApplicable === "yes") {
-                                const key = `${row.ponumber}-${row.partcode}`;
-                                const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
-                                if (idx === -1) return;
-                                handleFieldChange(key, "exp_date", e.target.value);
-                            }
-                        }}
-                        disabled={isDisabled}
-                        className="invoice-input"
-                        error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
-                        helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
-                        inputProps={{
-                            // MINIMUM date constraint: Today + 2 Months (e.g., 04-02-2026)
-                            min: expApplicable === "yes" ? minExpiryDate : undefined,
-                            // MAXIMUM date constraint: Min Date + 2 Months (e.g., 04-04-2026)
-                            max: expApplicable === "yes" ? maxExpiryDate : undefined,
-                        }}
-                    />
-                );
-            }
+        //         return (
+        //             <TextField
+        //                 type="date"
+        //                 variant="outlined"
+        //                 value={row.exp_date || ""}
+        //                 onChange={(e) => {
+        //                     if (expApplicable === "yes") {
+        //                         const key = `${row.ponumber}-${row.partcode}`;
+        //                         const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+        //                         if (idx === -1) return;
+        //                         handleFieldChange(key, "exp_date", e.target.value);
+        //                     }
+        //                 }}
+        //                 disabled={isDisabled}
+        //                 className="invoice-input"
+        //                 error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
+        //                 helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
+        //                 inputProps={{
+        //                     // MINIMUM date constraint: Today + 2 Months (e.g., 04-02-2026)
+        //                     min: expApplicable === "yes" ? minExpiryDate : undefined,
+        //                     // MAXIMUM date constraint: Min Date + 2 Months (e.g., 04-04-2026)
+        //                     max: expApplicable === "yes" ? maxExpiryDate : undefined,
+        //                 }}
+        //             />
+        //         );
+        //     }
+        // }
+
+
+     {
+    name: "Expiry Date",
+    cell: (row) => {
+        const expApplicable = row.expdateapplicable?.toLowerCase().replace(/\s/g, "");
+        const isDisabled = expApplicable === "notapplicable";
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        const addMonthsSafe = (date, months) => {
+            const d = new Date(date);
+            const day = d.getDate();
+            d.setDate(1);
+            d.setMonth(d.getMonth() + months);
+            const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            d.setDate(Math.min(day, lastDay));
+            return d;
+        };
+
+        const formatDate = (date) => {
+            const d = new Date(date);
+            const month = String(d.getMonth() + 1).padStart(2,'0');
+            const day = String(d.getDate()).padStart(2,'0');
+            const year = d.getFullYear();
+            return `${year}-${month}-${day}`;
+        };
+
+        let calculatedDate = "";
+
+        if(expApplicable === "yes"){
+            const minDate = addMonthsSafe(today, 2);
+            calculatedDate = formatDate(minDate);
+        } else if(expApplicable === "no"){
+            const shelfMonths = parseInt(row.shelflife || "0", 10);
+            const shelfDate = addMonthsSafe(today, shelfMonths);
+            calculatedDate = formatDate(shelfDate);
         }
+
+        return (
+            <TextField
+                type="date"
+                variant="outlined"
+                value={expApplicable === "no" ? calculatedDate : (row.exp_date || calculatedDate)}
+                onChange={(e) => {
+                    const key = `${row.ponumber}-${row.partcode}`;
+                    const idx = filteredAddData.findIndex(r => `${r.ponumber}-${r.partcode}` === key);
+                    if(idx===-1) return;
+                    handleFieldChange(key, "exp_date", e.target.value);
+                }}
+                disabled={isDisabled}
+                className="invoice-input"
+                error={Boolean(formErrors[`exp_date-${row.ponumber}-${row.partcode}`])}
+                helperText={formErrors[`exp_date-${row.ponumber}-${row.partcode}`]}
+                inputProps={{
+                    min: calculatedDate
+                }}
+            />
+        );
+    }
+}
     ]
 
     const handlePageChange = (newPage) => {
@@ -584,7 +653,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             width: '130px'
         },
         {
-            name: "CCfactor",
+            name: "CCFactor",
             selector: row => row.ccf,
             wrap: true,
             grow: 2,
@@ -599,7 +668,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
         },
 
         {
-            name: "TotalValue Euro",
+            name: "Total Value €",
             selector: row => row.totalValueEuro,
             wrap: true,
             grow: 2,

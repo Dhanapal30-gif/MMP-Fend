@@ -82,7 +82,7 @@ const GRNDefaultTable = ({
             orderqty: { label: "order Qty" },
               openOrderQty: { label: "OpenOrder Qty" },
             totalValue: { label: "Total Value" },
-            totalValueEuro: { label: "Total Value Euro" },
+            totalValueEuro: { label: "Total Value €" },
             unitprice: { label: "UnitPrice" },
             grno: { label: "GRN Number" },
             grnqty: { label: "GRN Qty" },

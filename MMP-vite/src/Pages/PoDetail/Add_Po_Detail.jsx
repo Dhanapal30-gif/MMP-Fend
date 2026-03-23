@@ -526,7 +526,7 @@ const Add_Po_Detail = () => {
       width: '130px'
     },
     {
-      name: "Totalvalue",
+      name: "Total Value",
       selector: row => row.totalvalue,
       width: '130px'
 
@@ -539,7 +539,7 @@ const Add_Po_Detail = () => {
       // width: `${calculateColumnWidth( 'ccf')}px`
     },
     {
-      name: "Totalvalue Euro",
+      name: "Total Value €",
       selector: row => row.totalvalueeuro,
       width: `${calculateColumnWidth('totalvalueeuro')}px`
     }
