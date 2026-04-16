@@ -112,7 +112,16 @@ row.batches.forEach(batch => {
       return;
     }
 
+const totalIssueQty = Object.values(locationQty)
+  .reduce((sum, val) => sum + Number(val || 0), 0);
 
+if (totalIssueQty !== Number(activeRow?.approvedQty)) {
+  const proceed = window.confirm(
+    `Issue Qty is not equal to Approved Qty (${activeRow?.approvedQty}). Do you want to continue?`
+  );
+
+  if (!proceed) return; // ❌ stop if user clicks Cancel
+}
     // Prepare payload
     // const payload = Object.keys(locationQty).map(loc => ({
     //   location: loc,

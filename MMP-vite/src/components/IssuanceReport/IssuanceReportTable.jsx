@@ -16,28 +16,28 @@ const formatDateArray = (arr) => {
 
 
 const fields = [
+    "createdon",
     "partcode",
     "partdescription",
     "uom",
-        "racklocation",
-
+    "racklocation",
     "tyc",
-        "requestertype",
-
+    "requestertype",
     "productname",
     "productgroup",
     "productfamily",
     "fmsn",
     "nsn",
     "rec_ticket_no",
+    "approved_l1_date",
     "approved_l2_date",
-    "createdon",
+    "issuance_date",
     "batchcode",
     "req_qty",
     "issueqty",
     "issueValue",
-      "issuance_date",
-      "issued_comments",
+    "lastUsedDate",
+    "issued_comments",
 
 ];
 
@@ -51,19 +51,21 @@ const customConfig = {
     requestertype: { label: "Component Usage" },
     productname: { label: "Product Name" },
     productgroup: { label: "Product Group" },
-    productfamily:{label:"Product Family"},
+    productfamily: { label: "Product Family" },
     fmsn: { label: "Faulty ModuleSerialNo" },
     nsn: { label: "Replacement ModuleSerial No" },
     rec_ticket_no: { label: "Ticket No" },
-    approved_l2_date: { label: " Approved date" },
+    approved_l2_date: { label: " Approved_l2_Date" },
     createdon: { label: " Posting Date" },
     req_qty: { label: "Req Qty" },
     issueqty: { label: "Issue Qty" },
     issueValue: { label: "Total Value  €" },
-    issuance_date: { label: "LastUsed" },
-    batchcode:{label:"Batchcode"},
-    issued_comments:{label:"ReciverName"},
-    
+    issuance_date: { label: "Issued Date" },
+    batchcode: { label: "Batchcode" },
+    issued_comments: { label: "ReciverName" },
+    approved_l1_date:{label:"Approved_l1_Date"},
+    lastUsedDate:{label:"LastUsed Date"}
+
 }
 
 
@@ -84,6 +86,8 @@ const IssuanceReportTable = ({
             issuance_date: formatDateArray(item.issuance_date),
             grdate: formatDateArray(item.grdate),
             receivingdate: formatDateArray(item.receivingdate),
+            approved_l1_date: formatDateArray(item.approved_l1_date),
+             lastUsedDate: formatDateArray(item.lastUsedDate),
         }));
     }, [data]);
 

@@ -90,6 +90,12 @@ export const fetchPoStatus = ({ page = 0, size = 20, ponumber, status, year, par
   });
 };
 
+const Get_PoSummaryDeatil = `${url}/poStataus/fetchPoSummaryDetail`;
+export const fetchPoStatusSummary = ({ page = 0, size = 20, ponumber, status, year, partcode } = {}) => {
+  return axios.get(Get_PoSummaryDeatil, {
+    params: { page, size, ponumber, status, year, partcode },
+  });
+};
 
 // const savePo = `${url}/poStataus/savePoStatus`
 export const savePoStataus = (id, formData) =>
@@ -336,8 +342,12 @@ export const getIssuanceTATReportDetailFilter = (page = 0, size = 10, formData) 
 };
 
 
+const Get_IssuanceTATDashboard = `${url}/issuanceTAT/fetchIssuanceTATAverageDashboard`;
+export const getIssuanceTATDashboard = (formData) => {
+  return axios.post(Get_IssuanceTATDashboard, formData);
+};
 
-const Get_UnitcomponenetReportDetailFilter = `${url}/unitcomponent/fetchunitcomponentReportFilter`;
+const Get_UnitcomponenetReportDetailFilter = `${url}/unitcomponent/fetchunitcomponentReportSeprate`;
 export const getUnitcompoenentDetailFilter = (page = 0, size = 10, formData) => {
   return axios.post(`${Get_UnitcomponenetReportDetailFilter}?page=${page}&size=${size}`, formData);
 };
@@ -532,6 +542,14 @@ export const checkUserSession = (formData7) => axios.post(checkUserTocken, formD
 const get_PartocdeList = `${url}/RecevingReportCon/getPartcode`;
 export const fetchPartcodeReport = () => axios.get(get_PartocdeList);
 
+const get_ReworkerPartocdeList = `${url}/repaierCon/dropdown-data`;
+export const fetchPartcodeDasboard = () => axios.get(get_ReworkerPartocdeList);
+
+
+const get_ReworkerQtyDashboardList = `${url}/repaierCon/reworkerSummary`;
+export const fetchReworkDashboard = (params) => {
+  return axios.get(get_ReworkerQtyDashboardList, { params });
+};
 const get_StockLocationList = `${url}/StockTransferCon/getLocationType`;
 export const fetchStockLocationList = () => axios.get(get_StockLocationList);
 
@@ -539,6 +557,14 @@ export const fetchStockLocationList = () => axios.get(get_StockLocationList);
 const Get_DownloadReceivingReportFilter = `${url}/RecevingReportCon/downloadLocalReportFilter-excel`;
 export const downloadReceivingReportFilter = (formData) =>
   axios.post(Get_DownloadReceivingReportFilter, formData, {
+    responseType: "blob",
+  });
+
+
+  const Get_DownloadProductQtyFilter = `${url}/unitcomponent/downloadProductQty-excel`;
+export const downloadProductQtyFilter = (formData) =>
+  axios.get(Get_DownloadProductQtyFilter, {
+    params: formData,
     responseType: "blob",
   });
 
@@ -586,3 +612,19 @@ export const downloadStockOverviewReportFilter = (formData) =>
 
   const get_TransferLocationList = `${url}/TransferLocation/getLocationlist`;
 export const fetchTransferLocation = () => axios.get(get_TransferLocationList);
+
+
+  const Get_DownloadPoSummaryReportFilter = `${url}/poStataus/downloadPoSummaryStatus-excel`;
+export const downloadPoSummaryReportFilter = (formData) =>
+  axios.get(Get_DownloadPoSummaryReportFilter, {
+    params: formData,          // ✅ query params
+    responseType: "blob",      // ✅ MUST
+  });
+
+    const Get_DownloadRecevingSummaryReportFilter = `${url}/poStataus/downloadRecevingSummaryStatus-excel`;
+export const donwloadSummaryinReceving = (formData) =>
+  axios.get(Get_DownloadRecevingSummaryReportFilter, {
+    params: formData,          // ✅ query params
+    responseType: "blob",      // ✅ MUST
+  });
+  

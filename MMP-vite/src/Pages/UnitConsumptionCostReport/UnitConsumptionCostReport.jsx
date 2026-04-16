@@ -15,6 +15,7 @@ const UnitConsumptionCostReport = () => {
     const [componentUsageList, setComponentUsageList] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [productDetail, setProductDetail] = useState([]);
+    const [componentUsage, setComponentUsage] = useState([]);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
@@ -29,10 +30,10 @@ const UnitConsumptionCostReport = () => {
     const [downloadProgress, setDownloadProgress] = useState(null);
     const [stockReportDetail, setStockReportDetail] = useState([]);
     const [locationList, setLocationList] = useState([]);
-    const [unitReportDetail,setUnitReportDetail] = useState([]);
+    const [unitReportDetail, setUnitReportDetail] = useState([]);
 
     const [formData, setFormData] = useState({
-        productname:"",
+        productname: "",
         // dateyear:""
 
 
@@ -77,57 +78,92 @@ const UnitConsumptionCostReport = () => {
     const debouncedSearch = useDebounce(searchText, 500);
     const userId = localStorage.getItem("userId");
 
-     const fetchPartAndProduct = () => {
-            getProductAndPartcode()
-                .then((response) => {
-    
-                    const data = response.data;
-                    // setComponentUsage(data.ComponentUsage || []);
-                    setProductDetail(data.ProductDetail || []);
-                })
-                .catch((error) => {
-                    console.error("Error fetching data:", error);
-                });
-        };
-    
-        useEffect(() => {
-            fetchPartAndProduct();
-        }, [])
+    const fetchPartAndProduct = () => {
+        getProductAndPartcode()
+            .then((response) => {
 
-        const handleFilter = (e) => {
-                e.preventDefault();
-                // if (!valiDate()) return;
-                // const isValid = valiDate();
-                // if (!isValid) return; // stop if invalid
-                if (!hasAnyFilter() && !searchText?.trim()) {
-                    setErrorMessage("Please select or enter at least one filter");
-                    setShowErrorPopup(true);
-                    return;
-                }
-                setShowTable(true);
-                setIsFilterActive(true);
-                fetchFilterResult();
-        
-            };
-        
-            const fetchFilterResult = (search = "") => {
-        
-                    setLoading(true)
-                const payload = {
-                    ...formData,
-                    // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
-                    search: search?.trim() || null
-                };
-            
-                    getUnitcompoenentDetailFilter(page - 1, perPage, payload)
-                     .then(res => {
-            // use content array directly
+                const data = response.data;
+                setComponentUsage(data.ComponentUsage || []);
+                setProductDetail(data.ProductDetail || []);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+    };
+
+    useEffect(() => {
+        fetchPartAndProduct();
+    }, [])
+
+
+    useEffect(() => {
+        if (isFilterActive) {
+            fetchFilterResult();
+        }
+    }, [page, perPage]); // ✅ re-fetch when page or size changes
+
+    const handleFilter = (e) => {
+        e.preventDefault();
+        // if (!valiDate()) return;
+        // const isValid = valiDate();
+        // if (!isValid) return; // stop if invalid
+        // if (!hasAnyFilter() && !searchText?.trim()) {
+        //     setErrorMessage("Please select or enter at least one filter");
+        //     setShowErrorPopup(true);
+        //     return;
+        // }
+        setShowTable(true);
+        setIsFilterActive(true);
+        fetchFilterResult();
+
+    };
+
+    // const fetchFilterResult = (search = "") => {
+
+    //     setLoading(true)
+    //     const payload = {
+    //         ...formData,
+    //         // issuanceType: formData.componentUsage === "PTL" ? "PTL" : "DTL",
+    //         search: search?.trim() || null
+    //     };
+
+    //     getUnitcompoenentDetailFilter(page - 1, perPage, payload)
+    //         .then(res => {
+    //             // use content array directly
+    //             setUnitReportDetail(res.data?.content || []);
+    //             // setTotalRows(res.data?.content?.length || 0);
+    //             setTotalRows(res.data?.totalElements || 0);
+    //         })
+    //         .finally(() => setLoading(false));
+    // };
+
+
+
+
+
+    const fetchFilterResult = (search = "") => {
+    setLoading(true);
+    const payload = {
+        ...formData,
+        search: search?.trim() || null
+    };
+
+    getUnitcompoenentDetailFilter(page - 1, perPage, payload)
+        .then(res => {
             setUnitReportDetail(res.data?.content || []);
-            setTotalRows(res.data?.content?.length || 0);
+            setTotalRows(res.data?.totalElements || 0); // ✅ fix here
         })
-                        .finally(() => setLoading(false));
-                };
+        .finally(() => setLoading(false));
+};
 
+    const formClear = () => {
+        setFormData({
+            productname: "",
+
+        })
+        setShowTable(false);
+
+    }
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -136,23 +172,24 @@ const UnitConsumptionCostReport = () => {
                 </div>
 
                 <UnitConsumptionTextfiled
-                                    productDetail={productDetail}
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                    handleInputChange={handleInputChange}
-                                    formErrors={formErrors}
-                                    handlePoChange={handlePoChange}
-                                    
-                                />
-                                 <div className="ReworkerButton9">
+                    productDetail={productDetail}
+                    componentUsage={componentUsage}
+                    formData={formData}
+                    setFormData={setFormData}
+                    handleInputChange={handleInputChange}
+                    formErrors={formErrors}
+                    handlePoChange={handlePoChange}
+
+                />
+                <div className="ReworkerButton9">
                     <button className='ComCssSubmitButton' onClick={handleFilter} >Search</button>
-                    <button className='ComCssClearButton' >Clear</button>
+                    <button className='ComCssClearButton' onClick={formClear} >Clear</button>
                 </div>
             </div>
             {showTable &&
-                            <div className='ComCssTable'>
-                                <h5 className='ComCssTableName'>Report Detail</h5>
-                                {/* <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+                <div className='ComCssTable'>
+                    <h5 className='ComCssTableName'>Report Detail</h5>
+                    {/* <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                                     <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
                                         {loading
                                             ? downloadProgress !== null
@@ -179,23 +216,23 @@ const UnitConsumptionCostReport = () => {
                                         )}
                                     </div>
                                 </div> */}
-                                <>
-                                    <LoadingOverlay loading={loading} />
-                                    <UnitComponentTable
-                                        data={unitReportDetail}
-                                        page={page}
-                                        perPage={perPage}
-                                        totalRows={totalRows}
-                                        setPage={setPage}
-                                        setPerPage={setPerPage}
-                                    />
-            
-            
-                                </>
-            
-                            </div>
-            
-                        }
+                    <>
+                        <LoadingOverlay loading={loading} />
+                        <UnitComponentTable
+                            data={unitReportDetail}
+                            page={page}
+                            perPage={perPage}
+                            totalRows={totalRows}
+                            setPage={setPage}
+                            setPerPage={setPerPage}
+                        />
+
+
+                    </>
+
+                </div>
+
+            }
         </div>
     )
 }

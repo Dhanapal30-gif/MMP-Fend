@@ -59,6 +59,9 @@ import IssuanceTatReport from './Pages/IssuanceTATReport/issuanceTatReport';
 import UnitConsumptionCostReport from './Pages/UnitConsumptionCostReport/UnitConsumptionCostReport';
 import LocationMaster from './Pages/LocationMaster/LocationMaster';
 import ReworkerSummaryDashboard from './Pages/ReworkerSummaryDashboard/ReworkerSummaryDashboard';
+import IssuanceTATDashboard from './Pages/IssuanceTATDashboard/IssuanceTATDashboard';
+import UnitCom_CostDashboard from './Pages/UnitCom_CostDashboard/UnitCom_CostDashboard';
+import RoadmapDashboard from './Pages/Own/RoadmapDashboard';
 
 function App() {
 
@@ -133,10 +136,13 @@ function App() {
        { name: "UnitConsumptionCostReport", path: "/UnitConsumptionCostReport" },
        { name: "locationMaster", path: "/LocationMaster" },
         { name: "reworkerSummaryDashboard", path: "/ReworkerSummaryDashboard" },
+       { name: "issuanceTATDashboard", path: "/IssuanceTATDashboard" },
+         { name: "unitCom_CostDashboard", path: "/UnitCom_CostDashboard" },
+          { name: "roadmapDashboard", path: "/RoadmapDashboard" },
       ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
-    } catch (err) {
+    } catch (err) { 
       console.error("Screen auto-registration failed", err);
     }
   }
@@ -242,6 +248,9 @@ function App() {
           <Route path='/unitConsumptionCostReport' element={<UnitConsumptionCostReport />} />
           <Route path='/locationMaster' element={<LocationMaster />} />
           <Route path='/reworkerSummaryDashboard' element={<ReworkerSummaryDashboard />} />
+          <Route path='/issuanceTATDashboard' element={<IssuanceTATDashboard />} />
+          <Route path='/unitCom_CostDashboard' element={<UnitCom_CostDashboard />} />
+          <Route path='/roadmapDashboard' element={<RoadmapDashboard />} />
           <Route
             path="/receving" 
             element={

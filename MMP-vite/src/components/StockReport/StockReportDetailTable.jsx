@@ -42,7 +42,7 @@ const customConfig = {
     transfer_ReqQty: { label: "Transfer Req Qty" },
     transferQty: { label: "Transfer Qty" },
     unitvalue: { label: "Unit Value" },
-    totalvalue: { label: "Total Value Euro" },
+    totalvalue: { label: "Total Value €" },
 
     
 

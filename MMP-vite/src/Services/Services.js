@@ -162,6 +162,9 @@ export const getLocationMaster = () => axios.get(Get_LocationMaster);
 const Get_PartProduct = `${url}/issuanceTAT/getPartAndProduct`;
 export const getProductAndPartcode = () => axios.get(Get_PartProduct);
 
+const Get_getHomeCard = `${url}/HomeCon/homeCardDetail`;
+export const getHomeCard = () => axios.get(Get_getHomeCard);
+
 const save_Bom = `${url}/Bom/SaveBom`
 export const saveBomMaster = (formData) => axios.post(save_Bom, formData);
 
