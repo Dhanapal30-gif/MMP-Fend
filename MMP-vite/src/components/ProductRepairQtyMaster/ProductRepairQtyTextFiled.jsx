@@ -131,7 +131,7 @@ const ProductRepairQtyTextFiled = ({
                     error={Boolean(formErrors?.totalRepairedQty)}
                     helperText={formErrors?.totalRepairedQty || ""}
                 />
-                <ComTextFiled
+                {/* <ComTextFiled
                     label="Repaired Ok"
                     name="repairedOk"
                     type="number"
@@ -148,7 +148,7 @@ const ProductRepairQtyTextFiled = ({
                     onChange={(e) => handleChange("scrap", e.target.value)}
                     error={Boolean(formErrors?.scrap)}
                     helperText={formErrors?.scrap || ""}
-                />
+                /> */}
             </ThemeProvider>
         </div >
     )

@@ -46,7 +46,7 @@ const customConfig = {
     receivingdate:{label:"Last ReceivingDate"},
     issuanceDate:{label:"Last issuanceDate"},
     unitValue:{label:"Unit Value"},
-    totalValue:{label:"Total Value Euro"}
+    totalValue:{label:"Total Value €"}
 };
 
 const StockOverviewTable = ({

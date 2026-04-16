@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PoTextFiled from "../../components/PoStatus/PoTextFiled";
-import { fetchPoStatusData } from '../../components/PoStatus/PoAction.js';
+import { fetchPoStatusData, PoSummaryStatusData } from '../../components/PoStatus/PoAction.js';
 import "../../components/Com_Component/COM_Css.css";
 import PoTableReSummary from "../../components/PoStatus/PoTableReSummary";
 import PoTable from "../../components/PoStatus/PoTable";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
-import { savePoStataus } from '../../Services/Services_09.js';
+import { donwloadSummaryinReceving, downloadPoSummaryReportFilter, downloadReceivingReportFilter, fetchPoStatusSummary, savePoStataus } from '../../Services/Services_09.js';
 
 
 const PoStatus = () => {
@@ -28,6 +28,7 @@ const PoStatus = () => {
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalRows, setTotalRows] = useState(0);
+    const [totalPosummaryRows, setTotalPosummaryRows] = useState(0);
     const [loading, setLoading] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
     const [searchText, setSearchText] = useState("");
@@ -39,6 +40,7 @@ const PoStatus = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [formPo, setformPo] = useState("");
+    const [poSummaryStatusData, setPoSummaryStatusData] = useState([]);
     const handleChange = (name, value) => {
         const newData = {
             ...formData,
@@ -48,9 +50,16 @@ const PoStatus = () => {
     };
 
     const handlePoChange = (id, field, value) => {
-        setPoData((prev) =>
+        // setPoData((prev) =>
+        //     prev.map((item) =>
+        //         item.Poid === id
+        //             ? { ...item, [field]: value }
+        //             : item
+        //     )
+        // );
+        setPoSummaryStatusData((prev) =>
             prev.map((item) =>
-                item.Poid === id
+                item.poid === id
                     ? { ...item, [field]: value }
                     : item
             )
@@ -84,53 +93,97 @@ const PoStatus = () => {
         partDescriptionOptions: [],
     });
 
-    useEffect(() => {
+
+    const loadPoStatusData = () => {
         if (searchText) return;
+        const { year, status, ponumber, partcode } = formData;
 
-        const loadPoStatusData = () => {
-            const { year, status, ponumber, partcode } = formData;
+        if (year || status || ponumber || partcode) {
+            setLoading(true);
+            fetchPoStatusData((data) => {
+                const responseData = data?.content || [];
 
-            if (year || status || ponumber || partcode) {
-                setLoading(true);
-                fetchPoStatusData((data) => {
-                    const responseData = data?.content || [];
+                setPoData(
+                    responseData.map((item, index) => ({
+                        ...item,
+                        id: `${item.Poid}_${index}`,
+                    }))
+                );
 
-                    setPoData(
-                        responseData.map((item, index) => ({
-                            ...item,
-                            id: `${item.Poid}_${index}`,
-                        }))
-                    );
+                setTotalRows(data?.totalElements || 0);
+                setPerPage(data?.size || 10);
 
-                    setTotalRows(data?.totalElements || 0);
-                    setPerPage(data?.size || 10);
+                // const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
+                //     .filter(Boolean)
+                //     .map((val) => ({ label: val, value: val }));
 
-                    const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
-                        .filter(Boolean)
-                        .map((val) => ({ label: val, value: val }));
+                // const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
+                //     .filter(Boolean)
+                //     .map((val) => ({ label: val, value: val }));
 
-                    const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
-                        .filter(Boolean)
-                        .map((val) => ({ label: val, value: val }));
+                // const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
+                //     .filter(Boolean)
+                //     .map((val) => ({ label: val, value: val }));
 
-                    const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
-                        .filter(Boolean)
-                        .map((val) => ({ label: val, value: val }));
+                // setPoDropdownOptions({
+                //     ponumberOptions,
+                //     partcodeOptions,
+                //     partDescriptionOptions
+                // });
 
-                    setPoDropdownOptions({
-                        ponumberOptions,
-                        partcodeOptions,
-                        partDescriptionOptions
-                    });
+                setLoading(false);
+            }, year, status, ponumber, partcode, page - 1, perPage);
+        }
+    };
 
-                    setLoading(false);
-                }, year, status, ponumber, partcode, page - 1, perPage);
-            }
-        };
+    const loadPoSummaryStatusData = () => {
+        if (searchText) return;
+        const { year, status, ponumber, partcode } = formData;
+
+        if (year || status || ponumber || partcode) {
+            setLoading(true);
+            PoSummaryStatusData((data) => {
+                const responseData = data?.content || [];
+
+                setPoSummaryStatusData(
+                    responseData.map((item, index) => ({
+                        ...item,
+                        id: `${item.poid}_${index}`,
+                    }))
+                );
+
+                setTotalPosummaryRows(data?.totalElements || 0);
+                setPerPage(data?.size || 10);
+
+                const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
+                    .filter(Boolean)
+                    .map((val) => ({ label: val, value: val }));
+
+                const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
+                    .filter(Boolean)
+                    .map((val) => ({ label: val, value: val }));
+
+                const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
+                    .filter(Boolean)
+                    .map((val) => ({ label: val, value: val }));
+
+                setPoDropdownOptions({
+                    ponumberOptions,
+                    partcodeOptions,
+                    partDescriptionOptions
+                });
+
+                setLoading(false);
+            }, year, status, ponumber, partcode, page - 1, perPage);
+        }
+    };
+
+
+    useEffect(() => {
 
         loadPoStatusData(); // ✅ Call here
+        loadPoSummaryStatusData();
     }, [formData, page, perPage]);
-
 
     const filteredData = poData.filter((item) =>
         Object.values(item).some(
@@ -138,6 +191,11 @@ const PoStatus = () => {
         )
     );
 
+    const filteredPoSummaryData = poSummaryStatusData.filter((item) =>
+        Object.values(item).some(
+            (val) => val && val.toString().toLowerCase().includes(searchText.toLowerCase())
+        )
+    );
     const filteredRecData = poData.filter((item) =>
         Object.values(item).some(
             (val) => val && val.toString().toLowerCase().includes(searchRecText.toLowerCase())
@@ -170,34 +228,118 @@ const PoStatus = () => {
             setShowErrorPopup(true);
             return;
         }
-        const selectedPoStatusData = poData
-            .filter(row => selectedRows.includes(row.id))
-            .map(row => ({
-                ...row,
-                id: row.id?.split("_")[0]  // keep only numeric ID
-            }));
+
+        const selectedPoStatusData = poSummaryStatusData
+            .filter(row => selectedRows.includes(row.id));
+
+        if (selectedPoStatusData.length === 0) {
+            setErrorMessage("No matching rows found");
+            setShowErrorPopup(true);
+            return;
+        }
 
         try {
             for (const row of selectedPoStatusData) {
-                await savePoStataus(row.id, row);  // ✅ Send with ID in URL
+                const { id, ...cleanRow } = row; // ✅ remove id
+                await savePoStataus(row.poid, cleanRow);
             }
-            setSuccessMessage("Data submitted successfully!");
+
+            setSuccessMessage("PoStatus  Updated  successfully!");
             setShowSuccessPopup(true);
             setSelectedRows([]);
-            loadPoStatusData(); // 🔁 Reload updated data
+            loadPoStatusData(); // ✅ Call here
+            loadPoSummaryStatusData();
 
         } catch (error) {
-            // console.error("Submit error", error);
+            console.error(error);
             setErrorMessage("Failed to submit data.");
             setShowErrorPopup(true);
         }
     };
-
     const formClear = () => {
         setSelectedRows([]);
         setFormErrors({});
-
+       
     }
+
+    const formCancel = ()=>{
+         setFormData({
+            year: "",
+        status: "",
+        ponumber: "",
+        partcode: "",
+        partdescription: ""
+        })
+        setPoData([]);
+        setPoSummaryStatusData([])
+    }
+
+
+    const exportToExcel = () => {
+    setLoading(true);
+
+    const payload = {
+        ...formData,
+        search: searchText?.trim() || null
+    };
+
+    downloadPoSummaryReportFilter(payload, {
+        responseType: "blob" // ✅ MUST here
+    })
+    .then(response => {
+        const url = window.URL.createObjectURL(
+            new Blob([response.data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            })
+        );
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "PoStatusSummary.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    })
+    .catch(error => {
+        console.error("Download failed:", error);
+    })
+    .finally(() => {
+        setLoading(false);
+    });
+};
+
+const recevingExportToExcel = () => {
+    setLoading(true);
+
+    const payload = {
+        ...formData,
+        search: searchText?.trim() || null
+    };
+
+    donwloadSummaryinReceving(payload, {
+        responseType: "blob" // ✅ MUST here
+    })
+    .then(response => {
+        const url = window.URL.createObjectURL(
+            new Blob([response.data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            })
+        );
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "PoStatusSummary.xlsx");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    })
+    .catch(error => {
+        console.error("Download failed:", error);
+    })
+    .finally(() => {
+        setLoading(false);
+    });
+};
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -235,10 +377,10 @@ const PoStatus = () => {
 
                 </div>
                 <PoTable
-                    data={searchText ? filteredData : poData}  // ✅ filter only if search
+                    data={searchText ? filteredPoSummaryData : poSummaryStatusData}  // ✅ filter only if search
                     page={page}
                     perPage={perPage}
-                    totalRows={totalRows}
+                    totalRows={totalPosummaryRows}
                     loading={loading}
                     setPage={setPage}
                     setPerPage={setPerPage}
@@ -248,6 +390,7 @@ const PoStatus = () => {
                     formErrors={formErrors}
                 />
                 <div className="ComCssButton9">
+                    
                     {poData.length > 0 && (
                         <button style={{ backgroundColor: 'green' }} onClick={handleSubmit}>
                             Submit
@@ -255,7 +398,8 @@ const PoStatus = () => {
 
                     )}
                     <button className='ComCssClearButton' onClick={formClear}>Clear</button>
-
+                    <button className='ComCssClearButton' onClick={formCancel}>Cancel</button>
+                    
                 </div>
             </div>
 
@@ -263,7 +407,7 @@ const PoStatus = () => {
 
                 <h5 className='ComCssTableName'>Receiving Summary</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
-                    <button className="btn btn-success" onClick={() => exportToExcel(searchRecText)} >
+                    <button className="btn btn-success" onClick={() => recevingExportToExcel(searchRecText)} >
                         <FaFileExcel /> Export
                     </button>
                     <div style={{ position: "relative", display: "inline-block", width: "200px" }}>

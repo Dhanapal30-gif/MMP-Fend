@@ -28,10 +28,10 @@ const PoTableReSummary = ({
       "partcode",
       "partdescription",
       "recevingTicketNo",
-      "GRNo",
-      "GRDate",
+      "grno",
+      "grdate",
       "recevingQty",
-      "GRNQty"
+      "grnqty"
     ],
     customConfig: {
       ponumber: { label: "PO Number" },
@@ -40,9 +40,9 @@ const PoTableReSummary = ({
       partdescription: { label: "Part Description" },
       recevingTicketNo: { label: "Receving TicketNo" },
       recevingQty: { label: "Receving Qty" },
-      GRNQty: { label: "GRN Qty" },
-      GRDate: { label: "GRN Date" },
-      GRNo: { label: "GRN No" },
+      grnqty: { label: "GRN Qty" },
+      grdate: { label: "GRN Date" },
+      grno: { label: "GRN No" },
     },
     selectedRows,
     handleGRNQtyChange,

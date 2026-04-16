@@ -15,7 +15,7 @@ const formatDateArray = (arr) => {
 
 
 const fields = [
-    "productname",
+    // "productname",
     "productgroup",
     "productfamily",
     "componentUsage",

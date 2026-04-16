@@ -33,21 +33,35 @@ const PoTable = ({
   };
 
 
-  const handleSelectAll = (e) => {
+//   const handleSelectAll = (e) => {
+//   if (e.target.checked) {
+//     setSelectedRows(data.map((row) => row.poid));
+//   } else {
+//     setSelectedRows([]);
+//   }
+// };
+
+//   const handleSelect = (poid, isChecked) => {
+//     setSelectedRows((prev) => {
+//       if (isChecked) return [...prev, poid];
+//       return prev.filter((id) => id !== poid);
+//     });
+//   };
+
+const handleSelectAll = (e) => {
   if (e.target.checked) {
-    setSelectedRows(data.map((row) => row.Poid));
+    setSelectedRows(data.map((row) => row.id)); // ✅ use id
   } else {
     setSelectedRows([]);
   }
 };
 
-  const handleSelect = (poid, isChecked) => {
-    setSelectedRows((prev) => {
-      if (isChecked) return [...prev, poid];
-      return prev.filter((id) => id !== poid);
-    });
-  };
-
+const handleSelect = (id, isChecked) => {
+  setSelectedRows((prev) => {
+    if (isChecked) return [...prev, id];
+    return prev.filter((val) => val !== id);
+  });
+};
   const columns = generateColumns_checkBox({
     fields: [
       "ponumber",
@@ -56,7 +70,7 @@ const PoTable = ({
       "partdescription",
       "orderqty",
       "recevingQty",
-      "GRNQty",
+      "grnqty",
       "postatus"
     ],
     customConfig: {
@@ -66,7 +80,7 @@ const PoTable = ({
       partdescription: { label: "Part Description" },
       orderqty: { label: "Order Qty" },
       recevingQty: { label: "Receving Qty" },
-      GRNQty: { label: "GRN Qty" },
+      grnqty: { label: "GRN Qty" },
       postatus: { label: "Po Status" },
     },
     selectedRows,
@@ -84,12 +98,12 @@ const PoTable = ({
               getOptionLabel={(option) => option.label}
               value={getOptionObj(row.postatus, poStatusChange)}
               onChange={(e, newValue) =>
-                handlePoChange(row.Poid, "postatus", newValue?.value || "")
+                handlePoChange(row.poid, "postatus", newValue?.value || "")
               }
               renderInput={(params) => (
                 <TextField {...params} variant="outlined" size="small"
-                  error={!!formErrors[`postatus${row.Poid}`]}           // ✅ correct key
-                  helperText={formErrors[`postatus${row.Poid}`] || ""} // ✅ display message
+                  error={!!formErrors[`postatus${row.poid}`]}           // ✅ correct key
+                  helperText={formErrors[`postatus${row.poid}`] || ""} // ✅ display message
                 />
               )}
               className="invoice-input"

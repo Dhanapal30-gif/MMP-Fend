@@ -1,0 +1,530 @@
+/* =========================================================
+   UnitCom_CostDashboard.css
+   Dark 3-D dashboard — deep-space purple theme
+   ========================================================= */
+
+/* ---------- Root / Page ---------- */
+.ucd-wrap {
+  min-height: 100vh;
+  background: white;
+  padding: 20px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #e2d9f3;
+  box-sizing: border-box;
+}
+
+/* ---------- Top bar ---------- */
+.ucd-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.ucd-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #4903f8;
+  letter-spacing: -0.3px;
+}
+
+.ucd-subtitle {
+  font-size: 12px;
+  color: #4903f8;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ucd-drill-indicator {
+  color: #f59e0b;
+  font-size: 10px;
+}
+
+.ucd-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Live badge */
+.ucd-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #a78bfa;
+  font-weight: 500;
+}
+
+.ucd-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: ucd-pulse 2s infinite;
+}
+
+@keyframes ucd-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Clear drill button */
+.ucd-btn-clear {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ea0c0c;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ucd-btn-clear:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Drill spinner */
+.ucd-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(54, 222, 127, 0.2);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: ucd-spin 0.7s linear infinite;
+}
+@keyframes ucd-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Filter bar ---------- */
+
+
+.ucd-filter-group {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.ucd-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+
+
+
+
+.ucd-filter-select option {
+  background: white;
+}
+
+.ucd-filter-btns {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.ucd-filter-bar {
+  background: linear-gradient(135deg, #f8f4ff 0%, #fdf2ff 100%);
+  border: 1.5px solid #e0d0ff;
+  border-radius: 16px;
+  padding: 18px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.08);
+}
+
+.ucd-filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.ucd-filter-select,
+.ucd-filter-input {
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid #d8b4fe;
+  background: #ffffff;
+  color: #1e1b4b;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ucd-filter-select:focus,
+.ucd-filter-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+
+.ucd-btn-apply {
+  height: 38px;
+  padding: 0 24px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124,58,237,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.ucd-btn-apply:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124,58,237,0.5);
+}
+
+.ucd-btn-apply:active { transform: scale(0.97); }
+
+.ucd-btn-reset {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ucd-btn-reset:hover { background: rgba(255, 255, 255, 0.08); }
+
+/* ---------- Metric cards ---------- */
+.ucd-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.ucd-metric {
+  border-radius: 16px;
+    padding: 1px 16px 1px;
+  position: relative;
+  overflow: hidden;
+  transform: perspective(700px) rotateX(3deg);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5),
+              0 2px 0 rgba(255, 255, 255, 0.06) inset;
+  transition: transform 0.25s;
+}
+.ucd-metric:hover {
+  transform: perspective(700px) rotateX(0deg) translateY(-3px);
+}
+
+/* Glow overlay */
+.ucd-metric-glow {
+  position: absolute;
+  top: -40%;
+  left: -10%;
+  width: 65%;
+  height: 80%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.m1 { background: linear-gradient(140deg, #4e0bf8 0%, #4c1d95 100%); }
+.m2 { background: linear-gradient(140deg, #064e2a 0%, #065f46 100%); }
+.m3 { background: linear-gradient(140deg, #4c0519 0%, #9f1239 100%); }
+.m4 { background: linear-gradient(140deg, #159191 0%, #066268 100%); }
+
+.ucd-metric-icon {
+  font-size: 18px;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.ucd-metric-lbl {
+  font-size: 10px;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+
+  font-weight: 500;
+}
+
+.ucd-metric-val {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+.ucd-metric-loading {
+  font-size: 13px;
+  opacity: 0.5;
+  font-weight: 400;
+}
+
+.ucd-metric-hint {
+  font-size: 10px;
+  color: white;
+}
+
+/* ---------- Chart area ---------- */
+.ucd-charts {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 1fr;
+  gap: 14px;
+}
+
+/* Card base — WHITE background */
+.ucd-card {
+  background: #ffffff;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45),
+              0 1px 0 rgba(167, 139, 250, 0.06) inset;
+  transform: perspective(900px) rotateY(-1.5deg);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.ucd-card:hover {
+  transform: perspective(900px) rotateY(0deg) translateY(-3px);
+  box-shadow: 0 14px 40px rgba(124, 58, 237, 0.18);
+}
+
+/* Card head */
+.ucd-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ucd-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: blue;
+}
+
+.ucd-card-sub {
+  font-size: 11px;
+  color: rgb(212, 8, 103);
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.ucd-pill {
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: #7c3aed;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 10px;
+}
+
+/* Canvas containers */
+.ucd-canvas-bar {
+  position: relative;
+  height: 210px;
+  width: 100%;
+}
+.ucd-canvas-bar canvas { cursor: pointer; }
+
+.ucd-canvas-pie {
+  position: relative;
+  height: 175px;
+  width: 100%;
+}
+
+.ucd-canvas-donut {
+  position: relative;
+  height: 165px;
+  width: 100%;
+}
+
+/* Empty / loading state */
+.ucd-chart-empty {
+  text-align: center;
+  padding: 40px 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ---------- Pie legend ---------- */
+.ucd-pie-legend {
+  margin-bottom: 10px;
+}
+
+.ucd-pie-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: #6b7280;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(156, 210, 208, 0.06);
+}
+.ucd-pie-legend-row:last-child { border-bottom: none; }
+
+.ucd-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ucd-pie-legend-label {
+  color: #000000;
+  flex: 1;
+}
+
+.ucd-pie-legend-val {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 11px;
+  text-align: right;
+}
+
+/* ---------- Donut rows ---------- */
+.ucd-donut-rows {
+  margin-bottom: 6px;
+}
+
+.ucd-donut-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 11px;
+}
+
+.ucd-donut-row-label {
+  color: black;
+  font-weight: 500;
+  flex: 0 0 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ucd-progress-wrap {
+  flex: 1;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 30px;
+}
+
+.ucd-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.ucd-donut-row-val {
+  color: #1a1a2e;
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+  min-width: 100px;
+  text-align: right;
+}
+
+.ucd-donut-row-pct {
+  color: blue;
+  font-weight: 500;
+  font-size: 12px;
+  min-width: 34px;
+  text-align: right;
+}
+
+/* ---------- Donut center overlay ---------- */
+.ucd-donut-canvas-wrap {
+  position: relative;
+}
+
+.ucd-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ucd-donut-center-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.ucd-donut-center-sub {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .ucd-charts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ucd-card-bar {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .ucd-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ucd-charts {
+    grid-template-columns: 1fr;
+  }
+  .ucd-card-bar {
+    grid-column: auto;
+  }
+  .ucd-filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ucd-filter-select,
+  .ucd-filter-input {
+    min-width: unset;
+    width: 100%;
+  }
+  .ucd-metric-val {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ucd-metrics {
+    grid-template-columns: 1fr;
+  }
+  .ucd-wrap {
+    padding: 12px;
+  }
+  .ucd-title {
+    font-size: 17px;
+  }
+}
+
+

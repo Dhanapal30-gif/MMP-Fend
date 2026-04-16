@@ -21,20 +21,22 @@
   min-width: 150px;
 }
 
-.stat-box h3 {
-  margin: 0 0 10px 0;
+.stat-box h6 {
+  font-size: 13px;    /* title size */
+  margin: 0 0 4px 0;
 }
 
 .stat-box p {
-  font-size: 17px;
+  font-size: 13px;    /* value size */
   font-weight: bold;
   margin: 0;
 }
 .stat-box {
   flex: 1 1 18%;
-  background: linear-gradient(145deg, #d857cb, #4682ff);
+  /* background: linear-gradient(145deg, #d857cb, #bbff46); */
+   background: linear-gradient(145deg, #6e0671, #17df82);
   color: rgb(255, 255, 255);
-  padding: 20px;
+  padding: 3px;
   border-radius: 15px;
   text-align: center;
   min-width: 150px;
@@ -47,4 +49,165 @@
   transform: translateY(-5px);
   box-shadow: 8px 8px 20px rgba(0,0,0,0.3),
               -8px -8px 20px rgba(255,255,255,0.1);
+}
+
+
+.homedashFlexbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.homedashFlexbox > div {
+  width: 32.30%;
+  /* background-color: rgb(60, 80, 91); */
+  background: linear-gradient(145deg, #4e0851, #076b3c);
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #fff;
+  font-weight: 500;
+  height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Stat box variants ── */
+.stat-box--clickable  { cursor: pointer; }
+
+.stat-box--split {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-box--split-right {
+  border-left: 1px solid #ddd;
+  padding-left: 5rem;
+}
+
+.stat-hint {
+  color: #eadd28;
+  font-size: 11px;
+}
+
+/* ── Ticker ── */
+.ticker-wrap {
+  margin-top: 8px;
+  overflow: hidden;
+  height: 18px;
+}
+
+.ticker-inner {
+  display: flex;
+  gap: 24px;
+  white-space: nowrap;
+  animation: tickerScroll 10s linear infinite;
+  font-size: 12px;
+  font-weight: 500;
+  color: #f1f0e7;
+}
+
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Chart search input ── */
+.chart-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 12px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+/* ── Popup ── */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-box {
+  background: #fff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-title  { font-size: 14px; }
+
+.popup-subtitle {
+  font-size: 12px;
+  color: #999;
+  margin: 2px 0 0;
+}
+
+.popup-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+}
+
+.popup-list   { overflowY: auto; padding: 8px 16px; overflow-y: auto; }
+
+.popup-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px;
+}
+
+.popup-badge {
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.popup-empty {
+  font-size: 13px;
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
 }

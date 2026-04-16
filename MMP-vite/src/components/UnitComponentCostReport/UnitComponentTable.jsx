@@ -17,14 +17,15 @@ const fields = [
     "productname",
     "productgroup",
     "productfamily",
-    "dateyear",
-    "repairedOk",
-    "scrap",
+   
     "totalrepairedQty",
-    "pickedqty",
-    "issuedqty",
-    "totalqty", 
-    "averageCostPerUnit"
+
+    "subModuleCost",
+        "otherCost",
+    "ptlIssuanceCost",
+    "totalCost",
+    "averageCostPerUnit",
+
   
 ];
 
@@ -32,14 +33,13 @@ const customConfig = {
     productname: { label: "ProductName" },
     productgroup: { label: "ProductGroup" },
     productfamily: { label: "ProductFamily" },
-    dateyear: { label: "Date_year" },
-    repairedOk: { label: "Repaired Ok" },
-    scrap: { label: "Scrap" },
+    dateyear: { label: "Month_year" },
     totalrepairedQty: { label: "Total Repaired Qty" },
-    issuedqty: { label: "DTL Qty" },
-    pickedqty:{label:"PTL Qty"},
-    totalqty:{label:"Total Qty"},
-    averageCostPerUnit:{label:"AverageCost Per_Unit"}
+    subModuleCost: { label: "Sub Module Cost €" },
+    otherCost:{label:"DTL Issuance Cost €"},
+    ptlIssuanceCost:{label:"PTL Issuance Cost €"},
+    totalCost:{label:"Total Cost €"},
+    averageCostPerUnit:{label:"Average Cost Per_Unit €"}
 
 }
 const UnitComponentTable = ({

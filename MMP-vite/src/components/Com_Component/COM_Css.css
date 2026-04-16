@@ -230,19 +230,7 @@ body {
     /* Space between rows */
 }
 
-.dashboardHeader{
-  flex-direction: column;
-  border: 2px solid #e3edd9;
-  box-shadow: 0 4px 12px rgba(71, 235, 41, 0.1);
-  border-radius: 15px;
-  background-color: #12de1d;
-  width: 98%;
-  margin-top: 10px;
-  margin-left: 15px;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-}
+
 .ComCssFiledName {
   font-size: 15.9px;
   font-weight: bold;
@@ -609,6 +597,43 @@ body {
   margin-left: 30px;
 }
 
+.ComCssDashboardButtonMenu{
+  display: flex;
+  justify-content: flex-end;
+  color: white;
+  font-size: 14px;
+
+}
+
+.ComCssDashboardButtonMenu button {
+  color: white;
+  background-color: #20c9c6;
+  /* height: 30px; */
+  width: 70px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  font-weight: bold;
+  margin-top: 10px;
+
+}
+
+
+.ComCssDashboardButtonMenu button:hover {
+  background-color: #0d9a95;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ComCssDashboardButtonMenu button:active {
+  /* transform: scale(0.98);     */
+  transform: scale(1.30);
+
+}
 .ComCssButtonMenu button {
   color: white;
   background-color: #20c9c6;
@@ -811,5 +836,185 @@ body {
   .ComCssInput {
     margin-left: 5px;
   }
+
+}
+
+.dashboardHeader{
+    display: flex;
+  flex-direction: column;
+    justify-content: space-between;
+  border: 2px solid #d6d30f;
+  /* box-shadow: 0 4px 12px rgba(86, 12, 177, 0.1); */
+  /* border-radius: 15px; */
+  /* background-color: #047f69; */
+  background: linear-gradient(to right, #4e0a4b, #179999);
+  width: 98%;
+  margin-top: 5px;
+  margin-left: 15px;
+  padding: 5px;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.85rem;
+  
+ 
+  /* position: relative;
+  overflow: hidden;
+  z-index: 1; */
+}
+
+.dashboardDropdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+}
+
+.reworkerdropdown-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.reworkerdropdown-label {
+ 
+ color:white;
+  border-radius: 6px;
+  cursor: pointer;
+
+  font-weight:bold;
+}
+
+.reworkerdropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.reworkerdropdown-item {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.reworkerdropdown-search {
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-bottom: 1px solid #c516c2;
+  outline: none;
+  font-size: 13px;
+}
+
+.selected-value {
+  /* margin-top: 6px; */
+  padding: 1px 5px;
+  border: 1px solid #d910a0;
+  border: radius 10px;
+
+  background-color: white;
+  font-size: 10px;
+}
+
+.dashFlexbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px;
+}.dashFlexbox > div {
+  width: 32.30%;
+  background-color: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  box-sizing: border-box;
+  color: #333;
+  font-weight: 500;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dashFlexbox > div:hover {
+  box-shadow: 0 8px 24px rgba(32, 178, 200, 0.25);
+  transform: translateY(-2px);
+  border-color: #20b2c8;
+}
+
+.dashFlexboxA > div {
+  width: 49.15%;
+  background-color: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  box-sizing: border-box;
+  color: #333;
+  font-weight: 500;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.dashFlexboxA > div:hover {
+  box-shadow: 0 8px 24px rgba(31, 51, 228, 0.2);
+  transform: translateY(-2px);
+  border-color: #1f33e4;
+}
+
+.dashFlexboxA {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.dashFlexbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px;
+}
+
+.ButtonSummaryDashboard {
+  color: white;
+}
+@media (min-width: 1024px) and (max-width: 1439.98px) {
+  .dashboardDropdown {
+  
+  gap: 30px;
+}
+
+
+.dashboardHeader{
+  width: 98%;
+  margin-top: 5px;
+  margin-left: 15px;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  /* position: relative;
+  overflow: hidden;
+  z-index: 1; */
+}
+
 
 }
