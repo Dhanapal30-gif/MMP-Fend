@@ -17,6 +17,7 @@ const fields = [
     "productname",
     "productgroup",
     "productfamily",
+    "monthYear",
    
     "totalrepairedQty",
 
@@ -39,7 +40,8 @@ const customConfig = {
     otherCost:{label:"DTL Issuance Cost €"},
     ptlIssuanceCost:{label:"PTL Issuance Cost €"},
     totalCost:{label:"Total Cost €"},
-    averageCostPerUnit:{label:"Average Cost Per_Unit €"}
+    averageCostPerUnit:{label:"Average Cost Per_Unit €"},
+    monthYear:{label:"Month_Year"},
 
 }
 const UnitComponentTable = ({

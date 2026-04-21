@@ -8,7 +8,9 @@ import { useNavigate } from "react-router-dom";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { FaFileExcel } from "react-icons/fa";
 import { checkUserValid } from "../../components/Com_Component/userUtils";
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { Snackbar, Alert } from "@mui/material";
 
 const UserDetail = () => {
@@ -148,62 +150,90 @@ const UserDetail = () => {
 
 
 
-    const exportToExcel = (searchText = "") => {
-        if (!Array.isArray(roleAndScreen) || roleAndScreen.length === 0) return;
+    // const exportToExcel = (searchText = "") => {
+    //     if (!Array.isArray(roleAndScreen) || roleAndScreen.length === 0) return;
 
-        // Filter data if search text is provided
-        const filteredData = searchText.trim()
-            ? roleAndScreen.filter(item =>
-                item.userName.toLowerCase().includes(searchText.toLowerCase()) ||
-                item.userId.toLowerCase().includes(searchText.toLowerCase()) ||
-                item.emailAddress.toLowerCase().includes(searchText.toLowerCase()) ||
-                item.phoneNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-                item.productname.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
-                item.productGroup.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
-                item.requestType.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
-                item.requesterType.join(", ").toLowerCase().includes(searchText.toLowerCase())
-            )
-            : roleAndScreen;
+    //     // Filter data if search text is provided
+    //     const filteredData = searchText.trim()
+    //         ? roleAndScreen.filter(item =>
+    //             item.userName.toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.userId.toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.emailAddress.toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.phoneNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.productname.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.productGroup.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.requestType.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
+    //             item.requesterType.join(", ").toLowerCase().includes(searchText.toLowerCase())
+    //         )
+    //         : roleAndScreen;
 
-        if (filteredData.length === 0) return;
+    //     if (filteredData.length === 0) return;
 
-        // Flatten array fields
-        const formattedData = filteredData.map(item => ({
-            // id: item.id,
-            userId: item.userId,
-            userName: item.userName,
-            emailAddress: item.emailAddress,
-            phoneNumber: item.phoneNumber,
-            userRole: item.userRole.join(", "),
-            requestType: item.requestType.join(", "),
-            productGroup: item.productGroup.join(", "),
-            requesterType: item.requesterType.join(", "),
-            productname: item.productname.join(", "),
-            userRole: item.userRole.join(",")
-        }));
+    //     // Flatten array fields
+    //     const formattedData = filteredData.map(item => ({
+    //         // id: item.id,
+    //         userId: item.userId,
+    //         userName: item.userName,
+    //         emailAddress: item.emailAddress,
+    //         phoneNumber: item.phoneNumber,
+    //         userRole: item.userRole.join(", "),
+    //         requestType: item.requestType.join(", "),
+    //         productGroup: item.productGroup.join(", "),
+    //         requesterType: item.requesterType.join(", "),
+    //         productname: item.productname.join(", "),
+    //         userRole: item.userRole.join(",")
+    //     }));
 
-        const sheet = XLSX.utils.json_to_sheet(formattedData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, sheet, "UserList");
-        XLSX.writeFile(workbook, "UserList.xlsx");
-    };
+    //     const sheet = XLSX.utils.json_to_sheet(formattedData);
+    //     const workbook = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(workbook, sheet, "UserList");
+    //     XLSX.writeFile(workbook, "UserList.xlsx");
+    // };
 
-    // const columns = React.useMemo(
-    //     () =>
-    //         generateColumns({
-    //             fields,
-    //             customConfig,
-    //             customCellRenderers: {
-    //                 User_Edit: (row) => (
-    //                     <button className="edit-button" onClick={() => handleEditClick(row)}>
-    //                         <FaEdit />
-    //                     </button>
-    //                 ),
-    //                 productname: (row) => (row.productname ? row.productname.join(", ") : ""),
-    //             },
-    //         }),
-    //     [fields, customConfig, handleEditClick]
-    // );
+    const exportToExcel = async (searchText = "") => {
+    if (!Array.isArray(roleAndScreen) || roleAndScreen.length === 0) return;
+
+    const filteredData = searchText.trim()
+        ? roleAndScreen.filter(item =>
+            item.userName.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.userId.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.emailAddress.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.phoneNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.productname.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
+            item.productGroup.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
+            item.requestType.join(", ").toLowerCase().includes(searchText.toLowerCase()) ||
+            item.requesterType.join(", ").toLowerCase().includes(searchText.toLowerCase())
+        )
+        : roleAndScreen;
+
+    if (filteredData.length === 0) return;
+
+    const formattedData = filteredData.map(item => ({
+        userId: item.userId,
+        userName: item.userName,
+        emailAddress: item.emailAddress,
+        phoneNumber: item.phoneNumber,
+        userRole: item.userRole.join(", "),
+        requestType: item.requestType.join(", "),
+        productGroup: item.productGroup.join(", "),
+        requesterType: item.requesterType.join(", "),
+        productname: item.productname.join(", "),
+    }));
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("UserList");
+
+    worksheet.columns = Object.keys(formattedData[0]).map(key => ({
+        header: key,
+        key: key,
+        width: 20
+    }));
+
+    formattedData.forEach(row => worksheet.addRow(row));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer], { type: "application/octet-stream" }), "UserList.xlsx");
+};
     const columns = React.useMemo(
         () =>
             generateColumns({

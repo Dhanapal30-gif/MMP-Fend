@@ -534,7 +534,7 @@ const payload = Object.keys(locationQty)
                 <TableRow sx={{ bgcolor: '#e3f2fd' }}>
                   <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', padding: '5px', width: '15%' }}>Location</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Quantity</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Issue Qty</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Request Qty</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>Available Qty</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '13px', width: '15%' }}>BatchCode</TableCell>
                   {/* {activeRow?.requestertype === "Submodule" && (

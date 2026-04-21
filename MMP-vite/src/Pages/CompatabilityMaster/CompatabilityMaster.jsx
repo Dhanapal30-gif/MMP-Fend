@@ -2,7 +2,9 @@ import React, { useState, useMemo, useRef, useEffect } from 'react'
 // import './RcStore.css';
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses, Select, FormControl, InputLabel } from '@mui/material';
 import DataTable from "react-data-table-component";
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { FaFileExcel } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
@@ -328,18 +330,29 @@ const CompatabilityMaster = () => {
         }
     };
 
-    const handleDownloadExcel = () => {
-        const worksheetData = [
-            ["parentpartcode", "partcode"]
-        ];
+    // const handleDownloadExcel = () => {
+    //     const worksheetData = [
+    //         ["parentpartcode", "partcode"]
+    //     ];
 
-        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    //     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Product Data");
+    //     const workbook = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(workbook, worksheet, "Product Data");
 
-        XLSX.writeFile(workbook, "CompatabilityMaster.xlsx");
-    };
+    //     XLSX.writeFile(workbook, "CompatabilityMaster.xlsx");
+    // };
+
+    const handleDownloadExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Product Data");
+
+    worksheet.addRow(["parentpartcode", "partcode"]);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    saveAs(blob, "CompatabilityMaster.xlsx");
+};
 
     const handleUpload = (event) => {
         setLoading(true);
@@ -361,47 +374,59 @@ const CompatabilityMaster = () => {
         setTimeout(function () {
             const reader = new FileReader();
             reader.readAsBinaryString(file);
-            reader.onload = (e) => {
-                try {
-                    const data = e.target.result;
-                    const workbook = XLSX.read(data, { type: "binary" });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+           reader.onload = async (e) => {
+    try {
+        const buffer = e.target.result;
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
 
-                    const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
-                    const expectedColumns = ["parentpartcode", "partcode"];
-                    const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+        const worksheet = workbook.worksheets[0];
+        const rows = [];
+        worksheet.eachRow((row, rowNumber) => {
+            rows.push(row.values.slice(1)); // slice(1) removes ExcelJS's empty index 0
+        });
 
-                    if (!isValid) {
-                        setShowErrorPopup(true);
-                        setErrorMessage("Invalid column format. Please upload a file with the correct columns")
-                        event.target.value = null;
-                        setLoading(false);
-                        return;
-                    }
-                    // Prepare data ignoring the first row (since it's the header row).
-                    const parsedData = XLSX.utils.sheet_to_json(worksheet);
-                    if (!parsedData || parsedData.length === 0) {
-                        setShowErrorPopup(true);
-                        setErrorMessage("No data found in the uploaded file")
-                        event.target.value = null;
-                        exceluploadClear();
-                        setLoading(false);
-                        return;
-                    }
-                    setExcelUploadData(parsedData);
-                    setTotalRows(parsedData.length);
-                    setHandleUploadButton(true);
-                    setHandleSubmitButton(false);
-                    setShowUploadTable(true);
-                    setShowTable(false)
-                } catch (error) {
-                    console.error("Error processing file:", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
+        const sheetHeaders = rows[0]?.map((h) => String(h).toLowerCase()) || [];
+        const expectedColumns = ["parentpartcode", "partcode"];
+        const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+
+        if (!isValid) {
+            setShowErrorPopup(true);
+            setErrorMessage("Invalid column format. Please upload a file with the correct columns");
+            event.target.value = null;
+            setLoading(false);
+            return;
+        }
+
+        const dataRows = rows.slice(1).map((row) => {
+            const obj = {};
+            sheetHeaders.forEach((key, i) => { obj[key] = row[i] ?? ""; });
+            return obj;
+        }).filter(row => Object.values(row).some(v => v !== ""));
+
+        if (!dataRows.length) {
+            setShowErrorPopup(true);
+            setErrorMessage("No data found in the uploaded file");
+            event.target.value = null;
+            setLoading(false);
+            return;
+        }
+
+        setExcelUploadData(dataRows);
+        setTotalRows(dataRows.length);
+        setHandleUploadButton(true);
+        setHandleSubmitButton(false);
+        setShowUploadTable(true);
+        setShowTable(false);
+    } catch (error) {
+        console.error("Error processing file:", error);
+    } finally {
+        setLoading(false);
+    }
+};
+
+// Change readAsBinaryString to readAsArrayBuffer
+reader.readAsArrayBuffer(file);
             reader.onerror = (error) => {
                 // console.error("File read error:", error);
                 setLoading(false);

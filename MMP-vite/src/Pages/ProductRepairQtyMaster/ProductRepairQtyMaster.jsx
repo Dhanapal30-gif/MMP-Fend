@@ -161,23 +161,39 @@ const ProductRepairQtyMaster = () => {
     }
 
 
+    // const formClear = () => {
+
+    //     setFormData({
+    //         productname: "",
+    //         scrap: "",
+    //         repairedOk: "",
+    //         // dateyear: "",
+    //         dateyear: prev.dateyear, 
+    //         totalRepairedQty: "",
+    //         productgroup: "",
+    //         productfamily: ""
+    //     })
+    //     setFormErrors("");
+    //     setUpdateButton(false)
+    //     setAddButton(true)
+
+
+    // }
+
     const formClear = () => {
-
-        setFormData({
-            productname: "",
-            scrap: "",
-            repairedOk: "",
-            dateyear: "",
-            totalRepairedQty: "",
-            productgroup: "",
-            productfamily: ""
-        })
-        setFormErrors("");
-        setUpdateButton(false)
-        setAddButton(true)
-
-
-    }
+    setFormData(prev => ({
+        productname: "",
+        scrap: "",
+        repairedOk: "",
+        dateyear: prev.dateyear,  // ← keep existing dateyear
+        totalRepairedQty: "",
+        productgroup: "",
+        productfamily: ""
+    }));
+    setFormErrors("");
+    setUpdateButton(false);
+    setAddButton(true);
+};
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);

@@ -14,7 +14,7 @@ import { tr } from 'date-fns/locale';
 import { fetchScreenName, fetchUserRole } from '../../Services/Services';
 import CommonDataTable from '../../components/Com_Component/CommonDataTable';
 import { generateColumns } from '../../components/Com_Component/generateColumns'; // make sure this import is correct
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
 import { checkUserValid } from "../../components/Com_Component/userUtils";
 import ExcelJS from 'exceljs';
 import { Snackbar, Alert } from "@mui/material";
