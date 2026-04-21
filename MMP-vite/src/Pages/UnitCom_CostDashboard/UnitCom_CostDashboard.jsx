@@ -14,11 +14,21 @@ const DONUT_COLORS = ["#7c3aed","#f59e0b","#10b981","#ef4444","#3b82f6","#ec4899
 const PIE_COLORS   = ["#7c3aed","#f59e0b","#10b981","#ef4444"];
 const PIE_LABELS   = ["DTL cost","PTL cost","Total cost","Avg cost/unit"];
 
+// const METRICS_CFG = [
+//   { key:"dtl", cls:"m1", label:"Total DTL Cost",  hint:"Direct Line issuance" },
+//   { key:"ptl", cls:"m2",  label:"Total PTL Cost",  hint:"Parts Moving PTL"  },
+//   { key:"tot", cls:"m3",  label:"Total Cost",      hint:"DTL + PTL combined"      },
+//   { key:"avg", cls:"m4",  label:"Avg Cost / Unit", hint:"Per Repaired unit"       },
+// ];
+
 const METRICS_CFG = [
-  { key:"dtl", cls:"m1", label:"Total DTL Cost",  hint:"Direct Line issuance" },
-  { key:"ptl", cls:"m2",  label:"Total PTL Cost",  hint:"Parts Moving PTL"  },
-  { key:"tot", cls:"m3",  label:"Total Cost",      hint:"DTL + PTL combined"      },
-  { key:"avg", cls:"m4",  label:"Avg Cost / Unit", hint:"Per Repaired unit"       },
+  { key:"other", cls:"m5", label:"DTL Issuance Cost",    hint:"Requester Type: Others" },
+  { key:"sub",   cls:"m6", label:"Sub Module Cost",      hint:"Requester Type: Submodule" },
+  { key:"dtl",   cls:"m1", label:"Total DTL Cost",       hint:"Direct Line issuance" },
+  { key:"ptl",   cls:"m2", label:"Total PTL Cost",       hint:"Parts Moving PTL"     },
+  { key:"tot",   cls:"m3", label:"Total Cost",           hint:"DTL + PTL combined"   },
+  { key:"avg",   cls:"m4", label:"Avg Cost / Unit",      hint:"Per Repaired unit"    },
+  
 ];
 
 function fmtFull(v) {
@@ -109,34 +119,65 @@ const UnitCom_CostDashboard = () => {
       .finally(() => setLoading(false));
   };
 
+  // const aggregateAndSetState = (content, isDrill = false) => {
+  //   if (!content || content.length === 0) {
+  //     setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0 });
+  //     setDonutLegendData({});
+  //     if (isDrill) setDrillData(null);
+  //     return;
+  //   }
+
+  //   const aggDTL   = content.reduce((s, r) => s + (Number(r.dtlIssuanceCost)    || 0), 0);
+  //   const aggPTL   = content.reduce((s, r) => s + (Number(r.ptlIssuanceCost)    || 0), 0);
+  //   const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)          || 0), 0);
+  //   const aggAvg   = content.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0) / content.length;
+
+  //   const rtbAgg = {};
+  //   content.forEach(r => {
+  //     if (!r.requesterTypeBreakdown) return;
+  //     Object.entries(r.requesterTypeBreakdown).forEach(([k, v]) => {
+  //       rtbAgg[k] = (rtbAgg[k] || 0) + (Number(v) || 0);
+  //     });
+  //   });
+
+  //   setPieLegendData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg });
+  //   setDonutLegendData({ ...rtbAgg });
+
+  //   if (isDrill) {
+  //     setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg });
+  //   }
+  // };
+
   const aggregateAndSetState = (content, isDrill = false) => {
-    if (!content || content.length === 0) {
-      setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0 });
-      setDonutLegendData({});
-      if (isDrill) setDrillData(null);
-      return;
-    }
+  if (!content || content.length === 0) {
+    setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0, other: 0, sub: 0 });
+    setDonutLegendData({});
+    if (isDrill) setDrillData(null);
+    return;
+  }
 
-    const aggDTL   = content.reduce((s, r) => s + (Number(r.dtlIssuanceCost)    || 0), 0);
-    const aggPTL   = content.reduce((s, r) => s + (Number(r.ptlIssuanceCost)    || 0), 0);
-    const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)          || 0), 0);
-    const aggAvg   = content.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0) / content.length;
+  const aggDTL   = content.reduce((s, r) => s + (Number(r.dtlIssuanceCost)    || 0), 0);
+  const aggPTL   = content.reduce((s, r) => s + (Number(r.ptlIssuanceCost)    || 0), 0);
+  const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)          || 0), 0);
+  const aggOther = content.reduce((s, r) => s + (Number(r.otherCost)          || 0), 0); // ← new
+  const aggSub   = content.reduce((s, r) => s + (Number(r.subModuleCost)      || 0), 0); // ← new
+  const aggAvg   = content.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0) / content.length;
 
-    const rtbAgg = {};
-    content.forEach(r => {
-      if (!r.requesterTypeBreakdown) return;
-      Object.entries(r.requesterTypeBreakdown).forEach(([k, v]) => {
-        rtbAgg[k] = (rtbAgg[k] || 0) + (Number(v) || 0);
-      });
+  const rtbAgg = {};
+  content.forEach(r => {
+    if (!r.requesterTypeBreakdown) return;
+    Object.entries(r.requesterTypeBreakdown).forEach(([k, v]) => {
+      rtbAgg[k] = (rtbAgg[k] || 0) + (Number(v) || 0);
     });
+  });
 
-    setPieLegendData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg });
-    setDonutLegendData({ ...rtbAgg });
+  setPieLegendData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
+  setDonutLegendData({ ...rtbAgg });
 
-    if (isDrill) {
-      setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg });
-    }
-  };
+  if (isDrill) {
+    setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
+  }
+};
 
   const buildBarChart = () => {
   if (barChartInst.current) { barChartInst.current.destroy(); barChartInst.current = null; }
@@ -321,18 +362,32 @@ const UnitCom_CostDashboard = () => {
   const totalDTL  = dashboardData.reduce((s, r) => s + (r.dtlIssuanceCost    || 0), 0);
   const totalPTL  = dashboardData.reduce((s, r) => s + (r.ptlIssuanceCost    || 0), 0);
   const totalCost = dashboardData.reduce((s, r) => s + (r.totalCost          || 0), 0);
+  const totalOther = dashboardData.reduce((s, r) => s + (r.otherCost          || 0), 0); 
+const totalSub   = dashboardData.reduce((s, r) => s + (r.subModuleCost      || 0), 0); 
   const avgCPU    = dashboardData.length
     ? dashboardData.reduce((s, r) => s + (r.averageCostPerUnit || 0), 0) / dashboardData.length
     : 0;
 
-  const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU };
+  // const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU };
 
-  const metricValues = {
-    dtl: fmtFull(source.dtl),
-    ptl: fmtFull(source.ptl),
-    tot: fmtFull(source.total),
-    avg: fmtFull(source.avg)
-  };
+  const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU, other: totalOther, sub: totalSub };
+
+  // const metricValues = {
+  //   dtl: fmtFull(source.dtl),
+  //   ptl: fmtFull(source.ptl),
+  //   tot: fmtFull(source.total),
+  //   avg: fmtFull(source.avg)
+  // };
+
+
+const metricValues = {
+  dtl:   fmtFull(source.dtl),
+  ptl:   fmtFull(source.ptl),
+  tot:   fmtFull(source.total),
+  avg:   fmtFull(source.avg),
+  other: fmtFull(source.other || 0), // ← new
+  sub:   fmtFull(source.sub   || 0), // ← new
+};
 
   const donutLegendTotal = Object.values(donutLegendData).reduce((s, v) => s + v, 0);
 

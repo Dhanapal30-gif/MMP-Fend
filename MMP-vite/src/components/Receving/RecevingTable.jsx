@@ -551,6 +551,31 @@ const key = `${row.ponumber}-${row.partcode}`;
 export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPage, setPage, setPerPage, loading, searchText, setSearchText, handleEdit, handleRowSelect, selectedDeleteRows, exportToExcel }) => {
     //const [searchText, setSearchText] = useState("");
 
+    const computedData = React.useMemo(() => {
+    // Group rows by ponumber+partcode
+    const groups = {};
+    recevingData.forEach(row => {
+      const key = `${row.ponumber}-${row.partcode}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(row);
+    });
+
+    // Sort each group by receivingDate ascending, then calculate running openOrderQty
+    const resultMap = {};
+    Object.entries(groups).forEach(([key, rows]) => {
+      const sorted = [...rows].sort((a, b) =>
+        new Date(a.invoiceDate) - new Date(b.invoiceDate)
+      );
+      let running = Number(sorted[0].orderqty);
+      sorted.forEach(row => {
+        running = running - Number(row.recevingQty);
+        resultMap[`${row.ponumber}-${row.partcode}-${row.recevingTicketNo}`] = Math.max(0, running);
+      });
+    });
+
+    return resultMap;
+  }, [recevingData]);
+  
     const column = [
         {
             name: (
@@ -631,13 +656,23 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             grow: 2,
             width: '130px'
         },
+        // {
+        //     name: "Open Order Qty",
+        //     selector: row => row.orderqty - row.recevingQty,
+        //     wrap: true,
+        //     grow: 2,
+        //     width: '130px'
+        // },
         {
-            name: "Open Order Qty",
-            selector: row => row.orderqty - row.recevingQty,
-            wrap: true,
-            grow: 2,
-            width: '130px'
-        },
+      name: "Open Order Qty",
+      selector: row => {
+        const key = `${row.ponumber}-${row.partcode}-${row.recevingTicketNo}`;
+        return computedData[key] ?? (row.orderqty - row.recevingQty);
+      },
+      wrap: true,
+      grow: 2,
+      width: '130px'
+    },
         {
             name: "Rec Qty",
             selector: row => row.recevingQty,

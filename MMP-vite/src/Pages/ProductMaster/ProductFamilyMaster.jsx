@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { TextField, MenuItem, Autocomplete, formControlLabelClasses } from '@mui/material';
 import DataTable from "react-data-table-component";
-import * as XLSX from "xlsx";
+// import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { FaFileExcel } from "react-icons/fa";
 import "../../components/Com_Component/COM_Css.css";
@@ -380,19 +381,21 @@ const ProductFamilyMaster = () => {
       name: "Status", selector: row => row.recordstatus, width: `${calculateColumnWidth(productMaster, 'recordstatus')}px`, style: { paddingLeft: '20px' }
     },
     {
-      name: "Line Lead",
-      selector: row => row.lineLead
-        ? row.lineLead.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'lineLead')}px`,
-      style: { paddingLeft: '20px' }
-    },
-    {
-      name: "Product Engineer",
-      selector: row => row.productEngineer
-        ? row.productEngineer.split(",").map(email => <div key={email}>{email}</div>)
-        : "", width: `${calculateColumnWidth(productMaster, 'productEngineer')}px`,
-      style: { paddingLeft: '20px' }
-    }
+    name: "Line Lead",
+    selector: row => row.lineLead
+        ? String(row.lineLead).split(",").map(email => <div key={email}>{email}</div>)
+        : "",
+    width: `${calculateColumnWidth(productMaster, 'lineLead')}px`,
+    style: { paddingLeft: '20px' }
+},
+{
+    name: "Product Engineer",
+    selector: row => row.productEngineer
+        ? String(row.productEngineer).split(",").map(email => <div key={email}>{email}</div>)
+        : "",
+    width: `${calculateColumnWidth(productMaster, 'productEngineer')}px`,
+    style: { paddingLeft: '20px' }
+}
   ]
   //filterdata fomr productname 
   const filteredData = productMaster.length > 0
@@ -546,16 +549,26 @@ const exportToExcel = (search = "") => {
       });
   };
 
-  const handleDownloadExcel = () => {
-    const worksheetData = [
-      ["productname", "productgroup", "productfamily", "lineLead", "productEngineer", "recordstatus"], // Headers
-    ];
+  // const handleDownloadExcel = () => {
+  //   const worksheetData = [
+  //     ["productname", "productgroup", "productfamily", "lineLead", "productEngineer", "recordstatus"], // Headers
+  //   ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Product Data");
-    XLSX.writeFile(workbook, "Product_Data.xlsx");
-  };
+  //   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Product Data");
+  //   XLSX.writeFile(workbook, "Product_Data.xlsx");
+  // };
+
+  const handleDownloadExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Product Data");
+
+    worksheet.addRow(["productname", "productgroup", "productfamily", "lineLead", "productEngineer", "recordstatus"]);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer], { type: "application/octet-stream" }), "Product_Data.xlsx");
+};
 
   const fileInputRef = useRef(null);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
@@ -565,6 +578,65 @@ const exportToExcel = (search = "") => {
     setHandleUploadButton(false);
     setHandleSubmitButton(true);
   }
+  // const handleUpload = (event) => {
+  //   setExcelUploadData([]);
+  //   setShowProductTable(false);
+  //   setHandleUpdateButton(false);
+  //   setFormData({ productname: "", productgroup: "", productfamily: "", lineLead: "", productEngineer: "" });
+  //   setSelectedRow([]);
+  //   setDeletButton(false);
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+
+  //   if (!file.name.startsWith("Product_Data")) {
+  //     setErrorMessage("Invalid file. Please upload Product_Data.xlsx");
+  //     setShowErrorPopup(true);
+  //     event.target.value = null;
+  //     exceluploadClear();
+  //     return;
+  //   }
+
+  //   const reader = new FileReader();
+  //   reader.readAsBinaryString(file);
+  //   reader.onload = (e) => {
+  //     const data = e.target.result;
+  //     const workbook = XLSX.read(data, { type: "binary" });
+  //     const sheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[sheetName];
+  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  //     const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
+  //     const expectedColumns = ["productname", "productgroup", "productfamily", "linelead", "productengineer", "recordstatus",];
+  //     const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+
+  //     if (!isValid) {
+  //       setErrorMessage("Invalid column format. Please upload a file with the correct columns");
+  //       setShowErrorPopup(true);
+  //       event.target.value = null;
+  //       exceluploadClear();
+  //       return;
+  //     }
+  //     const parsedData = XLSX.utils.sheet_to_json(worksheet);
+  //     if (!parsedData || parsedData.length === 0) {
+  //       setErrorMessage("No data found in the uploaded file");
+  //       setShowErrorPopup(true);
+  //       event.target.value = null;
+  //       exceluploadClear();
+  //       return
+  //     }
+  //     setExcelUploadData(parsedData);
+  //     setUploadTotalRows(parsedData.length);
+  //     setHandleUploadButton(true);
+  //     setHandleSubmitButton(false);
+  //     setShowUploadTable(true);
+  //     setShowProductTable(false);
+  //   };
+  //   reader.onerror = (error) => {
+  //     setErrorMessage("File read error:", error);
+  //     setShowErrorPopup(true);
+  //     // console.error("File read error:", error);
+  //   };
+  // };
+
   const handleUpload = (event) => {
     setExcelUploadData([]);
     setShowProductTable(false);
@@ -576,53 +648,82 @@ const exportToExcel = (search = "") => {
     if (!file) return;
 
     if (!file.name.startsWith("Product_Data")) {
-      setErrorMessage("Invalid file. Please upload Product_Data.xlsx");
-      setShowErrorPopup(true);
-      event.target.value = null;
-      exceluploadClear();
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.readAsBinaryString(file);
-    reader.onload = (e) => {
-      const data = e.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
-      const expectedColumns = ["productname", "productgroup", "productfamily", "linelead", "productengineer", "recordstatus",];
-      const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
-
-      if (!isValid) {
-        setErrorMessage("Invalid column format. Please upload a file with the correct columns");
+        setErrorMessage("Invalid file. Please upload Product_Data.xlsx");
         setShowErrorPopup(true);
         event.target.value = null;
         exceluploadClear();
         return;
-      }
-      const parsedData = XLSX.utils.sheet_to_json(worksheet);
-      if (!parsedData || parsedData.length === 0) {
-        setErrorMessage("No data found in the uploaded file");
-        setShowErrorPopup(true);
-        event.target.value = null;
-        exceluploadClear();
-        return
-      }
-      setExcelUploadData(parsedData);
-      setUploadTotalRows(parsedData.length);
-      setHandleUploadButton(true);
-      setHandleSubmitButton(false);
-      setShowUploadTable(true);
-      setShowProductTable(false);
+    }
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = async (e) => {
+        try {
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(e.target.result);
+            const worksheet = workbook.worksheets[0];
+
+            const rows = [];
+            worksheet.eachRow((row) => rows.push(row.values.slice(1)));
+
+            const sheetHeaders = rows[0]?.map((h) => String(h).toLowerCase()) || [];
+            const expectedColumns = ["productname", "productgroup", "productfamily", "linelead", "productengineer", "recordstatus"];
+            const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
+
+            if (!isValid) {
+                setErrorMessage("Invalid column format. Please upload a file with the correct columns");
+                setShowErrorPopup(true);
+                event.target.value = null;
+                exceluploadClear();
+                return;
+            }
+
+            // Key mapping: lowercase header → camelCase field name
+const keyMap = {
+    productname: "productname",
+    productgroup: "productgroup",
+    productfamily: "productfamily",
+    linelead: "lineLead",         // fix
+    productengineer: "productEngineer", // fix
+    recordstatus: "recordstatus"
+};
+
+const getCellValue = (val) => {
+    if (val === null || val === undefined) return "";
+    if (typeof val === "object" && val.richText) return val.richText.map(r => r.text).join("");
+    if (typeof val === "object" && val.text) return val.text;
+    return String(val);
+};
+
+const parsedData = rows.slice(1).map((row) => {
+    const obj = {};
+    sheetHeaders.forEach((key, i) => {
+        const mappedKey = keyMap[key] || key;
+        obj[mappedKey] = getCellValue(row[i]);
+    });
+    return obj;
+}).filter(row => Object.values(row).some(v => v !== ""));
+
+            if (!parsedData.length) {
+                setErrorMessage("No data found in the uploaded file");
+                setShowErrorPopup(true);
+                event.target.value = null;
+                exceluploadClear();
+                return;
+            }
+
+            setExcelUploadData(parsedData);
+            setUploadTotalRows(parsedData.length);
+            setHandleUploadButton(true);
+            setHandleSubmitButton(false);
+            setShowUploadTable(true);
+            setShowProductTable(false);
+        } catch (error) {
+            setErrorMessage("File read error");
+            setShowErrorPopup(true);
+        }
     };
-    reader.onerror = (error) => {
-      setErrorMessage("File read error:", error);
-      setShowErrorPopup(true);
-      // console.error("File read error:", error);
-    };
-  };
+};
 
   const [duplicateProducts, setDuplicateProducts] = useState([]);
   const handleExcelUpload = (e) => {
@@ -739,23 +840,44 @@ const exportToExcel = (search = "") => {
 
   }
 
-  const exportToExcel = (searchText = "") => {
-    const dataToExport =
-      searchText && searchText.trim() !== "" ? filteredProductMaster : productMaster;
+  // const exportToExcel = (searchText = "") => {
+  //   const dataToExport =
+  //     searchText && searchText.trim() !== "" ? filteredProductMaster : productMaster;
 
+  //   if (!Array.isArray(dataToExport) || dataToExport.length === 0) return;
+
+  //   const formattedData = dataToExport.map(({ id, ...v }) => ({
+  //     ...v,
+  //     lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
+  //     productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
+  //   }));
+
+  //   const sheet = XLSX.utils.json_to_sheet(formattedData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, sheet, "ProductMaster");
+  //   XLSX.writeFile(workbook, "ProductMaster.xlsx");
+  // };
+
+
+  const exportToExcel = async (searchText = "") => {
+    const dataToExport = searchText?.trim() ? filteredProductMaster : productMaster;
     if (!Array.isArray(dataToExport) || dataToExport.length === 0) return;
 
     const formattedData = dataToExport.map(({ id, ...v }) => ({
-      ...v,
-      lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
-      productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
+        ...v,
+        lineLead: Array.isArray(v.lineLead) ? v.lineLead.join(", ") : v.lineLead || "",
+        productEngineer: Array.isArray(v.productEngineer) ? v.productEngineer.join(", ") : v.productEngineer || ""
     }));
 
-    const sheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, sheet, "ProductMaster");
-    XLSX.writeFile(workbook, "ProductMaster.xlsx");
-  };
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("ProductMaster");
+
+    worksheet.columns = Object.keys(formattedData[0]).map(key => ({ header: key, key, width: 20 }));
+    formattedData.forEach(row => worksheet.addRow(row));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveAs(new Blob([buffer], { type: "application/octet-stream" }), "ProductMaster.xlsx");
+};
 
 
   return (
