@@ -68,6 +68,10 @@ const requester = `${url}/RequesterCon/saverequestList`
 export const saveRequester = (formData) => axios.post(requester, formData);
 
 
+const ticketRaise = `${url}/ticketRaiseCon/saveTicketList`
+export const saveTicketRaise = (formData) => axios.post(ticketRaise, formData);
+
+
 
 const fetchRequestTicketDetail = `${url}/RequesterCon/fetchRequesterDetail`;
 export const fetchRequestDetail = (page, userId, size) => {
@@ -76,6 +80,15 @@ export const fetchRequestDetail = (page, userId, size) => {
   });
 };
 
+
+
+
+const fetchTicketRaise = `${url}/ticketRaiseCon/fetchTicketDetails`;
+export const fetchTicketRaiseDetail = (search, page, size) => {
+  return axios.get(fetchTicketRaise, {
+    params: {search, page, size}, // ✅ Pass userId as query param
+  });
+};
 
 const fetchRequesterSaerch = `${url}/RequesterCon/fetchRequesterDetailSearch`;
 export const fetchSearchRequester = (page = 0, size = 10, userId, search = "") => {

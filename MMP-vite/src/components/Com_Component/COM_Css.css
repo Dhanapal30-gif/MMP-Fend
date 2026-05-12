@@ -843,11 +843,11 @@ body {
     display: flex;
   flex-direction: column;
     justify-content: space-between;
-  border: 2px solid #d6d30f;
+  /* border: 2px solid #d6d30f; */
   /* box-shadow: 0 4px 12px rgba(86, 12, 177, 0.1); */
-  /* border-radius: 15px; */
+  border-radius: 9px;
   /* background-color: #047f69; */
-  background: linear-gradient(to right, #4e0a4b, #179999);
+  background: linear-gradient(to right, #901964, #0ecd8d);
   width: 98%;
   margin-top: 5px;
   margin-left: 15px;

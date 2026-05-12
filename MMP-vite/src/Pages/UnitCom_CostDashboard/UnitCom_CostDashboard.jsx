@@ -10,8 +10,8 @@ const MONTH_MAP = {
   "09":"P09 Sep","10":"P10 Oct","11":"P11 Nov","12":"P12 Dec"
 };
 
-const DONUT_COLORS = ["#7c3aed","#f59e0b","#10b981","#ef4444","#3b82f6","#ec4899"];
-const PIE_COLORS   = ["#7c3aed","#f59e0b","#10b981","#ef4444"];
+const DONUT_COLORS = ["#0e39d4","#f59e0b","#10b981","#ef4444","#3b82f6","#ec4899"];
+const PIE_COLORS   = ["#0e39d4","#f59e0b","#10b981","#ef4444"];
 const PIE_LABELS   = ["DTL cost","PTL cost","Total cost","Avg cost/unit"];
 
 // const METRICS_CFG = [
@@ -197,7 +197,7 @@ const UnitCom_CostDashboard = () => {
       datasets: [{
         label: "Total cost",
         data:  data.map(r => r.totalCost || 0),
-        backgroundColor: data.map(() => "#7c3aed"),
+        backgroundColor: data.map(() => "#d40e99"),
         borderRadius: 8,
         borderSkipped: false,
         hoverBackgroundColor: "#f59e0b",
@@ -436,15 +436,16 @@ const metricValues = {
       {/* Top bar */}
       <div className="ucd-topbar">
         <div className="ucd-topbar-left">
-          <div className="ucd-title">Unit Component Cost Dashboard</div>
-          
+          {/* <div className="ucd-title">Unit Component Cost Dashboard</div> */}
+          <h1 style={{ margin:0, fontSize:20, fontWeight:'bolder', color:'rgb(9, 146, 156)', letterSpacing:-0.5, fontFamily:'Segoe UI, sans-serif' }}>
+      Unit Component Cost Dashboard
+    </h1>
+    <p style={{ margin:'1px 0 0', fontSize:9, color:'#2876e4', fontWeight:600, fontFamily:'Segoe UI, sans-serif' }}>
+      Unit Component — Cost Analysis
+    </p>
         </div>
-        <div className="ucd-topbar-right">
-          {/* {drillMonth && (
-            <button className="ucd-btn-clear" onClick={handleClearDrill}>
-              &#10005; Clear 
-            </button>
-          )} */}
+        {/* <div className="ucd-topbar-right">
+        
           {(drillMonth || selectedProduct || selectedMonth) && (
   <button className="ucd-btn-clear" onClick={handleClearDrill}>
     &#10005; Clear 
@@ -454,7 +455,18 @@ const metricValues = {
           <div className="ucd-live-badge">
             <span className="ucd-live-dot" />Live Data
           </div>
-        </div>
+        </div> */}
+        <div className="ucd-topbar-right">
+    {(drillMonth || selectedProduct || selectedMonth) && (
+      <button className="ucd-btn-clear" onClick={handleClearDrill}>&#10005; Clear</button>
+    )}
+    {drillLoading && <div className="ucd-spinner" />}
+    
+    <span style={{ fontSize:10, color:'#64748B', fontWeight:700, background:'#fff', padding:'4px 10px', borderRadius:16, border:'1px solid #E2E8F0', fontFamily:'Segoe UI, sans-serif' }}>
+      {new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}
+    </span>
+  </div>
+
       </div>
 
       {/* Filter bar */}

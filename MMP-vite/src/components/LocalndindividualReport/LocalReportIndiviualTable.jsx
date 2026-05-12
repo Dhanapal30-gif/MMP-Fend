@@ -21,6 +21,7 @@ const fields = [
   "repairername",
   "reworkername",
   "recordstatus",
+  "repaireLocation",
   "createddate",
   // "startdate",
   "ptl_op_st_date",
@@ -48,6 +49,7 @@ const customConfig = {
   ptl_op_end_date: { label: "component Issue Time",width: "170px" },
   enddate: { label: "Reworker Out Time",width: "170px" },
   repairercomments: { label: "Comments" },
+  repaireLocation: { label: "Schematic Location" },
 };
 
 const LocalReportIndiviualTable = ({

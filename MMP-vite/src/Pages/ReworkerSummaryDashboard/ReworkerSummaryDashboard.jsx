@@ -67,7 +67,7 @@ const ReworkerSummaryDashboard = () => {
     status: "",
     year: currentYear,
     month: "",
-    week: ""
+    week: "" ,startDate: "", endDate: "" 
   });
 
   const reverseStatusMap = Object.fromEntries(
@@ -213,7 +213,7 @@ const ReworkerSummaryDashboard = () => {
         anchor: 'center',
         align: 'center',
         font: { weight: 'bold', size: 12 },
-        formatter: value => value >= 1000 ? (value / 1000).toFixed(1) + 'K' : value,
+        formatter: value => value >= 1000 ? (value / 1000).toFixed(1) + ' K' : value,
         rotation: -90,
       },
     },
@@ -291,14 +291,25 @@ const ReworkerSummaryDashboard = () => {
         anchor: 'center',
         align: 'center',
         font: { weight: 'bold', size: 12 },
-        formatter: value => value >= 1000 ? (value / 1000).toFixed(1) + 'K' : value,
+        formatter: value => value >= 1000 ? (value / 1000).toFixed(1) + ' K' : value,
         rotation: -90,
       },
     },
+    // scales: {
+    //   x: { grid: { display: false }, ticks: { color: 'black' } },   // ← black
+    //   y: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { color: 'black' } },  // ← black
+    // },
     scales: {
-      x: { grid: { display: false }, ticks: { color: 'black' } },   // ← black
-      y: { grid: { color: 'rgba(0,0,0,0.07)' }, ticks: { color: 'black' } },  // ← black
+  x: { grid: { display: false }, ticks: { color: 'black' } },
+  y: {
+    grid: { color: 'rgba(0,0,0,0.07)' },
+    ticks: {
+      color: 'black',
+      // ✅ ADD THIS
+      callback: value => value >= 1000 ? (value / 1000).toFixed(1) + ' K' : value,
     },
+  },
+},
   };
 
   const sortedPartcode = [...totalPartcode].sort((a, b) => b.partcodePickedQty - a.partcodePickedQty);
@@ -338,7 +349,7 @@ const ReworkerSummaryDashboard = () => {
         formatter: value => value >= 1000000
           ? (value / 1000000).toFixed(1) + 'M'
           : value >= 1000
-            ? (value / 1000).toFixed(1) + 'K'
+            ? (value / 1000).toFixed(1) + ' K'
             : value,
         clip: false,
       },
@@ -458,7 +469,7 @@ const ReworkerSummaryDashboard = () => {
         formatter: value => value >= 1000000
           ? (value / 1000000).toFixed(1) + 'M'
           : value >= 1000
-            ? (value / 1000).toFixed(1) + 'K'
+            ? (value / 1000).toFixed(1) + ' K'
             : value,
         clip: false,
       },
@@ -491,7 +502,8 @@ const ReworkerSummaryDashboard = () => {
       status: "",
       year: currentYear,
       month: "",
-      week: ""
+      week: "" ,
+      startDate: "", endDate: ""  
     });
     setYear(currentYear);
     setMonth("");
@@ -546,6 +558,37 @@ const ReworkerSummaryDashboard = () => {
               handleFilterChange("week", weekNumber);
             }}
           />
+          <div className="ComCssDashboardButtonMenu" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+  <label style={{ fontSize: 10, fontWeight: 600, marginBottom: 2, color: '#fff' }}>Start Date</label>
+  <input
+    type="date"
+    value={filters.startDate}
+    onChange={e => {
+      setClearButton(true);
+      setFilters(prev => ({ ...prev, startDate: e.target.value }));
+    }}
+    style={{
+      padding: '3px 6px', borderRadius: 6, border: '1px solid #ccc',
+      fontSize: 11, height: '28px', boxSizing: 'border-box'
+    }}
+  />
+</div>
+
+<div className="ComCssDashboardButtonMenu" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+  <label style={{ fontSize: 10, fontWeight: 600, marginBottom: 2, color: '#fff' }}>End Date</label>
+  <input
+    type="date"
+    value={filters.endDate}
+    onChange={e => {
+      setClearButton(true);
+      setFilters(prev => ({ ...prev, endDate: e.target.value }));
+    }}
+    style={{
+      padding: '3px 6px', borderRadius: 6, border: '1px solid #ccc',
+      fontSize: 11, height: '28px', boxSizing: 'border-box'
+    }}
+  />
+</div>
 
           {clearButton &&
             <div className="ComCssDashboardButtonMenu">
@@ -615,6 +658,74 @@ const ReworkerSummaryDashboard = () => {
       </div>
 
       <div className='dashFlexbox'>
+        
+        <div>
+          
+          <div style={{
+            overflowY: 'auto',
+            height: '180px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#20b2c8 transparent',
+            marginTop: '30px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
+              <span>Rework Qty by Partcode</span>
+            </div>
+            <div style={{
+              position: 'relative',
+              height: `${Math.max(totalPartcode.length * 38, 200)}px`,
+              minHeight: '200px',
+            }}>
+              <Bar data={partcodeChartData} options={partcodeChartOptions} />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style={{
+            overflowY: 'auto',
+            height: '180px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#20b2c8 transparent',
+            marginTop: '30px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
+              <span>Rework Qty by Reworker</span>
+            </div>
+            <div style={{
+              position: 'relative',
+              height: `${Math.max(totalReworkerQty.length * 38, 200)}px`,
+              minHeight: '200px',
+            }}>
+              <Bar data={reworkerChartData} options={reworkerChartOptions} />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style={{
+            overflowY: 'auto',
+            height: '180px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#20b2c8 transparent',
+            marginTop: '30px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
+              <span>Rework Qty by Product</span>
+            </div>
+            <div style={{
+              position: 'relative',
+              height: `${Math.max(totalProductSummary.length * 38, 200)}px`,
+              minHeight: '200px',
+            }}>
+              <Bar data={productChartData} options={productChartOptions} />
+            </div>
+          </div>
+
+
+          
+          
+        </div>
         <div>
            <div>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
@@ -719,70 +830,6 @@ const ReworkerSummaryDashboard = () => {
             />
           </div>
           </div>
-        </div>
-        <div>
-          
-          <div style={{
-            overflowY: 'auto',
-            height: '180px',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#20b2c8 transparent',
-            marginTop: '30px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
-              <span>Rework Qty by Partcode</span>
-            </div>
-            <div style={{
-              position: 'relative',
-              height: `${Math.max(totalPartcode.length * 38, 200)}px`,
-              minHeight: '200px',
-            }}>
-              <Bar data={partcodeChartData} options={partcodeChartOptions} />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div style={{
-            overflowY: 'auto',
-            height: '180px',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#20b2c8 transparent',
-            marginTop: '30px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
-              <span>Rework Qty by Reworker</span>
-            </div>
-            <div style={{
-              position: 'relative',
-              height: `${Math.max(totalReworkerQty.length * 38, 200)}px`,
-              minHeight: '200px',
-            }}>
-              <Bar data={reworkerChartData} options={reworkerChartOptions} />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div style={{
-            overflowY: 'auto',
-            height: '180px',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#20b2c8 transparent',
-            marginTop: '30px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, fontSize: 15, color: 'Blue' }}>  {/* ← black */}
-              <span>Rework Qty by Product</span>
-            </div>
-            <div style={{
-              position: 'relative',
-              height: `${Math.max(totalProductSummary.length * 38, 200)}px`,
-              minHeight: '200px',
-            }}>
-              <Bar data={productChartData} options={productChartOptions} />
-            </div>
-          </div>
-          
         </div>
        
       </div>

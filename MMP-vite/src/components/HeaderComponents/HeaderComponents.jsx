@@ -268,6 +268,7 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {/* <li><Link to="/userList" className="dropdown-item" onClick={closeServicesDropdown}>userList</Link></li> */}
                       {(userRole.includes("Admin") || isScreenAllowed("userDetail")) && <li><Link to="/userDetail" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}  >User Detail</Link></li>}
                       {(userRole.includes("Admin") || isScreenAllowed("Role")) && <li><Link to="/role" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Role Master</Link></li>}
+                      {(userRole.includes("Admin") || isScreenAllowed("TicketRaise")) && <li><Link to="/ticketRaise" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Ticket Raise</Link></li>}
                     </ul>
                   )}
                 </li>
@@ -367,6 +368,7 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("LocalSummary Report")) && (<li><Link to="/localSummaryReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Summary Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("PoReport")) && (<li><Link to="/poReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Procurement  Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("recevingReport")) && (<li><Link to="/recevingReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Receving Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("issuanceReport")) && (<li><Link to="/issuanceReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("materialMovementReport")) && (<li><Link to="/materialMovementReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Material Movement Report</Link></li>)}
@@ -401,7 +403,8 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {(userRole.includes("Admin") || isScreenAllowed("reworkerSummaryDashboard")) && (<li><Link to="/reworkerSummaryDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Reworker Summary</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("issuanceTATDashboard")) && (<li><Link to="/issuanceTATDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance TAT Dashboard</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("unitCom_CostDashboard")) && (<li><Link to="/unitCom_CostDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Unit Consumption Cost </Link></li>)}
-                                         {(userRole.includes("Admin") || isScreenAllowed("roadmapDashboard")) && (<li><Link to="/roadmapDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Roadmap Dashboard </Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("PoDashboard")) && (<li><Link to="/poDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Procurement </Link></li>)}
+                      {/* {(userRole.includes("Admin") || isScreenAllowed("roadmapDashboard")) && (<li><Link to="/roadmapDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Roadmap Dashboard </Link></li>)} */}
 
                       {/* <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localndindividualReport</Link></li>
                     <li><Link to="/localndindividualReport" className="dropdown-item" onClick={closeServicesDropdown}>localReport</Link></li> */}

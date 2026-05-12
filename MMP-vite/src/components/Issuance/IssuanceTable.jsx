@@ -4,9 +4,10 @@ import { generateColumns } from '../../components/Com_Component/generateColumns'
 import { TextField } from "@mui/material";
 import { saveDoneRequest, savePickequest } from '../../Services/Services_09';
 import CryptoJS from "crypto-js";
-
+import { FaEdit } from "react-icons/fa";  // ← add this
 
 const fields = [
+  
   "recTicketNo",
   "requestertype",
   "requestfor",
@@ -60,7 +61,9 @@ const IssuanceTable = ({
   pickButton,
   setpickButton,
   setSuccessMessage,
-  setShowSuccessPopup
+  setShowSuccessPopup,
+  isSuperAdmin ,
+  onEdit,
 }) => {
 
   //  const columns = generateColumns({
@@ -89,9 +92,37 @@ const IssuanceTable = ({
 
   //       })   
   // Generate columns and prepend Cancel column manually
+  // const columns = React.useMemo(() => {
+  //   return generateColumns({ fields, customConfig,onEdit,
+  //   showEdit: true, });
+  // }, [fields, customConfig,onEdit]);
+
   const columns = React.useMemo(() => {
-    return generateColumns({ fields, customConfig });
-  }, [fields, customConfig]);
+  const generatedCols = generateColumns({ fields, customConfig });
+
+  // ✅ Manually prepend edit column — no dependency on generateColumns for this
+  
+  const editColumn = {
+    name: "Edit",
+    cell: (row) => (
+      <button
+        className="edit-button"
+        onClick={() => onEdit && onEdit(row)}
+        style={{ cursor: "pointer", background: "green", border: "none" }}
+      >
+        <FaEdit />
+      </button>
+    ),
+    width: "79px",
+    ignoreRowClick: true,
+  };
+
+ return isSuperAdmin
+    ? [editColumn, ...generatedCols]
+    : generatedCols;
+ // ← edit icon always first column
+}, [customConfig, onEdit,isSuperAdmin ]);
+
 
   // Flatten {label, value} objects
   const normalizedData = React.useMemo(() => {

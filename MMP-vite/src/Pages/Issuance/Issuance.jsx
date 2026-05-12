@@ -5,7 +5,7 @@ import IssuanceTable from "../../components/Issuance/IssuanceTable";
 import { downloadIssuance, downloadPTLIssuance, fetchIssueTicketList, fetchpickTicketDetails, getIssuanceData, getPTLIssuanceData, saveDeliver, saveIssue, saveLEDRequest } from '../../Services/Services-Rc';
 import ApproverTable from "../../components/Approver/ApproverTable";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
-import { rejectedIssuanceTicket, savePtlDeliver, savePtlIssue } from '../../Services/Services_09';
+import { rejectedIssuanceTicket, savePtlDeliver, savePtlIssue, updateIssuedQty } from '../../Services/Services_09';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { FaFileExcel, FaBars } from "react-icons/fa";
 import { TextField, } from '@mui/material';
@@ -13,7 +13,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import { Snackbar, Alert } from "@mui/material";
 import { checkUserValid } from '../../components/Com_Component/userUtils';
-
+import IssuanceEditTable from "../../components/Issuance/IssuanceEditTable";
 
 const Issuance = () => {
 
@@ -63,7 +63,12 @@ const Issuance = () => {
     const [formData1, setFormData1] = useState({
         rejectedComment: ""
     })
-
+    const [editTableData, setEditTableData] = useState([]);
+    const [isEditMode, setIsEditMode] = useState(true);
+    const [showEditTable, setShowEditTable] = useState(false);
+    const [editRow, setEditRow] = useState(null);
+    const menuRef = useRef(null); 
+    const [showDefaultTable, setShowDefaultTable] = useState(true);
 
     const buildTicketNo = (type, value) => {
         if (!value) return "";
@@ -761,6 +766,41 @@ const Issuance = () => {
             .catch(err => console.error(err));
     };
 
+
+    const handleGrnAction = (e) => {
+        e.preventDefault();
+
+    };
+
+  const handleIssuanceEdit = (row) => {
+  setEditRow(row);
+  setShowEditTable(true);
+  setShowDefaultTable(false);
+  setShowTable(false);
+
+  setEditTableData([{
+    partcode:        row.partcode,
+    partdescription: row.partdescription,
+    batchCode:       row.batchCode || row.rcBactchCode || "",
+    reqQty:          row.reqQty,      // ← add this
+    issuedQty:       row.issuedQty
+  }]);
+};
+
+// Handle qty change in edit table
+const handleEditQtyChange = (idx, field, value) => {
+  setEditTableData(prev =>
+    prev.map((item, i) => i === idx ? { ...item, [field]: value } : item)
+  );
+};
+
+const userRole = JSON.parse(localStorage.getItem("userRole"));
+console.log("userRole", userRole)
+
+const isSuperAdmin = userRole
+  .map(r => r.toLowerCase().replace(/\s+/g, ""))
+  .includes("superadmin");
+  
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -895,6 +935,7 @@ const Issuance = () => {
                     </ThemeProvider>
                 </div>
             )}
+            {showDefaultTable &&(
             <div className='ComCssTable'>
                 {/* <h5 className='ComCssTableName'>Issued Tickets</h5> */}
 
@@ -952,6 +993,7 @@ const Issuance = () => {
                     </div>
                 </div>
                 <LoadingOverlay loading={loading} />
+                
                 <IssuanceTable
                     data={issuanceData}
                     page={page}
@@ -960,9 +1002,71 @@ const Issuance = () => {
                     loading={loading}
                     setPage={setPage}
                     setPerPage={setPerPage}
+                     isEditMode={isEditMode}
+                     onEdit={handleIssuanceEdit}
+                      isSuperAdmin={isSuperAdmin}  
 
                 />
+                
+               
             </div>
+)}
+            {showEditTable && editRow && (
+  <div className='ComCssTable'>
+    <h5 className='ComCssTableName'>Edit Issue — {editRow.recTicketNo}</h5>
+
+    <IssuanceEditTable
+      data={editTableData}
+      onChange={handleEditQtyChange}
+    />
+
+    <div className="ComCssButton9" style={{ marginTop: "10px" }}>
+  <button
+    className='ComCssSubmitButton'
+    onClick={() => {
+      const invalid = editTableData.some(
+        r => Number(r.issuedQty) > Number(r.reqQty)
+      );
+      if (invalid) {
+        setErrorMessage("Issued Qty cannot exceed Request Qty");
+        setShowErrorPopup(true);
+        return;
+      }
+
+      const payload = editTableData.map(row => ({
+  partCode: row.partcode,
+  issuedQty: row.newIssuedQty ?? row.issuedQty
+}));
+
+      setLoading(true);
+      updateIssuedQty(editRow.recTicketNo, payload)
+        .then((res) => {
+          setSuccessMessage(res.data?.message || "Updated successfully");
+          setShowSuccessPopup(true);
+          setShowEditTable(false);
+          setShowDefaultTable(true);
+          setEditRow(null);
+          fetchData(); // ← refresh table
+          setSearchText(""); 
+        })
+        .catch((err) => {
+          setErrorMessage(err.response?.data?.message || "Update failed");
+          setShowErrorPopup(true);
+        })
+        .finally(() => setLoading(false));
+    }}
+  >
+    Update
+  </button>
+  <button
+    className='ComCssClearButton'
+    onClick={() => { setShowEditTable(false); setEditRow(null); setShowDefaultTable(true); }}
+  >
+    Cancel
+  </button>
+</div>
+  </div>
+)}
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}
