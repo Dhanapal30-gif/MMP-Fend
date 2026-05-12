@@ -62,6 +62,9 @@ import ReworkerSummaryDashboard from './Pages/ReworkerSummaryDashboard/ReworkerS
 import IssuanceTATDashboard from './Pages/IssuanceTATDashboard/IssuanceTATDashboard';
 import UnitCom_CostDashboard from './Pages/UnitCom_CostDashboard/UnitCom_CostDashboard';
 import RoadmapDashboard from './Pages/Own/RoadmapDashboard';
+import PoReport from './Pages/PoReport/PoReport';
+import PoDashboard from './Pages/poDashboard/poDashboard';
+import TicketRaise from './Pages/TicketRaise/TicketRaise';
 
 function App() {
 
@@ -139,6 +142,9 @@ function App() {
        { name: "issuanceTATDashboard", path: "/IssuanceTATDashboard" },
          { name: "unitCom_CostDashboard", path: "/UnitCom_CostDashboard" },
           { name: "roadmapDashboard", path: "/RoadmapDashboard" },
+          { name: "poReport", path: "/PoReport" },
+          { name: "poDashboard", path: "/PoDashboard" },
+          { name: "ticketRaise", path: "/TicketRaise" },
       ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -251,6 +257,9 @@ function App() {
           <Route path='/issuanceTATDashboard' element={<IssuanceTATDashboard />} />
           <Route path='/unitCom_CostDashboard' element={<UnitCom_CostDashboard />} />
           <Route path='/roadmapDashboard' element={<RoadmapDashboard />} />
+          <Route path='/poReport' element={<PoReport />} />
+          <Route path='/poDashboard' element={< PoDashboard/>} />
+          <Route path='/ticketRaise' element={< TicketRaise/>} />
           <Route
             path="/receving" 
             element={

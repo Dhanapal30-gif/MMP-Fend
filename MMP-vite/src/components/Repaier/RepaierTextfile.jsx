@@ -5,7 +5,7 @@ import TextFiledTheme from '../Com_Component/TextFiledTheme'; // adjust path if 
 import { Autocomplete, TextField } from "@mui/material";
 import { fetchSearchSuiNo } from '../../Services/Services-Rc';
 
-const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, setExtraFields, setFormData, isFrozen, partOptions, suiNoOptions, handleChange, productOptions, handlePoChange, setTableData, setShowTable, formErrors }) => {
+const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, setExtraFields, setFormData, isFrozen, isFrozenThermalgel, partOptions, suiNoOptions, handleChange, productOptions, handlePoChange, setTableData, setShowTable, formErrors }) => {
     const RepaierType = [
         { label: "SUI", value: "SUI" },
         { label: "Rework", value: "Rework" },
@@ -133,6 +133,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                     value={formData.boardserialnumber}
                     onChange={handleChange}
                     disabled={isFrozen}
+                    disabled={isFrozenThermalgel}
                     error={Boolean(formErrors?.boardserialnumber)}
                     helperText={formErrors?.boardserialnumber || ""}
                     className="comTextFiled"

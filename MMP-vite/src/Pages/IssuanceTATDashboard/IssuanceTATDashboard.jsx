@@ -35,24 +35,11 @@ const S = {
   },
 
   /* header bar */
-  header: {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexWrap: 'wrap',
-  gap: 12,
-  // background: 'rgba(225, 238, 227, 0.05)',
-    background: 'linear-gradient(135deg, #11a2b9 0%, #a30a63 100%)',
-  backdropFilter: 'blur(12px)',
-  border: '1px solid rgba(255,255,255,0.10)',
-  borderRadius: 16,
-  padding: '10px 15px',
-  marginBottom: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
-  overflow: 'visible',   // ✅ ensure dropdown not clipped
-  position: 'relative',
-  zIndex: 100,           // ✅ ensure above chart cards
+header: {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  flexShrink: 0,
 },
+
   headerLeft: { display: 'flex', alignItems: 'center', gap: 12 },
   headerDot: {
     width: 10, height: 10, borderRadius: '50%',
@@ -71,22 +58,29 @@ headerSub:   { color: 'rgba(255,255,255,0.75)', fontSize: 11, margin: 0 },
 
   /* filter group */
   filterGroup: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
-  filterLabel: { color: C.muted, fontSize: 11, fontWeight: 600,
-                 textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 },
-  filterWrap:  { display: 'flex', flexDirection: 'column' },
+  filterLabel: {
+  fontSize: 12, color: '#462dea', fontWeight: 700,
+  display: 'block', marginBottom: 2,
+  fontFamily: "'Segoe UI', sans-serif",
+},
+ filterWrap: { display: 'flex', flexDirection: 'column' },
   input: {
-    height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.15)',
-    background: 'rgba(255,255,255,0.07)', color: C.text,
-    padding: '0 10px', fontSize: 12, outline: 'none',
-    colorScheme: 'dark',
-  },
-  btnClear: {
-    height: 34, padding: '0 16px', borderRadius: 8,
-    background: 'linear-gradient(135deg,#7c3aed,#db2777)',
-    border: 'none', color: '#fff', fontSize: 12, fontWeight: 600,
-    cursor: 'pointer', boxShadow: '0 4px 14px rgba(124,58,237,0.45)',
-    transition: 'opacity .2s',
-  },
+  padding: '5px 8px', borderRadius: 6,
+  border: '1px solid #E2E8F0',
+  background: '#F8FAFC', color: '#334155',
+  fontSize: 12, fontWeight: 600, outline: 'none',
+  fontFamily: "'Segoe UI', sans-serif",
+  colorScheme: 'light',
+},
+
+// FIND and REPLACE S.btnClear:
+btnClear: {
+  padding: '6px 12px', borderRadius: 7,
+  background: '#e62c22', color: '#fff',
+  border: '1px solid #E2E8F0',
+  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+  fontFamily: "'Segoe UI', sans-serif", whiteSpace: 'nowrap',
+},
 
   /* chart grid */
   grid: {
@@ -115,20 +109,19 @@ headerSub:   { color: 'rgba(255,255,255,0.75)', fontSize: 11, margin: 0 },
   borderRadius: 18,
   padding: '16px 18px',
   boxShadow: `0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px ${accent}22`,
-  transform: 'perspective(800px) rotateX(0.8deg)',
+
   transition: 'transform .25s, box-shadow .25s',
   position: 'relative',
+   overflow: 'hidden',
 }),
 
   // ✅ Use clipPath instead of overflow hidden for glow effect
 cardGlow: (accent) => ({
-  position: 'absolute', top: -40, right: -40,
-  width: 130, height: 130, borderRadius: '50%',
-  background: accent, filter: 'blur(55px)', opacity: 0.18,
+  position: 'absolute', top: -30, right: -30,
+  width: 100, height: 100, borderRadius: '50%',
+  background: accent, filter: 'blur(40px)', opacity: 0.10,
   pointerEvents: 'none',
   zIndex: 0,
-  // ✅ clip the glow blob itself instead of the whole card
-  clipPath: 'inset(0 0 0 0 round 18px)',
 }),
   cardHeader: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 },
   iconBox: (bg, border) => ({
@@ -356,75 +349,62 @@ const IssuanceTATDashboard = () => {
     <div style={S.wrap}>
 
       {/* ── Header ── */}
-      <div style={S.header}>
-        <div style={S.headerLeft}>
-          <div style={S.headerDot} />
-          <div>
-            <p style={S.headerTitle}>Issuance TAT Dashboard</p>
-            <p style={S.headerSub}>
-              {loading ? 'Loading…' : `${recevingReportDetail.length} product groups • live`}
-            </p>
-          </div>
-        </div>
+     {/* ── Header row ── */}
+<div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0, marginBottom:8 }}>
+  <div>
+    <h1 style={{ margin:0, fontSize:20, fontWeight:'bolder', color:'rgb(9,146,156)', letterSpacing:-0.5, fontFamily:'Segoe UI, sans-serif' }}>
+      Issuance TAT Dashboard
+    </h1>
+    <p style={{ margin:'1px 0 0', fontSize:9, color:'#2876e4', fontWeight:600, fontFamily:'Segoe UI, sans-serif' }}>
+      {loading ? 'Loading…' : `${recevingReportDetail.length} product groups • live`}
+    </p>
+  </div>
+  <span style={{ fontSize:10, color:'#64748B', fontWeight:700, background:'#fff', padding:'4px 10px', borderRadius:16, border:'1px solid #E2E8F0', fontFamily:'Segoe UI, sans-serif' }}>
+    {new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}
+  </span>
+</div>
 
-        {/* filters */}
-        <div style={S.filterGroup} key={resetKey}>
+{/* ── Filter bar ── */}
+<div style={{ background:'#fff', borderRadius:10, border:'1px solid #a5c7f4', boxShadow:'0 1px 4px rgba(0,0,0,0.05)', padding:'9px 12px', marginBottom:12 }}>
+  <div style={{ display:'flex', alignItems:'flex-end', gap:12, flexWrap:'wrap' }} key={resetKey}>
 
-          <div style={S.filterWrap}>
-            <span style={S.filterLabel}>Product Group</span>
-            <IssuanceTATDashTexrFiled
-              label="Product Group"
-              options={productDetail}
-              onChange={(v) => {
-                const u = { ...formData, productgroup: v };
-                setFormData(u);
-                fetchFilterResultWith(u);
-                setClearButton(true);
-              }}
-            />
-          </div>
+    <div style={{ display:'flex', flexDirection:'column' }}>
+      <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>Product Group</label>
+      <IssuanceTATDashTexrFiled
+        label="Product Group"
+        options={productDetail}
+        onChange={(v) => {
+          const u = { ...formData, productgroup: v };
+          setFormData(u); fetchFilterResultWith(u); setClearButton(true);
+        }}
+      />
+    </div>
 
-          <div style={S.filterWrap}>
-            <span style={S.filterLabel}>Start Date</span>
-            <input
-              type="date"
-              style={S.input}
-              value={formData.startDate}
-              max={formData.endDate || ''}
-              onChange={e => {
-                const u = { ...formData, startDate: e.target.value };
-                setFormData(u);
-                fetchFilterResultWith(u);
-                setClearButton(true);
-              }}
-            />
-          </div>
+    <div style={{ display:'flex', flexDirection:'column' }}>
+      <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>Start Date</label>
+      <input type="date" value={formData.startDate} max={formData.endDate || ''}
+        style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #E2E8F0', background:'#F8FAFC', color:'#334155', fontSize:12, fontWeight:600, outline:'none' }}
+        onChange={e => { const u={...formData,startDate:e.target.value}; setFormData(u); fetchFilterResultWith(u); setClearButton(true); }}
+      />
+    </div>
 
-          <div style={S.filterWrap}>
-            <span style={S.filterLabel}>End Date</span>
-            <input
-              type="date"
-              style={S.input}
-              value={formData.endDate}
-              min={formData.startDate || ''}
-              onChange={e => {
-                const u = { ...formData, endDate: e.target.value };
-                setFormData(u);
-                fetchFilterResultWith(u);
-                setClearButton(true);
-              }}
-            />
-          </div>
+    <div style={{ display:'flex', flexDirection:'column' }}>
+      <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>End Date</label>
+      <input type="date" value={formData.endDate} min={formData.startDate || ''}
+        style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #E2E8F0', background:'#F8FAFC', color:'#334155', fontSize:12, fontWeight:600, outline:'none' }}
+        onChange={e => { const u={...formData,endDate:e.target.value}; setFormData(u); fetchFilterResultWith(u); setClearButton(true); }}
+      />
+    </div>
 
-          {clearButton && (
-            <div style={S.filterWrap}>
-              <span style={{ ...S.filterLabel, visibility:'hidden' }}>x</span>
-              <button style={S.btnClear} onClick={formClear}>✕ Clear</button>
-            </div>
-          )}
+    {clearButton && (
+      <button onClick={formClear}
+        style={{ padding:'6px 12px', borderRadius:7, background:'#e62c22', color:'#fff', border:'1px solid #E2E8F0', fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'Segoe UI, sans-serif' }}>
+        ✕ Clear
+      </button>
+    )}
 
-        </div>
-      </div>
+  </div>
+</div>
 
       {/* ── 4 chart cards ── */}
       <div style={S.grid}>

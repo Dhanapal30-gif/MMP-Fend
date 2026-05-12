@@ -628,3 +628,19 @@ export const donwloadSummaryinReceving = (formData) =>
     responseType: "blob",      // ✅ MUST
   });
   
+
+
+  const updateIssuance = `${url}/IssuacneCon/updateIssuedQty`;
+export const updateIssuedQty = (ticketNo, payload) =>
+  axios.put(`${updateIssuance}/${ticketNo}`, payload);
+
+
+const get_PoReportDetail = `${url}/Podeatil/poReport`;
+export const fetchPoReportDetail = (params) =>
+  axios.get(get_PoReportDetail, { params });
+
+
+
+const get_PoMaterialTypeVendor = `${url}/Podeatil/materialTypeVendor`;
+export const fetchMaterialTypeVendor = () =>
+  axios.get(get_PoMaterialTypeVendor, {  });

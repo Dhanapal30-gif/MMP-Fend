@@ -50,6 +50,7 @@ const Repaier = () => {
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isFrozen, setIsFrozen] = useState(false);
+    const [isFrozenThermalgel, setIsFrozenThermalgel] = useState(false);
     const [suiData, setSuiData] = useState([]);
     const [openMsg, setOpenMsg] = useState(false);
     const handleChange = (e) => {
@@ -100,6 +101,10 @@ const Repaier = () => {
 
         if (!formData.type) {
             errors.type = "Please Enter Type";   // 🔴 overrides previous type error
+            isValid = false;
+        }
+        if (!formData.repairelocation) {
+            errors.repairelocation = "Please Enter Schematic Location";  
             isValid = false;
         }
 
@@ -158,6 +163,11 @@ const Repaier = () => {
 
         if (!formData.productname) {
             errors.productname = "Please Enter Product Name";
+            isValid = false;
+        }
+
+        if (!formData.repairelocation) {
+            errors.repairelocation = "Please Enter Schematic Location";  
             isValid = false;
         }
 
@@ -248,7 +258,8 @@ const Repaier = () => {
                             tgquantity: "",
                             boardserialnumber: ""
                         }));
-                        setIsFrozen(true);
+                        // setIsFrozen(true);
+                        setIsFrozenThermalgel(false);
                     }
                     // setIsFrozen(false);
                     // handleClear();
@@ -429,6 +440,7 @@ const Repaier = () => {
                     setFormData={setFormData}
                     partOptions={partOptions}
                     isFrozen={isFrozen}
+                    isFrozenThermalgel={isFrozenThermalgel}
                     setExtraFields={setExtraFields}
                     extraFields={extraFields}
                     setSuiData={setSuiData}

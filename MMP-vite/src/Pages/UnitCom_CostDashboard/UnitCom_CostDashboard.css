@@ -21,6 +21,7 @@
   margin-bottom: 18px;
 }
 
+/* FIND and DELETE this entire rule: */
 .ucd-title {
   font-size: 22px;
   font-weight: 700;
@@ -133,64 +134,64 @@
 }
 
 .ucd-filter-bar {
-  background: linear-gradient(135deg, #f8f4ff 0%, #fdf2ff 100%);
-  border: 1.5px solid #e0d0ff;
-  border-radius: 16px;
-  padding: 18px 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(124,58,237,0.08);
+  background: #fff;
+  border: 1px solid #a5c7f4;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 
 .ucd-filter-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: #7c3aed;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin-bottom: 6px;
+  color: #462dea;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 2px;
   display: block;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .ucd-filter-select,
 .ucd-filter-input {
-  height: 38px;
-  border-radius: 10px;
-  border: 1.5px solid #d8b4fe;
-  background: #ffffff;
-  color: #1e1b4b;
-  padding: 0 12px;
-  font-size: 13px;
-  font-weight: 500;
+  height: auto;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #E2E8F0;
+  background: #F8FAFC;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .ucd-filter-select:focus,
 .ucd-filter-input:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+  border-color: #a5c7f4;
+  box-shadow: none;
 }
 
 .ucd-btn-apply {
-  height: 38px;
-  padding: 0 24px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #7c3aed, #db2777);
+  height: auto;
+  padding: 6px 16px;
+  border-radius: 7px;
+  background: blue;
   border: none;
   color: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(124,58,237,0.4);
-  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 3px 8px rgba(99,102,241,0.4);
+  font-family: 'Segoe UI', sans-serif;
+  white-space: nowrap;
+  transition: none;
 }
 
-.ucd-btn-apply:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(124,58,237,0.5);
-}
-
-.ucd-btn-apply:active { transform: scale(0.97); }
+.ucd-btn-apply:hover { transform: none; box-shadow: 0 3px 8px rgba(99,102,241,0.4); }
+.ucd-btn-apply:active { transform: none; }
 
 .ucd-btn-reset {
   background: rgba(255, 255, 255, 0.04);
@@ -229,8 +230,8 @@
   position: relative;
   overflow: hidden;
   transform: perspective(700px) rotateX(3deg);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5),
-              0 2px 0 rgba(255, 255, 255, 0.06) inset;
+  /* box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5),
+              0 2px 0 rgba(255, 255, 255, 0.06) inset; */
   transition: transform 0.25s;
 }
 .ucd-metric:hover {
@@ -302,9 +303,9 @@
   border: 1px solid rgba(124, 58, 237, 0.18);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45),
-              0 1px 0 rgba(167, 139, 250, 0.06) inset;
-  transform: perspective(900px) rotateY(-1.5deg);
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45),
+              0 1px 0 rgba(167, 139, 250, 0.06) inset; */
+  /* transform: perspective(900px) rotateY(-1.5deg); */
   transition: transform 0.3s, box-shadow 0.3s;
 }
 .ucd-card:hover {

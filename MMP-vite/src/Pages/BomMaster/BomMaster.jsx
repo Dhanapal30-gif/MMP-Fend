@@ -55,7 +55,8 @@ const BomMaster = () => {
         updatedby: "",
         productname: "",
         productgroup: "",
-        productfamily: ""
+        productfamily: "",
+        ComponentUsage: ""  
 
     })
     const CustomPopper = (props) => (
@@ -439,9 +440,17 @@ const BomMaster = () => {
             sortable: true,
             width: `${calculateColumnWidth(bomMaster, 'partcode')}px`
         },
-        {
+        
+         {
             name: "Part Description",
             selector: row => row.partdescription,
+            wrap: true,
+            // width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
+            width: "250px"
+        },
+        {
+            name: "Component Usage",
+            selector: row => row.ComponentUsage,
             wrap: true,
             // width: `${calculateColumnWidth(bomMaster, 'partdescription')}px`
             width: "250px"
@@ -723,10 +732,11 @@ const BomMaster = () => {
                                     setFormData({
                                         ...formData,
                                         partcode: newValue.partcode,
-                                        partdescription: newValue.partdescription
+                                        partdescription: newValue.partdescription,
+                                         ComponentUsage: newValue.ComponentUsage  // ✅ add this
                                     });
                                 } else {
-                                    setFormData({ ...formData, partcode: "", partdescription: "" });
+                                    setFormData({ ...formData, partcode: "", partdescription: "" ,ComponentUsage: "" });
                                 }
                             }}
                             renderInput={(params) => (
@@ -769,10 +779,11 @@ const BomMaster = () => {
                                     setFormData({
                                         ...formData,
                                         partcode: newValue.partcode,
-                                        partdescription: newValue.partdescription
+                                        partdescription: newValue.partdescription,
+                                        ComponentUsage: newValue.ComponentUsage  // ✅ add this
                                     });
                                 } else {
-                                    setFormData({ ...formData, partcode: "", partdescription: "" });
+                                    setFormData({ ...formData, partcode: "", partdescription: "" ,ComponentUsage: "" });
                                 }
                             }}
                             renderInput={(params) => (
@@ -797,6 +808,45 @@ const BomMaster = () => {
                                 </li>
                             )}
                         />
+
+
+                        <Autocomplete
+    options={storeRc}
+    ListboxComponent={DropdownCom}
+    PopperComponent={CustomPopper}
+    className='ProductTexfiled-textfield'
+    getOptionLabel={(option) => option.ComponentUsage || ""}
+    isOptionEqualToValue={(option, value) => option.ComponentUsage === value.ComponentUsage}
+    value={storeRc.find(item => item.ComponentUsage === formData.ComponentUsage) || null}
+    readOnly  // ✅ prevent manual selection — auto-set from partcode/description
+    onChange={(event, newValue) => {
+        if (newValue) {
+            setFormData({ ...formData, ComponentUsage: newValue.ComponentUsage });
+        } else {
+            setFormData({ ...formData, ComponentUsage: "" });
+        }
+    }}
+    renderInput={(params) => (
+        <TextField
+            {...params}
+            label="Component Usage"
+            variant="outlined"
+            size="small"
+            InputProps={{ ...params.InputProps, readOnly: true }}  // ✅ read-only display
+            sx={{
+                "& label.MuiInputLabel-shrink": {
+                    color: "green",
+                    fontWeight: 'bold',
+                }
+            }}
+        />
+    )}
+    renderOption={(props, option) => (
+        <li {...props} key={option.ComponentUsage}>
+            {option.ComponentUsage}
+        </li>
+    )}
+/>
                         <Autocomplete
                             options={storeProduct}
                             getOptionLabel={(option) => option.productName}
