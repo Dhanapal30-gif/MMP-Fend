@@ -114,6 +114,11 @@ const CreateAccount = () => {
       errors.userRole = 'User Role is required';
       isValid = false;
     }
+
+     if (!(formData.afa || "").trim()) {
+      errors.afa = 'Account Active is required';
+      isValid = false;
+    }
     // if (formData.requesterType.length === 0) {
     //   errors.requesterType = 'RequesterType is required';
     //   isValid = false;
@@ -430,6 +435,9 @@ const CreateAccount = () => {
                   fullWidth
                   size="small"
                 />
+               
+
+                
                 {(formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others") || formData.requestType?.includes("Thermal Gel"))  && (
 
                   <Autocomplete
@@ -717,7 +725,37 @@ const CreateAccount = () => {
                 />
               {/*  )} */}
 
-
+ <Autocomplete
+  options={["Active", "Deactive"]}
+  getOptionLabel={(option) => option || ""}
+  value={formData.afa || null}
+  onChange={(event, newValue) =>
+    setFormData({ ...formData, afa: newValue || "" })
+  }
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Active For Account"
+      variant="outlined"
+      error={Boolean(formErrors.afa)}
+      helperText={formErrors.afa}
+      size="small"
+      className="ProductTexfiled-textfield"
+    />
+  )}
+  sx={{
+                    "& .MuiAutocomplete-tag": {
+                      maxWidth: "100%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    },
+                    "& .MuiAutocomplete-inputRoot": {
+                      maxHeight: "120px",
+                      overflowY: "auto",
+                      width: "589px"
+                    }
+                  }}
+/>
 
             </ThemeProvider>
             {/* {formData.requesterType?.includes("Material Request") && (

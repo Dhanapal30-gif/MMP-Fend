@@ -103,10 +103,12 @@ const Repaier = () => {
             errors.type = "Please Enter Type";   // 🔴 overrides previous type error
             isValid = false;
         }
-        if (!formData.repairelocation) {
-            errors.repairelocation = "Please Enter Schematic Location";  
-            isValid = false;
-        }
+        if (formData.type !== "Thermal GEL") {
+    if (!formData.repairelocation) {
+        errors.repairelocation = "Please Enter Schematic Location";
+        isValid = false;
+    }
+}
 
         // if (!formData.boardserialnumber?.trim()) {
         //     errors.boardserialnumber = "Enter Module Serial Number";

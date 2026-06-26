@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Autocomplete, TextField, Button } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import "./TicketRaise.css";
 import TicketRaiseTable from "../../components/TicketRaise/TicketRaiseTable";
-
-import { fetchTicketRaiseDetail, saveTicketRaise } from "../../Services/Services-Rc";
+import { downloadTicketRaiseExport, fetchScreenName, fetchTicketRaiseDetail, fetchUserName, saveTicketRaise } from "../../Services/Services-Rc";
+import { updateTicketDetail } from '../../Services/Services_09';
 
 const priorityOptions = [
     { label: "Low",      value: "LOW"      },
@@ -15,39 +15,79 @@ const priorityOptions = [
     { label: "Critical", value: "CRITICAL"  },
 ];
 
-const escalatedByOptions = [
-    { label: "Kumaran",  value: "Kumaran"  },
-    { label: "Dhanapal", value: "Dhanapal" },
-    { label: "Praveen",  value: "Praveen"  },
-];
+const INIT_FORM   = { priority: null,screen:"", escalatedBy: null, description: "", file: null};
+const INIT_ERRORS = { priority: "", screen:"", escalatedBy: "", description: "" };
 
-const INIT_FORM   = { priority: null, escalatedBy: null, description: "", file: null };
-const INIT_ERRORS = { priority: "",   escalatedBy: "",   description: "" };
+// ── DescriptionField — isolated, no parent re-render on typing ─────────────────
+const DescriptionField = memo(({ initialValue, error, descRef }) => {
+    const [text, setText] = useState(initialValue || "");
+    useEffect(() => {
+        setText(initialValue || "");
+        descRef.current = initialValue || "";
+    }, [initialValue]);
+    const handleChange = (e) => {
+        const val = e.target.value;
+        if (val.length > 200) return;
+        setText(val);
+        descRef.current = val;
+    };
+    return (
+        <TextField
+            label="Description" multiline rows={2} fullWidth
+            value={text} onChange={handleChange}
+            error={Boolean(error)} helperText={error || `${text.length}/200`}
+        />
+    );
+});
 
+// ─────────────────────────────────────────────────────────────────────────────
 const TicketRaise = () => {
 
-    // ── Table state ───────────────────────────────────────────────────────────
     const [tableData,     setTableData]     = useState([]);
     const [page,          setPage]          = useState(0);
     const [totalPages,    setTotalPages]    = useState(0);
     const [totalElements, setTotalElements] = useState(0);
-    const [searchText,    setSearchText]    = useState("");
 
-    // ── Form state ────────────────────────────────────────────────────────────
-    const [formData,      setFormData]      = useState(INIT_FORM);
-    const [errors,        setErrors]        = useState(INIT_ERRORS);
-    const [loading,       setLoading]       = useState(false);
-    const [apiError,      setApiError]      = useState("");
-    const [success,       setSuccess]       = useState(false);
+    const [formData, setFormData] = useState(INIT_FORM);
+    const [errors,   setErrors]   = useState(INIT_ERRORS);
+    const [loading,  setLoading]  = useState(false);
+    const [apiError, setApiError] = useState("");
+    const [success,  setSuccess]  = useState(false);
 
-    // ── Edit state ────────────────────────────────────────────────────────────
-    const [editMode,      setEditMode]      = useState(false);   // true when editing a row
-    const [editTicketNo,  setEditTicketNo]  = useState(null);    // ticketNo being edited
+    const [editMode,         setEditMode]         = useState(false);
+    const [editTicketnumber, setEditTicketnumber] = useState(null);
 
-    // ── Fetch on page change ──────────────────────────────────────────────────
+    const descRef            = useRef("");
+    const [descSeed, setDescSeed]       = useState("");
+    const [userDetails, setUserDetails] = useState([]);
+    const [screenDetails, setScreenDetails] = useState([]);
+
     useEffect(() => { fetchTickets(); }, [page]);
+    useEffect(() => { FetchUserName(); }, []);
+    useEffect(() => { FetchScreen(); }, []);
 
-    // ── Form handlers ─────────────────────────────────────────────────────────
+    const escalatedByOptions = userDetails.map(item => ({ label: item, value: item }));
+    const screenOptions = screenDetails.map(item => ({ label: item, value: item }));
+    const FetchUserName = async () => {
+        try {
+            const response = await fetchUserName();
+            const data = response.data;
+            if (data.table1?.length > 0) setUserDetails(data.table1);
+        } catch (error) {
+            console.error("Error fetching user details:", error);
+        }
+    };
+
+    const FetchScreen = async () => {
+        try {
+            const response = await fetchScreenName();
+            const data = response.data;
+            if (data.ScreenName?.length > 0) setScreenDetails(data.ScreenName);
+        } catch (error) {
+            console.error("Error fetching screen details:", error);
+        }
+    };
+
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         if (errors[field]) setErrors(prev => ({ ...prev, [field]: "" }));
@@ -61,39 +101,85 @@ const TicketRaise = () => {
     };
 
     const validate = () => {
+        const desc = descRef.current.trim();
         const newErrors = { ...INIT_ERRORS };
         let isValid = true;
-        if (!formData.priority)           { newErrors.priority    = "Priority is required.";                  isValid = false; }
-        if (!formData.escalatedBy)        { newErrors.escalatedBy = "Please select who escalated the issue."; isValid = false; }
-        if (!formData.description.trim()) { newErrors.description = "Description is required.";               isValid = false; }
+        if (!formData.priority)   { newErrors.priority    = "Priority is required.";                  isValid = false; }
+        if (!formData.escalatedBy || formData.escalatedBy.length === 0)
+                                  { newErrors.escalatedBy = "Please select who escalated the issue."; isValid = false; }
+        if (!desc)                { newErrors.description = "Description is required.";               isValid = false; }
         setErrors(newErrors);
         return isValid;
     };
 
-    // ── Edit icon click: populate form with row data ───────────────────────────
-    const handleEditClick = (row) => {
-        // Map the row values back to option objects
-        const matchedPriority    = priorityOptions.find(o => o.value === row.priority)    || null;
+    const handleEditClick = useCallback((row) => {
+        const matchedPriority    = priorityOptions.find(o => o.value === row.priority) || null;
         const matchedEscalatedBy = escalatedByOptions.find(o => o.value === row.escalatedBy) || null;
-
-        setFormData({
-            priority:    matchedPriority,
-            escalatedBy: matchedEscalatedBy,
-            description: row.description || "",
-            file:        null,               // file can't be pre-filled from server
-        });
-
+        const matchedScreen =
+        screenOptions.find(o => o.value === row.screen) || null;
+        descRef.current = row.description || "";
+        setDescSeed(row.description || "");
+        setFormData({ priority: matchedPriority, screen: matchedScreen, escalatedBy: matchedEscalatedBy ? [matchedEscalatedBy] : [], file: null});
         setErrors(INIT_ERRORS);
         setApiError("");
         setSuccess(false);
         setEditMode(true);
-        setEditTicketNo(row.ticketNo);       // store the ticketNo for the PUT call
-
-        // Scroll the form into view smoothly
+        setEditTicketnumber(row.ticketnumber);
         window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [escalatedByOptions , screenOptions]);
+
+    const fetchTickets = useCallback(async (status = "", priority = "",screen = "" , currentPage = page) => {
+        try {
+            const response = await fetchTicketRaiseDetail(status, priority,  screen, currentPage, 10);
+            setTableData(response.data.content      || []);
+            setTotalPages(response.data.totalPages  || 0);
+            setTotalElements(response.data.totalElements || 0);
+        } catch (err) { console.error(err); }
+    }, [page]);
+
+    const handleSearch = useCallback(({ status = "", priority = "" , screen = "" } = {}) => {
+        setPage(0);
+        fetchTickets(status, priority, screen, 0);
+    }, [fetchTickets]);
+
+    const handleDownload = useCallback(async ({ status = "", priority = "" , screen = "" } = {}) => {
+        try {
+            const response = await downloadTicketRaiseExport(status, priority, screen);
+            const blob = new Blob([response.data], {
+                type: response.headers["content-type"] || "application/octet-stream",
+            });
+            const url         = URL.createObjectURL(blob);
+            const a           = document.createElement("a");
+            const disposition = response.headers["content-disposition"] || "";
+            const match       = disposition.match(/filename="?([^";\n]+)"?/);
+            a.download        = match?.[1] || `tickets_${new Date().toISOString().slice(0,10)}.xlsx`;
+            a.href = url;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Download failed:", err);
+            alert("Failed to download. Please try again.");
+        }
+    }, []);
+
+    const handleNextPage = useCallback(() => setPage(p => p + 1), []);
+    const handlePrevPage = useCallback(() => setPage(p => p - 1), []);
+
+    const buildPayload = (isEdit = false) => {
+        const payload = new FormData();
+        if (isEdit) payload.append("ticketnumber", editTicketnumber);
+        payload.append("priority",    formData.priority?.value || "");
+        payload.append("escalatedBy", formData.escalatedBy?.map(i => i.value).join(",") || "");
+        payload.append("description", descRef.current.trim());
+        // payload.append("createddate", formData.createddate || "");
+        payload.append("screen", formData.screen?.value || "");
+
+        if (!isEdit) payload.append("createdby", localStorage.getItem("userName"));
+        else         payload.append("updatedby", localStorage.getItem("userName"));
+        if (formData.file) payload.append("file", formData.file);
+        return payload;
     };
 
-    // ── Submit (create) ───────────────────────────────────────────────────────
     const handleSubmit = async () => {
         setApiError(""); setSuccess(false);
         const userName = localStorage.getItem("userName");
@@ -101,25 +187,15 @@ const TicketRaise = () => {
         if (!validate()) return;
         try {
             setLoading(true);
-            const payload = new FormData();
-            payload.append("priority",    formData.priority?.value    || "");
-            payload.append("escalatedBy", formData.escalatedBy?.value || "");
-            payload.append("description", formData.description.trim());
-            payload.append("createdby",   userName);
-            if (formData.file) payload.append("file", formData.file);
-            await saveTicketRaise(payload);
+            await saveTicketRaise(buildPayload(false));
             setSuccess(true);
-            setFormData(INIT_FORM);
-            setErrors(INIT_ERRORS);
+            resetForm();
             fetchTickets();
         } catch (err) {
             setApiError(err?.response?.data?.message || "Failed to raise ticket");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // ── Edit submit (update) ──────────────────────────────────────────────────
     const handleEditSubmit = async () => {
         setApiError(""); setSuccess(false);
         const userName = localStorage.getItem("userName");
@@ -127,120 +203,151 @@ const TicketRaise = () => {
         if (!validate()) return;
         try {
             setLoading(true);
-            const payload = new FormData();
-            payload.append("ticketNo",    editTicketNo);
-            payload.append("priority",    formData.priority?.value    || "");
-            payload.append("escalatedBy", formData.escalatedBy?.value || "");
-            payload.append("description", formData.description.trim());
-            payload.append("updatedby",   userName);
-            if (formData.file) payload.append("file", formData.file);
-
-            // Call your update API — adjust the import in Services-Rc accordingly
-            await updateTicketRaise(payload);
-
+            await updateTicketDetail(editTicketnumber, buildPayload(true));
             setSuccess(true);
             resetForm();
             fetchTickets();
         } catch (err) {
             setApiError(err?.response?.data?.message || "Failed to update ticket");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // ── Reset form & exit edit mode ───────────────────────────────────────────
     const resetForm = () => {
+        descRef.current = "";
+        setDescSeed("");
         setFormData(INIT_FORM);
         setErrors(INIT_ERRORS);
         setApiError("");
         setSuccess(false);
         setEditMode(false);
-        setEditTicketNo(null);
+        setEditTicketnumber(null);
     };
 
-    const handleCancel = () => resetForm();
+    const userName = localStorage.getItem("userName");
+    const userId   = localStorage.getItem("userId");
 
-    // ── Fetch tickets ─────────────────────────────────────────────────────────
-    const fetchTickets = async (overrideSearch) => {
-        try {
-            const q        = overrideSearch !== undefined ? overrideSearch : searchText;
-            const response = await fetchTicketRaiseDetail(q, page, 10);
-            setTableData(response.data.content      || []);
-            setTotalPages(response.data.totalPages);
-            setTotalElements(response.data.totalElements);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    // ── Pagination handlers ───────────────────────────────────────────────────
-    const handleSearch   = (overrideSearch) => { setPage(0); fetchTickets(overrideSearch); };
-    const handleNextPage = () => { if (page + 1 < totalPages) setPage(p => p + 1); };
-    const handlePrevPage = () => { if (page > 0)              setPage(p => p - 1); };
-
-    // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="TicketRaisedContainer">
-
-            {/* ── Form panel ── */}
             <div className="TicketRaisedInput">
 
-                {/* Title changes based on mode */}
+                {/* ── Title ── */}
                 <div className="ComCssFiledName">
-                    <p>{editMode ? `Edit Ticket — #${editTicketNo}` : "Ticket Raise"}</p>
+                    <p>{editMode ? `Edit Ticket — #${editTicketnumber}` : "Service Desk"}</p>
                 </div>
 
                 <div className="TicketRaisedTexfiled">
                     <ThemeProvider theme={TextFiledTheme}>
 
-                        <Autocomplete
-                            options={priorityOptions}
-                            value={formData.priority}
-                            getOptionLabel={o => o.label || ""}
-                            onChange={(_, v) => handleChange("priority", v)}
-                            renderInput={params => (
-                                <TextField {...params} label="Priority" size="small" fullWidth
-                                    error={Boolean(errors.priority)} helperText={errors.priority} />
-                            )}
+                        {/* ══ ROW 1 — 3 fields side by side ══ */}
+                        <div className="tr-field-row">
+
+                            {/* Priority */}
+                            <div className="tr-field-col">
+                                <Autocomplete
+                                    options={screenOptions}
+                                    value={formData.screen}
+                                    getOptionLabel={o => o.label || ""}
+                                    onChange={(_, v) => handleChange("screen", v)}
+                                    renderInput={params => (
+                                        <TextField {...params} label="Screen" size="small" fullWidth
+                                            error={Boolean(errors.screen)} helperText={errors.screen} />
+                                    )}
+                                />
+                            </div>
+                            <div className="tr-field-col">
+                                <Autocomplete
+                                    options={priorityOptions}
+                                    value={formData.priority}
+                                    getOptionLabel={o => o.label || ""}
+                                    onChange={(_, v) => handleChange("priority", v)}
+                                    renderInput={params => (
+                                        <TextField {...params} label="Priority" size="small" fullWidth
+                                            error={Boolean(errors.priority)} helperText={errors.priority} />
+                                    )}
+                                />
+                            </div>
+
+                            {/* Escalated By */}
+                            <div className="tr-field-col">
+                                <Autocomplete
+                                    multiple filterSelectedOptions
+                                    options={escalatedByOptions}
+                                    value={formData.escalatedBy || []}
+                                    getOptionLabel={o => o.label || ""}
+                                    isOptionEqualToValue={(option, value) => option.value === value.value}
+                                    onChange={(_, v) => handleChange("escalatedBy", v)}
+                                    renderInput={params => (
+                                        <TextField {...params} label="Issue Escalated By" size="small" fullWidth
+                                            error={Boolean(errors.escalatedBy)} helperText={errors.escalatedBy} />
+                                    )}
+                                />
+                            </div>
+
+                            {/* Created Date */}
+                            {/* <div className="tr-field-col">
+                                <TextField
+                                    label="Created Date" type="datetime-local"
+                                    size="small" fullWidth
+                                    value={formData.createddate}
+                                    onChange={e => handleChange("createddate", e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                            </div> */}
+                        </div>
+
+                        {/* ══ ROW 2 — Description (full width, unchanged) ══ */}
+                        <DescriptionField
+                            initialValue={descSeed}
+                            error={errors.description}
+                            descRef={descRef}
                         />
 
-                        <Autocomplete
-                            options={escalatedByOptions}
-                            value={formData.escalatedBy}
-                            getOptionLabel={o => o.label || ""}
-                            onChange={(_, v) => handleChange("escalatedBy", v)}
-                            renderInput={params => (
-                                <TextField {...params} label="Issue Escalated By" size="small" fullWidth
-                                    error={Boolean(errors.escalatedBy)} helperText={errors.escalatedBy} />
-                            )}
-                        />
-
-                        <TextField
-                            label="Description" multiline rows={3} fullWidth
-                            value={formData.description}
-                            onChange={e => {
-                                if (e.target.value.length <= 200)
-                                    handleChange("description", e.target.value);
-                            }}
-                            error={Boolean(errors.description)}
-                            helperText={errors.description || `${formData.description.length}/200`}
-                        />
-
-                        <div className="uploadSection">
+                        {/* ══ ROW 3 — File upload ══ */}
+                        {/* <div className="uploadSection">
                             <Button
                                 variant="contained" component="label" size="small"
                                 startIcon={<UploadFileIcon />}
-                                sx={{ textTransform: "none", borderRadius: "8px",
-                                      height: "38px", minWidth: "170px", boxShadow: "none" }}
-                            >
+                                sx={{ textTransform:"none", borderRadius:"8px",
+                                      height:"38px", minWidth:"170px", boxShadow:"none" }}>
                                 Upload File
-                                <input type="file" hidden accept="image/*,video/*"
-                                    onChange={handleFileUpload} />
+                                <input type="file" hidden accept="image/*,video/*" onChange={handleFileUpload} />
                             </Button>
-                            {formData.file && (
-                                <p className="fileName">{formData.file.name}</p>
-                            )}
-                        </div>
+                            {formData.file && <p className="fileName">{formData.file.name}</p>}
+                        </div> */}
+                        {/* ══ ROW 3 — File upload + Notes ══ */}
+<div className="uploadSection">
+    <div className="uploadBtn">
+        {/* <Button
+            variant="contained" component="label" size="small"
+            startIcon={<UploadFileIcon />}
+            sx={{ textTransform:"none", borderRadius:"8px",
+                  height:"38px", minWidth:"170px", boxShadow:"none" }}>
+            Upload File
+            <input type="file" hidden accept="image/*,video/*" onChange={handleFileUpload} />
+        </Button>
+        {formData.file && <p className="fileName">{formData.file.name}</p>} */}
+    </div>
+
+  <div className="noteSection">
+    <p className="noteTitle">Note:</p>
+
+    <p className="noteItem">
+        <span className="noteKey bug">Bug</span> → Issue in the existing process
+    </p>
+
+    <p className="noteItem">
+        <span className="noteKey update">Update</span> → Improvement in the existing process
+    </p>
+
+    <p className="noteItem">
+        <span className="noteKey feature">New Feature</span> → Addition of a new functionality
+    </p>
+
+    <p className="noteItem">
+        <span className="noteKey clarification">Clarification</span> → Need clarification on the existing process
+    </p>
+</div>
+</div>
 
                         {apiError && <p className="apiError">{apiError}</p>}
                         {success  && (
@@ -252,35 +359,46 @@ const TicketRaise = () => {
                     </ThemeProvider>
                 </div>
 
+                {/* ── Buttons ── */}
                 <div className="ComCssButton9">
-                    {/* Button label: "Edit" in edit mode, "Submit" otherwise */}
-                    <button
-                        className="ComCssSubmitButton"
+                    <Button
+            variant="contained" component="label" size="small"
+            startIcon={<UploadFileIcon />}
+            sx={{ textTransform:"none", borderRadius:"8px",
+                  height:"31px", minWidth:"130px",marginTop:"9px", boxShadow:"none" }}>
+            Upload File
+            <input type="file" hidden accept="image/*,video/*" onChange={handleFileUpload} />
+        </Button>
+        {formData.file && <p className="fileName">{formData.file.name}</p>}
+                    <button className="ComCssSubmitButton"
                         onClick={editMode ? handleEditSubmit : handleSubmit}
-                        disabled={loading}
-                    >
-                        {loading ? (editMode ? "Updating…" : "Submitting…") : (editMode ? "Edit" : "Submit")}
+                        disabled={loading}>
+                        {loading
+                            ? (editMode ? "Updating…" : "Submitting…")
+                            : (editMode ? "Edit"       : "Submit")}
                     </button>
-                    <button className="ComCssDeleteButton" onClick={handleCancel} disabled={loading}>
+                    <button className="ComCssDeleteButton" onClick={resetForm} disabled={loading}>
                         Cancel
                     </button>
+                    
                 </div>
             </div>
 
-            {/* ── Tickets table — pass handleEditClick down ── */}
             <TicketRaiseTable
                 tableData={tableData}
                 page={page}
                 totalPages={totalPages}
                 totalElements={totalElements}
-                searchText={searchText}
-                setSearchText={setSearchText}
                 onSearch={handleSearch}
+                onDownload={handleDownload}
                 onPrev={handlePrevPage}
                 onNext={handleNextPage}
-                onEdit={handleEditClick}       
+                onEdit={handleEditClick}
+                userName={userName}
+                userId={userId}
+                screenDetails={screenDetails}
+                
             />
-
         </div>
     );
 };

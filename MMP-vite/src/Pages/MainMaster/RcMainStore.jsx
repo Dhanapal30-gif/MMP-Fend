@@ -205,6 +205,11 @@ const RcMainStore = () => {
       errors.expdateapplicable = "Please Select Exp-Date Applicable";
       isValid = false;
     }
+
+    if (!formData.AFO) {
+      errors.AFO = "Please Select AFO";
+      isValid = false;
+    }
     // if (!formData.shelflife) {
     //   errors.shelflife = "Please Enter Shelflife";
     //   isValid = false;
@@ -1024,7 +1029,7 @@ const RcMainStore = () => {
               size="small"
               className='ProductTexfiled-textfield '
             />
-            <TextField
+            {/* <TextField
               id="outlined-basic"
               label="Active For Ordering"
               variant="outlined"
@@ -1034,9 +1039,32 @@ const RcMainStore = () => {
               //error={Boolean(formErrors.partcode)}
               //helperText={formErrors.partcode}
               //sx={{ "& .MuiInputBase-root": { height: "40px" } }}
+             error={Boolean(formErrors.AFO)}
+              helperText={formErrors.AFO}
               size="small"
               className='ProductTexfiled-textfield '
-            />
+            /> */}
+
+            <Autocomplete
+  options={["Yes", "No"]}
+  getOptionLabel={(option) => option || ""}
+  value={formData.AFO || null}
+  onChange={(event, newValue) =>
+    setFormData({ ...formData, AFO: newValue || "" })
+  }
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Active For Ordering"
+      variant="outlined"
+      error={Boolean(formErrors.AFO)}
+      helperText={formErrors.AFO}
+      size="small"
+      className="ProductTexfiled-textfield"
+    />
+  )}
+/>
+
             {/* <TextField
               id="outlined-basic"
               label="ComponentUsage"

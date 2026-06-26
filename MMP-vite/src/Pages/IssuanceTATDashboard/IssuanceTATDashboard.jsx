@@ -166,9 +166,13 @@ const makeOptions = (color, sortedData, tatKey, onClickFn, chartData) => ({
       callbacks: { label: ctx => ` ${sortedData[ctx.dataIndex][tatKey]}` },
     },
     datalabels: {
-      color: 'rgba(255,255,255,0.75)',
-      anchor: 'end', align: 'end', offset: 4,
-      font: { size: 10 },
+      // color: 'rgba(255,255,255,0.75)',
+      // anchor: 'end', align: 'end', offset: 4,
+      // font: { size: 10 },
+      color: '#334155',   // ← was 'rgba(255,255,255,0.75)'
+  display: true,      // ← add this to guarantee always-visible
+  anchor: 'end', align: 'end', offset: 4,
+  font: { size: 10 },
       formatter: (_, ctx) => {
         const item = sortedData[ctx.dataIndex];
         return `${item.componentUsage}  |  ${item[tatKey]}`;
@@ -318,6 +322,7 @@ const IssuanceTATDashboard = () => {
     setFormData(def);
     setResetKey(p => p+1);
     setClearButton(false);
+    setProductFamily('');   
     fetchFilterResultWith(def);
   };
 
@@ -344,7 +349,7 @@ const IssuanceTATDashboard = () => {
   const data2     = mkData(sorted2,     'approver_2_TAT', C.a2);
   const dataStore = mkData(sortedStore, 'storeTAT',       C.st);
   const dataOA    = mkData(sortedOA,    'overallTAT',     C.oa);
-
+const [productFamily, setProductFamily] = useState('');
   return (
     <div style={S.wrap}>
 
@@ -355,7 +360,7 @@ const IssuanceTATDashboard = () => {
     <h1 style={{ margin:0, fontSize:20, fontWeight:'bolder', color:'rgb(9,146,156)', letterSpacing:-0.5, fontFamily:'Segoe UI, sans-serif' }}>
       Issuance TAT Dashboard
     </h1>
-    <p style={{ margin:'1px 0 0', fontSize:9, color:'#2876e4', fontWeight:600, fontFamily:'Segoe UI, sans-serif' }}>
+    <p style={{ margin:'1px 0 0', fontSize:9, color:'#2a413d', fontWeight:600, fontFamily:'Segoe UI, sans-serif' }}>
       {loading ? 'Loading…' : `${recevingReportDetail.length} product groups • live`}
     </p>
   </div>
@@ -365,23 +370,69 @@ const IssuanceTATDashboard = () => {
 </div>
 
 {/* ── Filter bar ── */}
-<div style={{ background:'#fff', borderRadius:10, border:'1px solid #a5c7f4', boxShadow:'0 1px 4px rgba(0,0,0,0.05)', padding:'9px 12px', marginBottom:12 }}>
+<div style={{ background:'#088579', borderRadius:10, border:'1px solid #a5c7f4', boxShadow:'0 1px 4px rgba(0,0,0,0.05)', padding:'9px 12px', marginBottom:12 }}>
   <div style={{ display:'flex', alignItems:'flex-end', gap:12, flexWrap:'wrap' }} key={resetKey}>
 
     <div style={{ display:'flex', flexDirection:'column' }}>
-      <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>Product Group</label>
-      <IssuanceTATDashTexrFiled
+      {/* <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>Product Group</label> */}
+      {/* <IssuanceTATDashTexrFiled
         label="Product Group"
         options={productDetail}
         onChange={(v) => {
           const u = { ...formData, productgroup: v };
           setFormData(u); fetchFilterResultWith(u); setClearButton(true);
         }}
-      />
+      /> */}
+      {/* <IssuanceTATDashTexrFiled
+  label="Product Group"
+  options={productDetail}
+  onChange={(v) => {
+    const u = { ...formData, productgroup: v };
+    setFormData(u);
+    fetchFilterResultWith(u);
+    setClearButton(true);
+
+    // ── auto-set family: productDetail[i] = [productname, productgroup, productfamily]
+    const match = productDetail.find(item => item[1] === v);
+    setProductFamily(match ? match[2] : '');
+  }}
+/> */}
+
+<IssuanceTATDashTexrFiled
+  label="Product Group"
+  options={[...new Set(productDetail.map(item => item[1]))]}
+  onChange={(v) => {
+    const u = { ...formData, productgroup: v };
+    setFormData(u);
+    fetchFilterResultWith(u);
+    setClearButton(true);
+
+    const match = productDetail.find(item => item[1] === v);
+    setProductFamily(match ? match[2] : '');
+  }}
+/>
+
+{productFamily && (
+    <span style={{
+      marginTop: 4,
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      fontSize: 10, fontWeight: 700,
+      color: '#fff',
+      background: 'rgba(255,255,255,0.18)',
+      border: '1px solid rgba(255,255,255,0.35)',
+      borderRadius: 20,
+      padding: '2px 8px',
+      fontFamily: 'Segoe UI, sans-serif',
+      whiteSpace: 'nowrap',
+      letterSpacing: 0.3,
+    }}>
+      🏷 {productFamily}
+    </span>
+  )}
     </div>
 
     <div style={{ display:'flex', flexDirection:'column' }}>
-      <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>Start Date</label>
+      <label style={{ fontSize:12, color:'white', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>Start Date</label>
       <input type="date" value={formData.startDate} max={formData.endDate || ''}
         style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #E2E8F0', background:'#F8FAFC', color:'#334155', fontSize:12, fontWeight:600, outline:'none' }}
         onChange={e => { const u={...formData,startDate:e.target.value}; setFormData(u); fetchFilterResultWith(u); setClearButton(true); }}
@@ -389,7 +440,7 @@ const IssuanceTATDashboard = () => {
     </div>
 
     <div style={{ display:'flex', flexDirection:'column' }}>
-      <label style={{ fontSize:12, color:'#462dea', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>End Date</label>
+      <label style={{ fontSize:12, color:'white', fontWeight:700, display:'block', marginBottom:2, fontFamily:'Segoe UI, sans-serif' }}>End Date</label>
       <input type="date" value={formData.endDate} min={formData.startDate || ''}
         style={{ padding:'5px 8px', borderRadius:6, border:'1px solid #E2E8F0', background:'#F8FAFC', color:'#334155', fontSize:12, fontWeight:600, outline:'none' }}
         onChange={e => { const u={...formData,endDate:e.target.value}; setFormData(u); fetchFilterResultWith(u); setClearButton(true); }}

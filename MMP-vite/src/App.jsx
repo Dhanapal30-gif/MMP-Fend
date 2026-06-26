@@ -65,6 +65,9 @@ import RoadmapDashboard from './Pages/Own/RoadmapDashboard';
 import PoReport from './Pages/PoReport/PoReport';
 import PoDashboard from './Pages/poDashboard/poDashboard';
 import TicketRaise from './Pages/TicketRaise/TicketRaise';
+import SessionTimeout from './components/SessionTimeout/SessionTimeout';
+import DTLTicketDashboard from './Pages/DTLTicketDashboard/DTLTicketDashboard';
+import ReworkShiftDashbaord from './Pages/ReworkShiftDashbaord/ReworkShiftDashbaord';
 
 function App() {
 
@@ -144,7 +147,8 @@ function App() {
           { name: "roadmapDashboard", path: "/RoadmapDashboard" },
           { name: "poReport", path: "/PoReport" },
           { name: "poDashboard", path: "/PoDashboard" },
-          { name: "ticketRaise", path: "/TicketRaise" },
+          { name: "dtlTicketDashboard", path: "/DTLTicketDashboard" },
+          { name: "reworkShiftDashboard", path: "/ReworkShiftDashboard" },
       ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -180,6 +184,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+       <SessionTimeout />
       <div className='App'>
         {/* {!hideHeader && <HeaderComponents isLoggedIn={isLoggedIn} />} */}
         {!hideHeader && (
@@ -260,6 +265,8 @@ function App() {
           <Route path='/poReport' element={<PoReport />} />
           <Route path='/poDashboard' element={< PoDashboard/>} />
           <Route path='/ticketRaise' element={< TicketRaise/>} />
+              <Route path='/dtlTicketDashboard' element={< DTLTicketDashboard/>} />
+          <Route path='/reworkShiftDashboard' element={< ReworkShiftDashbaord/>} />
           <Route
             path="/receving" 
             element={

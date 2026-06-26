@@ -536,11 +536,25 @@ const ReworkerSummaryDashboard = () => {
           <ReworkerSummaryTextfiled label="Status" options={recordstatuses}
             onChange={(v) => handleFilterChange("status", v)} />
 
-          <ReworkerSummaryTextfiled label="Year" options={years}
+          {/* <ReworkerSummaryTextfiled label="Year" options={years}
             onChange={(v) => {
               setYear(v);
               handleFilterChange("year", v);
-            }} />
+            }} /> */}
+
+            <ReworkerSummaryTextfiled label="Year" options={years}
+  onChange={(v) => {
+    setYear(v);
+    handleFilterChange("year", v);
+    setFilters(prev => ({ 
+      ...prev, 
+      year: v,
+      startDate: "",   // ← clear date range when year selected
+      endDate: ""
+    }));
+  }} 
+/>
+
 
           <ReworkerSummaryTextfiled label="Month" options={months}
             onChange={(v) => {
@@ -563,10 +577,20 @@ const ReworkerSummaryDashboard = () => {
   <input
     type="date"
     value={filters.startDate}
+    // onChange={e => {
+    //   setClearButton(true);
+    //   setFilters(prev => ({ ...prev, startDate: e.target.value }));
+    // }}
     onChange={e => {
-      setClearButton(true);
-      setFilters(prev => ({ ...prev, startDate: e.target.value }));
-    }}
+  setClearButton(true);
+  setFilters(prev => ({ 
+    ...prev, 
+    startDate: e.target.value,
+    year: "",      // ← clear year when date range selected
+    month: "",
+    week: ""
+  }));
+}}
     style={{
       padding: '3px 6px', borderRadius: 6, border: '1px solid #ccc',
       fontSize: 11, height: '28px', boxSizing: 'border-box'
@@ -579,10 +603,20 @@ const ReworkerSummaryDashboard = () => {
   <input
     type="date"
     value={filters.endDate}
+    // onChange={e => {
+    //   setClearButton(true);
+    //   setFilters(prev => ({ ...prev, endDate: e.target.value }));
+    // }}
     onChange={e => {
-      setClearButton(true);
-      setFilters(prev => ({ ...prev, endDate: e.target.value }));
-    }}
+  setClearButton(true);
+  setFilters(prev => ({ 
+    ...prev, 
+    endDate: e.target.value,
+    year: "",      // ← clear year when date range selected
+    month: "",
+    week: ""
+  }));
+}}
     style={{
       padding: '3px 6px', borderRadius: 6, border: '1px solid #ccc',
       fontSize: 11, height: '28px', boxSizing: 'border-box'
