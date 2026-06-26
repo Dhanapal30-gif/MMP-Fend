@@ -9,7 +9,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
     const RepaierType = [
         { label: "SUI", value: "SUI" },
         { label: "Rework", value: "Rework" },
-        { label: "RND", value: "RND" },
+        // { label: "RND", value: "RND" },
         { label: "Soldring", value: "Soldring" },
         { label: "Desoldring", value: "Desoldring" },
         { label: "Track change", value: "Trackchange" },
@@ -140,6 +140,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                 // inputProps={{ maxLength: 11 }}
 
                 />
+                {formData.type != "Thermal GEL" && (
 <ComTextFiled
                     label="Schematic Location"
                     name="repairelocation"
@@ -152,6 +153,7 @@ const RepaierTextfile = ({ formData, setSuiData, setFormErrors, extraFields, set
                 // inputProps={{ maxLength: 11 }}
 
                 />
+                )}
                 <Autocomplete
 
                     options={RepaierType}

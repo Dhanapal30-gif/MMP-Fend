@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef ,useMemo  } from 'react';
 import ProductRepairQtyTextFiled from "../../components/ProductRepairQtyMaster/ProductRepairQtyTextFiled";
 import ProductQtyMasterTable from "../../components/ProductRepairQtyMaster/ProductQtyMasterTable";
 import { getProduct, getProductQtyMaster, saveProductQtyMaster } from '../../Services/Services';
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 import { FaFileExcel } from "react-icons/fa";
-import { downloadProductQtyFilter } from '../../Services/Services_09';
+import { downloadProductQtyFilter, saveProductQtyBulck } from '../../Services/Services_09';
+import * as XLSX from "xlsx";
+import DataTable from 'react-data-table-component';
 const ProductRepairQtyMaster = () => {
 
     const [formErrors, setFormErrors] = useState({});
@@ -41,6 +43,7 @@ const ProductRepairQtyMaster = () => {
     const [isEdit, setIsEdit] = useState(true);
     const [editingRowId, setEditingRowId] = useState(null);
     const [addSearchText, setAddSearchText] = useState("");
+    const [uploadErrors, setUploadErrors] = useState([]);
 
     const getFirstDayOfMonth = () => {
         const year = new Date().getFullYear();
@@ -160,6 +163,49 @@ const ProductRepairQtyMaster = () => {
             })
     }
 
+    const handleDownloadExcel = () => {
+        const worksheetData = [
+            ["productname", "dateyear", "totalRepairedQty"]
+        ];
+
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "ProductQtyMaster");
+
+        XLSX.writeFile(workbook, "ProductQtyMaster.xlsx");
+    };
+
+
+    const calculateColumnWidthExcelUpload = (data, key, charWrap = 19, charWidth = 8, minWidth = 250, maxWidth = 518) => {
+        if (!Array.isArray(data) || data.length === 0) return minWidth;
+
+        const maxLines = Math.max(
+            ...data.map(row => {
+                const text = row[key]?.toString() || "";
+                return Math.ceil(text.length / charWrap); // count wrapped lines
+            })
+        );
+
+        const width = charWrap * charWidth;
+        return Math.min(Math.max(width, minWidth), maxWidth);
+    };
+
+    const uploadColumn = useMemo(() => {
+        // console.log("Recalculating column widths...");
+        return [
+            {
+                name: "ProductName", selector: row => row.productname, sortable: true, width: `${calculateColumnWidthExcelUpload(excelUploadData, 'partcode')}px`
+            },
+            {
+                name: "Month Year", selector: row => row.dateyear, width: `${calculateColumnWidthExcelUpload(excelUploadData, 'partdescription')}px`
+            },
+            {
+                name: "RepairedQty", selector: row => row.totalRepairedQty, width: `${calculateColumnWidthExcelUpload(excelUploadData, 'productname')}px`
+            },
+            
+        ]
+    }, [excelUploadData]);
 
     // const formClear = () => {
 
@@ -180,6 +226,57 @@ const ProductRepairQtyMaster = () => {
 
     // }
 
+    const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: "binary" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+
+        const errors = [];
+        const dateYearRegex = /^\d{4}-(0[1-9]|1[0-2])$/; // format: 2025-09
+
+        data.forEach((row, index) => {
+            const rowNum = index + 2; // Excel row number (1=header, so data starts at 2)
+
+            if (!row.dateyear || !dateYearRegex.test(String(row.dateyear).trim())) {
+                errors.push(`Row ${rowNum}: "dateyear" value "${row.dateyear}" is invalid. Expected format: 2025-09`);
+            }
+
+            if (!row.totalRepairedQty || isNaN(Number(row.totalRepairedQty))) {
+                errors.push(`Row ${rowNum}: "totalRepairedQty" value "${row.totalRepairedQty}" is not numeric.`);
+            }
+        });
+
+        if (errors.length > 0) {
+            setUploadErrors(errors);
+            setExcelUploadData([]);
+            setShowUploadTable(false);
+            // reset file input so same file can be re-selected after fix
+            setFileInputKey(Date.now());
+            return;
+        }
+
+        setUploadErrors([]);
+        setExcelUploadData(data);
+        setShowUploadTable(true);
+    };
+    reader.readAsBinaryString(file);
+};
+
+const handlePerRowsChange = (newPerPage) => {
+    setPerPage(newPerPage);
+    setPage(1);
+};
+
+const handlePageChange = (newPage) => {
+    setPage(newPage);
+};
     const formClear = () => {
     setFormData(prev => ({
         productname: "",
@@ -334,6 +431,18 @@ const ProductRepairQtyMaster = () => {
                 <div className='ComCssFiledName'>
                     <p>Product RepairQty Master</p>
                 </div>
+                <div className='ComCssUpload'>
+<input 
+    type="file" 
+    key={fileInputKey} 
+    accept=".xlsx, .xls" 
+    id="fileInput" 
+    style={{ display: 'none' }} 
+    onChange={handleFileUpload}   // ← ADD THIS
+/>                    < button onClick={() => document.getElementById("fileInput").click()} >  Excel Upload </button>
+
+                    <button onClick={handleDownloadExcel}> Excel Download </button>
+                </div>
                 <ProductRepairQtyTextFiled
                     data={storeProduct}
                     formData={formData}
@@ -349,8 +458,161 @@ const ProductRepairQtyMaster = () => {
                     {updateButton &&
                         <button className='ComCssSubmitButton' onClick={handleUpdate} >Update</button>
                     }
+                    
                 </div>
             </div>
+
+   
+   {/* Validation errors */}
+{uploadErrors.length > 0 && (
+    <div style={{
+        margin: '10px 0',
+        padding: '10px 14px',
+        backgroundColor: '#fff3f3',
+        border: '1px solid #f5c6cb',
+        borderRadius: 6,
+    }}>
+        <strong style={{ color: '#c0392b' }}>❌ Upload Validation Errors:</strong>
+        <ul style={{ marginTop: 6, marginBottom: 0, paddingLeft: 18 }}>
+            {uploadErrors.map((err, i) => (
+                <li key={i} style={{ color: '#c0392b', fontSize: 13 }}>{err}</li>
+            ))}
+        </ul>
+    </div>
+)}
+
+{showUploadTable && (
+    <div className='ComCssTable'>
+
+        {/* Upload & Cancel buttons */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+            
+            <span style={{ fontSize: 12, color: '#555', alignSelf: 'center' }}>
+                {excelUploadData.length} record(s) ready to upload
+            </span>
+        </div>
+
+        <DataTable
+            columns={uploadColumn}
+            data={excelUploadData}
+            pagination
+            progressPending={loading}
+            paginationTotalRows={excelUploadData.length}
+            onChangeRowsPerPage={handlePerRowsChange}
+            onChangePage={handlePageChange}
+            paginationPerPage={perPage}
+            paginationRowsPerPageOptions={[5, 10, 15, 20]}
+            fixedHeader
+            fixedHeaderScrollHeight="400px"
+            highlightOnHover
+            className="react-datatable"
+            customStyles={{
+                headRow: {
+                    style: {
+                        background: "linear-gradient(to bottom, rgb(37, 9, 102), rgb(16, 182, 191))",
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        textAlign: "center",
+                        minHeight: "50px",
+                    },
+                },
+                rows: {
+                    style: {
+                        fontSize: "14px",
+                        textAlign: "center",
+                        alignItems: "center",
+                        fontFamily: "Arial, Helvetica, sans-serif",
+                    },
+                },
+                cells: {
+                    style: {
+                        padding: "5px",
+                        justifyContent: "center",
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                    },
+                },
+                headCells: {
+                    style: {
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "left",
+                        textAlign: "left",
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                    },
+                },
+                pagination: {
+                    style: {
+                        border: "1px solid #ddd",
+                        backgroundColor: "#f9f9f9",
+                        color: "#333",
+                        minHeight: "35px",
+                        padding: "5px",
+                        fontSize: "12px",
+                        fontWeight: "bolder",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                    },
+                },
+            }}
+        />
+
+         <div className="ReworkerButton9"> 
+            <button
+                className='ComCssSubmitButton'
+                onClick={async () => {
+    try {
+        setLoading(true);
+        const response = await saveProductQtyBulck(excelUploadData); // your service call
+        const result = response.data;
+
+        if (result.failedCount > 0) {
+            setErrorMessage(
+                `✅ ${result.successCount} saved.  ❌ ${result.failedCount} failed:\n` +
+                result.failedList.join("\n")
+            );
+            setShowErrorPopup(true);
+        } else {
+            setSuccessMessage(`✅ All ${result.successCount} records uploaded successfully!`);
+            setShowSuccessPopup(true);
+        }
+
+        // close upload table after upload
+        setShowUploadTable(false);
+        setExcelUploadData([]);
+        setFileInputKey(Date.now());
+        fetchProductQtyMaster(); // refresh main table
+
+    } catch (error) {
+        setErrorMessage("Bulk upload failed: " + error.message);
+        setShowErrorPopup(true);
+    } finally {
+        setLoading(false);
+    }
+}}
+            >
+                Upload
+            </button>
+            <button
+                className='ComCssClearButton'
+                onClick={() => {
+                    setShowUploadTable(false);
+                    setExcelUploadData([]);
+                    setUploadErrors([]);
+                    setFileInputKey(Date.now()); // reset file input
+                }}
+            >
+                Cancel
+            </button>
+         </div>
+    </div>
+)}
+
+
+
             <div className='ComCssTable'>
                 <h5 className='ComCssTableName'>Report Detail</h5>
                 <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
@@ -391,7 +653,9 @@ const ProductRepairQtyMaster = () => {
 
 
                 </>
+              
             </div>
+
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}

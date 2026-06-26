@@ -45,6 +45,17 @@ export const fetchRequesterType = (userId) => {
   });
 };
 
+const FetchUserNameList = `${url}/ticketRaiseCon/fetchUserName`;
+export const fetchUserName = () => {
+  return axios.get(FetchUserNameList);
+};
+
+
+const FetchScreenNameList = `${url}/ticketRaiseCon/fetchScreenName`;
+export const fetchScreenName = () => {
+  return axios.get(FetchScreenNameList);
+};
+
 const fetchProductPartcode = `${url}/RequesterCon/fetchproductAndPartcode`
 export const fetchProductAndPartcode = (userId, orderType, requesterType) => {
   return axios.get(fetchProductPartcode, {
@@ -83,13 +94,31 @@ export const fetchRequestDetail = (page, userId, size) => {
 
 
 
+// const fetchTicketRaise = `${url}/ticketRaiseCon/fetchTicketDetails`;
+// export const fetchTicketRaiseDetail = (search, page, size) => {
+//   return axios.get(fetchTicketRaise, {
+//     params: {search, page, size}, // ✅ Pass userId as query param
+//   });
+// };
+
+// Services-Rc.js — add status and priority params
 const fetchTicketRaise = `${url}/ticketRaiseCon/fetchTicketDetails`;
-export const fetchTicketRaiseDetail = (search, page, size) => {
-  return axios.get(fetchTicketRaise, {
-    params: {search, page, size}, // ✅ Pass userId as query param
-  });
+export const fetchTicketRaiseDetail = (status, priority,  screen, page, size) => {
+    return axios.get(fetchTicketRaise, {
+        params: { status, priority,  screen, page, size },
+    });
 };
 
+
+// Calls backend export endpoint — returns Excel/CSV as a blob
+const Get_DownloadTicketRaise = `${url}/ticketRaiseCon/exportRequesterTable-excel`;
+export const downloadTicketRaiseExport = (status = "", priority = "", screen = "") =>
+    axios.get(Get_DownloadTicketRaise, {
+        params: { status, priority, screen },   
+        responseType: "blob",          
+    });
+
+    
 const fetchRequesterSaerch = `${url}/RequesterCon/fetchRequesterDetailSearch`;
 export const fetchSearchRequester = (page = 0, size = 10, userId, search = "") => {
   return axios.get(fetchRequesterSaerch, {

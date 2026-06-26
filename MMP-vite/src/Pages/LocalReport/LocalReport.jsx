@@ -12,12 +12,15 @@ import { fetchProductAndPartcode } from '../../Services/Services-Rc';
 const LocalReport = () => {
     const [formData, setFormData] = useState({
         status: "",
+        shift:"",
         startDate: "",
         endDate: "",
         download: null,
         repairername: "",
+        RepaierType:"",
         reworkername: "",
         boardserialnumber: ""
+        
     });
 
     const [formErrors, setFormErrors] = useState({});
@@ -46,19 +49,43 @@ const LocalReport = () => {
     };
 
 
+    // const handleInputChange = (e) => {
+    //     const { name, value } = e.target;
+
+    //     let updatedForm = {
+    //         ...formData,
+    //         [name]: value,
+    //     };
+
+    //     if (name === "startDate" || name === "endDate") {
+    //         updatedForm.download = null;
+    //     }
+    //     setFormData(updatedForm);
+    // };
+
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+    const { name, value } = e.target;
 
-        let updatedForm = {
-            ...formData,
-            [name]: value,
-        };
-
-        if (name === "startDate" || name === "endDate") {
-            updatedForm.download = null;
-        }
-        setFormData(updatedForm);
+    let updatedForm = {
+        ...formData,
+        [name]: value,
     };
+
+    if (name === "startDate" || name === "endDate") {
+        updatedForm.download = null;
+    }
+
+    // ✅ Step 1: Set value normally → picker closes naturally
+    setFormData(updatedForm);
+
+    // ✅ Step 2: After picker closes, reset time to 00:00
+    if ((name === "startDate" || name === "endDate") && !formData[name] && value) {
+        setTimeout(() => {
+            const dateOnly = value.split('T')[0];
+            setFormData(prev => ({ ...prev, [name]: `${dateOnly}T00:00` }));
+        }, 100);
+    }
+};
 
 
     const useDebounce = (value, delay) => {
@@ -269,7 +296,7 @@ const LocalReport = () => {
         setIsFilterActive(false);
         setSearchText("");
         setShowTable(false);
-        fetchData(page, perPage, debouncedSearch);
+        // fetchData(page, perPage, debouncedSearch);
         setFormData({
             status: "",
             startDate: "",

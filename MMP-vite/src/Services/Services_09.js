@@ -102,6 +102,18 @@ export const savePoStataus = (id, formData) =>
   axios.put(`${url}/poStataus/savePoStatus/${id}`, formData);
 
 
+
+const updateTicketRaise = `${url}/ticketRaiseCon/updateTicketDetail`;
+export const updateTicketDetail = (id, formData) =>
+  axios.post(`${updateTicketRaise}/${id}`, formData);
+
+
+const updateTicketRaiseDev = `${url}/ticketRaiseCon/updateTicketDetailbyDev`;
+export const updateTicketDetailDev = (id, formData) =>
+  axios.post(`${updateTicketRaiseDev}/${id}`, formData);
+
+
+
 const Get_RecTick = `${url}/Putaway/getRecTicketNo`;
 export const fetchPutTicket = () => axios.get(Get_RecTick);
 
@@ -550,6 +562,40 @@ const get_ReworkerQtyDashboardList = `${url}/repaierCon/reworkerSummary`;
 export const fetchReworkDashboard = (params) => {
   return axios.get(get_ReworkerQtyDashboardList, { params });
 };
+
+
+
+const get_DTLDashboardList = `${url}/RequesterCon/dtlTciketSummaryDashboard`;
+export const fetchDTLSummaryDashboard = (params) => {
+  return axios.get(get_DTLDashboardList, { params });
+};
+
+
+
+const get_ReworkShiftDashboardList = `${url}/repaierCon/summaryDashboard`;
+export const fetchReworkShiftDashboardList = (params) => {
+  return axios.get(get_ReworkShiftDashboardList, { params });
+};
+
+
+const saveBulkProductQtyMaster = `${url}/unitcomponent/saveProdutQtyBulk`;
+export const saveProductQtyBulck = (data) => {
+  return axios.post(saveBulkProductQtyMaster, data);
+}
+
+
+const GetReworkShiftDropdown  = `${url}/repaierCon/dropdownsDahboard`;
+export const fetchReworkShiftDropdown  = () => {
+  return axios.get(GetReworkShiftDropdown , {  });
+};
+
+
+const get_DTLDashboardPartcodeList = `${url}/RequesterCon/fetchDTLDetail`;
+export const fetchDTLSummaryDashboardPartcodeList = () => {
+  return axios.get(get_DTLDashboardPartcodeList, {  });
+};
+
+
 const get_StockLocationList = `${url}/StockTransferCon/getLocationType`;
 export const fetchStockLocationList = () => axios.get(get_StockLocationList);
 

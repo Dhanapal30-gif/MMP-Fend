@@ -69,7 +69,8 @@ const Login = ({ setUserId ,setIsLoggedIn }) => {
              localStorage.setItem("userId", data.empId);
             setIsLoggedIn(true);
             setUserId(data.empId);
-            callServer(data.empName);
+            // callServer(data.empName);
+            callServer(localStorage.getItem("userName"));
 
             // Fetch screens
             const roleStr = sessionStorage.getItem("userRole");

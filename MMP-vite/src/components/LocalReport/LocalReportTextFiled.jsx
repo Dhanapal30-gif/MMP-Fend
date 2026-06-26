@@ -8,13 +8,34 @@ import { Autocomplete, TextField } from "@mui/material";
 
 const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
     typeOptions, ReworkerNameOptions, handleInputChange, nameOptions, serialOptions,
-    RepaierNameOptions, handleChange,productNameAndPartcode, productOptions, handlePoChange, formErrors }) => {
+    RepaierNameOptions, handleChange, productNameAndPartcode, productOptions, handlePoChange, formErrors }) => {
 
     const BoardStaus = [
         { label: "Ongoing", value: "MSC00003" },
         { label: "Not Started", value: "MSC00001" },
         { label: "Closed", value: "MSC00004" },
         { label: "Cancel", value: "Cancel" },
+    ];
+
+   
+    const RepaierType = [
+        { label: "SUI", value: "SUI" },
+        { label: "Rework", value: "Rework" },
+        // { label: "RND", value: "RND" },
+        { label: "Soldring", value: "Soldring" },
+        { label: "Desoldring", value: "Desoldring" },
+        { label: "Track change", value: "Trackchange" },
+        { label: "Reflow", value: "Reflow" },
+        { label: "BGA", value: "BGA" },
+        { label: "Swap", value: "Swap" },
+        { label: "Thermal GEL", value: "Thermal GEL" }
+    ];
+
+    const shift = [
+        { label: "A", value: "A" },
+        { label: "B", value: "B" },
+        { label: "C", value: "C" }
+
     ];
 
 
@@ -40,19 +61,22 @@ const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
                 return null;
         }
 
-        const format = (date) => date.toISOString().split('T')[0];
+        const format = (date, isEnd = false) => {
+            const formatted = date.toISOString().split('T')[0];
+            return `${formatted}${isEnd ? 'T23:59' : 'T00:00'}`;
+        };
 
         return {
             startDate: format(startDate),
-            endDate: format(endDate)
+            endDate: format(endDate, true)
         };
     };
 
     const download = [
         "Last 1 Month",
         "Last 3 Month",
-        "Last 6 Month",
-        "Last Year "
+        "Last 6 Month"
+        // "Last Year "
 
     ].map(label => ({
         label,
@@ -99,34 +123,63 @@ const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
                     }}
                     renderInput={(params) => <TextField {...params} label="Reworker Name" size="small" />}
                 />
-<TextField
-    id="outlined-basic"
-    label="BoardSerial Number"
-    variant="outlined"
-    name="boardserialnumber"
-    value={formData.boardserialnumber || ""}
-    onChange={(e) => handlePoChange(e.target.name, e.target.value)}
-    size="small"
-/>
+                <TextField
+                    id="outlined-basic"
+                    label="BoardSerial Number"
+                    variant="outlined"
+                    name="boardserialnumber"
+                    value={formData.boardserialnumber || ""}
+                    onChange={(e) => handlePoChange(e.target.name, e.target.value)}
+                    size="small"
+                />
 
-           <Autocomplete
-  options={productNameAndPartcode.productname || []}
-  value={formData.productname || null}
-  onChange={(e, val) => setFormData({ ...formData, productname: val })}
-  renderInput={(params) => (
-    <TextField {...params} label="Product Name" size="small" />
-  )}
-/>
+                <Autocomplete
+                    options={productNameAndPartcode.productname || []}
+                    value={formData.productname || null}
+                    onChange={(e, val) => setFormData({ ...formData, productname: val })}
+                    renderInput={(params) => (
+                        <TextField {...params} label="Product Name" size="small" />
+                    )}
+                />
+                <Autocomplete
+                    options={productNameAndPartcode.productGroup || []}
+                    value={formData.productgroup || null}
+                    onChange={(e, val) => setFormData({ ...formData, productgroup: val })}
+                    renderInput={(params) => (
+                        <TextField {...params} label="Product Group" size="small" />
+                    )}
+                />
 
-<Autocomplete
-  options={productNameAndPartcode.partcode || []}
-  value={formData.partcode || null}
-  onChange={(e, val) => setFormData({ ...formData, partcode: val })}
-  renderInput={(params) => (
-    <TextField {...params} label="Part Code" size="small" />
-  )}
-/>
- 
+                <Autocomplete
+                    options={productNameAndPartcode.partcode || []}
+                    value={formData.partcode || null}
+                    onChange={(e, val) => setFormData({ ...formData, partcode: val })}
+                    renderInput={(params) => (
+                        <TextField {...params} label="Part Code" size="small" />
+                    )}
+                />
+                <Autocomplete
+                    options={RepaierType}
+                    getOptionLabel={(option) => option.label}
+                    value={getOptionObj(formData.type, RepaierType)}
+                    onChange={(e, newValue) => handlePoChange("type", newValue?.value || "")}
+                    disabled={isFrozen}
+                    renderInput={(params) => (
+                        <TextField {...params} label="Reworker Type"
+                            className="comTextFiled"
+                            error={Boolean(formErrors?.type)}
+                            helperText={formErrors?.type || ""}
+                            variant="outlined" size="small" />
+                    )}
+                />
+
+                <Autocomplete
+                    options={shift}
+                    getOptionLabel={(option) => option.label}
+                    value={getOptionObj(formData?.shift, shift)}  // safe access
+                    onChange={(e, newValue) => handlePoChange("shift", newValue?.value || "")}
+                    renderInput={(params) => <TextField {...params} label="Shift" size="small" />}
+                />
                 <Autocomplete
                     options={BoardStaus}
                     getOptionLabel={(option) => option.label}
@@ -138,7 +191,7 @@ const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
                 <ComTextFiled
                     label="Start Date"
                     name="startDate"
-                    type="date"
+                    type="datetime-local"
                     value={formData.startDate || ''}
                     onChange={handleInputChange}
                     error={Boolean(formErrors?.startDate)}
@@ -146,16 +199,19 @@ const LocalReportTextFiled = ({ formData, setFormData, isFrozen,
                     InputLabelProps={{ shrink: true }}
                 />
 
+
                 <ComTextFiled
                     label="End Date"
                     name="endDate"
-                    type="date"
+                    type="datetime-local"
                     value={formData.endDate}
                     onChange={handleInputChange}
                     error={Boolean(formErrors?.endDate)}
                     helperText={formErrors?.endDate || ""}
                     InputLabelProps={{ shrink: true }}
                 />
+
+
 
                 <Autocomplete
                     options={download}
