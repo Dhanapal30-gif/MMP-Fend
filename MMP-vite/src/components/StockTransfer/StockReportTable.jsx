@@ -34,6 +34,7 @@ const StockReportTable = ({
       "location",
        "qty",
       "batchCode",
+      "expirydate",
        "unitprice",    
       "total_value",
     ],
@@ -48,6 +49,7 @@ const StockReportTable = ({
       location: { label: "Rack Location" },
       batchCode: { label: "BatchCode" },
       qty: { label: "Qty" },
+      expirydate: { label: "Expiry Date" },  
       total_value: { label: "Total Value  €" },
       unitprice: { label: "Unit Value €" },
       

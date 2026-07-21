@@ -253,7 +253,7 @@ const ApproverTable = ({
                 onChange={(e) => {
                   const val = e.target.value;
                   if (val !== "" && Number(val) > row.TotalAvailableQty) {
-                    setErrorMessage("Entered quantity exceeds Req quantity!")
+                    setErrorMessage("Entered quantity exceeds Available  quantity!")
                     setShowErrorPopup(true)
                     return;
                   }

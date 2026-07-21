@@ -99,22 +99,36 @@ const StockTransferOverview = () => {
         );
     };
 
-    const Clear = () => {
-        // setIsFilterActive(false);
-        // setSearchText("");
-         fetchFilterResult();
-        // setShowTable(false);
-        // fetchData(page, perPage, debouncedSearch);
-        setFormData({
-            partcode: "",
-            componentUsage: "",
-            ponumber: "",
-            startDate: "",
-            endDate: "",
-            download: null,
-        })
+    // const Clear = () => {
+    //     // setIsFilterActive(false);
+    //     // setSearchText("");
+    //      fetchFilterResult();
+    //     // setShowTable(false);
+    //     // fetchData(page, perPage, debouncedSearch);
+    //     setFormData({
+    //         partcode: "",
+    //         componentUsage: "",
+    //         ponumber: "",
+    //         startDate: "",
+    //         endDate: "",
+    //         download: null,
+    //     })
        
+    // };
+
+    const Clear = () => {
+    const clearedForm = {
+        partcode: "",
+        componentUsage: "",
+        ponumber: "",
+        startDate: "",
+        endDate: "",
+        download: null,
     };
+
+    setFormData(clearedForm);
+    fetchFilterResult("", clearedForm);  // pass fresh values explicitly
+};
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -190,23 +204,39 @@ const StockTransferOverview = () => {
 
     };
 
-    const fetchFilterResult = (search = "") => {
-        setLoading(true);
-        setShowTable(true)
-        const payload = {
-            ...formData,
-            search: search?.trim() || null
-        };
+    // const fetchFilterResult = (search = "") => {
+    //     setLoading(true);
+    //     setShowTable(true)
+    //     const payload = {
+    //         ...formData,
+    //         search: search?.trim() || null
+    //     };
 
-        getStockReportOverViewFilter(page - 1, perPage, payload)
-            .then(res => {
-                setStockReportDetail(res.data.content || []);
-                setTotalRows(res.data.totalElements || 0);
-            })
-            .finally(() => setLoading(false));
+    //     getStockReportOverViewFilter(page - 1, perPage, payload)
+    //         .then(res => {
+    //             setStockReportDetail(res.data.content || []);
+    //             setTotalRows(res.data.totalElements || 0);
+    //         })
+    //         .finally(() => setLoading(false));
+    // };
+
+
+
+    const fetchFilterResult = (search = "", overrideForm = null) => {
+    setLoading(true);
+    setShowTable(true);
+    const payload = {
+        ...(overrideForm || formData),
+        search: search?.trim() || null
     };
 
-
+    getStockReportOverViewFilter(page - 1, perPage, payload)
+        .then(res => {
+            setStockReportDetail(res.data.content || []);
+            setTotalRows(res.data.totalElements || 0);
+        })
+        .finally(() => setLoading(false));
+};
 
     const exportToExcel = (search = "") => {
             setDownloadDone(false);

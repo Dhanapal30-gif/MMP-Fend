@@ -63,6 +63,24 @@ const Approver = () => {
     }, [formData.rec_ticket_no]);
 
 
+
+
+
+
+    useEffect(() => {
+    const handleEnterKey = (e) => {
+        if (e.key === "Enter" && showTable) {
+            e.preventDefault();
+            handleSubmit();
+        }
+    };
+
+    window.addEventListener("keydown", handleEnterKey);
+
+    return () => {
+        window.removeEventListener("keydown", handleEnterKey);
+    };
+}, [showTable, selectedGrnRows, approveTicketDetail]);
     const fetchApproverTicktes = async (userId) => {
         try {
             const response = await fetchApproverTicket(userId);

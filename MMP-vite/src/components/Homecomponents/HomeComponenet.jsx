@@ -5,6 +5,11 @@ import {
   Tooltip, Legend, ArcElement
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
+
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(BarElement, ArcElement, CategoryScale, LinearScale, Tooltip, Legend, ChartDataLabels);
@@ -108,7 +113,10 @@ const HomeComponent = () => {
     <div className="home-container">
 
       {/* ── Total Summary Card ── */}
-      <div className="stat-box stat-box--split">
+      <div className="stat-box stat-box--summary stat-box--split">
+        {/* <div className="stat-box-icon">
+          <Inventory2OutlinedIcon />
+        </div> */}
         <div>
           <h6>Total Stock Partcode</h6>
           <p>{Number(totalSummary.totalStockCount).toLocaleString('en-IN')}</p>
@@ -120,21 +128,30 @@ const HomeComponent = () => {
       </div>
 
       {/* ── Out Of Stock Card ── */}
-      <div className="stat-box stat-box--clickable" onClick={() => setShowOutOfStock(true)}>
+      <div className="stat-box stat-box--out-of-stock stat-box--clickable" onClick={() => setShowOutOfStock(true)}>
+        <div className="stat-box-icon">
+          <WarningAmberOutlinedIcon />
+        </div>
         <h6>Out Of Stock Parts</h6>
         <p>{outOfStockList.length}</p>
         <small className="stat-hint">Click to view list</small>
       </div>
 
       {/* ── Today Received Card ── */}
-      <div className="stat-box stat-box--clickable" onClick={() => setShowTodayReceived(true)}>
+      <div className="stat-box stat-box--received stat-box--clickable" onClick={() => setShowTodayReceived(true)}>
+        <div className="stat-box-icon">
+          <DownloadOutlinedIcon />
+        </div>
         <h6>Received Parts : {todayReceivedList.length}</h6>
         {renderTicker(todayReceivedList)}
         <small className="stat-hint">Click to view list</small>
       </div>
 
       {/* ── Today Issued Card ── */}
-      <div className="stat-box stat-box--clickable" onClick={() => setShowTodayIssued(true)}>
+      <div className="stat-box stat-box--issued stat-box--clickable" onClick={() => setShowTodayIssued(true)}>
+        <div className="stat-box-icon">
+          <UploadOutlinedIcon />
+        </div>
         <h6>Issued Parts : {todayIssuedList.length}</h6>
         {renderTicker(todayIssuedList)}
         <small className="stat-hint">Click to view list</small>
@@ -145,8 +162,8 @@ const HomeComponent = () => {
 
         {/* Box 1 — Partcode wise bar chart */}
         <div>
-          <h6 style={{ marginBottom: 8, color: '#fff', fontSize: 13, width: '100%' }}>
-            Partcode wise Stock Value — highest first
+          <h6 style={{ marginBottom: 8, color: '#0d0c0c', fontSize: 13, width: '100%' }}>
+            Partcode wise Stock Value — Highest First
           </h6>
           <input
             type="text"
@@ -164,15 +181,15 @@ const HomeComponent = () => {
                     label: 'Stock Value (€)',
                     data: filteredPartcodeList.map(item => Number(item.totalValue).toFixed(2)),
                     backgroundColor: filteredPartcodeList.map((_, i) =>
-                      i === 0 ? 'rgba(16, 222, 126, 0.85)' :
-                      i === 1 ? 'rgba(197, 10, 239, 0.85)' :
-                      i === 2 ? 'rgba(255, 205, 86, 0.85)' :
-                      i === 3 ? 'white'                    :
-                                'rgba(54, 162, 235, 0.75)'
+                      i === 0 ? 'rgba(16, 26, 222, 0.85)' :
+                      i === 1 ? 'rgba(9, 132, 170, 0.85)' :
+                      i === 2 ? 'rgba(73, 179, 12, 0.85)' :
+                      i === 3 ? 'rgba(243, 232, 24, 0.85)':
+                                'rgba(183, 27, 235, 0.75)'
                     ),
                     borderRadius: 5,
                     borderSkipped: false,
-                    barThickness: 28,
+                    barThickness: 13,
                   }],
                 }}
                 options={{
@@ -190,7 +207,7 @@ const HomeComponent = () => {
                     datalabels: {
                       anchor: 'end', align: 'end', clip: false,
                       font: { size: 10, weight: 'bold' },
-                      color: '#fff',
+                      color: '#0c0c0c',
                       formatter: (value) =>
                         `€ ${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
                     },
@@ -199,13 +216,13 @@ const HomeComponent = () => {
                     x: {
                       beginAtZero: true,
                       ticks: {
-                        font: { size: 10 }, color: '#ccc',
+                        font: { size: 10 }, color: '#0f0e0e',
                         callback: (value) => `€ ${Number(value).toLocaleString('en-IN')}`,
                       },
                       grid: { color: 'rgba(255,255,255,0.05)' },
                     },
                     y: {
-                      ticks: { font: { size: 10 }, color: '#fff' },
+                      ticks: { font: { size: 10 }, color: '#0c0b0b' },
                       grid: { display: false },
                     },
                   },
@@ -214,17 +231,17 @@ const HomeComponent = () => {
             </div>
           </div>
           {filteredPartcodeList.length === 0 && (
-            <p style={{ color: '#aaa', fontSize: 12, textAlign: 'center', marginTop: 20 }}>
+            <p style={{ color: '#0a0909', fontSize: 12, textAlign: 'center', marginTop: 20 }}>
               No partcode found
             </p>
           )}
         </div>
 
         {/* Box 2 — empty */}
-        <div></div>
+        {/* <div></div> */}
 
         {/* Box 3 — empty */}
-        <div></div>
+        {/* <div></div> */}
 
       </div>
 

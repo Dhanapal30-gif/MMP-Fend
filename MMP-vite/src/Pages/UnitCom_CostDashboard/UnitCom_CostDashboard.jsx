@@ -197,7 +197,7 @@ const UnitCom_CostDashboard = () => {
       datasets: [{
         label: "Total cost",
         data:  data.map(r => r.totalCost || 0),
-        backgroundColor: data.map(() => "#d40e99"),
+       backgroundColor: data.map(() => "#10B981"),
         borderRadius: 8,
         borderSkipped: false,
         hoverBackgroundColor: "#f59e0b",

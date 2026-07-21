@@ -216,12 +216,14 @@
 
 /* Others Cost card */
 .ucd-metric.m5 {
-  background: linear-gradient(135deg, #0f7638 0%, #04da5a 100%);
+  /* background: linear-gradient(135deg, #0f7638 0%, #04da5a 100%); */
+   background: linear-gradient(135deg, #3B82F6, #2563EB);
 }
 
 /* Sub Module Cost card */
 .ucd-metric.m6 {
-  background: linear-gradient(135deg, #b45309 0%, #78350f 100%);
+  /* background: linear-gradient(135deg, #b45309 0%, #78350f 100%); */
+  background: linear-gradient(135deg, #2DD4BF, #14B8A6);
 }
 
 .ucd-metric {
@@ -250,10 +252,14 @@
   pointer-events: none;
 }
 
-.m1 { background: linear-gradient(140deg, #4e0bf8 0%, #4c1d95 100%); }
+/* .m1 { background: linear-gradient(140deg, #4e0bf8 0%, #4c1d95 100%); }
 .m2 { background: linear-gradient(140deg, #064e2a 0%, #065f46 100%); }
 .m3 { background: linear-gradient(140deg, #4c0519 0%, #9f1239 100%); }
-.m4 { background: linear-gradient(140deg, #159191 0%, #066268 100%); }
+.m4 { background: linear-gradient(140deg, #159191 0%, #066268 100%); } */
+.m1{ background: linear-gradient(135deg, #FBBF24, #F59E0B);}
+.m2{background: linear-gradient(135deg, #8B5CF6, #7C3AED);}
+.m3{background: linear-gradient(135deg, #f441c7, #ad0a8f);}
+.m4{background: linear-gradient(135deg, #10B981, #059669);}
 
 .ucd-metric-icon {
   font-size: 18px;
