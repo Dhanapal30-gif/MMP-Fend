@@ -18,7 +18,7 @@ const fields = [
     "partdescription",
     "uom",
     "componentUsage",
-    "unitValue",
+  
     "msdstatus",
 
     "rcQty",
@@ -26,7 +26,8 @@ const fields = [
     "ROWH",
 
     "overallQty",
-    "totalValue",
+     "unitValue",
+     "totalValue",
     "receivingdate",
     "issuanceDate",
 ];
@@ -45,7 +46,7 @@ const customConfig = {
     overallQty:{label:"Overall Qty"},
     receivingdate:{label:"Last ReceivingDate"},
     issuanceDate:{label:"Last issuanceDate"},
-    unitValue:{label:"Unit Value"},
+    unitValue:{label:"Unit Value €"},
     totalValue:{label:"Total Value €"}
 };
 

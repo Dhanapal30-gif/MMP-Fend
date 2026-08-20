@@ -77,7 +77,8 @@ const RcMainStore = () => {
     POSLT: '',
     BG: '',
     expdateapplicable: '',
-    shelflife: 0
+    shelflife: 0,
+    minReqQty:''
   })
   // const handleChange = (e) => {
   //   const { name, value } = e.target;
@@ -117,7 +118,7 @@ const RcMainStore = () => {
     setFormData({
       partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '',
       createdby: '', modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '',
-      TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
+      TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0 , minReqQty:''
     });
     setRackRows([{ racklocation: "" }]);
 
@@ -210,6 +211,15 @@ const RcMainStore = () => {
       errors.AFO = "Please Select AFO";
       isValid = false;
     }
+    if (
+  formData.minReqQty !== "" &&
+  formData.minReqQty !== null &&
+  formData.minReqQty !== undefined &&
+  Number(formData.minReqQty) === 0
+) {
+  errors.minReqQty = "Min Req Qty cannot be 0";
+  isValid = false;
+}
     // if (!formData.shelflife) {
     //   errors.shelflife = "Please Enter Shelflife";
     //   isValid = false;
@@ -233,7 +243,7 @@ const RcMainStore = () => {
   const handleDownloadExcel = () => {
     const worksheetData = [
       ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology",
-        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"]
+        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife","minReqQty"]
     ];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
@@ -258,7 +268,7 @@ const RcMainStore = () => {
     setHandleUpdateButton(false);
     setFormData({
       partcode: '', partdescription: '', rohsstatus: '', racklocation: '', msdstatus: '', technology: '', unitprice: '', createdby: '',
-      modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '', TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0
+      modifiedby: '', quantity: '', UOM: '', AFO: '', ComponentUsage: '', TYC: '', TLT: '', MOQ: '', TRQty: '', POSLT: '', BG: '', expdateapplicable: '', shelflife: 0 ,minReqQty:''
     }); setSelectedRows([]);
     setDeletButton(false);
 
@@ -285,7 +295,7 @@ const RcMainStore = () => {
       // Validate column headers first
       const sheetHeaders = jsonData[0]?.map((header) => header.toLowerCase()) || [];
       const expectedColumns = ["partcode", "partdescription", "rohsstatus", "racklocation", "msdstatus", "technology", "unitprice", "quantity",
-        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife"];
+        "UOM", "AFO", "ComponentUsage", "TYC", "TLT", "MOQ", "TRQty", "POSLT", "BG", "expdateapplicable", "shelflife","minReqQty"];
 
       const isValid = expectedColumns.every((col) => sheetHeaders.includes(col));
       const parsedData = XLSX.utils.sheet_to_json(worksheet);
@@ -342,13 +352,23 @@ const RcMainStore = () => {
       {
         name: "Rohs-status", selector: row => row.rohsstatus, width: `${calculateColumnWidth(excelUploadData, 'rohsstatus')}px`
       },
-      {
-        name: "Rack Location",
-        selector: row => row.racklocation
-          ? row.racklocation.split(",").map(email => <div key={email}>{email}</div>)
-          : "", width: `${calculateColumnWidth(excelUploadData, 'racklocation')}px`
+      // {
+      //   name: "Rack Location",
+      //   selector: row => row.racklocation
+      //     ? row.racklocation.split(",").map(email => <div key={email}>{email}</div>)
+      //     : "", width: `${calculateColumnWidth(excelUploadData, 'racklocation')}px`
 
-      },
+      // },
+      {
+  name: "Rack Location",
+  selector: row =>
+    row.racklocation
+      ? String(row.racklocation)
+          .split(",")
+          .map((location) => <div key={location}>{location}</div>)
+      : "",
+  width: `${calculateColumnWidth(excelUploadData, "racklocation")}px`,
+},
       {
         name: "Msd Status", selector: row => row.msdstatus, width: `${calculateColumnWidth(excelUploadData, 'msdstatus')}px`
       },
@@ -397,6 +417,9 @@ const RcMainStore = () => {
       },
       {
         name: "Shelflife", selector: row => row.shelflife, width: `${calculateColumnWidth(excelUploadData, 'shelflife')}px`
+      },
+      {
+        name: "MinReqQty", selector: row => row.minReqQty, width: `${calculateColumnWidth(excelUploadData, 'shelflife')}px`
       }
     ]
   }, [excelUploadData]);
@@ -572,6 +595,11 @@ const RcMainStore = () => {
       name: "Shelf Life",
       selector: row => row.shelflife,
       width: `${calculateColumnWidth(rcStoreData, 'shelflife')}px`
+    },
+    {
+      name: "Min Req Qty",
+      selector: row => row.minReqQty,
+      width: `${calculateColumnWidth(rcStoreData, 'minReqQty')}px`
     }
 
   ];
@@ -628,15 +656,43 @@ const RcMainStore = () => {
         errors.push(`Row ${index + 1}: Racklocation is required`);
       }
 
-      if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
-        errors.push(`Row ${index + 1}: componentUsage is required`);
-      } else if (row.ComponentUsage.includes(",")) {
-        errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
-      } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
-        errors.push(
-          `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Others" or "Thermal Gel" or "PTL"`
-        );
-      }
+    
+
+      // if (!row.ComponentUsage || row.ComponentUsage.trim() === "") {
+      //   errors.push(`Row ${index + 1}: componentUsage is required`);
+      // } else if (row.ComponentUsage.includes(",")) {
+      //   errors.push(`Row ${index + 1}: Only one Component Usage allowed , never use ','`);
+      // } else if (!allowedValues.includes(row.ComponentUsage.trim())) {
+      //   errors.push(
+      //     `Row ${index + 1}: componentUsage must be exactly "Sub Module", "Others" or "Thermal Gel" or "PTL"`
+      //   );
+      // }
+
+      const componentUsage = String(row.ComponentUsage ?? "").trim();
+
+if (componentUsage === "") {
+  errors.push(`Row ${index + 1}: ComponentUsage is required`);
+} else if (componentUsage.includes(",")) {
+  errors.push(`Row ${index + 1}: Only one Component Usage allowed, never use ','`);
+} else if (!allowedValues.includes(componentUsage)) {
+  errors.push(
+    `Row ${index + 1}: ComponentUsage must be exactly "Sub Module", "Others", "Thermal Gel" or "PTL"`
+  );
+}
+
+
+      if (
+  row.minReqQty !== null &&
+  row.minReqQty !== undefined &&
+  String(row.minReqQty).trim() !== ""
+) {
+  if (!/^\d+$/.test(String(row.minReqQty).trim())) {
+    errors.push(`Row ${index + 1}: MinReqQty must contain only numbers`);
+  }else if (parseInt(row.minReqQty, 10) === 0) {
+    errors.push(`Row ${index + 1}: MinReqQty must be greater than 0`);
+  }
+  
+}
     });
 
 
@@ -881,7 +937,8 @@ const RcMainStore = () => {
       POSLT: row.POSLT || "",
       BG: row.BG || "",
       expdateapplicable: row.expdateapplicable || "",
-      shelflife: row.shelflife || ""
+      shelflife: row.shelflife || "",
+      minReqQty:row.minReqQty || "",
     });
 
     setHandleSubmitButton(false);
@@ -1280,6 +1337,18 @@ const RcMainStore = () => {
               //   helperText={formErrors.shelflife}
               />
             )}
+            <TextField
+              id="outlined-basic"
+              label="Minimum Request Qty"
+              type='number'
+              variant="outlined"
+              name="minReqQty"
+              value={formData.minReqQty}
+              onChange={handleChange}
+              error={Boolean(formErrors.minReqQty)}
+              helperText={formErrors.minReqQty}
+              className='ProductTexfiled-textfield '
+            />
             <div style={{
               maxHeight: 230,           // scroll after 3 rows
               overflowY: "auto",        // vertical scroll
@@ -1329,6 +1398,7 @@ const RcMainStore = () => {
                   ))}
                 </TableBody>
               </Table>
+              
             </div>
 
           </ThemeProvider>

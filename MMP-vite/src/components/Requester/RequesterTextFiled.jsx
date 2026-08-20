@@ -16,7 +16,8 @@ const RequesterTextFiled = ({
     productandPartcode,
     compatibilityData,
     formErrors,
-    isFrozen
+    isFrozen,
+    handleChangeMulti
 }) => {
 
     const requesterForOption = [
@@ -27,6 +28,7 @@ const RequesterTextFiled = ({
         { label: "Material Request Project", value: "Material Request Project" }
     ];
 
+    console.log("userId",userId);
     const uniqueProducts = Array.from(
         new Map((productandPartcode || []).map(item => [item.productname, item])).values()
     );
@@ -67,15 +69,19 @@ const RequesterTextFiled = ({
                 productname: item.productname,
                 componentUsage: item.componentUsage,
                 tyc: item.tyc,
-                uom: item.uom
+                uom: item.uom,
+                 minReqQty: item.minReqQty  
 
             }));
     }, [formData.productName, productandPartcode]);
 
-    console.log("formData", formData);
-    console.log("userId", userId);
-console.log("requestFor",formData.requestFor);
-console.log("requestFor?.value",formData.requestFor?.value);
+//     console.log("formData", formData);
+//     console.log("userId", userId);
+// console.log("requestFor",formData.requestFor);
+// console.log("requestFor?.value",formData.requestFor?.value);
+
+
+
 
     return (
         <div className="ComCssTexfiled">
@@ -360,16 +366,28 @@ console.log("requestFor?.value",formData.requestFor?.value);
                     getOptionLabel={(option) => option.partcode || ""}
                     isOptionEqualToValue={(option, value) => option?.partcode === value?.partcode}
                     // onChange={(e, newValue) => handleChange("partCode", newValue || null)}
-                    onChange={(e, newValue) => {
-                        handleChange("partCode", newValue || null);
-
-                        handleChange("requestQty", newValue?.requestQty || "");
-
-                        // Set the read-only fields based on selected part
-                        handleChange("componentUsage", newValue?.componentUsage || "");
-                        handleChange("uom", newValue?.uom || "");  // lowercase key
-                        handleChange("tyc", newValue?.tyc || "");  // lowercase key
-                    }}
+                    // in RequesterTextFiled, pass handleChangeMulti as a new prop
+onChange={(e, newValue) => {
+    if (newValue) {
+        handleChangeMulti({
+            partCode: newValue,
+            minReqQty: newValue.minReqQty ?? "",
+            requestQty: newValue.minReqQty ?? "",
+            componentUsage: newValue.componentUsage ?? "",
+            uom: newValue.uom ?? "",
+            tyc: newValue.tyc ?? "",
+        });
+    } else {
+        handleChangeMulti({
+            partCode: null,
+            minReqQty: "",
+            requestQty: "",
+            componentUsage: "",
+            uom: "",
+            tyc: "",
+        });
+    }
+}}
                     renderInput={(params) => <TextField {...params}
                         error={Boolean(formErrors?.partCode)}
                         helperText={formErrors?.partCode || ""}
@@ -407,7 +425,7 @@ console.log("requestFor?.value",formData.requestFor?.value);
                     InputProps={{ readOnly: true }}
                     InputLabelProps={{ shrink: true }}
                 />
-                <ComTextFiled
+                {/* <ComTextFiled
                     label="Request Qty"
                     name="requestQty"
                     value={formData.requestQty || ""}
@@ -415,7 +433,17 @@ console.log("requestFor?.value",formData.requestFor?.value);
                     onChange={(e) => handleChange("requestQty", e.target.value)}
                     error={Boolean(formErrors?.requestQty)}
                     helperText={formErrors?.requestQty || ""}
-                />
+                /> */}
+                <ComTextFiled
+    label="Request Qty"
+    name="requestQty"
+    value={formData.requestQty || ""}
+    type="number"
+    onChange={(e) => handleChange("requestQty", e.target.value)}
+    
+    error={Boolean(formErrors?.requestQty)}
+    helperText={formErrors?.requestQty || ""}
+/>
 
                 {(formData.requesterType?.value === "Sub Module" || formData.requesterType === "Sub Module") && (
                     <ComTextFiled

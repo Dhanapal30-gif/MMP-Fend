@@ -286,7 +286,8 @@ apiCall = () => downloadLocalIndiviualReportFilter(payload,userId,userRole);
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Local individual Report</p>
+                    {/* <p>Local individual Report</p> */}
+                    <p>Indiviual PTL User Report</p>
 
                 </div>
                 <LocalndindividualReportCom

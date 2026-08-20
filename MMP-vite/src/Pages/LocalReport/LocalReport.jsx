@@ -357,7 +357,8 @@ apiCall = () => downloadLocalReportFilter(payload);
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>Local Report</p>
+                    {/* <p>Local Report</p> */}
+                    <p>PTL Consumption Report</p>
                 </div>
                 <LocalReportTextFiled
                     formData={formData}

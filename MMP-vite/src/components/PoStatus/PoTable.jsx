@@ -56,6 +56,8 @@ const handleSelectAll = (e) => {
   }
 };
 
+
+
 const handleSelect = (id, isChecked) => {
   setSelectedRows((prev) => {
     if (isChecked) return [...prev, id];
@@ -115,7 +117,18 @@ const handleSelect = (id, isChecked) => {
       }
     }
   });
-
+if (columns.length > 0) {
+    const originalCheckboxCell = columns[0].cell;
+    columns[0] = {
+      ...columns[0],
+      cell: (row, ...rest) => {
+        if (row.postatus === "Closed") {
+          return null; // no checkbox for Closed rows
+        }
+        return originalCheckboxCell(row, ...rest);
+      }
+    };
+  }
   return (
     <CommonDataTable
       columns={columns}

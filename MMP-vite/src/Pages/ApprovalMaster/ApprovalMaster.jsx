@@ -791,7 +791,7 @@ const ApprovalMaster = () => {
 
                         <Autocomplete
                             ListboxComponent={DropdownCom}
-                            options={["Material Request", "Scrap Request", "Stock Transfer Request", "Material Request Projects", "Stock Transfer ", "Returning", "PTL Request"]}
+                            options={["Material Request", "Material Request Projects", "PTL Request","Returning","Scrap Request",  "Stock Transfer "]}
                             getOptionLabel={(option) => (typeof option === "string" ? option : "")} // ✅ Ensure it's a string
                             value={formData.requesttype || []}
                             onChange={(event, newValue) => {

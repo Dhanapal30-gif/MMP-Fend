@@ -46,7 +46,7 @@ const GRNTable = ({
   const columns = generateColumns({
     fields: [
       "recevingTicketNo", "ponumber", "vendorname", "postingdate",
-      "partcode", "partdescription", "UOM", "TYC", "invoiceNo",
+      "partcode", "partdescription", "uom", "tyc", "invoiceNo",
       "invoiceDate", "receivingDate", "recevingQty", "orderqty",
       "unitprice", "GRNQty", "GRComments"
     ],

@@ -45,16 +45,20 @@ const GRNPendingTable = ({
   const columns = generateColumns({
     fields: [
       "recevingTicketNo",
+       "receivingDate",
+      "postingdate",
+      "invoiceDate",
+      "invoiceNo",
       "ponumber",
       "vendorname",
-      "postingdate",
+     
       "partcode",
       "partdescription",
-      "UOM",
-      "TYC",
-      "invoiceNo",
-      "invoiceDate",
-      "receivingDate",
+      "uom",
+      "tyc",
+
+      
+      
       "recevingQty",
       "orderqty",
       "openOrderQty", // 👈 add new field
@@ -67,6 +71,30 @@ const GRNPendingTable = ({
       "GRNComment",
 
     ],
+     customConfig: {
+            recevingTicketNo: { label: "Receving TicketNo" },
+            ponumber: { label: "PoNumber", },
+            vendorname: { label: "Vendor Name" },
+    postingdate: { label: "Posting Date",  }, 
+            partcode: { label: "PartCode" },
+            partdescription: { label: "Part Description" },
+            invoiceNo: { label: "Invoice No" },
+            invoiceDate: { label: "Invoice Date" },
+            receivingDate: { label: "Receiving Date" },
+            recevingQty: { label: "Receving Qty" },
+            orderqty: { label: "order Qty" },
+            uom:{label:"UOM"},
+            tyc:{label:"TYC"},
+              openOrderQty: { label: "OpenOrder Qty" },
+            totalValue: { label: "Total Value" },
+            totalValueEuro: { label: "Total Value €" },
+            unitprice: { label: "UnitPrice" },
+            grno: { label: "GRN Number" },
+            grnqty: { label: "GRN Qty" },
+            grdate: { label: "GRN Date" },
+            grcomments: { label: "GRN Comments" }
+
+        },
     // onEdit,
     selectedRows,
     handleSelect,

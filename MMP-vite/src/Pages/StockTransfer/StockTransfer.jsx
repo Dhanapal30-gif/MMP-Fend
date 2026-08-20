@@ -327,6 +327,8 @@ const handleAdd = () => {
             comments: "",
         })
         setTrnasferPrtcode([]);
+        setFormErrors({});
+        
     }
     const handleCancel = () => {
         setTableData([]);
@@ -378,7 +380,7 @@ const handleAdd = () => {
                 <div className='ComCssFiledName'>
                     <p>Stock Transfer</p>
                 </div>
-                <div className='ComCssButton9'>
+                {/* <div className='ComCssButton9'> */}
                     {/* {(formData.transfertype === 'RC-DHL') && (
                         <button
                             style={{ backgroundColor: 'orange', marginTop: "-50px" }}
@@ -402,7 +404,7 @@ const handleAdd = () => {
                         </button>
                     )} */}
 
-                </div>
+                {/* </div> */}
                 <StockTransferTextFile
                     formData={formData}
                     handleChange={handleChange}

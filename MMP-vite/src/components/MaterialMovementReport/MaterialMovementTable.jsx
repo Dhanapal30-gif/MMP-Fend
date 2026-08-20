@@ -12,10 +12,24 @@ const formatDateArray = (arr) => {
     return `${year}-${pad(month)}-${pad(day)}`;
 };
 
+const formatReceivingDate = (value) => {
+    if (!value) return "";
+
+    if (typeof value === "string") {
+        const [datePart] = value.split(" ");
+        const [year, month, day] = datePart.split("-");
+
+        return `${year}-${month}-${day}`;
+    }
+
+    return value;
+};
+
 
 const fields = [
 
     "postingdate",
+    "receivingdate",
     "partcode",
     "partdescription",
     "uom",
@@ -39,6 +53,7 @@ const customConfig = {
     amount: { label: "Total Value   €" },
     comment: { label: "comment" },
     postingRefernce: { label: "Posting Refernce" },
+    receivingdate: { label: "Receiving Date" },
     movementType: { label: "Movement Type" }
 }
 
@@ -60,7 +75,7 @@ const MaterialMovementTable = ({
             podate: formatDateArray(item.podate),
             exp_date: formatDateArray(item.exp_date),
             grdate: formatDateArray(item.grdate),
-            receivingdate: formatDateArray(item.receivingdate),
+             receivingdate: formatReceivingDate(item.receivingdate),
         }));
     }, [data]);
 

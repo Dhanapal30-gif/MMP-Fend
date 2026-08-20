@@ -176,7 +176,8 @@ const LocalSummaryReport = () => {
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
-                    <p>LocalSummary Report</p>
+                    {/* <p>LocalSummary Report</p> */}
+                    <p>PTL TAT Report</p>
                 </div>
                 <LocalSummaryReportText
                     formData={formData}

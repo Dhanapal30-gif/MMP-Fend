@@ -219,6 +219,7 @@ const payload = Object.keys(locationQty)
       return [
         "rec_ticket_no",
         "requestertype",
+        "requestfor",
         "productname",
         "productgroup",
         "productfamily",
@@ -250,6 +251,7 @@ const payload = Object.keys(locationQty)
     customConfig: {
       rec_ticket_no: { label: "Request TicketNo" },
       requestertype: { label: "Requester Type" },
+      requestfor: { label: "Request For" },
       partcode: { label: "PartCode" },
       partdescription: { label: "Part Description" },
       productname: { label: "Product Name" },

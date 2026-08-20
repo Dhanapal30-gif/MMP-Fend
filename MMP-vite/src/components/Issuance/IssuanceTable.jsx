@@ -19,6 +19,8 @@ const fields = [
   "reqQty",
   "approvedL2",
   "approved2Qty",
+  "createdon",
+  "issuance_date",
   "fsn",
   "fmsn",
   "issuedQty",
@@ -43,7 +45,9 @@ const customConfig = {
   fmsn: { label: "Faulty UnitModule SerialNo" },
   issuedQty:{label:"issueQty"},
     status: { label: "Status"}   ,
-    newSerialNumber: { label: "New Serial Number"}
+    newSerialNumber: { label: "New Serial Number"},
+    createdon:{label:"RequestDate"},
+    issuance_date:{label:"issuanceDate"}
 
 };
 

@@ -33,7 +33,8 @@ const [perPage, setPerPage] = useState(10); // ✅ must exist
     return (
        <div className='OpenRepoInput'>
                 <div className='ComCssFiledName'>
-                    <p>Open Report</p>
+                    {/* <p>Open Report</p> */}
+                    <p>Open PTL Ticket Report</p>
                 </div>
             <div style={{ marginBottom: 16 }}>
                 <strong>Total Ongoing:</strong> {totals.totalOngoing} &nbsp;&nbsp;
