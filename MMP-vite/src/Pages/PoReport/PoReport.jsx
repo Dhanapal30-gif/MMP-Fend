@@ -89,11 +89,12 @@ const fetchMaterialType = useCallback(async () => {
 
    }, []);
 
-  const totalContribEuro  = top10Contributors.reduce((s, r) => s + Number(r.totalValueEuro || 0), 0);
-  const totalContribQty   = top10Contributors.reduce((s, r) => s + Number(r.orderQty || 0), 0);
-  const totalCountryEuro  = top10Countrywise.reduce((s, r) => s + Number(r.totalValueEuro || 0), 0);
+  const totalContribEuro  = top10Contributors.reduce((s, r) => s + Number(r.totalvalueeuro || 0), 0);
+  const totalContrySumofQty   = top10Vendorwise.reduce((s, r) => s + Number(r.grnqty || 0), 0);
+  const totalContribQty   = top10Contributors.reduce((s, r) => s + Number(r.grnqty || 0), 0);
+  const totalCountryEuro  = top10Countrywise.reduce((s, r) => s + Number(r.totalvalueeuro || 0), 0);
   const totalCountryCount = top10Countrywise.reduce((s, r) => s + Number(r.vendorCount || 0), 0);
-  const totalVendorEuro   = top10Vendorwise.reduce((s, r) => s + Number(r.totalValueEuro || 0), 0);
+  const totalVendorEuro   = top10Vendorwise.reduce((s, r) => s + Number(r.totalvalueeuro || 0), 0);
   const totalVendorParts  = top10Vendorwise.reduce((s, r) => s + Number(r.partcodeCount || 0), 0);
 
   const inp = {
@@ -300,8 +301,8 @@ const fetchMaterialType = useCallback(async () => {
                 : top10Contributors.map((r, i) => (
                   <tr key={i}>
                     <td style={td(i)}>{r.partcode}</td>
-                    <td style={td(i, 'right')}>{Number(r.orderQty || 0).toLocaleString('en-IN')}</td>
-                    <td style={td(i, 'right')}>{fmtEuro(r.totalValueEuro)}</td>
+                    <td style={td(i, 'right')}>{Number(r.grnqty || 0).toLocaleString('en-IN')}</td>
+                    <td style={td(i, 'right')}>{fmtEuro(r.totalvalueeuro)}</td>
                   </tr>
                 ))
               }
@@ -335,7 +336,7 @@ const fetchMaterialType = useCallback(async () => {
                   <tr key={i}>
                     <td style={td(i)}>{r.country}</td>
                     <td style={td(i, 'right')}>{Number(r.vendorCount || 0)}</td>
-                    <td style={td(i, 'right')}>{fmtEuro(r.totalValueEuro)}</td>
+                    <td style={td(i, 'right')}>{fmtEuro(r.totalvalueeuro)}</td>
                   </tr>
                 ))
               }
@@ -368,8 +369,9 @@ const fetchMaterialType = useCallback(async () => {
                 : top10Vendorwise.map((r, i) => (
                   <tr key={i}>
                     <td style={td(i)}>{r.vendorName}</td>
-                    <td style={td(i, 'right')}>{fmtEuro(r.totalValueEuro)}</td>
                     <td style={td(i, 'right')}>{Number(r.partcodeCount || 0)}</td>
+                    <td style={td(i, 'right')}>{fmtEuro(r.totalvalueeuro)}</td>
+                    
                   </tr>
                 ))
               }
@@ -377,8 +379,9 @@ const fetchMaterialType = useCallback(async () => {
             <tfoot>
               <tr>
                 <td style={totalTd()}>Total</td>
-                <td style={totalTd('right')}>{fmtEuro(totalVendorEuro)}</td>
                 <td style={totalTd('right')}>{totalVendorParts.toLocaleString('en-IN')}</td>
+                <td style={totalTd('right')}>{fmtEuro(totalVendorEuro)}</td>
+                
               </tr>
             </tfoot>
           </>

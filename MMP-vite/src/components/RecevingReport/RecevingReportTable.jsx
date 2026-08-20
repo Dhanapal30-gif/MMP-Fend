@@ -16,7 +16,9 @@ const formatDateArray = (arr) => {
 
 
 const fields = [
+    "receivingdate",
     "postingdate",
+    
     "rec_ticket_no",
     "pono",
     "partcode",
@@ -39,7 +41,7 @@ const fields = [
     "openorderqty",
     "grno",
     "grdate",
-    "receivingdate",
+    
 
 ];
 

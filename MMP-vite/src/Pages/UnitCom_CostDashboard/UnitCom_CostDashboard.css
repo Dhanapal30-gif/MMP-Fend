@@ -299,7 +299,7 @@
 /* ---------- Chart area ---------- */
 .ucd-charts {
   display: grid;
-  grid-template-columns: 1.7fr 1fr 1fr;
+  grid-template-columns: 4fr 1fr 1fr;
   gap: 14px;
 }
 
@@ -543,5 +543,79 @@
     font-size: 17px;
   }
 }
+
+
+
+
+
+
+.product-filter {
+  position: relative;
+}
+
+.product-dropdown {
+  position: relative;
+  width: 195px;
+}
+
+.product-dropdown .ucd-filter-input {
+  width: 100%;
+  box-sizing: border-box;
+  cursor: text;
+}
+
+.product-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 280px;       /* REDUCED HEIGHT */
+  overflow-y: auto;        /* SCROLL */
+  overflow-x: hidden;
+
+  background: #ffffff;
+  border: 1px solid #d9e2f2;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+
+  z-index: 9999;
+}
+
+.product-dropdown-item {
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #1e293b;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.product-dropdown-item:hover {
+  background: #eef4ff;
+}
+
+/* Scrollbar */
+.product-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product-dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.product-dropdown-menu::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 10px;
+}
+
+.product-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+
+
+
+
+
+
 
 

@@ -335,3 +335,12 @@ export const downloadSearchPoDetail = (search) =>
 
    const getScreen = `${url}/userAuth/fetchScreen`;
   export const fetchScreenName=()=>{return axios.get(getScreen)}
+
+
+
+const downloadPTLCostValidationUrl = `${url}/unitcomponent/download-ptlCostValidation`;
+export const downloadPTLCostValidation = (payload) => {
+  return axios.post(downloadPTLCostValidationUrl, payload, {
+    responseType: 'blob'
+  });
+};

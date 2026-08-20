@@ -75,7 +75,14 @@ const RecevingReportTextfiled = ({
         <div className="ComCssTexfiled">
             <ThemeProvider theme={TextFiledTheme}>
                 <Autocomplete
-                    options={partcodeList || []}
+                    // options={partcodeList || []}
+                    options={[...(partcodeList || [])].sort((a, b) =>
+        String(a.partcode || "").localeCompare(
+            String(b.partcode || ""),
+            undefined,
+            { numeric: true, sensitivity: "base" }
+        )
+    )}
                     getOptionLabel={(option) => option.partcode || ""}
                     value={partcodeList.find(p => p.partcode === formData.partcode) || null}
                     onChange={(e, newValue) => {

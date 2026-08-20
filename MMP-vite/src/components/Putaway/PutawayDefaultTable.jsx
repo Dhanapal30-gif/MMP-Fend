@@ -32,7 +32,8 @@ const PutawayDefaultTable = ({
        "ponumber",
       "partcode",
       "partdescription",
-      "UOM",
+      "uom",
+      "tyc",
       "location",
      
       "poDate",
@@ -57,6 +58,8 @@ const PutawayDefaultTable = ({
       vendorname: { label: "Vendor Name" },
       postingdate: { label: "Postin Date" },
       recevingQty: { label: "Receving Qty" },
+      uom:{label:"UOM"},
+      tyc:{label:"TYC"},
       grnqty: { label: "GRN Qty" },
       putqty: { label: "PUT Qty" },
       grno: { label: "GRN No" },

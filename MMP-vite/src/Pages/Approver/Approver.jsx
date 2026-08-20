@@ -26,6 +26,8 @@ const Approver = () => {
     const [ptlRequesterTickets, setPtlRequesterTickets] = useState([]);
     const [stockTransferTicketsL1, setStockTransferTicketsL1] = useState([]);
     const [stockTransferTicketsL2, setStockTransferTicketsL2] = useState([]);
+    const [scrapRequestTicketsL1, setScrapRequestTicketsL1] = useState([]);
+    const [scrapRequestTicketsL2, setScrapRequestTicketsL2] = useState([]);
     const [openMsg, setOpenMsg] = useState(false);
     const [showTable, setShowTable] = useState(false);
     const [page, setPage] = useState(0);
@@ -93,7 +95,8 @@ const Approver = () => {
             setPtlRequesterTickets(response.data.ptlOpreatorTicket || []);
             setStockTransferTicketsL1(response.data.l1StockTickets || []);
             setStockTransferTicketsL2(response.data.l2StockTickets || []);
-
+            setScrapRequestTicketsL1(response.data.l1ScrapTickets || []);
+            setScrapRequestTicketsL2(response.data.l2ScrapTickets || []);
         } catch (error) {
             console.error("Error fetching requester types:", error);
         }
@@ -533,6 +536,8 @@ const Approver = () => {
                     ptlRequesterTickets={ptlRequesterTickets}
                     stockTransferTicketsL1={stockTransferTicketsL1}
                     stockTransferTicketsL2={stockTransferTicketsL2}
+                    scrapRequestTicketsL1={scrapRequestTicketsL1}
+                    scrapRequestTicketsL2={scrapRequestTicketsL2}
 
                 />
             </div>

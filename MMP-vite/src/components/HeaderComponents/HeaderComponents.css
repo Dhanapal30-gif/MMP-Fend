@@ -316,11 +316,11 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
 
 .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 10px;
 }
 
 
-@media (min-width: 887px) and (max-width: 1197px) {
+@media (min-width: 887px) and (max-width: 1300px) {
 .navgation {
    margin-left:0px;
 
@@ -329,6 +329,21 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
     display: flex;
     gap: 0px;
 }
+.nav-link {
+  text-decoration: none;
+  color: white;
+  font-size: 10px;
+  padding: 8px 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.dropdown-menu {
+
+  font-size: 13px;
+ 
+}
+
 }
 @media (min-width: 887px) and (max-width:970px) {
 .navgation {
@@ -340,6 +355,7 @@ box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2), inset -2px -2px 6px rgba(97, 2
     gap: 0px;
 }
 }
+
 
 /* Keep header aligned nicely for tablets (768px - 1024px) */
 @media (min-width: 768px) and (max-width:887px) {

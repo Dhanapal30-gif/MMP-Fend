@@ -46,16 +46,20 @@ const GRNDefaultTable = ({
     fields: [
       "EDIT",
       "recevingTicketNo",
+       "receivingDate",
+      "postingdate",
+        "invoiceDate",
+         "invoiceNo",
       "ponumber",
       "vendorname",
-      "postingdate",
+      
       "partcode",
       "partdescription",
-      "UOM",
-      "TYC",
-      "invoiceNo",
-      "invoiceDate",
-      "receivingDate",
+      "uom",
+      "tyc",
+     
+    
+     
       "recevingQty",
       "orderqty",
       "openOrderQty", // 👈 add new field
@@ -66,6 +70,7 @@ const GRNDefaultTable = ({
       "grno",
       "grdate",
       "grcomments",
+      "createdby"
 
     ],
     customConfig: {
@@ -80,6 +85,8 @@ const GRNDefaultTable = ({
             receivingDate: { label: "Receiving Date" },
             recevingQty: { label: "Receving Qty" },
             orderqty: { label: "order Qty" },
+            uom:{label:"UOM"},
+            tyc:{label:"TYC"},
               openOrderQty: { label: "OpenOrder Qty" },
             totalValue: { label: "Total Value" },
             totalValueEuro: { label: "Total Value €" },
@@ -87,7 +94,8 @@ const GRNDefaultTable = ({
             grno: { label: "GRN Number" },
             grnqty: { label: "GRN Qty" },
             grdate: { label: "GRN Date" },
-            grcomments: { label: "GRN Comments" }
+            grcomments: { label: "GRN Comments" },
+            createdby: { label: "Created By" },
 
         },
     // onEdit,

@@ -41,6 +41,8 @@ const PoStatus = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [formPo, setformPo] = useState("");
     const [poSummaryStatusData, setPoSummaryStatusData] = useState([]);
+    const isAnyFilterSelected = !!(formData.year || formData.status || formData.ponumber || formData.partcode);
+
     const handleChange = (name, value) => {
         const newData = {
             ...formData,
@@ -136,47 +138,122 @@ const PoStatus = () => {
         }
     };
 
-    const loadPoSummaryStatusData = () => {
-        if (searchText) return;
-        const { year, status, ponumber, partcode } = formData;
+    // const loadPoSummaryStatusData = () => {
+    //     if (searchText) return;
+    //     const { year, status, ponumber, partcode } = formData;
 
-        if (year || status || ponumber || partcode) {
-            setLoading(true);
-            PoSummaryStatusData((data) => {
-                const responseData = data?.content || [];
+    //     if (year || status || ponumber || partcode) {
+    //         setLoading(true);
+    //         PoSummaryStatusData((data) => {
+    //             const responseData = data?.content || [];
 
-                setPoSummaryStatusData(
-                    responseData.map((item, index) => ({
-                        ...item,
-                        id: `${item.poid}_${index}`,
-                    }))
-                );
+    //             setPoSummaryStatusData(
+    //                 responseData.map((item, index) => ({
+    //                     ...item,
+    //                     id: `${item.poid}_${index}`,
+    //                 }))
+    //             );
 
-                setTotalPosummaryRows(data?.totalElements || 0);
-                setPerPage(data?.size || 10);
+    //             setTotalPosummaryRows(data?.totalElements || 0);
+    //             setPerPage(data?.size || 10);
 
-                const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
-                    .filter(Boolean)
-                    .map((val) => ({ label: val, value: val }));
+    //             const ponumberOptions = [...new Set(responseData.map((item) => item.ponumber))]
+    //                 .filter(Boolean)
+    //                 .map((val) => ({ label: val, value: val }));
 
-                const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
-                    .filter(Boolean)
-                    .map((val) => ({ label: val, value: val }));
+    //             const partcodeOptions = [...new Set(responseData.map((item) => item.partcode))]
+    //                 .filter(Boolean)
+    //                 .map((val) => ({ label: val, value: val }));
 
-                const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
-                    .filter(Boolean)
-                    .map((val) => ({ label: val, value: val }));
+    //             const partDescriptionOptions = [...new Set(responseData.map((item) => item.partdescription))]
+    //                 .filter(Boolean)
+    //                 .map((val) => ({ label: val, value: val }));
 
-                setPoDropdownOptions({
-                    ponumberOptions,
-                    partcodeOptions,
-                    partDescriptionOptions
-                });
+    //             setPoDropdownOptions({
+    //                 ponumberOptions,
+    //                 partcodeOptions,
+    //                 partDescriptionOptions
+    //             });
 
-                setLoading(false);
-            }, year, status, ponumber, partcode, page - 1, perPage);
+    //             setLoading(false);
+    //         }, year, status, ponumber, partcode, page - 1, perPage);
+    //     }
+    // };
+
+    // Helper: dedupe by normalized value (trim + case-insensitive), keep first original label
+const getUniqueOptions = (items, field) => {
+    const map = new Map();
+    items.forEach((item) => {
+        const raw = item[field];
+        if (!raw) return;
+        const value = raw.toString().trim();
+        const key = value.toLowerCase(); // normalize for comparison
+        if (!map.has(key)) {
+            map.set(key, { label: value, value: value });
         }
-    };
+    });
+    return [...map.values()];
+};
+
+
+//     const loadDropdownOptions = () => {
+//     const { year, status, ponumber, partcode } = formData;
+//     if (!(year || status || ponumber || partcode)) return;
+
+//     PoSummaryStatusData((data) => {
+//         const responseData = data?.content || [];
+
+//         const ponumberOptions = getUniqueOptions(responseData, "ponumber");
+//         const partcodeOptions = getUniqueOptions(responseData, "partcode");
+//         const partDescriptionOptions = getUniqueOptions(responseData, "partdescription");
+
+//         setPoDropdownOptions({
+//             ponumberOptions,
+//             partcodeOptions,
+//             partDescriptionOptions
+//         });
+//     }, year, status, ponumber, partcode, 0, 100000);
+// };
+
+const loadDropdownOptions = () => {
+    const { year, status } = formData; // 👈 don't pass ponumber/partcode as filters for their own options
+
+    PoSummaryStatusData((data) => {
+        const responseData = data?.content || [];
+        setPoDropdownOptions({
+            ponumberOptions: getUniqueOptions(responseData, "ponumber"),
+            partcodeOptions: getUniqueOptions(responseData, "partcode"),
+            partDescriptionOptions: getUniqueOptions(responseData, "partdescription")
+        });
+    }, year, status, "", "", 0, 100000); // always fetch the full list, only year/status narrow it
+};
+
+useEffect(() => {
+    loadDropdownOptions();
+}, [formData.year, formData.status]); // only re-fetch when year/status change, not ponumber/partcode
+// Table data stays paginated as before, but no longer builds dropdown options.
+const loadPoSummaryStatusData = () => {
+    if (searchText) return;
+    const { year, status, ponumber, partcode } = formData;
+
+    if (year || status || ponumber || partcode) {
+        setLoading(true);
+        PoSummaryStatusData((data) => {
+            const responseData = data?.content || [];
+
+            setPoSummaryStatusData(
+                responseData.map((item, index) => ({
+                    ...item,
+                    id: `${item.poid}_${index}`,
+                }))
+            );
+
+            setTotalPosummaryRows(data?.totalElements || 0);
+            setPerPage(data?.size || 10);
+            setLoading(false);
+        }, year, status, ponumber, partcode, page - 1, perPage);
+    }
+};
 
 
     useEffect(() => {
@@ -214,7 +291,9 @@ const PoStatus = () => {
         setTriggerFetch(p => !p);
     }, [formData, searchText]);
 
-
+useEffect(() => {
+    loadDropdownOptions();
+}, [formData.year, formData.status, formData.ponumber, formData.partcode]);
     // useEffect(() => {
     //     console.log("PO Dropdown Options:", poData);
     // }, [poData]);
@@ -262,17 +341,30 @@ const PoStatus = () => {
        
     }
 
-    const formCancel = ()=>{
-         setFormData({
-            year: "",
-        status: "",
-        ponumber: "",
-        partcode: "",
-        partdescription: ""
-        })
-        setPoData([]);
-        setPoSummaryStatusData([])
-    }
+    // const formCancel = ()=>{
+    //      setFormData({
+    //         year: "",
+    //     status: "",
+    //     ponumber: "",
+    //     partcode: "",
+    //     partdescription: ""
+    //     })
+    //     setPoData([]);
+    //     setPoSummaryStatusData([])
+    // }
+
+    const formCancel = () => {
+    setFormData({
+        year: "", status: "", ponumber: "", partcode: "", partdescription: ""
+    });
+    setPoData([]);
+    setPoSummaryStatusData([]);
+    setPoDropdownOptions({          // 👈 add this
+        ponumberOptions: [],
+        partcodeOptions: [],
+        partDescriptionOptions: []
+    });
+};
 
 
     const exportToExcel = () => {
@@ -354,6 +446,7 @@ const recevingExportToExcel = () => {
 
                 />
             </div>
+            {isAnyFilterSelected && (
             <div className='ComCssTable'>
 
                 <h5 className='ComCssTableName'>Po Summary</h5>
@@ -402,7 +495,9 @@ const recevingExportToExcel = () => {
                     
                 </div>
             </div>
+            )}
 
+{isAnyFilterSelected && (
             <div className='ComCssTable'>
 
                 <h5 className='ComCssTableName'>Receiving Summary</h5>
@@ -436,6 +531,12 @@ const recevingExportToExcel = () => {
                 />
 
             </div>
+            )}
+            {!isAnyFilterSelected && (
+    <p style={{ textAlign: 'center', marginTop: '20px', color: '#888' }}>
+        Please select a filter (Year, Status, PO Number, or Part Code) to view data.
+    </p>
+)}
             <CustomDialog
                 open={showSuccessPopup}
                 onClose={() => setShowSuccessPopup(false)}

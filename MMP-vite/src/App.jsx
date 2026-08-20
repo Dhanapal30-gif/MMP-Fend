@@ -68,6 +68,7 @@ import TicketRaise from './Pages/TicketRaise/TicketRaise';
 import SessionTimeout from './components/SessionTimeout/SessionTimeout';
 import DTLTicketDashboard from './Pages/DTLTicketDashboard/DTLTicketDashboard';
 import ReworkShiftDashbaord from './Pages/ReworkShiftDashbaord/ReworkShiftDashbaord';
+import AiAssistant from './Pages/Ai/AiAssistant';
 
 function App() {
 
@@ -149,6 +150,7 @@ function App() {
           { name: "poDashboard", path: "/PoDashboard" },
           { name: "dtlTicketDashboard", path: "/DTLTicketDashboard" },
           { name: "reworkShiftDashboard", path: "/ReworkShiftDashboard" },
+           { name: "aiAssistant", path: "/AiAssistant" },
       ];
     try {
       await axios.post(`${url}/userAuth/screens/register`, screens);
@@ -267,6 +269,7 @@ function App() {
           <Route path='/ticketRaise' element={< TicketRaise/>} />
               <Route path='/dtlTicketDashboard' element={< DTLTicketDashboard/>} />
           <Route path='/reworkShiftDashboard' element={< ReworkShiftDashbaord/>} />
+          <Route path='/aiAssistant' element={< AiAssistant/>} />
           <Route
             path="/receving" 
             element={

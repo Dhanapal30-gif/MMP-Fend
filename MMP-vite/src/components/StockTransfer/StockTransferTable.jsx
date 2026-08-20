@@ -30,7 +30,7 @@ const StockTransferTable = ({
     const customConfig = {
         RTN: { label: "TicketNo" },
         fromLocation: { label: "From Location" },
-        xtransferLocations: { label: "Transfer Location" },
+        xtransferLocation: { label: "Transfer Location" },
         RecordStatus:{label:"Status "}
 
     }

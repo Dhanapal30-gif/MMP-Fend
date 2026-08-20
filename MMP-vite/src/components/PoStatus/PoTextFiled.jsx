@@ -1,5 +1,5 @@
 import React from 'react';
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField ,createFilterOptions} from "@mui/material";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 
@@ -13,6 +13,12 @@ const PoTextFiled = ({
     const year = currentYear - 3 + i;
     return { label: year.toString(), value: year.toString() };
   });
+
+  const filterLimit50 = createFilterOptions({
+  limit: 50,
+  // optional: only start matching from the beginning of the string (faster, and usually what users expect)
+  // matchFrom: 'start',
+});
 
   const statusOptions = [
     { label: "Open", value: "Open" },
@@ -74,7 +80,7 @@ const PoTextFiled = ({
           }}
           onInputChange={(e, newInputValue) => {
             handleChange("ponumber", newInputValue); // update typing input
-            setPonumberInput(newInputValue); // fetch suggestions dynamically
+            // setPonumberInput(newInputValue); // fetch suggestions dynamically
           }}
           renderInput={(params) => (
             <TextField
@@ -89,7 +95,7 @@ const PoTextFiled = ({
 
 
 
-        <Autocomplete
+        {/* <Autocomplete
           options={partcodeOptions}
           getOptionLabel={(option) => option.label}
           value={getOptionObj(formData.partcode, partcodeOptions)}
@@ -97,8 +103,19 @@ const PoTextFiled = ({
           renderInput={(params) => (
             <TextField {...params} label="Partcode" variant="outlined" size="small" />
           )}
-        />
+        /> */}
         <Autocomplete
+  options={partcodeOptions}
+  getOptionLabel={(option) => option.label}
+  value={getOptionObj(formData.partcode, partcodeOptions)}
+  onChange={(e, newValue) => handleChange("partcode", newValue?.value || "")}
+  filterOptions={filterLimit50}   // 👈 caps to 50 options at a time
+  renderInput={(params) => (
+    <TextField {...params} label="Partcode" variant="outlined" size="small" />
+  )}
+/>
+
+        {/* <Autocomplete
           options={partDescriptionOptions}
           getOptionLabel={(option) => option.label}
           value={getOptionObj(formData.partDescription, partDescriptionOptions)}
@@ -106,7 +123,7 @@ const PoTextFiled = ({
           renderInput={(params) => (
             <TextField {...params} label="Part Description" variant="outlined" size="small" />
           )}
-        />
+        /> */}
 
       </ThemeProvider>
     </div>

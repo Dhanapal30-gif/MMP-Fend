@@ -16,7 +16,7 @@ import { IoSettingsSharp } from "react-icons/io5";
 import { GiCube } from "react-icons/gi";
 import { HiChartBar } from "react-icons/hi";
 import CloseIcon from '@mui/icons-material/Close';
-
+import { IoChatbubbleEllipsesSharp } from "react-icons/io5";
 const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCount }) => {
   const [empName, setEmpName] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -84,6 +84,8 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
     sessionStorage.clear();
     localStorage.clear();
     setUserId(null);       // 🔥 VERY IMPORTANT
+      console.log("localStorage userId:", localStorage.getItem("userId")); // null
+  console.log("sessionStorage userId:", sessionStorage.getItem("userId")); // null
     setIsLoggedIn(false); // 🔥
     navigate("/");
   };
@@ -364,11 +366,11 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                   {servicesDropdown && (
                     <ul className="dropdown-menu">
                       {(userRole.includes("Admin") || isScreenAllowed("Local & Individual Report")) && (
-                        <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Indiviual Report</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Report</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open Report</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("LocalSummary Report")) && (<li><Link to="/localSummaryReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Local Summary Report</Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("PoReport")) && (<li><Link to="/poReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Procurement  Report</Link></li>)}
+                        <li><Link to="/localndindividualReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Indiviual PTL User Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Local Report")) && (<li><Link to="/localReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTL Consumption Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("Open Report")) && (<li><Link to="/openReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Open PTL Ticket Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("LocalSummary Report")) && (<li><Link to="/localSummaryReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>PTL TAT Report</Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("poReport")) && (<li><Link to="/poReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Procurement  Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("recevingReport")) && (<li><Link to="/recevingReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Receving Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("issuanceReport")) && (<li><Link to="/issuanceReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance Report</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("materialMovementReport")) && (<li><Link to="/materialMovementReport" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Material Movement Report</Link></li>)}
@@ -403,7 +405,7 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                       {(userRole.includes("Admin") || isScreenAllowed("reworkerSummaryDashboard")) && (<li><Link to="/reworkerSummaryDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Reworker Summary</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("issuanceTATDashboard")) && (<li><Link to="/issuanceTATDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Issuance TAT Dashboard</Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("unitCom_CostDashboard")) && (<li><Link to="/unitCom_CostDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Unit Consumption Cost </Link></li>)}
-                      {(userRole.includes("Admin") || isScreenAllowed("PoDashboard")) && (<li><Link to="/poDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Procurement </Link></li>)}
+                      {(userRole.includes("Admin") || isScreenAllowed("poDashboard")) && (<li><Link to="/poDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Procurement </Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("dtlTicketDashboard")) && (<li><Link to="/dtlTicketDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>DTL Ticket Dashboard </Link></li>)}
                       {(userRole.includes("Admin") || isScreenAllowed("reworkShiftDashboard")) && (<li><Link to="/reworkShiftDashboard" className="dropdown-item" onClick={() => { closeServicesDropdown(); handleLinkClick(); }}>Rework Shift Dashboard </Link></li>)}
 
@@ -413,6 +415,9 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
                   )}
                 </li>
 
+
+                
+
                 {(userRole.includes("Admin") || isScreenAllowed("ticketRaise")) && (
   <li>
     <Link 
@@ -421,6 +426,18 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
       onClick={handleLinkClick}
     >
       <IoSettingsSharp className="nav-icon" /> Service Desk
+    </Link>
+  </li>
+)}
+
+      {(userRole.includes("Admin") || isScreenAllowed("aiAssistant")) && (
+  <li>
+    <Link 
+      to="/aiAssistant" 
+      className="nav-link"
+      onClick={handleLinkClick}
+    >
+      <IoChatbubbleEllipsesSharp className="nav-icon" /> Chat Bot
     </Link>
   </li>
 )}

@@ -54,6 +54,7 @@ const Requester = () => {
     const [addSearchText, setAddSearchText] = useState("");
     const [downloadProgress, setDownloadProgress] = useState(null);
     const [openMsg, setOpenMsg] = useState(false);
+    const [availableQtyR, setAvailableQtyR] = useState(0);
 
     const orderTypeOption = [
         { label: "Repair", value: "Repair" },
@@ -76,6 +77,10 @@ const Requester = () => {
     const compAvailbleQty = compatibilityData?.[0]?.compatabilityQty ?? "0";
     // console.log("availbleqtrtyy", availbleqty)
 
+    // in parent
+const handleChangeMulti = (fieldsObj) => {
+    setFormData(prev => ({ ...prev, ...fieldsObj }));
+};
     const handleChange = (field, value) => {
         setFormData((prev) => {
             if (field === "requestFor" && value === "Material Request") {
@@ -198,6 +203,75 @@ const Requester = () => {
             isValid = false;
         }
 
+// const reqQty = Number(formData.requestQty);
+// const minReqQty = Number(formData.minReqQty);
+
+// if (formData.minReqQty != null && formData.minReqQty !== "") {
+
+//     // if (reqQty < minReqQty) {
+//     //     errors.requestQty = `Request Qty cannot be less than ${minReqQty}`;
+//     //     isValid = false;
+//     // }
+//      if (reqQty >= availbleqty) {
+//         errors.requestQty = `Request Qty cannot be greater than Available Qty`;
+//         isValid = false;
+//     }
+//     else if ((reqQty - minReqQty) % 100 !== 0) {
+//         errors.requestQty =
+//             `Request Qty must be ${minReqQty} or increase by multiple of ${minReqQty} (e.g. ${minReqQty}, ${minReqQty + minReqQty})`;
+//         isValid = false;
+//     }
+    
+//     if(reqQty >=formData.compatibilityAvailableQty){
+//         errors.requestQty = `Request Qty cannot be greater than Compatibility Available Qty`;
+//         isValid = false;
+//     }
+    
+// }
+const reqQty = Number(formData.requestQty);
+const minReqQty = Number(formData.minReqQty);
+const availableQty = Number(availbleqty) || 0;
+
+const hasCompatibilityQty =
+    formData.compatibilityAvailableQty !== null &&
+    formData.compatibilityAvailableQty !== undefined &&
+    formData.compatibilityAvailableQty !== "";
+
+const compatibilityAvailableQty = hasCompatibilityQty
+    ? Number(formData.compatibilityAvailableQty)
+    : 0;
+
+if (formData.minReqQty != null && formData.minReqQty !== "") {
+
+    // CASE 1: Normal Available Qty is available
+    if (availableQty > 0) {
+
+        if (reqQty > availableQty) {
+            errors.requestQty =
+                `Request Qty cannot be greater than Available Qty`;
+            isValid = false;
+        }
+
+    }
+
+    // CASE 2: Normal Available Qty is 0
+    else if (hasCompatibilityQty) {
+
+        if (reqQty > compatibilityAvailableQty) {
+            errors.requestQty =
+                `Request Qty cannot be greater than Compatibility Available Qty`;
+            isValid = false;
+        }
+
+    }
+
+    // Min Request Qty validation
+    if (isValid && (reqQty - minReqQty) % minReqQty !== 0) {
+        errors.requestQty =
+            `Request Qty must be ${minReqQty} or increase by multiple of ${minReqQty} (e.g. ${minReqQty}, ${minReqQty * 2})`;
+        isValid = false;
+    }
+}
 
         setFormErrors(errors);
         return isValid;
@@ -205,7 +279,7 @@ const Requester = () => {
     // const userId = sessionStorage.getItem("userId");
     const userId = localStorage.getItem("userId");
 
-    // console.log("requestType", requestType)
+    console.log("requestType userId", userId)
     // console.log("productandPartcode", productandPartcode)
 
 
@@ -313,6 +387,11 @@ const Requester = () => {
                 setShowErrorPopup(true);
             } else {
                 setCompatibilityData(data);
+                const qty = data[0]?.Availbleqty || 0;
+
+setAvailableQtyR(qty);
+console.log("Available Qty from API:", qty);
+console.log("setCompatibilityData API:", compatibilityData);
 
                 // optionally set availableQty if you want the first item's availableQty
                 setFormData(prev => ({
@@ -830,6 +909,7 @@ const Requester = () => {
                 <RequesterTextFiled
                     formData={formData}
                     handleChange={handleChange}
+                    handleChangeMulti={handleChangeMulti}
                     orderTypeOption={orderTypeOption}
                     requestType={requestType}
                     requesterType={requesterType}

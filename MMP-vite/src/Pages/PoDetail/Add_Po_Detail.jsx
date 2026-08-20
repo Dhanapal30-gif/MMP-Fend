@@ -264,6 +264,8 @@ const Add_Po_Detail = () => {
     setHandleUpdateButton(false);
     setDeletButton(false);
     setFormErrors("");
+  
+     sethidePonumber(false)
     // isvalid(false);
     setFormData({
       ordertype: "", potool: "", ponumber: "", podate: "",
@@ -542,6 +544,11 @@ const Add_Po_Detail = () => {
       name: "Total Value €",
       selector: row => row.totalvalueeuro,
       width: `${calculateColumnWidth('totalvalueeuro')}px`
+    },
+    {
+      name: "Createdby",
+      selector: row => row.createdby, 
+      width: `${calculateColumnWidth('Createdby')}px`
     }
 
   ]

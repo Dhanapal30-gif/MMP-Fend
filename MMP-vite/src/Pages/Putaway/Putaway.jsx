@@ -660,9 +660,13 @@ const Putaway = () => {
         const filteredData = putawayProcessDetail.filter((row) =>
             selectedRows1.includes(row.id)
         );
+        // const stockFilteredData = putawayRc_DHL.filter((row) =>
+        //     newSelectedRows.includes(row.id) // <-- use selectedId (capital I)
+        // );
         const stockFilteredData = putawayRc_DHL.filter((row) =>
-            newSelectedRows.includes(row.id) // <-- use selectedId (capital I)
-        );
+    selectedRows1.includes(row.selectedId ?? row.selectedid)
+);
+
         // console.log("newSelectedRows", newSelectedRows)
         // console.log("Filtered data:", stockFilteredData);
         let submitData = [];

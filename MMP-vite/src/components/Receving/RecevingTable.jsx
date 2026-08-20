@@ -216,7 +216,7 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, se
         },
         {
             name: "UOM",
-            selector: row => row.UOM,
+            selector: row => row.uom,
             wrap: true,
             grow: 2,
             //   width: `${calculateColumnWidth('UOM')}px`
@@ -614,6 +614,13 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             width: '150px'
 
         },
+            {
+            name: "Receiving Date",
+            selector: row => row.receivingDate,
+            wrap: true,
+            grow: 2,
+            width: '130px'
+        },
         {
             name: "Posting Date",
             selector: row => row.postingdate,
@@ -637,14 +644,14 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
         },
         {
             name: "UOM",
-            selector: row => row.UOM,
+            selector: row => row.uom,
             wrap: true,
             grow: 2,
             width: '190px'
         },
         {
             name: "TYC",
-            selector: row => row.TYC,
+            selector: row => row.tyc,
             wrap: true,
             grow: 2,
             width: '190px'
@@ -724,13 +731,7 @@ export const ColumnTable = ({ recevingData, selectedRows, totalRows, page, perPa
             grow: 2,
             width: '130px'
         },
-        {
-            name: "Receiving Date",
-            selector: row => row.receivingDate,
-            wrap: true,
-            grow: 2,
-            width: '130px'
-        },
+    
         {
             name: "Exp Date",
             selector: row => row.exp_date,
