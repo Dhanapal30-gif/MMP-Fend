@@ -29,13 +29,21 @@ export const getRecDetailFind = (page = 0, size = 10, search = "") => {
 }
 
 
-const Get_DownloadRecDetail = `${url}/Receving/download-excel`;
+// const Get_DownloadRecDetail = `${url}/Receving/download-excel`;
+// export const downloadRecevingDetail = () =>
+//   axios.get(Get_DownloadRecDetail, {
+//     responseType: "blob",
+//   });
+
+  
+
+const Get_DownloadRecDetail = `${url}/GRN/downloadGrn-excel-search`;
 export const downloadRecevingDetail = () =>
   axios.get(Get_DownloadRecDetail, {
     responseType: "blob",
   });
 
-const Get_DownloadSearchRecDetail = `${url}/Receving/download-excelSearch`;
+const Get_DownloadSearchRecDetail = `${url}/GRN/downloadGrn-excel-search`;
 export const downloadSearchRecDetail = (search) =>
   axios.get(Get_DownloadSearchRecDetail, {
     params: { search: search || undefined },
@@ -364,6 +372,19 @@ export const getUnitcompoenentDetailFilter = (page = 0, size = 10, formData) => 
   return axios.post(`${Get_UnitcomponenetReportDetailFilter}?page=${page}&size=${size}`, formData);
 };
 
+
+const Get_UnitcomponenetReportDetailFilterMMP = `${url}/unitcomponent/fetchunitcomponentReportSeprateMMP`;
+export const getUnitcompoenentDetailFilterMMP = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_UnitcomponenetReportDetailFilterMMP}?page=${page}&size=${size}`, formData);
+};
+
+
+
+const Get_UnitcomponenetReportDetailFilterMMPDashboard = `${url}/unitcomponent/fetchunitcomponentReportSeprateMMPDashboard`;
+export const getUnitcompoenentDetailFilterMMPDashboard = (page = 0, size = 10, formData) => {
+  return axios.post(`${Get_UnitcomponenetReportDetailFilterMMPDashboard}?page=${page}&size=${size}`, formData);
+};
+
 const Get_PTLPutawayTicket = `${url}/localPutawayCon/fetchPTLStorePutawayTicket`;
 export const fetchPTLPutawayTicket = () => axios.get(Get_PTLPutawayTicket);
 
@@ -685,8 +706,53 @@ const get_PoReportDetail = `${url}/Podeatil/poReport`;
 export const fetchPoReportDetail = (params) =>
   axios.get(get_PoReportDetail, { params });
 
-
+const Get_TopCardDetail = `${url}/storeDashboard/TopCardDetail`;
+export const getTopCardDetail = (params) => {
+  return axios.get(Get_TopCardDetail, { params });
+};
 
 const get_PoMaterialTypeVendor = `${url}/Podeatil/materialTypeVendor`;
 export const fetchMaterialTypeVendor = () =>
   axios.get(get_PoMaterialTypeVendor, {  });
+
+const Get_PendingRequestCount = `${url}/storeDashboard/pendingcount`;
+export const getPendingRequestCount = () => {
+  return axios.get(Get_PendingRequestCount);
+};
+
+const Get_PendingRequestDetails = `${url}/storeDashboard/pendingdetails`;
+export const getPendingRequestDetails = () => {
+  return axios.get(Get_PendingRequestDetails);
+};
+
+const Get_TotalPartcodeCount = `${url}/storeDashboard/partcodecount`;
+export const getTotalPartcodeCount = () => {
+  return axios.get(Get_TotalPartcodeCount);
+};
+
+
+const Get_OutOfStockCount = `${url}/storeDashboard/outofStockPartcodeCount`;
+export const getOutOfStockCount = () => {
+  return axios.get(Get_OutOfStockCount);
+};
+
+
+const Get_TopCardDetailReceving = `${url}/storeDashboard/TopCardDetailReceving`;
+export const getTopCardDetailReceving = (params) => {
+  return axios.get(Get_TopCardDetailReceving, { params });
+};
+
+const Get_TopCardDetailStock = `${url}/storeDashboard/TopCardDetailStock`;
+export const getTopCardDetailStock = (params) => {
+  return axios.get(Get_TopCardDetailStock, { params });
+};
+
+const Get_TopCardDetailIssued = `${url}/storeDashboard/TopCardDetailIssued`;
+export const getTopCardDetailIssued = (params) => {
+  return axios.get(Get_TopCardDetailIssued, { params });
+};
+
+const Get_TopCardDetailRequests = `${url}/storeDashboard/TopCardDetailRequests`;
+export const getTopCardDetailRequests = (params) => {
+  return axios.get(Get_TopCardDetailRequests, { params });
+};

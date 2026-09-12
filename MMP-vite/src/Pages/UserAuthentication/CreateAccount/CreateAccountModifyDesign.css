@@ -1,0 +1,278 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --ink: #16213e;
+  --ink-soft: #4a5a7a;
+  --steel-100: #eef2f7;
+  --steel-200: #dde5ee;
+  --paper: #ffffff;
+  --accent: #d98e36;
+  --accent-dark: #b5701f;
+  --error: #c6403b;
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 30px 70px -30px rgba(22, 33, 62, 0.45);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  font-family: 'IBM Plex Sans', 'Trebuchet MS', 'Lucida Sans Unicode', Arial, sans-serif;
+}
+
+.cretaeBackgroundimgae {
+  background-image:
+    linear-gradient(160deg, rgba(16, 24, 47, 0.78) 0%, rgba(22, 33, 62, 0.55) 45%, rgba(16, 24, 47, 0.82) 100%),
+    url('../../../assets/image.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  padding: 32px 20px;
+  box-sizing: border-box;
+}
+
+/* Logo */
+.cretaeimgaeuyef {
+  background-image: url('../../../assets/Nokia_9-removebg-preview.png');
+  background-size: contain;
+  background-position: center left;
+  background-repeat: no-repeat;
+  height: 48px;
+  width: 110px;
+  flex-shrink: 0;
+}
+
+/* ---------- Card shell ---------- */
+
+.form-container {
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 860px;
+  max-height: 88vh;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* ---------- Header band ---------- */
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 26px 36px;
+  background: linear-gradient(135deg, var(--ink) 0%, #223258 100%);
+  color: var(--paper);
+  flex-shrink: 0;
+}
+
+.form-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+}
+
+.form-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 60ch;
+}
+
+/* ---------- Scrollable body ---------- */
+
+.form-body {
+  overflow-y: auto;
+  padding: 28px 36px 32px;
+}
+
+.form-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.form-body::-webkit-scrollbar-thumb {
+  background: var(--steel-200);
+  border-radius: 8px;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+/* ---------- Sections ---------- */
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--steel-200);
+}
+
+.ProductTexfiled,
+.RoleFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  font-family: inherit;
+}
+
+/* Autocomplete groups read better spanning the full row */
+.ProductTexfiled > .MuiAutocomplete-root,
+.RoleFields > .MuiAutocomplete-root {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+
+  .ProductTexfiled,
+  .RoleFields {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Field appearance polish (layout-safe MUI overrides) ---------- */
+
+.form-body .MuiOutlinedInput-root {
+  border-radius: var(--radius-sm);
+  background: var(--steel-100);
+}
+
+.form-body .MuiOutlinedInput-notchedOutline {
+  border-color: var(--steel-200);
+}
+
+.form-body .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--accent);
+  border-width: 1.5px;
+}
+
+.form-body .MuiFormLabel-root.Mui-focused {
+  color: var(--accent-dark);
+}
+
+.form-body .MuiFormHelperText-root.Mui-error {
+  color: var(--error);
+}
+
+/* ---------- Actions ---------- */
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.form-submit-btn.MuiButton-root {
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 11px 0;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 0.95rem;
+  box-shadow: none;
+}
+
+.form-submit-btn.MuiButton-root:hover {
+  background: var(--accent-dark);
+  box-shadow: none;
+}
+
+.form-cancel-btn.MuiButton-root {
+  border-radius: var(--radius-sm);
+  padding: 10px 0;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 0.95rem;
+  background: var(--steel-100);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.form-cancel-btn.MuiButton-root:hover {
+  background: var(--steel-200);
+  box-shadow: none;
+}
+
+.form-footer-link {
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.form-footer-link a {
+  color: var(--accent-dark);
+  font-weight: 500;
+}
+
+.form-footer-link a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  .cretaeBackgroundimgae {
+    padding: 16px;
+  }
+
+  .form-container {
+    max-height: 92vh;
+    border-radius: var(--radius-md);
+  }
+
+  .form-header {
+    padding: 20px;
+  }
+
+  .form-body {
+    padding: 20px 20px 26px;
+  }
+
+  .cretaeimgaeuyef {
+    height: 36px;
+    width: 84px;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

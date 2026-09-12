@@ -69,20 +69,46 @@ const Approver = () => {
 
 
 
-    useEffect(() => {
+//     useEffect(() => {
+//     const handleEnterKey = (e) => {
+//         if (e.key === "Enter" && showTable) {
+//             e.preventDefault();
+//             handleSubmit();
+//         }
+//     };
+
+//     window.addEventListener("keydown", handleEnterKey);
+
+//     return () => {
+//         window.removeEventListener("keydown", handleEnterKey);
+//     };
+// }, [showTable, selectedGrnRows, approveTicketDetail]);
+
+
+useEffect(() => {
     const handleEnterKey = (e) => {
-        if (e.key === "Enter" && showTable) {
+        if (e.key === "Enter" && showTable && !rejectComment) {
             e.preventDefault();
-            handleSubmit();
+            if (requesterApproveButton) handleSubmit();
+            else if (returningApproveButton) handleReturningApprove();
+            else if (ptlRequestApproveButton) handlePTLApprove();
+            else if (stockRequestApproveButton) handleStockApprove();
         }
     };
 
     window.addEventListener("keydown", handleEnterKey);
+    return () => window.removeEventListener("keydown", handleEnterKey);
+}, [
+    showTable,
+    rejectComment,
+    requesterApproveButton,
+    returningApproveButton,
+    ptlRequestApproveButton,
+    stockRequestApproveButton,
+    selectedGrnRows,
+    approveTicketDetail,
+]);
 
-    return () => {
-        window.removeEventListener("keydown", handleEnterKey);
-    };
-}, [showTable, selectedGrnRows, approveTicketDetail]);
     const fetchApproverTicktes = async (userId) => {
         try {
             const response = await fetchApproverTicket(userId);
@@ -297,19 +323,36 @@ const Approver = () => {
 
             if (!valiDate(selectedData)) return;
             // console.log("Selected Data:", selectedData);
+            // const payload = selectedData.map(row => ({
+            //     requestTicketNo: row.rec_ticket_no,
+            //     partCode: row.partcode,
+            //     approved1_qty: Number(row.ApprovedL1Qty) || 0,
+            //     approved2_qty: Number(row.ApprovedL2Qty) || 0,
+            //     requestQty: Number(row.req_qty) || 0,
+            //     Comment: row.Comment || "",
+            //     createdby: userId,
+            //     recordstatus: row.recordstatus
+            // }));
             const payload = selectedData.map(row => ({
-                requestTicketNo: row.rec_ticket_no,
-                partCode: row.partcode,
-                approved1_qty: Number(row.ApprovedL1Qty) || 0,
-                approved2_qty: Number(row.ApprovedL2Qty) || 0,
-                requestQty: Number(row.req_qty) || 0,
-                Comment: row.Comment || "",
-                createdby: userId,
-                recordstatus: row.recordstatus
-            }));
-            console.log("Payload to send:", payload);
+    requestTicketNo: row.rec_ticket_no,
+
+    // ORIGINAL partcode - used to find Requester record
+    partCode: row.partcode,
+
+    // Compatibility partcode - used for inventory quantity
+    compatibilityPartCode:
+        row.compatabilitypartcode?.trim() || null,
+
+    approved1_qty: Number(row.ApprovedL1Qty) || 0,
+    approved2_qty: Number(row.ApprovedL2Qty) || 0,
+    requestQty: Number(row.req_qty) || 0,
+    Comment: row.Comment || "",
+    createdby: userId,
+    recordstatus: row.recordstatus
+}));
+            // console.log("Payload to send:", payload);
             await saveApproverTickets(payload);
-            setSuccessMessage("Submitted successfully!")
+            setSuccessMessage("Approved successfully!")
             setShowSuccessPopup(true)
             // alert("Submitted successfully!");
             setShowTable(false);
@@ -353,7 +396,7 @@ const Approver = () => {
 
             // console.log("Payload to send:", payload);
             await saveAReturningpproverTickets(payload);
-            setSuccessMessage("Submitted successfully!")
+            setSuccessMessage("Approved successfully!")
             setShowSuccessPopup(true)
             setShowTable(false);
             setTableData([])
@@ -394,7 +437,7 @@ const Approver = () => {
             // console.log("Payload to send:", payload);
 
             await savePtlApproverTickets(payload);
-            setSuccessMessage("Submitted successfully!")
+            setSuccessMessage("Approved successfully!")
             setShowSuccessPopup(true)
             setShowTable(false);
             setTableData([])
@@ -437,7 +480,7 @@ const Approver = () => {
             }));
             // console.log("Payload to send:", payload);
             await saveStockApproverTickets(payload);
-            setSuccessMessage("Submitted successfully!")
+            setSuccessMessage("Approved successfully!")
             setShowSuccessPopup(true)
             // alert("Submitted successfully!");
             setShowTable(false);

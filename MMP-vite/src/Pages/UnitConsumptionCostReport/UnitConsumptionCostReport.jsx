@@ -5,7 +5,7 @@ import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadStockOverviewReportFilter, fetchPartcodeReport, fetchTransferLocation, getStockReportDetailFilter, getStockReportOverViewFilter, getUnitcompoenentDetailFilter, } from '../../Services/Services_09';
+import { downloadStockOverviewReportFilter, fetchPartcodeReport, fetchTransferLocation, getStockReportDetailFilter, getStockReportOverViewFilter, getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, } from '../../Services/Services_09';
 import { getProductAndPartcode } from '../../Services/Services';
 
 const UnitConsumptionCostReport = () => {
@@ -107,11 +107,12 @@ const UnitConsumptionCostReport = () => {
         // if (!valiDate()) return;
         // const isValid = valiDate();
         // if (!isValid) return; // stop if invalid
-        // if (!hasAnyFilter() && !searchText?.trim()) {
-        //     setErrorMessage("Please select or enter at least one filter");
-        //     setShowErrorPopup(true);
-        //     return;
-        // }
+        if (!hasAnyFilter() && !searchText?.trim()) {
+            // setErrorMessage("Please select or enter at least one filter");
+            // setShowErrorPopup(true);
+            alert("Please select or enter at least one filter");
+            return;
+        }
         setShowTable(true);
         setIsFilterActive(true);
         fetchFilterResult();
@@ -148,7 +149,7 @@ const UnitConsumptionCostReport = () => {
         search: search?.trim() || null
     };
 
-    getUnitcompoenentDetailFilter(page - 1, perPage, payload)
+    getUnitcompoenentDetailFilterMMP(page - 1, perPage, payload)
         .then(res => {
             setUnitReportDetail(res.data?.content || []);
             setTotalRows(res.data?.totalElements || 0); // ✅ fix here

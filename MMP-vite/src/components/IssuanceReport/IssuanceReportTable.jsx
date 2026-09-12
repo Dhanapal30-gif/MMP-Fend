@@ -17,27 +17,29 @@ const formatDateArray = (arr) => {
 
 const fields = [
     "createdon",
-    "partcode",
-    "partdescription",
-    "uom",
-    "racklocation",
-    "tyc",
-    "requestertype",
-    "productname",
-    "productgroup",
-    "productfamily",
-    "fmsn",
-    "nsn",
-    "rec_ticket_no",
-    "approved_l1_date",
+      "approved_l1_date",
     "approved_l2_date",
     "issuance_date",
-    "batchcode",
-    "req_qty",
+    "partcode",
+    "partdescription",
+     "uom",
+      "racklocation",
+     "tyc",
+     "requestertype",
+     "productname",
+    "productgroup",
+    "productfamily",
+     "fmsn",
+    "nsn",
+    "rec_ticket_no",
+     "batchcode",
+     "req_qty",
     "issueqty",
     "issueValue",
     "lastUsedDate",
-    "issued_comments",
+     "createdName",
+    "issued_comments"
+   
 
 ];
 
@@ -62,9 +64,10 @@ const customConfig = {
     issueValue: { label: "Total Value  €" },
     issuance_date: { label: "Issued Date" },
     batchcode: { label: "Batchcode" },
-    issued_comments: { label: "ReciverName" },
+    issued_comments: { label: "Receiver Name" },
     approved_l1_date:{label:"Approved_l1_Date"},
-    lastUsedDate:{label:"LastUsed Date"}
+    lastUsedDate:{label:"LastUsed Date"},
+    createdName:{label:"Requester Name"}
 
 }
 

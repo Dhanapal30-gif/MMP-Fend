@@ -119,6 +119,12 @@ const StockTransfer = () => {
 
     const handleSubmit = async () => {
         if (!valiDate()) return;
+         const userName = localStorage.getItem("userId");
+         console.log("userName from localStorage:", userName)
+        if (!userName) {
+            alert("Please relogin");
+            return;
+        }
         try {
             // const payload = [
             //     {
@@ -164,8 +170,14 @@ const StockTransfer = () => {
     const handleAddSubmit = async () => {
         // const userId = sessionStorage.getItem("userId") || "System";
         //  const userName = sessionStorage.getItem("userName") || "System";
-        const userId = localStorage.getItem("userId") || "System";
-        const userName = localStorage.getItem("userName") || "System";
+        // const userId = localStorage.getItem("userId") || "System";
+        // const userName = localStorage.getItem("userName") || "System";
+
+         const userName = localStorage.getItem("userId");
+        if (!userName) {
+            alert("Please relogin");
+            return;
+        }
 
         const updatedFormData = tableData.map(row => ({
             ...row,

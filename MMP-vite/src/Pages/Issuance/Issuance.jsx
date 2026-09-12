@@ -145,18 +145,42 @@ const Issuance = () => {
         setDonwloadCosed(true);
     }
 
+    // useEffect(() => {
+    //     const validate = async () => {
+    //         const isValid = await checkUserValid();
+    //         if (!isValid) {
+    //             setOpenMsg(true);
+    //             setTimeout(() => {
+    //                 window.location.href = "/";
+    //             }, 1000);
+    //         }
+    //     };
+    //     validate();
+    // }, []);
+
     useEffect(() => {
-        const validate = async () => {
-            const isValid = await checkUserValid();
-            if (!isValid) {
-                setOpenMsg(true);
-                setTimeout(() => {
-                    window.location.href = "/";
-                }, 1000);
-            }
-        };
-        validate();
-    }, []);
+    const validate = async () => {
+        console.log("=== checkUserValid START (Approver page) ===");
+        console.log("userId in localStorage:", localStorage.getItem("userId"));
+        console.log("passwordToken in localStorage:", localStorage.getItem("passwordToken"));
+
+        const isValid = await checkUserValid();
+
+        console.log("checkUserValid() returned:", isValid);
+        console.log("=== checkUserValid END ===");
+
+        if (!isValid) {
+            console.log("Session marked INVALID — showing popup & redirecting");
+            setOpenMsg(true);
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1000);
+        } else {
+            console.log("Session marked VALID — staying on page");
+        }
+    };
+    validate();
+}, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -214,10 +238,10 @@ const Issuance = () => {
             if (uniqueUsers.length && uniqueUsers[0] !== 0) {
                 switch (uniqueUsers[0]) {
                     case 1: colour = "green"; break;
-                    case 2: colour = "blue"; break;
-                    case 3: colour = "red"; break;
+                    case 2: colour = "red"; break;
+                    case 3: colour = "blue"; break;
                     case 4: colour = "yellow"; break;
-                    default: colour = "green";
+                    // default: colour = "green";
                 }
                 setIsUserActive(true);
 
@@ -538,7 +562,10 @@ const Issuance = () => {
                 })
                 .catch((error) => {
                     alert(error.response?.data?.message || "Something went wrong!");
-                });
+                })
+                .finally(() => {
+                setLoading(false);   // ← added, was missing entirely
+            });
         } else {
             const submitDataWithExtras = submitData.map(item => ({
                 ...item,

@@ -186,22 +186,69 @@ const Add_Po_Detail = () => {
     }
   };
 
+  // const fetchPoDetail = (page = 1, size = 10) => {
+  //   setLoading(true);
+  //   fetchPoDeatil(page - 1, size)
+  //     .then((response) => {
+  //       setPoDetail(response.data.content || []);
+  //       setTotalRows(response.data.totalElements || 0);
+  //       // console.log('fetchPodetail', response.data);
+  //     })
+  // }
+
   const fetchPoDetail = (page = 1, size = 10) => {
+    setLoading(true);
     fetchPoDeatil(page - 1, size)
       .then((response) => {
         setPoDetail(response.data.content || []);
         setTotalRows(response.data.totalElements || 0);
-        // console.log('fetchPodetail', response.data);
       })
-  }
+      .catch((error) => {
+        console.error("Error fetching PO detail:", error);
+        setErrorMessage("Failed to load PO details");
+        setShowErrorPopup(true);
+      })
+      .finally(() => {
+        setLoading(false);   // guarantees loading always clears, success or failure
+      });
+}
+  // useEffect(() => {
+  //   const validate = async () => {
+  //     const isValid = await checkUserValid();
+  //     if (!isValid) {
+  //       setOpenMsg(true);
+  //       setTimeout(() => {
+  //         window.location.href = "/";
+  //       }, 1000);
+  //     }
+  //   };
+  //   validate();
+  //   fetchCurrencyMaster();
+  //   fetchRcStoreMaster();
+  //   fetchVendotMaster();
+  //   //fetchPoDetail(page,perPage);
+  // }, []);
+
+
   useEffect(() => {
     const validate = async () => {
+      console.log("=== checkUserValid START ===");
+      console.log("userId in localStorage:", localStorage.getItem("userId"));
+      console.log("passwordToken in localStorage:", localStorage.getItem("passwordToken"));
+
       const isValid = await checkUserValid();
+
+      console.log("checkUserValid() returned:", isValid);
+      console.log("=== checkUserValid END ===");
+
       if (!isValid) {
+        console.log("Session marked INVALID — showing popup & redirecting");
         setOpenMsg(true);
         setTimeout(() => {
           window.location.href = "/";
         }, 1000);
+      } else {
+        console.log("Session marked VALID — staying on page");
       }
     };
     validate();
@@ -209,7 +256,7 @@ const Add_Po_Detail = () => {
     fetchRcStoreMaster();
     fetchVendotMaster();
     //fetchPoDetail(page,perPage);
-  }, []);
+}, []);
 
   useEffect(() => {
     fetchData(page, perPage, debouncedSearch);
@@ -528,6 +575,12 @@ const Add_Po_Detail = () => {
       width: '130px'
     },
     {
+      name: "UOM",
+      selector: row => row.uom,
+      //width: `${calculateColumnWidth( 'orderqty')}px`
+      width: '130px'
+    },
+    {
       name: "Total Value",
       selector: row => row.totalvalue,
       width: '130px'
@@ -545,6 +598,11 @@ const Add_Po_Detail = () => {
       selector: row => row.totalvalueeuro,
       width: `${calculateColumnWidth('totalvalueeuro')}px`
     },
+    //  {
+    //   name: "PoStatus",
+    //   selector: row => row.postatus, 
+    //   width: `${calculateColumnWidth('Postatus')}px`
+    // },
     {
       name: "Createdby",
       selector: row => row.createdby, 

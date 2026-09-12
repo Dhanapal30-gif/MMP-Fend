@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
-import { getUnitcompoenentDetailFilter } from '../../Services/Services_09';
+import { getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, getUnitcompoenentDetailFilterMMPDashboard } from '../../Services/Services_09';
 import { downloadPTLCostValidation, getProductAndPartcode } from '../../Services/Services';
 import './UnitCom_CostDashboard.css';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const MONTH_MAP = {
   "01":"P01 Jan","02":"P02 Feb","03":"P03 Mar","04":"P04 Apr",
@@ -38,6 +39,19 @@ function fmtFull(v) {
 function periodLabel(my) {
   const mm = my?.split("-")[1];
   return MONTH_MAP[mm] || my;
+}
+
+function computeAvgOfAverages(rows) {
+  if (!rows || rows.length === 0) return 0;
+
+  // Only count months that actually have repaired qty — a month with
+  // totalrepairedQty = 0 (or missing) shouldn't drag the average down
+  // just because its averageCostPerUnit defaulted to 0.
+  const validRows = rows.filter(r => Number(r.totalrepairedQty) > 0);
+  if (validRows.length === 0) return 0;
+
+  const sum = validRows.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0);
+  return sum / validRows.length;
 }
 
 const UnitCom_CostDashboard = () => {
@@ -129,7 +143,8 @@ const productDropdownRef = useRef(null);
     setLoading(true);
     setDrillMonth(null);
     setDrillData(null);
-    getUnitcompoenentDetailFilter(0, 100, {
+    getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
+    // getUnitcompoenentDetailFilter(0, 100, {
       productname: productname || "",
       monthYear:   monthYear   || "",
       search:      null
@@ -170,7 +185,39 @@ const productDropdownRef = useRef(null);
   //   }
   // };
 
-  const aggregateAndSetState = (content, isDrill = false) => {
+//   const aggregateAndSetState = (content, isDrill = false) => {
+//   if (!content || content.length === 0) {
+//     setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0, other: 0, sub: 0 });
+//     setDonutLegendData({});
+//     if (isDrill) setDrillData(null);
+//     return;
+//   }
+
+//   const aggDTL   = content.reduce((s, r) => s + (Number(r.dtlIssuanceCost)    || 0), 0);
+//   const aggPTL   = content.reduce((s, r) => s + (Number(r.ptlIssuanceCost)    || 0), 0);
+//   const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)          || 0), 0);
+//   const aggOther = content.reduce((s, r) => s + (Number(r.otherCost)          || 0), 0); // ← new
+//   const aggSub   = content.reduce((s, r) => s + (Number(r.subModuleCost)      || 0), 0); // ← new
+//   const aggAvg   = content.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0) / content.length;
+
+//   const rtbAgg = {};
+//   content.forEach(r => {
+//     if (!r.requesterTypeBreakdown) return;
+//     Object.entries(r.requesterTypeBreakdown).forEach(([k, v]) => {
+//       rtbAgg[k] = (rtbAgg[k] || 0) + (Number(v) || 0);
+//     });
+//   });
+
+//   setPieLegendData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
+//   setDonutLegendData({ ...rtbAgg });
+
+//   if (isDrill) {
+//     setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
+//   }
+// };
+
+
+const aggregateAndSetState = (content, isDrill = false) => {
   if (!content || content.length === 0) {
     setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0, other: 0, sub: 0 });
     setDonutLegendData({});
@@ -178,12 +225,14 @@ const productDropdownRef = useRef(null);
     return;
   }
 
-  const aggDTL   = content.reduce((s, r) => s + (Number(r.dtlIssuanceCost)    || 0), 0);
-  const aggPTL   = content.reduce((s, r) => s + (Number(r.ptlIssuanceCost)    || 0), 0);
-  const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)          || 0), 0);
-  const aggOther = content.reduce((s, r) => s + (Number(r.otherCost)          || 0), 0); // ← new
-  const aggSub   = content.reduce((s, r) => s + (Number(r.subModuleCost)      || 0), 0); // ← new
-  const aggAvg   = content.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0) / content.length;
+  const aggDTL   = content.reduce((s, r) => s + (Number(r.dtlIssuanceCost) || 0), 0);
+  const aggPTL   = content.reduce((s, r) => s + (Number(r.ptlIssuanceCost) || 0), 0);
+  const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)       || 0), 0);
+  const aggOther = content.reduce((s, r) => s + (Number(r.otherCost)       || 0), 0);
+  const aggSub   = content.reduce((s, r) => s + (Number(r.subModuleCost)   || 0), 0);
+
+  // ✅ single source of truth for "avg cost/unit"
+  const aggAvg = computeAvgOfAverages(content);
 
   const rtbAgg = {};
   content.forEach(r => {
@@ -200,6 +249,7 @@ const productDropdownRef = useRef(null);
     setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
   }
 };
+
 
   const buildBarChart = () => {
   if (barChartInst.current) { barChartInst.current.destroy(); barChartInst.current = null; }
@@ -312,7 +362,8 @@ const productDropdownRef = useRef(null);
           setCurrentFilter({ productname: selectedProductRef.current || "", monthYear }); // ← add
 
 
-          getUnitcompoenentDetailFilter(0, 100, {
+          getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
+          // getUnitcompoenentDetailFilter(0, 100, {
             productname: selectedProductRef.current || "",
             monthYear:   monthYear,
             search:      null
@@ -373,6 +424,11 @@ scales: {
     ticks: {
       callback: value => value
     }
+  },
+
+  y2: {
+    display: false,
+    beginAtZero: true
   }
 }
       }
@@ -461,14 +517,23 @@ scales: {
     });
   };
 
-  const totalDTL  = dashboardData.reduce((s, r) => s + (r.dtlIssuanceCost    || 0), 0);
-  const totalPTL  = dashboardData.reduce((s, r) => s + (r.ptlIssuanceCost    || 0), 0);
-  const totalCost = dashboardData.reduce((s, r) => s + (r.totalCost          || 0), 0);
-  const totalOther = dashboardData.reduce((s, r) => s + (r.otherCost          || 0), 0); 
-const totalSub   = dashboardData.reduce((s, r) => s + (r.subModuleCost      || 0), 0); 
-  const avgCPU    = dashboardData.length
-    ? dashboardData.reduce((s, r) => s + (r.averageCostPerUnit || 0), 0) / dashboardData.length
-    : 0;
+//   const totalDTL  = dashboardData.reduce((s, r) => s + (r.dtlIssuanceCost    || 0), 0);
+//   const totalPTL  = dashboardData.reduce((s, r) => s + (r.ptlIssuanceCost    || 0), 0);
+//   const totalCost = dashboardData.reduce((s, r) => s + (r.totalCost          || 0), 0);
+//   const totalOther = dashboardData.reduce((s, r) => s + (r.otherCost          || 0), 0); 
+// const totalSub   = dashboardData.reduce((s, r) => s + (r.subModuleCost      || 0), 0); 
+//   const avgCPU    = dashboardData.length
+//     ? dashboardData.reduce((s, r) => s + (r.averageCostPerUnit || 0), 0) / dashboardData.length
+//     : 0;
+
+const totalDTL   = dashboardData.reduce((s, r) => s + (r.dtlIssuanceCost || 0), 0);
+const totalPTL   = dashboardData.reduce((s, r) => s + (r.ptlIssuanceCost || 0), 0);
+const totalCost  = dashboardData.reduce((s, r) => s + (r.totalCost       || 0), 0);
+const totalOther = dashboardData.reduce((s, r) => s + (r.otherCost       || 0), 0);
+const totalSub   = dashboardData.reduce((s, r) => s + (r.subModuleCost   || 0), 0);
+
+// ✅ same helper — guarantees this always matches pieLegendData.avg for the same dataset
+const avgCPU = computeAvgOfAverages(dashboardData);
 
   // const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU };
 
@@ -583,14 +648,14 @@ const handleDownloadPTL = (downloadType) => {
 
   // const handleApply = () => fetchDashboard(selectedProduct, selectedMonth);
   const handleApply = () => {
-  // if (!selectedProduct && !selectedMonth) {
-  //   alert("Please select at least one filter (Product Name or Month & Year) before applying.");
-  //   return;
-  // }
-  if (!selectedProduct || !selectedMonth) {
-    alert("Please select both Product Name and Month & Year before applying.");
+  if (!selectedProduct && !selectedMonth) {
+    alert("Please select at least one filter (Product Name or Month & Year) before applying.");
     return;
   }
+  // if (!selectedProduct || !selectedMonth) {
+  //   alert("Please select both Product Name and Month & Year before applying.");
+  //   return;
+  // }
   fetchDashboard(selectedProduct, selectedMonth);
     setCurrentFilter({ productname: selectedProduct, monthYear: selectedMonth }); // ← add
 };
@@ -603,7 +668,7 @@ const handleDownloadPTL = (downloadType) => {
 
   return (
     <div className="ucd-wrap">
-
+ <LoadingOverlay loading={loading} />
       {/* Top bar */}
       <div className="ucd-topbar">
         <div className="ucd-topbar-left">

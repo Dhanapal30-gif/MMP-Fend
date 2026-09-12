@@ -54,11 +54,101 @@ const Tip = ({ active, payload }) => {
   );
 };
 
-const Card = ({ title, accent, children }) => (
-  <div style={{ background:'#fff', borderRadius:10, overflow:'hidden', border:'1px solid #E8EDF5', boxShadow:'0 2px 8px rgba(0,0,0,0.07)', display:'flex', flexDirection:'column' }}>
-    <div style={{ height:3, background:accent, flexShrink:0 }}/>
-    <p style={{ margin:'8px 12px 0', fontSize:15, fontWeight:600, color:'#0c3b87', fontFamily:'Segoe UI, sans-serif', flexShrink:0 }}>{title}</p>
+// const Card = ({ title, accent, children }) => (
+//   <div style={{ background:'#fff', borderRadius:10, overflow:'hidden', border:'1px solid #E8EDF5', boxShadow:'0 2px 8px rgba(0,0,0,0.07)', display:'flex', flexDirection:'column' }}>
+//     <div style={{ height:3, background:accent, flexShrink:0 }}/>
+//     <p style={{ margin:'8px 12px 0', fontSize:15, fontWeight:600, color:'#0c3b87', fontFamily:'Segoe UI, sans-serif', flexShrink:0 }}>{title}</p>
+//     <div style={{ flex:1, minHeight:0 }}>{children}</div>
+//   </div>
+// );
+
+// const Card = ({ title, accent, children, onExpand }) => (
+//   <div style={{ background:'#fff', borderRadius:10, overflow:'hidden', border:'1px solid #E8EDF5', boxShadow:'0 2px 8px rgba(0,0,0,0.07)', display:'flex', flexDirection:'column', position:'relative' }}>
+//     <div style={{ height:3, background:accent, flexShrink:0 }}/>
+//     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', margin:'8px 12px 0', flexShrink:0 }}>
+//       <p style={{ margin:0, fontSize:15, fontWeight:600, color:'#0c3b87', fontFamily:'Segoe UI, sans-serif' }}>{title}</p>
+//       {onExpand && (
+//         <button
+//           onClick={onExpand}
+//           style={{
+//             fontSize:10, fontWeight:700, color:'#fff', background:'#3B82F6',
+//             border:'none', borderRadius:6, padding:'4px 10px', cursor:'pointer',
+//             fontFamily:'Segoe UI, sans-serif', whiteSpace:'nowrap'
+//           }}
+//         >
+//           View
+//         </button>
+//       )}
+//     </div>
+//     <div style={{ flex:1, minHeight:0 }}>{children}</div>
+//   </div>
+// );
+
+const Card = ({ title, accent, children, onExpand }) => (
+  <div className="chart-card" style={{ 
+    background:'#fff', borderRadius:14, overflow:'hidden', border:'1px solid #E8EDF5', 
+    boxShadow:'0 2px 8px rgba(0,0,0,0.06)', display:'flex', flexDirection:'column', position:'relative' 
+  }}>
+    <div style={{ height:4, background:accent, flexShrink:0 }}/>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', margin:'10px 14px 0', flexShrink:0 }}>
+<p style={{ margin:0, fontSize:15, fontWeight:600, color:'#0c3b87', fontFamily:'Segoe UI, sans-serif' }}>{title}</p>      {onExpand && (
+        <button
+          className="view-btn"
+          onClick={onExpand}
+          style={{
+            fontSize:10.5, fontWeight:700, color:'#fff', background:'#6366F1',
+            border:'none', borderRadius:7, padding:'5px 12px', cursor:'pointer',
+            fontFamily:'Segoe UI, sans-serif', whiteSpace:'nowrap', 
+            transition:'background 0.15s ease', display:'flex', alignItems:'center', gap:4
+          }}
+        >
+          ⛶ View
+        </button>
+      )}
+    </div>
     <div style={{ flex:1, minHeight:0 }}>{children}</div>
+  </div>
+);
+
+const ChartModal = ({ title, accent, onClose, children }) => (
+  <div
+    onClick={onClose}
+    style={{
+      position:'fixed', top:0, left:0, right:0, bottom:0,
+      background:'rgba(34, 42, 15, 0.6)', backdropFilter:'blur(2px)', zIndex:1000,
+      display:'flex', alignItems:'center', justifyContent:'center',
+      padding:20, boxSizing:'border-box'
+    }}
+  >
+    <div
+      onClick={(e)=>e.stopPropagation()}
+      style={{
+        background:'#fff', borderRadius:16, overflow:'hidden',
+        width:'100%', maxWidth:1000, height:'75vh', maxHeight:700,
+        display:'flex', flexDirection:'column',
+        boxShadow:'0 25px 70px rgba(0,0,0,0.35)'
+      }}
+    >
+      <div style={{ height:5, background:accent, flexShrink:0 }}/>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', borderBottom:'1px solid #F1F5F9', flexShrink:0 }}>
+        <p style={{ margin:0, fontSize:18, fontWeight:500, color:'#1f6eec', fontFamily:'Segoe UI, sans-serif' }}>{title}</p>
+        <button
+          onClick={onClose}
+          style={{
+            fontSize:12.5, fontWeight:700, color:'#fff', background:'#EF4444',
+            border:'none', borderRadius:8, padding:'7px 16px', cursor:'pointer',
+            fontFamily:'Segoe UI, sans-serif', transition:'background 0.15s ease'
+          }}
+          onMouseOver={(e)=>e.currentTarget.style.background='#DC2626'}
+          onMouseOut={(e)=>e.currentTarget.style.background='#EF4444'}
+        >
+          ✕ Close
+        </button>
+      </div>
+      <div style={{ flex:1, minHeight:0, padding:18 }}>
+        {children}
+      </div>
+    </div>
   </div>
 );
 
@@ -159,7 +249,12 @@ const HBar = ({ data, palette, valKey, nameKey, fmtFn, tipFmtFn }) => {
 
 /* ════ MAIN ════ */
 const PoDashboard = () => {
-  const [filters, setFilters] = useState({ grnDate:'', poSendDate:'', materialType:'', vendor:'', poStatus:'closed' ,potool:'' });
+  // const [filters, setFilters] = useState({ grnDate:'', poSendDate:'', materialType:'', vendor:'', poStatus:'closed' ,potool:'' });
+  const [filters, setFilters] = useState({
+    grnDate: '', poSendDate: '', materialType: '', vendor: '',
+    poStatus: 'closed', potool: '',
+    year: '', quarter: '', month: ''   // ← new
+});
   const [top10Contributors, setTop10Contributors] = useState([]);
   const [top10Countrywise,  setTop10Countrywise]  = useState([]);
   const [top10Vendorwise,   setTop10Vendorwise]    = useState([]);
@@ -168,26 +263,61 @@ const PoDashboard = () => {
   const [materialTypes, setMaterialTypes] = useState([]);
   const [vendors, setVendors] = useState([]);
 
+  // const fetchData = useCallback(async (defaultYear=null, overrideFilters=null) => {
+  //   setLoading(true); setError(null);
+  //   try {
+  //     const af = overrideFilters||filters;
+  //     const params = {};
+  //     params.grnDate = af.grnDate||defaultYear||new Date().getFullYear().toString();
+  //     if (af.poSendDate)   params.poSendDate   = af.poSendDate;
+  //     if (af.materialType) params.materialType = af.materialType;
+  //     if (af.vendor)       params.vendor       = af.vendor;
+  //     if (af.poStatus)     params.poStatus     = af.poStatus;
+  //     if (af.potool) params.potool = af.potool;
+  //     const res  = await fetchPoReportDetail(params);
+  //     const data = res.data?.data||{};
+  //     setTop10Contributors(data.top10Contributors||[]);
+  //     setTop10Countrywise(data.top10Countrywise||[]);
+  //     setTop10Vendorwise(data.top10Vendorwise||[]);
+  //   } catch(err) {
+  //     setError(err?.response?.data?.message||'Failed to fetch');
+  //   } finally { setLoading(false); }
+  // }, [filters]);
+
+
   const fetchData = useCallback(async (defaultYear=null, overrideFilters=null) => {
     setLoading(true); setError(null);
     try {
-      const af = overrideFilters||filters;
+      const af = overrideFilters || filters;
       const params = {};
-      params.grnDate = af.grnDate||defaultYear||new Date().getFullYear().toString();
+
+      const usingNewFilters = af.year || af.quarter || af.month;
+
+      if (!usingNewFilters) {
+        // Original default behavior — completely untouched
+        params.grnDate = af.grnDate || defaultYear || new Date().getFullYear().toString();
+      } else {
+        // User picked Year/Quarter/Month — send those instead of grnDate
+        if (af.year)    params.year    = af.year;
+        if (af.quarter) params.quarter = af.quarter;
+        if (af.month)   params.month   = af.month;
+      }
+
       if (af.poSendDate)   params.poSendDate   = af.poSendDate;
       if (af.materialType) params.materialType = af.materialType;
       if (af.vendor)       params.vendor       = af.vendor;
       if (af.poStatus)     params.poStatus     = af.poStatus;
-      if (af.potool) params.potool = af.potool;
+      if (af.potool)       params.potool       = af.potool;
+
       const res  = await fetchPoReportDetail(params);
-      const data = res.data?.data||{};
-      setTop10Contributors(data.top10Contributors||[]);
-      setTop10Countrywise(data.top10Countrywise||[]);
-      setTop10Vendorwise(data.top10Vendorwise||[]);
+      const data = res.data?.data || {};
+      setTop10Contributors(data.top10Contributors || []);
+      setTop10Countrywise(data.top10Countrywise || []);
+      setTop10Vendorwise(data.top10Vendorwise || []);
     } catch(err) {
-      setError(err?.response?.data?.message||'Failed to fetch');
+      setError(err?.response?.data?.message || 'Failed to fetch');
     } finally { setLoading(false); }
-  }, [filters]);
+}, [filters]);
 
   const fetchMeta = useCallback(async () => {
     try {
@@ -232,13 +362,109 @@ const fmtKpi = (v) => {
   return `€${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
+
+const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_MONTH = new Date().getMonth() + 1; // 1–12
+
+const YEAR_OPTIONS = [CURRENT_YEAR - 1, CURRENT_YEAR]; // shows e.g. 2025, 2026 — extend range if needed
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const QUARTER_MONTHS = {
+  1: [1, 2, 3],
+  2: [4, 5, 6],
+  3: [7, 8, 9],
+  4: [10, 11, 12],
+};
+
+// How many quarters to show for a given year:
+// - Past year → all 4 quarters
+// - Current year → only quarters up to the current month
+// - Future year → none yet
+const getAvailableQuarters = (year) => {
+  if (!year) return [1, 2, 3, 4];
+  const y = Number(year);
+  if (y < CURRENT_YEAR) return [1, 2, 3, 4];
+  if (y > CURRENT_YEAR) return [];
+  const currentQuarter = Math.ceil(CURRENT_MONTH / 3); // e.g. Aug (8) → Q3
+  return Array.from({ length: currentQuarter }, (_, i) => i + 1);
+};
+
+const getAvailableMonths = (year, quarter) => {
+  const y = Number(year);
+  let months = quarter ? QUARTER_MONTHS[quarter] : [1,2,3,4,5,6,7,8,9,10,11,12];
+
+  if (y === CURRENT_YEAR) {
+    months = months.filter((m) => m <= CURRENT_MONTH);
+  }
+  return months;
+};
+
+const [expandedChart, setExpandedChart] = useState(null); // null | 'contributors' | 'qty' | 'country' | 'vendor'
+
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") setExpandedChart(null);
+  };
+  window.addEventListener("keydown", handleEsc);
+  return () => window.removeEventListener("keydown", handleEsc);
+}, []);
+
   return (
-    <div style={{
-      padding:'12px 16px', background:'white',
-      height:'100vh', overflow:'hidden', boxSizing:'border-box',
-      fontFamily:'Segoe UI, sans-serif',
-      display:'flex', flexDirection:'column', gap:8,
-    }}>
+    <div className="po-dashboard-scope" style={{
+    padding:'16px 20px', 
+    background:'linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0f9ff 100%)',
+    height:'100vh', overflow:'hidden', boxSizing:'border-box',
+    fontFamily:'Segoe UI, sans-serif',
+    display:'flex', flexDirection:'column', gap:12,
+}}>
+
+    {/* Scoped style — only affects charts inside .po-dashboard-scope */}
+   <style>{`
+  .po-dashboard-scope .recharts-wrapper svg *:focus {
+    outline: none !important;
+  }
+  .po-dashboard-scope .recharts-sector:focus,
+  .po-dashboard-scope .recharts-rectangle:focus,
+  .po-dashboard-scope .recharts-bar-rectangle:focus {
+    outline: none !important;
+  }
+  .po-dashboard-scope .kpi-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .po-dashboard-scope .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+  }
+  .po-dashboard-scope .chart-card {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .po-dashboard-scope .chart-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.1) !important;
+  }
+  .po-dashboard-scope select:hover,
+  .po-dashboard-scope input:hover {
+    border-color: #6366F1 !important;
+  }
+  .po-dashboard-scope select:focus,
+  .po-dashboard-scope input:focus {
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  }
+  .po-dashboard-scope .view-btn:hover {
+    background: #4F46E5 !important;
+  }
+  .po-dashboard-scope .search-btn:hover {
+    background: #4338CA !important;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.5) !important;
+  }
+  .po-dashboard-scope .clear-btn:hover {
+    background: #DC2626 !important;
+  }
+`}</style>
 
       {/* HEADER */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
@@ -255,46 +481,100 @@ const fmtKpi = (v) => {
       </div>
 
       {/* FILTERS */}
-      <div style={{ background:'#fff', borderRadius:10, border:'1px solid #a5c7f4', boxShadow:'0 1px 4px rgba(0,0,0,0.05)', padding:'9px 12px', flexShrink:0 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr) auto auto', gap:8, alignItems:'flex-end' }}>
-          {[{key:'grnDate',l:'GRN Date',type:'date'},{key:'poSendDate',l:'PO Send Date',type:'date'}].map(({key,l,type})=>(
-            <div key={key}><label style={lbl}>{l}</label><input type={type} value={filters[key]} onChange={e=>setFilters(p=>({...p,[key]:e.target.value}))} style={inp}/></div>
-          ))}
-          <div><label style={lbl}>Technology</label>
-            <select value={filters.materialType} onChange={e=>setFilters(p=>({...p,materialType:e.target.value}))} style={{...inp,cursor:'pointer'}}>
-              <option value="">All Material Types</option>
-              {materialTypes.filter(m=>m?.trim()).map((m,i)=><option key={i} value={m}>{m}</option>)}
-            </select>
-          </div>
-          <div><label style={lbl}>Vendor</label>
-            <select value={filters.vendor} onChange={e=>setFilters(p=>({...p,vendor:e.target.value}))} style={{...inp,cursor:'pointer'}}>
-              <option value="">All Vendors</option>
-              {vendors.map((v,i)=><option key={i} value={v}>{v}</option>)}
-            </select>
-          </div>
-          <div><label style={lbl}>PO Status</label>
-            <select value={filters.poStatus} onChange={e=>setFilters(p=>({...p,poStatus:e.target.value}))} style={{...inp,cursor:'pointer'}}>
-              <option value="">All Status</option>
-              <option value="open">Open</option>
-              <option value="closed">Closed</option>
-              <option value="manual close">Manual Close</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="on hold">On Hold</option>
-            </select>
-          </div>
+     {/* FILTERS */}
+<div style={{
+    background:'#fff', borderRadius:10, border:'1px solid #a5c7f4',
+    boxShadow:'0 1px 4px rgba(0,0,0,0.05)', padding:'12px', flexShrink:0
+}}>
 
-          <div><label style={lbl}>PoTool</label>
-  <select value={filters.potool} onChange={e=>setFilters(p=>({...p,potool:e.target.value}))} style={{...inp,cursor:'pointer'}}>
-    <option value="">All PoTools</option>
-    {["I-BUY","P20","SRM","Nokia Internal Transfer","RC Internal Transfer","Harvester"].map((opt,i)=>(
-      <option key={i} value={opt}>{opt}</option>
-    ))}
-  </select>
+  {/* Filters — responsive grid, same structure at every screen size */}
+  <div style={{
+      display:'grid',
+      gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))',
+      gap:12,
+  }}>
+
+    <div>
+      <label style={lbl}>Year</label>
+      <select value={filters.year} onChange={(e)=>{const year=e.target.value; setFilters(p=>({...p, year, quarter:'', month:''}));}} style={{...inp, cursor:'pointer'}}>
+        <option value="">All Years</option>
+        {YEAR_OPTIONS.map((y)=><option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+
+    <div>
+      <label style={lbl}>Quarter</label>
+      <select value={filters.quarter} onChange={(e)=>{const quarter=e.target.value; setFilters(p=>({...p, quarter, month:''}));}} style={{...inp, cursor:'pointer'}} disabled={!filters.year}>
+        <option value="">All Quarters</option>
+        {getAvailableQuarters(filters.year).map((q)=><option key={q} value={q}>{`Quarter ${q}`}</option>)}
+      </select>
+    </div>
+
+    <div>
+      <label style={lbl}>Month</label>
+      <select value={filters.month} onChange={(e)=>setFilters(p=>({...p, month:e.target.value}))} style={{...inp, cursor:'pointer'}}>
+        <option value="">All Months</option>
+        {getAvailableMonths(filters.year, filters.quarter).map((m)=><option key={m} value={m}>{MONTH_NAMES[m-1]}</option>)}
+      </select>
+    </div>
+
+    <div>
+      <label style={lbl}>GRN Date</label>
+      <input type="date" value={filters.grnDate} onChange={e=>setFilters(p=>({...p,grnDate:e.target.value}))} style={inp}/>
+    </div>
+
+    <div>
+      <label style={lbl}>PO Send Date</label>
+      <input type="date" value={filters.poSendDate} onChange={e=>setFilters(p=>({...p,poSendDate:e.target.value}))} style={inp}/>
+    </div>
+
+    <div>
+      <label style={lbl}>Technology</label>
+      <select value={filters.materialType} onChange={e=>setFilters(p=>({...p,materialType:e.target.value}))} style={{...inp,cursor:'pointer'}}>
+        <option value="">All Material Types</option>
+        {materialTypes.filter(m=>m?.trim()).map((m,i)=><option key={i} value={m}>{m}</option>)}
+      </select>
+    </div>
+
+    <div>
+      <label style={lbl}>Vendor</label>
+      <select value={filters.vendor} onChange={e=>setFilters(p=>({...p,vendor:e.target.value}))} style={{...inp,cursor:'pointer'}}>
+        <option value="">All Vendors</option>
+        {vendors.map((v,i)=><option key={i} value={v}>{v}</option>)}
+      </select>
+    </div>
+
+    <div>
+      <label style={lbl}>PO Status</label>
+      <select value={filters.poStatus} onChange={e=>setFilters(p=>({...p,poStatus:e.target.value}))} style={{...inp,cursor:'pointer'}}>
+        <option value="">All Status</option>
+        <option value="open">Open</option>
+        <option value="closed">Closed</option>
+        <option value="manual close">Manual Close</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="on hold">On Hold</option>
+      </select>
+    </div>
+
+    <div>
+      <label style={lbl}>PoTool</label>
+      <select value={filters.potool} onChange={e=>setFilters(p=>({...p,potool:e.target.value}))} style={{...inp,cursor:'pointer'}}>
+        <option value="">All PoTools</option>
+        {["I-BUY","P20","SRM","Nokia Internal Transfer","RC Internal Transfer","Harvester"].map((opt,i)=>(
+          <option key={i} value={opt}>{opt}</option>
+        ))}
+      </select>
+    </div>
+
+  </div>
+
+  {/* Buttons — always their own row, right-aligned, wraps below on small screens */}
+  <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:14, flexWrap:'wrap' }}>
+    <button onClick={()=>fetchData()} style={{ padding:'7px 18px', background:'blue', color:'#fff', border:'none', borderRadius:7, fontSize:12, fontWeight:700, cursor:'pointer', boxShadow:'0 3px 8px rgba(99,102,241,0.4)', fontFamily:'Segoe UI, sans-serif', whiteSpace:'nowrap' }}>Search</button>
+    <button onClick={()=>{ const c={grnDate:'',poSendDate:'',materialType:'',vendor:'',poStatus:'closed',potool:'',year:'',quarter:'',month:''}; setFilters(c); fetchData(new Date().getFullYear().toString(),c); }} style={{ padding:'7px 14px', background:'#e62c22', color:'white', border:'1px solid #E2E8F0', borderRadius:7, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'Segoe UI, sans-serif', whiteSpace:'nowrap' }}>Clear</button>
+  </div>
+
 </div>
-          <button onClick={()=>fetchData()} style={{ padding:'6px 16px', background:'blue', color:'#fff', border:'none', borderRadius:7, fontSize:12, fontWeight:700, cursor:'pointer', boxShadow:'0 3px 8px rgba(99,102,241,0.4)', fontFamily:'Segoe UI, sans-serif', whiteSpace:'nowrap' }}>Search</button>
-          <button onClick={()=>{ const c={grnDate:'',poSendDate:'',materialType:'',vendor:'',poStatus:'closed',potool:''}; setFilters(c); fetchData(new Date().getFullYear().toString(),c); }} style={{ padding:'6px 12px', background:'#e62c22', color:'white', border:'1px solid #E2E8F0', borderRadius:7, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'Segoe UI, sans-serif', whiteSpace:'nowrap' }}>Clear</button>
-        </div>
-      </div>
 
       {error && <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:7, padding:'6px 10px', color:'#EF4444', fontSize:11, fontWeight:600, flexShrink:0 }}>{error}</div>}
       {loading && <div style={{ textAlign:'center', padding:20, color:'#6366F1', fontSize:13, fontWeight:800 }}>⏳ Loading…</div>}
@@ -309,21 +589,51 @@ const fmtKpi = (v) => {
         </div>
 
         {/* CHARTS — fills remaining height exactly */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gridTemplateRows:'1fr 1fr', gap:8, flex:1, minHeight:0 }}>
-         <Card title="Top 10 Contributors by Value" accent="linear-gradient(90deg,#F59E0B,#EF4444)">
-            {top10Contributors.length===0 ? noData : <HBar data={top10Contributors} palette={P1} valKey="totalvalueeuro" nameKey="partcode" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
-          </Card>
-          <Card title="Top 10 Part as per Qty" accent="linear-gradient(90deg,#6366F1,#8B5CF6)">
-            {top10Contributors.length===0 ? noData : <PieComp data={top10Contributors} palette={P1} valKey="grnqty" nameKey="partcode" fmtFn={fmtNum} tipFmtFn={fmtFullNum}/>}
-          </Card>
-          <Card title="Country Wise Cost & Vendor Count" accent="linear-gradient(90deg,#10B981,#06B6D4)">
-            {top10Countrywise.length===0 ? noData : <PieComp data={top10Countrywise} palette={P2} valKey="totalvalueeuro" nameKey="country" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
-          </Card>
-          
-          <Card title="Vendor Wise Cost & Part Count" accent="linear-gradient(90deg,#EF4444,#EC4899)">
-            {top10Vendorwise.length===0 ? noData : <PieComp data={top10Vendorwise} palette={P2} valKey="totalvalueeuro" nameKey="vendorName" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
-          </Card>
-        </div>
+        {/* CHARTS — fills remaining height exactly */}
+<div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gridTemplateRows:'1fr 1fr', gap:8, flex:1, minHeight:0 }}>
+
+  <Card title="Top 10 Contributors by Value" accent="linear-gradient(90deg,#F59E0B,#EF4444)" onExpand={()=>setExpandedChart('contributors')}>
+    {top10Contributors.length===0 ? noData : <HBar data={top10Contributors} palette={P1} valKey="totalvalueeuro" nameKey="partcode" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
+  </Card>
+
+  <Card title="Top 10 Part as per Qty" accent="linear-gradient(90deg,#6366F1,#8B5CF6)" onExpand={()=>setExpandedChart('qty')}>
+    {top10Contributors.length===0 ? noData : <PieComp data={top10Contributors} palette={P1} valKey="grnqty" nameKey="partcode" fmtFn={fmtNum} tipFmtFn={fmtFullNum}/>}
+  </Card>
+
+  <Card title="Country Wise Cost & Vendor Count" accent="linear-gradient(90deg,#10B981,#06B6D4)" onExpand={()=>setExpandedChart('country')}>
+    {top10Countrywise.length===0 ? noData : <PieComp data={top10Countrywise} palette={P2} valKey="totalvalueeuro" nameKey="country" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
+  </Card>
+
+  <Card title="Vendor Wise Cost & Part Count" accent="linear-gradient(90deg,#EF4444,#EC4899)" onExpand={()=>setExpandedChart('vendor')}>
+    {top10Vendorwise.length===0 ? noData : <PieComp data={top10Vendorwise} palette={P2} valKey="totalvalueeuro" nameKey="vendorName" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
+  </Card>
+
+</div>
+
+{/* Expanded chart modal — same data, rendered larger */}
+{expandedChart === 'contributors' && (
+  <ChartModal title="Top 10 Contributors by Value" accent="linear-gradient(90deg,#F59E0B,#EF4444)" onClose={()=>setExpandedChart(null)}>
+    {top10Contributors.length===0 ? noData : <HBar data={top10Contributors} palette={P1} valKey="totalvalueeuro" nameKey="partcode" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
+  </ChartModal>
+)}
+
+{expandedChart === 'qty' && (
+  <ChartModal title="Top 10 Part as per Qty" accent="linear-gradient(90deg,#6366F1,#8B5CF6)" onClose={()=>setExpandedChart(null)}>
+    {top10Contributors.length===0 ? noData : <PieComp data={top10Contributors} palette={P1} valKey="grnqty" nameKey="partcode" fmtFn={fmtNum} tipFmtFn={fmtFullNum}/>}
+  </ChartModal>
+)}
+
+{expandedChart === 'country' && (
+  <ChartModal title="Country Wise Cost & Vendor Count" accent="linear-gradient(90deg,#10B981,#06B6D4)" onClose={()=>setExpandedChart(null)}>
+    {top10Countrywise.length===0 ? noData : <PieComp data={top10Countrywise} palette={P2} valKey="totalvalueeuro" nameKey="country" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
+  </ChartModal>
+)}
+
+{expandedChart === 'vendor' && (
+  <ChartModal title="Vendor Wise Cost & Part Count" accent="linear-gradient(90deg,#EF4444,#EC4899)" onClose={()=>setExpandedChart(null)}>
+    {top10Vendorwise.length===0 ? noData : <PieComp data={top10Vendorwise} palette={P2} valKey="totalvalueeuro" nameKey="vendorName" fmtFn={fmtEuro} tipFmtFn={fmtFull}/>}
+  </ChartModal>
+)}
       </>)}
     </div>
   );

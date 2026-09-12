@@ -102,23 +102,41 @@ const handleChangeMulti = (fieldsObj) => {
                     compatibilityPartCode: ""
                 };
             }
+            // else if (field === "requestQty") {
+            //     if (value === "") return { ...prev, requestQty: "" };
+            //     if (!/^\d+$/.test(value)) return prev;
+
+            //     const numValue = Number(value);
+
+            //     // normalize both qtys
+            //     const compQty = Number(compAvailbleQty) || 0;
+            //     const availQty = Number(availbleqty) || 0;
+
+            //     // priority: compQty > 0 ? compQty : availQty
+            //     const maxQty = compQty > 0 ? compQty : availQty;
+
+            //     if (numValue === 0 || numValue > maxQty) return prev;
+
+            //     return { ...prev, requestQty: value };
+            // }
             else if (field === "requestQty") {
-                if (value === "") return { ...prev, requestQty: "" };
-                if (!/^\d+$/.test(value)) return prev;
+    if (value === "") return { ...prev, requestQty: "" };
+    if (!/^\d+$/.test(value)) return prev;
 
-                const numValue = Number(value);
+    const numValue = Number(value);
+    const availQty = Number(availbleqty) || 0;
 
-                // normalize both qtys
-                const compQty = Number(compAvailbleQty) || 0;
-                const availQty = Number(availbleqty) || 0;
+    // Cap against the SELECTED compatibility partcode's qty (prev.compatibilityAvailableQty),
+    // not compatibilityData[0]. Falls back to normal available qty when no compatibility partcode chosen.
+    const hasCompatibilitySelected = !!prev.compatibilityPartCode;
+    const compQty = Number(prev.compatibilityAvailableQty) || 0;
 
-                // priority: compQty > 0 ? compQty : availQty
-                const maxQty = compQty > 0 ? compQty : availQty;
+    const maxQty = hasCompatibilitySelected ? compQty : availQty;
 
-                if (numValue === 0 || numValue > maxQty) return prev;
+    if (numValue === 0 || numValue > maxQty) return prev;
 
-                return { ...prev, requestQty: value };
-            }
+    return { ...prev, requestQty: value };
+}
 
 
             // console.log("field, value", field, value)

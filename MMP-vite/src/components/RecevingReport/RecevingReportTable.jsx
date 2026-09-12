@@ -21,6 +21,7 @@ const fields = [
     
     "rec_ticket_no",
     "pono",
+    "podate",
     "partcode",
     "partdescription",
     "uom",
@@ -29,9 +30,7 @@ const fields = [
     "racklocation",
     "vendorname",
     "invoiceno",
-    
-    "podate",
-    "exp_date",
+    "invoicedate",
     "currency",
     "unitprice",
     "unitpriceper1qty",
@@ -41,6 +40,7 @@ const fields = [
     "openorderqty",
     "grno",
     "grdate",
+    "exp_date"
     
 
 ];
@@ -69,7 +69,9 @@ const customConfig = {
     grno: { label: "GR No" },
     grdate: { label: "GR Date" },
     receivingdate: { label: "Receiving Date" },
-    unitpriceper1qty:{label:"Unitprice  €"}
+    unitpriceper1qty:{label:"Unitprice  €"},
+    invoicedate:{label:"Invoice Date"},
+    exp_date:{label:"Exp Date"}
 }
 
 const RecevingReportTable = ({
@@ -90,6 +92,7 @@ const RecevingReportTable = ({
             exp_date: formatDateArray(item.exp_date),
             grdate: formatDateArray(item.grdate),
             receivingdate: formatDateArray(item.receivingdate),
+            invoicedate: formatDateArray(item.invoicedate),
         }));
     }, [data]);
 
