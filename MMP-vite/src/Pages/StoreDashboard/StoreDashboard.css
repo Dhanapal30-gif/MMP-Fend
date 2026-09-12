@@ -1,0 +1,1161 @@
+* {
+  box-sizing: border-box;
+}
+
+.store-dashboard {
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  font-family:
+    "Inter",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+  color: #102a56;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.dashboard-header {
+  min-height: 66px;
+  padding: 8px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #e7edf5;
+  background: #ffffff;
+
+  gap: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.menu-btn {
+  width: 40px;
+  height: 40px;
+
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  color: #14335e;
+}
+
+.menu-btn svg {
+  font-size: 25px;
+}
+
+.title-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #1769df;
+}
+
+.title-icon svg {
+  font-size: 32px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+
+  font-size: 27px;
+  font-weight: 700;
+
+  color: #122c55;
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   HEADER FILTERS
+===================================================== */
+
+.header-filters {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  flex: 1;
+}
+
+.header-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-filter label {
+  font-size: 12px;
+  font-weight:700;
+ 
+  padding-left: 4px;
+}
+
+.header-select {
+  min-width: 150px;
+  height: 38px;
+
+  border: 1px solid #dce4ef;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+
+  position: relative;
+}
+
+
+.header-select select {
+  width: 100%;
+  height: 100%;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  padding: 0 32px 0 11px;
+
+  appearance: none;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d3150;
+
+  cursor: pointer;
+}
+
+.header-select svg:last-child {
+  position: absolute;
+  right: 8px;
+
+  pointer-events: none;
+
+  font-size: 18px;
+  color: #2051e3;
+}
+
+.month-select {
+  min-width: 145px;
+}
+
+.month-select svg:first-child {
+  margin-left: 10px;
+  font-size: 17px;
+  color: #36577f;
+}
+
+.month-select select {
+  padding-left: 7px;
+}
+
+
+/* =====================================================
+   DATE RANGE HEADER
+===================================================== */
+
+.date-range-box {
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  border: 1px solid #dce4ef;
+  border-radius: 7px;
+
+  padding: 0 8px;
+  background: #ffffff;
+}
+
+.date-range-box input {
+  width: 110px;
+
+  border: none;
+  outline: none;
+
+  font-size: 13px;
+  font-weight: 500;
+  color: #263c5c;
+  background: transparent;
+}
+
+.date-range-box span {
+  font-size: 11px;
+  color: #8a96a8;
+  padding: 0 4px;
+}
+
+
+/* =====================================================
+   KPI GRID
+===================================================== */
+.kpi-grid {
+  width: 100%;
+  padding: 8px 20px;
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+
+/* =====================================================
+   KPI CARD
+===================================================== */
+
+.kpi-card {
+  min-width: 0;
+  height: auto;
+  min-height: 28px;   /* was 175px */
+  border-radius: 9px;
+  padding: 5px 7px;
+  border: 1px solid;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;             /* pulls the sections closer together */
+}
+
+.kpi-values {
+  display: flex;
+  align-items: center;
+  min-height: 30px;     /* was 42px */
+  margin-top: 0;
+}
+
+
+
+/* =====================================================
+   CARD COLORS
+===================================================== */
+
+.stock-card {
+  background: linear-gradient(
+    135deg,
+    #d5e6f7 0%,
+    #edf6ff 100%
+  );
+
+  border-color: #d5e7fb;
+}
+
+.receive-card {
+  background: linear-gradient(
+    135deg,
+    #c7f7da 0%,
+    #edfbf2 100%
+  );
+
+  border-color: #d6eedf;
+}
+
+.issued-card {
+  background: linear-gradient(
+    135deg,
+    #f5e9d1 0%,
+    #fff8ec 100%
+  );
+
+  border-color: #f3e1c1;
+}
+
+.request-card {
+  background: linear-gradient(
+    135deg,
+    #e3c8f7 0%,
+    #f9f4ff 100%
+  );
+
+  border-color: #e6d8f6;
+}
+
+.pending-card {
+  background: linear-gradient(
+    135deg,
+    #f8dfb1 0%,
+    #f7f5f1 100%
+  );
+
+  border-color: #f3e1c1;
+}
+
+
+.low-stock-card {
+  background: linear-gradient(
+    135deg,
+    #fcf6f5 0%,
+    #fbc9b8 100%
+  );
+
+  border-color: #f3e1c1;
+}
+
+.out-stock-card {
+  background: linear-gradient(
+    135deg,
+    #c7f7da 0%,
+    #edfbf2 100%
+  );
+
+  border-color: #d6eedf;
+}
+
+.active-parts-card {
+  /* background: linear-gradient(
+    135deg,
+    #f6f1f5 0%,
+    #c2f5d4 100%
+  ); */
+background:white;
+  border-color: #26f977;
+}
+/* =====================================================
+   CARD TOP
+===================================================== */
+
+.kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 28px;
+}
+
+
+.kpi-icon {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.kpi-icon svg {
+  font-size: 19px;
+}
+.kpi-icon svg {
+  font-size: 21px;
+}
+
+.stock-icon {
+  
+  color: #1473df;
+}
+
+.receive-icon {
+ 
+  color: #00a43c;
+}
+
+.issued-icon {
+ 
+  color: #ff8300;
+}
+
+.pending-icon{
+ 
+  color: #ff8300;
+}
+
+.request-icon {
+  
+  color: #8339d7;
+}
+
+.kpi-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+
+.stock-card .kpi-title {
+  color: #0769dc;
+}
+
+.receive-card .kpi-title {
+  color: #009c39;
+}
+
+.issued-card .kpi-title {
+  color: #f47700;
+}
+
+.pending-card .kpi-title {
+  color: #f47700;
+}
+
+.request-card .kpi-title {
+  color: #8033d4;
+}
+
+.low-stock-card .kpi-title {
+  color: #fa3008;
+}
+
+.out-stock-card .kpi-title {
+  color: #15979e;
+}
+
+.active-parts-card .kpi-title {
+  color: #2c880d;
+}
+/* =====================================================
+   STOCK CATEGORY SELECT
+===================================================== */
+
+.card-select-wrapper {
+  width: 100%;
+  height: 32px;
+
+  position: relative;
+
+  margin: 5px 0 6px;
+}
+
+.card-select-wrapper select {
+  width: 100%;
+  height: 100%;
+
+  appearance: none;
+
+  border: 1px solid #d5dfeb;
+  border-radius: 6px;
+
+  background: rgba(255, 255, 255, 0.85);
+
+  padding: 0 30px 0 9px;
+
+  font-size: 13px;
+  font-weight: 500;
+  color: #344964;
+
+  outline: none;
+}
+
+
+.card-select-wrapper svg {
+  position: absolute;
+
+  right: 7px;
+  top: 7px;
+
+  font-size: 17px;
+
+  pointer-events: none;
+
+  color: #708199;
+}
+
+
+/* =====================================================
+   CARD FILTERS
+===================================================== */
+
+.card-filters {
+  display: flex;
+
+  gap: 6px;
+
+  margin-bottom: 5px;
+
+  width: 100%;
+}
+
+.small-select {
+  height: 32px;
+
+  min-width: 115px;
+
+  position: relative;
+
+  flex: 0 0 115px;
+}
+.small-select select {
+  width: 100%;
+  height: 100%;
+
+  appearance: none;
+
+  border: 1px solid #d5dfeb;
+  border-radius: 6px;
+
+  background: rgba(255, 255, 255, 0.88);
+
+  padding: 0 22px 0 8px;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: #314865;
+
+  outline: none;
+}
+
+.small-select svg {
+  position: absolute;
+
+  right: 4px;
+  top: 8px;
+
+  font-size: 15px;
+
+  color: #718098;
+
+  pointer-events: none;
+}
+
+
+
+/* =====================================================
+   CARD DATE RANGE
+===================================================== */
+
+.card-date-range {
+  height: 32px;
+
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+
+  border: 1px solid #d5dfeb;
+  border-radius: 6px;
+
+  background: rgba(255, 255, 255, 0.88);
+
+  padding: 0 4px;
+
+  overflow: hidden;
+}
+
+.card-date-range svg {
+  flex-shrink: 0;
+
+  font-size: 14px;
+
+  color: #607694;
+
+  margin-right: 2px;
+}
+
+.card-date-range input {
+  min-width: 0;
+  width: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-size: 12px;
+  font-weight: 500;
+  color: #344b69;
+}
+
+.card-date-range span {
+  font-size: 8px;
+  color: #8b97a8;
+
+  padding: 0 1px;
+}
+
+
+/* =====================================================
+   KPI VALUES
+===================================================== */
+
+.kpi-values {
+  display: flex;
+  align-items: center;
+
+  min-height: 42px;
+
+  margin-top: 0;
+}
+
+.quantity-section,
+.value-section,
+.small-value-section {
+  min-width: 0;
+}
+
+
+.quantity-section {
+  flex: 1.2;
+}
+
+.value-section {
+  flex: 1;
+}
+
+.small-value-section {
+  flex: 1;
+}
+
+
+.kpi-number {
+  font-size: 22px;
+  line-height: 1.1;
+
+  font-weight: 700;
+
+  color: #132d57;
+
+  white-space: nowrap;
+}
+.pending-number {
+  font-size: 20px;
+  line-height: 1.1;
+
+  font-weight: 700;
+
+  color: #132d57;
+
+  white-space: nowrap;
+}
+
+
+.small-value-section .kpi-number {
+  font-size: 14px;
+}
+
+.kpi-label {
+  margin-top: 2px;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  color: #5e6d82;
+
+  white-space: nowrap;
+}
+
+.value-divider {
+  width: 1px;
+  height: 34px;
+
+  background: #dbe3ed;
+
+  margin: 0 7px;
+}
+
+
+/* =====================================================
+   REQUEST CARD
+===================================================== */
+
+.request-number {
+  font-size: 25px;
+  font-weight: 700;
+
+  color: #132d57;
+
+  margin-top: 5px;
+}
+
+
+/* =====================================================
+   VIEW DETAILS
+===================================================== */
+
+.view-details {
+  margin-top: auto;
+
+  align-self: flex-start;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border: none;
+  background: transparent;
+
+  color: #0869d8;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  padding: 4px 0 0;
+}
+
+.view-details svg {
+  font-size: 17px;
+
+  transition: transform 0.2s ease;
+}
+
+.view-details:hover svg {
+  transform: translateX(4px);
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 1250px) {
+
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+
+    padding: 12px 18px;
+  }
+
+  .header-filters {
+    width: 100%;
+
+    justify-content: flex-start;
+
+    flex-wrap: wrap;
+  }
+
+  .kpi-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =====================================================
+   TABLET SMALL
+===================================================== */
+
+@media (max-width: 800px) {
+
+  .dashboard-header {
+    padding: 12px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 23px;
+  }
+
+  .header-filters {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    width: 100%;
+  }
+
+  .header-filter {
+    width: 100%;
+  }
+
+  .header-select {
+    width: 100%;
+  }
+
+  .date-range-filter {
+    grid-column: span 2;
+  }
+
+  .date-range-box {
+    width: 100%;
+  }
+
+  .date-range-box input {
+    width: 100%;
+  }
+
+  .kpi-grid {
+    padding: 12px;
+
+    gap: 12px;
+  }
+
+  .kpi-card {
+    min-height: 220px;
+
+    padding: 13px 15px;
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .dashboard-header {
+    gap: 12px;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .title-icon {
+    width: 30px;
+  }
+
+  .title-icon svg {
+    font-size: 28px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 21px;
+  }
+
+  .header-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .date-range-filter {
+    grid-column: auto;
+  }
+
+  .header-filter label {
+    font-size: 10px;
+  }
+
+  .header-select,
+  .date-range-box {
+    height: 40px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+
+    padding: 10px;
+  }
+
+  .kpi-card {
+    min-height: 210px;
+
+    padding: 15px;
+  }
+
+  .card-filters {
+    flex-direction: column;
+  }
+
+  .small-select {
+    width: 100%;
+    flex: none;
+  }
+
+  .card-date-range {
+    width: 100%;
+  }
+
+  .kpi-number {
+    font-size: 24px;
+  }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media (max-width: 380px) {
+
+  .dashboard-header h1 {
+    font-size: 19px;
+  }
+
+  .kpi-top {
+    gap: 9px;
+  }
+
+  .kpi-icon {
+    width: 43px;
+    height: 43px;
+  }
+
+  .kpi-icon svg {
+    font-size: 28px;
+  }
+
+  .kpi-title {
+    font-size: 14px;
+  }
+
+  .kpi-values {
+    flex-wrap: wrap;
+  }
+
+  .kpi-number {
+    font-size: 22px;
+  }
+
+}
+
+/* =====================================================
+   CHART + REQUEST DETAILS
+===================================================== */
+
+.dashboard-content-grid {
+  width: 100%;
+  padding: 0 20px 20px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+
+  gap: 18px;
+  align-items: stretch;
+}
+
+
+/* =====================================================
+   COMMON DASHBOARD SECTION CARD
+===================================================== */
+
+.dashboard-section-card {
+  background: #ffffff;
+  border: 1px solid #e1e8f2;
+  border-radius: 10px;
+  padding: 16px;
+
+  box-shadow: 0 2px 8px rgba(16, 42, 86, 0.05);
+}
+
+
+/* =====================================================
+   STOCK TABLES
+===================================================== */
+
+.stock-tables-grid {
+  width: 100%;
+  padding: 0 20px 20px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+
+/* =====================================================
+   TABLE CARD
+===================================================== */
+
+.stock-table-card {
+  background: #ffffff;
+
+  border: 1px solid #e1e8f2;
+  border-radius: 10px;
+
+  padding: 16px;
+
+  box-shadow: 0 2px 8px rgba(16, 42, 86, 0.05);
+
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   SECTION TITLE
+===================================================== */
+
+.section-title {
+  margin: 0 0 14px;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  color: #122c55;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.stock-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 12px;
+}
+
+.stock-table thead {
+  background: #f5f8fc;
+}
+
+.stock-table th {
+  padding: 10px 8px;
+
+  text-align: left;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  color: #53657f;
+
+  border-bottom: 1px solid #dfe6ef;
+}
+
+.stock-table td {
+  padding: 9px 8px;
+
+  color: #344964;
+
+  border-bottom: 1px solid #edf1f6;
+}
+
+.stock-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.stock-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* =====================================================
+   REQUEST DETAILS
+===================================================== */
+
+.request-details-card {
+  height: 100%;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e8f2;
+  border-radius: 10px;
+
+  padding: 16px;
+
+  box-shadow: 0 2px 8px rgba(16, 42, 86, 0.05);
+}
+
+.request-details-title {
+  margin: 0 0 12px;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  color: #122c55;
+}
+
+.request-detail-row {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 8px 0;
+
+  border-bottom: 1px solid #edf1f6;
+
+  font-size: 12px;
+}
+
+.request-detail-row:last-child {
+  border-bottom: none;
+}
+
+.request-detail-label {
+  color: #71809a;
+}
+
+.request-detail-value {
+  color: #18365f;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   CHART CARD
+===================================================== */
+
+.chart-card {
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e8f2;
+  border-radius: 10px;
+
+  padding: 16px;
+
+  box-shadow: 0 2px 8px rgba(16, 42, 86, 0.05);
+
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .dashboard-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stock-tables-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 800px) {
+
+  .dashboard-content-grid,
+  .stock-tables-grid {
+    padding-left: 12px;
+    padding-right: 12px;
+
+    gap: 12px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .dashboard-content-grid,
+  .stock-tables-grid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .dashboard-section-card,
+  .stock-table-card,
+  .request-details-card,
+  .chart-card {
+    padding: 12px;
+  }
+
+}

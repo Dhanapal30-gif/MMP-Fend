@@ -8,7 +8,13 @@ body {
   background-color: white;
 }
 
-
+.session-timer {
+  color: #fff;
+  font-size: 13px;
+  margin-right: 10px;
+  font-family: monospace;
+  opacity: 0.85;
+}
 /* Parent header wrapper */
 .header-container {
   position: sticky;

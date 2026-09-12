@@ -129,20 +129,44 @@ const Receving = () => {
     return isValid;
   };
 
+  // useEffect(() => {
+  //   const validate = async () => {
+  //     const isValid = await checkUserValid();
+  //     if (!isValid) {
+  //       setOpenMsg(true);
+  //       setTimeout(() => {
+  //         window.location.href = "/";
+  //       }, 1000);
+  //     }
+  //   };
+  //   validate();
+  //   fetchPoNumberData(setPonumber);
+  // }, [])
+
   useEffect(() => {
     const validate = async () => {
-      const isValid = await checkUserValid();
-      if (!isValid) {
-        setOpenMsg(true);
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
-      }
+        console.log("=== checkUserValid START (this page) ===");
+        console.log("userId in localStorage:", localStorage.getItem("userId"));
+        console.log("passwordToken in localStorage:", localStorage.getItem("passwordToken"));
+
+        const isValid = await checkUserValid();
+
+        console.log("checkUserValid() returned:", isValid);
+        console.log("=== checkUserValid END ===");
+
+        if (!isValid) {
+            console.log("Session marked INVALID — showing popup & redirecting");
+            setOpenMsg(true);
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1000);
+        } else {
+            console.log("Session marked VALID — staying on page");
+        }
     };
     validate();
     fetchPoNumberData(setPonumber);
-  }, [])
-
+}, [])
 
   const commonFileds = {
     ponumber: formData.ponumber,
@@ -250,13 +274,39 @@ const Receving = () => {
   };
 
 
-  const handleSuccess = (response) => {
-    setLoading(false);  // <--- Stop loader here
+  // const handleSuccess = (response) => {
+  //   setLoading(false);  // <--- Stop loader here
 
+  //   setSuccessMessage(response.data.message);
+  //   setShowSuccessPopup(true);
+  //   setShowErrorPopup(false);
+  //   fetchPoNumberData(setPonumber);
+
+  //   setShowRecevingTable(false);
+  //   setPoDetail([]);
+  //   setFormData({});
+  //   setUpdateButton(false);
+  //   setSubmitButton(true);
+  //   setDeleteButton(false);
+  //   setSelectedDeleteRows([]);
+  //   setSelectedRows([]);
+  //   fetchFindData(page, perPage, searchText);
+  //   // ✅ Remove or replace this
+  //   // finalData(); ← this is the source of the error
+
+  //   fetchRecevingData((ticketNo) => {
+  //     setRecTicketNo(ticketNo);
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       recevingTicketNo: ticketNo,
+  //     }));
+  //   });
+  // };
+
+  const handleSuccess = async (response) => {
     setSuccessMessage(response.data.message);
     setShowSuccessPopup(true);
     setShowErrorPopup(false);
-    fetchPoNumberData(setPonumber);
 
     setShowRecevingTable(false);
     setPoDetail([]);
@@ -266,19 +316,23 @@ const Receving = () => {
     setDeleteButton(false);
     setSelectedDeleteRows([]);
     setSelectedRows([]);
-    fetchFindData(page, perPage, searchText);
-    // ✅ Remove or replace this
-    // finalData(); ← this is the source of the error
 
-    fetchRecevingData((ticketNo) => {
-      setRecTicketNo(ticketNo);
-      setFormData((prev) => ({
-        ...prev,
-        recevingTicketNo: ticketNo,
-      }));
-    });
-  };
-
+    try {
+        await fetchPoNumberData(setPonumber);
+        await fetchFindData(page, perPage, searchText);
+        await new Promise((resolve) => {
+            fetchRecevingData((ticketNo) => {
+                setRecTicketNo(ticketNo);
+                setFormData((prev) => ({ ...prev, recevingTicketNo: ticketNo }));
+                resolve();
+            });
+        });
+    } catch (error) {
+        console.error("Error refreshing data after success:", error);
+    } finally {
+        setLoading(false);   // now this is the ONLY place turning loading off, and it runs last, guaranteed
+    }
+};
 
   const handleError = (error) => {
     setLoading(false);  // <--- Stop loader here

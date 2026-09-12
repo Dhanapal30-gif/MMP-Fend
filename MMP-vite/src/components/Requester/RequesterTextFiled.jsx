@@ -109,7 +109,8 @@ const RequesterTextFiled = ({
                     )}
                 /> */}
 
-                {userId.toLowerCase() === "admin" && (
+                {/* {userId.toLowerCase() === "admin" && ( */}
+                {(userId || "").toLowerCase() === "admin" && (
                     <Autocomplete
                         options={requesterForOption} // ternary
                         readOnly={isFrozen}
@@ -376,6 +377,8 @@ onChange={(e, newValue) => {
             componentUsage: newValue.componentUsage ?? "",
             uom: newValue.uom ?? "",
             tyc: newValue.tyc ?? "",
+            compatibilityPartCode: "",        // clear stale compatibility selection
+            compatibilityAvailableQty: "",     // clear stale compatibility qty
         });
     } else {
         handleChangeMulti({
@@ -385,6 +388,8 @@ onChange={(e, newValue) => {
             componentUsage: "",
             uom: "",
             tyc: "",
+            compatibilityPartCode: "",
+            compatibilityAvailableQty: "",
         });
     }
 }}
@@ -463,10 +468,17 @@ onChange={(e, newValue) => {
                         ) || null}
                         getOptionLabel={(option) => option.compatibilityPartCode || ""}
                         isOptionEqualToValue={(option, value) => option?.compatibilityPartCode === value?.compatibilityPartCode}
+                        // onChange={(e, newValue) => {
+                        //     handleChange("compatibilityPartCode", newValue?.compatibilityPartCode || "");
+                        //     handleChange("compatibilityAvailableQty", newValue?.compatibilityAvailableQty || "");
+                        // }}
                         onChange={(e, newValue) => {
-                            handleChange("compatibilityPartCode", newValue?.compatibilityPartCode || "");
-                            handleChange("compatibilityAvailableQty", newValue?.compatibilityAvailableQty || "");
-                        }}
+    handleChangeMulti({
+        compatibilityPartCode: newValue?.compatibilityPartCode || "",
+        compatibilityAvailableQty: newValue?.compatibilityAvailableQty || "",
+        requestQty: "", // force refresh — old qty may exceed new compatibility partcode's limit
+    });
+}}
                         renderInput={(params) => <TextField {...params}
                             error={Boolean(formErrors?.compatibilityPartCode)}
                             helperText={formErrors?.compatibilityPartCode || ""}

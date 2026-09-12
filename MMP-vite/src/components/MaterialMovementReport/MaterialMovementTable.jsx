@@ -33,13 +33,13 @@ const fields = [
     "partcode",
     "partdescription",
     "uom",
+    "pono",
     "movementType",
     "materialDocumentNo",
+     "postingRefernce",
     "transcationQty",
     "amount",
-    "postingRefernce",
-    "pono",
-    "comment"
+     "comment"
 ];
 
 const customConfig = {

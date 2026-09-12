@@ -825,19 +825,43 @@ if (componentUsage === "") {
 
 
 
+  // useEffect(() => {
+  //   const validate = async () => {
+  //               const isValid = await checkUserValid();
+  //               if (!isValid) {
+  //                   setOpenMsg(true);
+  //                   setTimeout(() => {
+  //                       window.location.href = "/";
+  //                   }, 1000); 
+  //               }
+  //           };
+  //   validate();
+
+  // }, []);
+
   useEffect(() => {
     const validate = async () => {
-                const isValid = await checkUserValid();
-                if (!isValid) {
-                    setOpenMsg(true);
-                    setTimeout(() => {
-                        window.location.href = "/";
-                    }, 1000); 
-                }
-            };
-    validate();
+        console.log("=== checkUserValid START (this page) ===");
+        console.log("userId in localStorage:", localStorage.getItem("userId"));
+        console.log("passwordToken in localStorage:", localStorage.getItem("passwordToken"));
 
-  }, []);
+        const isValid = await checkUserValid();
+
+        console.log("checkUserValid() returned:", isValid);
+        console.log("=== checkUserValid END ===");
+
+        if (!isValid) {
+            console.log("Session marked INVALID — showing popup & redirecting");
+            setOpenMsg(true);
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1000);
+        } else {
+            console.log("Session marked VALID — staying on page");
+        }
+    };
+    validate();
+}, []);
 
   const fetchData = (page = 1, size = 10, search = "") => {
     if (search && search.trim() !== "") {

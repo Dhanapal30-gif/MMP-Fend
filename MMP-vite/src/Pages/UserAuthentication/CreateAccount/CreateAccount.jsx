@@ -37,25 +37,6 @@ const CreateAccount = () => {
     productname: []
   });
 
-  // useEffect(() => {
-  //   if (isEdit && storeProduct.length > 0) {
-  //     const availableGroups = [...new Set(storeProduct.map(item => item.productGroup))]; // unique
-  //     const availableNames = storeProduct.map(item => item.productName);
-
-  //     setFormData({
-  //       ...editFormData,
-  //       userRole: editFormData.userRole || [],
-  //       requesterType: editFormData.requesterType || [],
-  //       requestType: editFormData.requestType || [],
-  //       productGroup: Array.isArray(editFormData.productGroup)
-  //         ? editFormData.productGroup.filter(pg => availableGroups.includes(pg))
-  //         : availableGroups.includes(editFormData.productGroup)
-  //           ? [editFormData.productGroup]
-  //           : [],
-  //       productname: editFormData.productname?.filter(pn => availableNames.includes(pn)) || []
-  //     });
-  //   }
-  // }, [isEdit, editFormData, storeProduct]);
   useEffect(() => {
     if (isEdit && storeProduct.length > 0) {
       // unique product groups/names from storeProduct
@@ -79,9 +60,6 @@ const CreateAccount = () => {
       }));
     }
   }, [isEdit, editFormData, storeProduct]);
-
-
-  // console.log("editFormData", editFormData)
 
 
   const [userRoleData, setUserRoleData] = useState([]);
@@ -119,10 +97,7 @@ const CreateAccount = () => {
       errors.afa = 'Account Active is required';
       isValid = false;
     }
-    // if (formData.requesterType.length === 0) {
-    //   errors.requesterType = 'RequesterType is required';
-    //   isValid = false;
-    // }
+
     if (formData.userRole.includes("Requester") && formData.requesterType.length === 0) {
       errors.requesterType = 'RequesterType is required';
       isValid = false;
@@ -133,31 +108,17 @@ const CreateAccount = () => {
       isValid = false;
     }
 
-    //  if (formData.requesterType && formData.requestType.length === 0) {
-    //   errors.requestType = 'Request Type is required';
-    //   isValid = false;
-    // }
-
-    // if (formData.requesterType && formData.productGroup.length === 0) {
-    //   errors.productGroup = 'productGroup is required';
-    //   isValid = false;
-    // }
-    // if (formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others") || formData.requestType?.includes("Thermal Gel") && formData.productGroup.length === 0) {
-    //   errors.productGroup = 'productGroup is required';
-    //   isValid = false;
-    // }
-
     if (
-  (
-    formData.requestType?.includes("Sub Module") ||
-    formData.requestType?.includes("others") ||
-    formData.requestType?.includes("Thermal Gel")
-  ) &&
-  formData.productGroup.length === 0
-) {
-  errors.productGroup = 'productGroup is required';
-  isValid = false;
-}
+      (
+        formData.requestType?.includes("Sub Module") ||
+        formData.requestType?.includes("others") ||
+        formData.requestType?.includes("Thermal Gel")
+      ) &&
+      formData.productGroup.length === 0
+    ) {
+      errors.productGroup = 'productGroup is required';
+      isValid = false;
+    }
 
     if (formData.userRole?.includes("Repairer") && formData.productname.length === 0) {
       errors.productname = 'productName is required';
@@ -207,7 +168,6 @@ const CreateAccount = () => {
       CreateAccountUser(updatedFormData)
         .then((response) => {
 
-          // alert(response.data.message);
           setSuccessMessage(response.data.message)
           setShowSuccessPopup(true)
           navigate("/");
@@ -253,7 +213,6 @@ const CreateAccount = () => {
 
       updateUserDetail(updatedFormData)
         .then((response) => {
-          // alert(response.data.message);
           setSuccessMessage(response.data.message)
           setShowSuccessPopup(true)
           navigate("/userDetail");
@@ -289,9 +248,8 @@ const CreateAccount = () => {
   };
 
   const fetchUserRoleData = async () => {
-    // setLoading(true);
     try {
-      const response = await fetchUserRole(); // make sure this is imported correctly
+      const response = await fetchUserRole();
       setUserRoleData(response.data);
     } catch (error) {
       console.error("Error fetching user roles", error);
@@ -301,7 +259,6 @@ const CreateAccount = () => {
     getProduct()
       .then((response) => {
         setStoreProduct(response.data);
-        // console.log("product", response.data);
       })
   }
 
@@ -314,11 +271,10 @@ const CreateAccount = () => {
   const [productGroup, setProductGroup] = useState([]);
   const [productName, setProductName] = useState([]);
 
-  // 2. Fill state with unique ProductGroup values (run once, e.g., in useEffect)
   useEffect(() => {
     const uniqueGroups = [
       ...new Map(storeProduct.map(item => [item.productGroup, item])).values()
-    ].map(item => item.productGroup); // just strings
+    ].map(item => item.productGroup);
 
     setProductGroup(uniqueGroups);
   }, [storeProduct]);
@@ -328,180 +284,269 @@ const CreateAccount = () => {
       ...new Map(storeProduct.map(item => [item.productName, item])).values()
     ].map(item => item.productName);
 
-    setProductName(uniqueGroups);  // store in state
+    setProductName(uniqueGroups);
   }, [storeProduct]);
-
-  // console.log("productname", productName)
 
   return (
     <div className="cretaeBackgroundimgae">
       <div className="form-container">
-        <div className="cretaeimgaeuyef"></div>
-        {/* <img src={Image} alt="Nokia Logo" className="logo" /> */}
-        {/* {isEdit ? "Edit Account" : "Create Account"} */}
-       <div>
-  {isEdit ? (
-    <>
-      <span style={{ color: 'blue',fontWeight:'bold' }}>Edit  Account</span>
-    </>
-  ) : (
-    <>
-      <span style={{ color: 'blue',fontWeight:'bold' }}>Create Account</span>
-    </>
-  )}
-</div>
 
-        <form onSubmit={isEdit ? handleUpdate : handleSubmit}>
+        <div className="form-header">
+          <div className="cretaeimgaeuyef"></div>
+          <div className="form-header-text">
+            <h2 className="form-title">{isEdit ? "Edit account" : "Create account"}</h2>
+            <p className="form-subtitle">
+              {isEdit
+                ? "Update sign-in details and permissions for this user."
+                : "Set up sign-in access and assign permissions."}
+            </p>
+          </div>
+        </div>
+
+        <form className="form-body" onSubmit={isEdit ? handleUpdate : handleSubmit}>
           <div className="form-grid">
-            <div className='ProductTexfiled'>
-              <ThemeProvider theme={TextFiledTheme}>
 
-                <TextField
-                  label="User ID"
-                  name="userId"
-                  value={formData.userId}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.userId)}
-                  helperText={formErrors.userId}
-                  fullWidth
-                  size="small"
-                />
+            <section className="form-section">
+              <h3 className="form-section-title">Account &amp; product details</h3>
+              <div className='ProductTexfiled'>
+                <ThemeProvider theme={TextFiledTheme}>
 
-
-                <TextField
-                  label="User Name"
-                  name="userName"
-                  value={formData.userName}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.userName)}
-                  helperText={formErrors.userName}
-                  fullWidth
-                  size="small"
-                />
-
-
-                <TextField
-                  label="Phone Number"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.phoneNumber)}
-                  helperText={formErrors.phoneNumber}
-                  fullWidth
-                  size="small"
-                />
-
-                <TextField
-                  label="Email Address"
-                  name="emailAddress"
-                  value={formData.emailAddress}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.emailAddress)}
-                  helperText={formErrors.emailAddress}
-                  fullWidth
-                  size="small"
-                />
-
-
-                <TextField
-                  label="Password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.password)}
-                  helperText={formErrors.password}
-                  fullWidth
-                  size="small"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-
-                <TextField
-                  label="adminPassword"
-                  name="adminPassword"
-                  type="password"
-                  value={formData.adminPassword}
-                  onChange={handleChange}
-                  error={Boolean(formErrors.adminPassword)}
-                  helperText={formErrors.adminPassword}
-                  fullWidth
-                  size="small"
-                />
-               
-
-                
-                {(formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others") || formData.requestType?.includes("Thermal Gel"))  && (
-
-                  <Autocomplete
-                    multiple
-                    options={productGroup} // array of strings
-                    getOptionLabel={(option) => option || ""} // <-- important!
-                    value={formData.productGroup || []}
-                    onChange={(event, newValue) =>
-                      setFormData(prev => ({ ...prev, productGroup: newValue || [] }))
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Product Group"
-                        name="productGroup"
-                        error={Boolean(formErrors.productGroup)}
-                        helperText={formErrors.productGroup}
-                        variant="outlined"
-                        size="small"
-                      />
-                    )}
+                  <TextField
+                    label="User ID"
+                    name="userId"
+                    value={formData.userId}
+                    onChange={handleChange}
+                    error={Boolean(formErrors.userId)}
+                    helperText={formErrors.userId}
+                    fullWidth
+                    size="small"
                   />
-                )}
-                {/* {(formData.userRole?.includes("Repairer")) && (
 
-                  <Autocomplete
-                    multiple
-                    options={productName} // array of strings
-                    getOptionLabel={(option) => option || ""} // <-- important!
-                    value={formData.productname || []}
-                    onChange={(event, newValue) =>
-                      setFormData(prev => ({ ...prev, productname: newValue || [] }))
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Product Name"
-                        name="asignUserrole"
-                        error={Boolean(formErrors.productname)}
-                        helperText={formErrors.productname}
-                        variant="outlined"
-                        size="small"
-                      />
-                    )}
+
+                  <TextField
+                    label="User Name"
+                    name="userName"
+                    value={formData.userName}
+                    onChange={handleChange}
+                    error={Boolean(formErrors.userName)}
+                    helperText={formErrors.userName}
+                    fullWidth
+                    size="small"
                   />
-                  
-                )} */}
-                {(formData.userRole?.includes("Repairer")) && (
+
+
+                  <TextField
+                    label="Phone Number"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    error={Boolean(formErrors.phoneNumber)}
+                    helperText={formErrors.phoneNumber}
+                    fullWidth
+                    size="small"
+                  />
+
+                  <TextField
+                    label="Email Address"
+                    name="emailAddress"
+                    value={formData.emailAddress}
+                    onChange={handleChange}
+                    error={Boolean(formErrors.emailAddress)}
+                    helperText={formErrors.emailAddress}
+                    fullWidth
+                    size="small"
+                  />
+
+
+                  <TextField
+                    label="Password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleChange}
+                    error={Boolean(formErrors.password)}
+                    helperText={formErrors.password}
+                    fullWidth
+                    size="small"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+
+                  <TextField
+                    label="adminPassword"
+                    name="adminPassword"
+                    type="password"
+                    value={formData.adminPassword}
+                    onChange={handleChange}
+                    error={Boolean(formErrors.adminPassword)}
+                    helperText={formErrors.adminPassword}
+                    fullWidth
+                    size="small"
+                  />
+
+
+
+                  {(formData.requestType?.includes("Sub Module") || formData.requestType?.includes("others") || formData.requestType?.includes("Thermal Gel")) && (
+
+                    <Autocomplete
+                      multiple
+                      options={productGroup}
+                      getOptionLabel={(option) => option || ""}
+                      value={formData.productGroup || []}
+                      onChange={(event, newValue) =>
+                        setFormData(prev => ({ ...prev, productGroup: newValue || [] }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Product Group"
+                          name="productGroup"
+                          error={Boolean(formErrors.productGroup)}
+                          helperText={formErrors.productGroup}
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                    />
+                  )}
+
+                  {(formData.userRole?.includes("Repairer")) && (
+
+                    <Autocomplete
+                      multiple
+                      options={productName}
+                      getOptionLabel={(option) => option || ""}
+                      value={formData.productname || []}
+                      onChange={(event, newValue) =>
+                        setFormData(prev => ({ ...prev, productname: newValue || [] }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Product Name"
+                          name="asignUserrole"
+                          error={Boolean(formErrors.productname)}
+                          helperText={formErrors.productname}
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                      sx={{
+                        "& .MuiAutocomplete-tag": {
+                          maxWidth: "100%",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis"
+                        },
+                        "& .MuiAutocomplete-inputRoot": {
+                          maxHeight: "120px",
+                          overflowY: "auto"
+                        }
+                      }}
+                    />
+                  )}
+
+                </ThemeProvider>
+
+              </div>
+            </section>
+
+            <section className="form-section">
+              <h3 className="form-section-title">Roles &amp; permissions</h3>
+              <div className="RoleFields">
+                <ThemeProvider theme={TextFiledTheme}>
+
+                  {userRoleData.length > 0 && (
+                    <Autocomplete
+                      multiple
+                      options={userRoleData}
+                      getOptionLabel={(option) => option || ""}
+                      value={formData.userRole || []}
+                      onChange={(event, newValue) =>
+                        setFormData(prev => ({ ...prev, userRole: newValue || [] }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="User Role"
+                          error={Boolean(formErrors.userRole)}
+                          helperText={formErrors.userRole}
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                      sx={{
+                        "& .MuiAutocomplete-tag": {
+                          maxWidth: "100%",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis"
+                        },
+                        "& .MuiAutocomplete-inputRoot": {
+                          maxHeight: "120px",
+                          overflowY: "auto"
+                        }
+                      }}
+                    />
+                  )}
+
+                  {formData.userRole.includes("Requester") && (
+                    <Autocomplete
+                      multiple
+                      options={[
+                        "Material Request",
+                        "Scrap Request",
+                        "Stock Transfer Request",
+                        "Material Request Projects"
+                      ]}
+                      getOptionLabel={(option) => option || ""}
+                      value={formData.requesterType || []}
+                      onChange={(event, newValue) =>
+                        setFormData(prev => ({ ...prev, requesterType: newValue || [] }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Requester Type"
+                          error={Boolean(formErrors.requesterType)}
+                          helperText={formErrors.requesterType}
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                      sx={{
+                        "& .MuiAutocomplete-tag": {
+                          maxWidth: "100%",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis"
+                        },
+                        "& .MuiAutocomplete-inputRoot": {
+                          maxHeight: "120px",
+                          overflowY: "auto"
+                        }
+                      }}
+                    />
+                  )}
 
                   <Autocomplete
                     multiple
-                    options={productName} // array of strings
-                    getOptionLabel={(option) => option || ""} // <-- important!
-                    value={formData.productname || []}
+                    options={["Sub Module", "others", "Thermal Gel"]}
+                    getOptionLabel={(option) => option || ""}
+                    value={formData.requestType || []}
                     onChange={(event, newValue) =>
-                      setFormData(prev => ({ ...prev, productname: newValue || [] }))
+                      setFormData(prev => ({ ...prev, requestType: newValue || [] }))
                     }
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Product Name"
-                        name="asignUserrole"
-                        error={Boolean(formErrors.productname)}
-                        helperText={formErrors.productname}
+                        label="Request Type"
+                        error={Boolean(formErrors.requestType)}
+                        helperText={formErrors.requestType}
                         variant="outlined"
                         size="small"
                       />
@@ -514,312 +559,72 @@ const CreateAccount = () => {
                       },
                       "& .MuiAutocomplete-inputRoot": {
                         maxHeight: "120px",
-                        overflowY: "auto",
-                        width: "589px"
+                        overflowY: "auto"
                       }
                     }}
                   />
-                )}
 
-              </ThemeProvider>
-
-            </div>
-            {/* {userRoleData.length > 0 && (
-              <div className="form-field" style={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ color: 'blue' }}>User Role</FormLabel>
-                <FormGroup row>
-                  {userRoleData.map((role) => (
-                    <FormControlLabel
-                      key={role}
-                      control={
-                        <Checkbox
-                          checked={formData.userRole.includes(role)}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            const updatedRoles = checked
-                              ? [...formData.userRole, role]
-                              : formData.userRole.filter((r) => r !== role);
-                            setFormData({ ...formData, userRole: updatedRoles });
-                          }}
-                          sx={{ '& .MuiSvgIcon-root': { fontSize: 10 } }} // checkbox size if needed
-
-                        />
-                      }
-                      label={role}
-                    />
-                  ))}
-                </FormGroup>
-                {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
-              </div>
-            )} */}
-
-            <ThemeProvider theme={TextFiledTheme}>
-
-              {userRoleData.length > 0 && (
-                <Autocomplete
-                  multiple
-                  options={userRoleData} // array of user roles
-                  getOptionLabel={(option) => option || ""}
-                  value={formData.userRole || []}
-                  onChange={(event, newValue) =>
-                    setFormData(prev => ({ ...prev, userRole: newValue || [] }))
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="User Role"
-                      error={Boolean(formErrors.userRole)}
-                      helperText={formErrors.userRole}
-                      variant="outlined"
-                      size="small"
-                    />
-                  )}
-                  sx={{
-                    "& .MuiAutocomplete-tag": {
-                      maxWidth: "100%",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis"
-                    },
-                    "& .MuiAutocomplete-inputRoot": {
-                      maxHeight: "120px",
-                      overflowY: "auto",
-                      width: "589px"
+                  <Autocomplete
+                    options={["Active", "Deactive"]}
+                    getOptionLabel={(option) => option || ""}
+                    value={formData.afa || null}
+                    onChange={(event, newValue) =>
+                      setFormData({ ...formData, afa: newValue || "" })
                     }
-                  }}
-                />
-              )}
-
-
-              {/* <div className="form-field" style={{ width: '100%' }}>
-              <FormLabel component="legend">User Role</FormLabel>
-              <FormGroup row>
-                {userRoleData.map((role) => (
-                  <FormControlLabel
-                    key={role}
-                    control={
-                      <Checkbox
-                        checked={formData.userRole.includes(role)}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          const updatedRoles = checked
-                            ? [...formData.userRole, role]
-                            : formData.userRole.filter((r) => r !== role);
-                          setFormData({ ...formData, userRole: updatedRoles });
-                        }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Active For Account"
+                        variant="outlined"
+                        error={Boolean(formErrors.afa)}
+                        helperText={formErrors.afa}
+                        size="small"
+                        className="ProductTexfiled-textfield"
                       />
-                    }
-                    label={role}
+                    )}
+                    sx={{
+                      "& .MuiAutocomplete-tag": {
+                        maxWidth: "100%",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                      },
+                      "& .MuiAutocomplete-inputRoot": {
+                        maxHeight: "120px",
+                        overflowY: "auto"
+                      }
+                    }}
                   />
-                ))}
-              </FormGroup>
-              {formErrors.userRole && <p style={{ color: 'red' }}>{formErrors.userRole}</p>}
-            </div> */}
-              {formData.userRole.includes("Requester") && (
-                <Autocomplete
-                  multiple
-                  options={[
-                    "Material Request",
-                    "Scrap Request",
-                    "Stock Transfer Request",
-                    "Material Request Projects"
-                  ]}
-                  getOptionLabel={(option) => option || ""}
-                  value={formData.requesterType || []}
-                  onChange={(event, newValue) =>
-                    setFormData(prev => ({ ...prev, requesterType: newValue || [] }))
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Requester Type"
-                      error={Boolean(formErrors.requesterType)}
-                      helperText={formErrors.requesterType}
-                      variant="outlined"
-                      size="small"
-                    />
-                  )}
-                  sx={{
-                    "& .MuiAutocomplete-tag": {
-                      maxWidth: "100%",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis"
-                    },
-                    "& .MuiAutocomplete-inputRoot": {
-                      maxHeight: "120px",
-                      overflowY: "auto",
-                      width: "589px"
-                    }
-                  }}
-                />
-              )}
 
-              {/* {formData.userRole.includes("Requester") && (
-              <div className="form-field" style={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ color: 'blue' }}>Requester Type</FormLabel>
-                <FormGroup row>
-                  {[
-                    "Material Request",
-                    "Scrap Request",
-                    "Stock Transfer Request",
-                    "Material Request Projects"
-                  ].map((reqType) => (
-                    <FormControlLabel
-                      key={reqType}
-                      control={
-                        <Checkbox
-                          checked={formData.requesterType?.includes(reqType) || false}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            const currentList = formData.requesterType || [];
-                            const updated = checked
-                              ? [...currentList, reqType]
-                              : currentList.filter((r) => r !== reqType);
-                            setFormData({ ...formData, requesterType: updated });
-                          }}
-                          sx={{ '& .MuiSvgIcon-root': { fontSize: 10 } }} // checkbox size if needed
-
-                        />
-                      }
-                      label={reqType}
-                    />
-                  ))}
-                </FormGroup>
-                {formErrors.requesterType && <p style={{ color: 'red' }}>{formErrors.requesterType}</p>}
-              </div>
-            )} */}
-              {/* {formData.requesterType?.includes("Material Request") && ( */}
-
- {/* {formData.requesterType.includes("Material Request") && ( */}
-
-              {/*   {formData.requesterType && ( */}
-               <Autocomplete
-                  multiple
-                  options={["Sub Module", "others", "Thermal Gel"]}
-                  getOptionLabel={(option) => option || ""}
-                  value={formData.requestType || []}
-                  onChange={(event, newValue) =>
-                    setFormData(prev => ({ ...prev, requestType: newValue || [] }))
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Request Type"
-                      error={Boolean(formErrors.requestType)}
-                      helperText={formErrors.requestType}
-                      variant="outlined"
-                      size="small"
-                    />
-                  )}
-                  sx={{
-                    "& .MuiAutocomplete-tag": {
-                      maxWidth: "100%",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis"
-                    },
-                    "& .MuiAutocomplete-inputRoot": {
-                      maxHeight: "120px",
-                      overflowY: "auto",
-                      width: "589px"
-                    }
-                  }}
-                />
-              {/*  )} */}
-
- <Autocomplete
-  options={["Active", "Deactive"]}
-  getOptionLabel={(option) => option || ""}
-  value={formData.afa || null}
-  onChange={(event, newValue) =>
-    setFormData({ ...formData, afa: newValue || "" })
-  }
-  renderInput={(params) => (
-    <TextField
-      {...params}
-      label="Active For Account"
-      variant="outlined"
-      error={Boolean(formErrors.afa)}
-      helperText={formErrors.afa}
-      size="small"
-      className="ProductTexfiled-textfield"
-    />
-  )}
-  sx={{
-                    "& .MuiAutocomplete-tag": {
-                      maxWidth: "100%",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis"
-                    },
-                    "& .MuiAutocomplete-inputRoot": {
-                      maxHeight: "120px",
-                      overflowY: "auto",
-                      width: "589px"
-                    }
-                  }}
-/>
-
-            </ThemeProvider>
-            {/* {formData.requesterType?.includes("Material Request") && (
-              <div className="form-field" style={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ color: 'blue' }}>Request Type</FormLabel>
-                <FormGroup row>
-                  {["Submodule", "others", "ThermalGel"].map((reqType) => (
-                    <FormControlLabel
-                      key={reqType}
-                      control={
-                        <Checkbox
-                          checked={formData.requestType?.includes(reqType) || false}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            const currentList = formData.requestType || [];
-                            const updated = checked
-                              ? [...currentList, reqType]
-                              : currentList.filter((r) => r !== reqType);
-                            setFormData({ ...formData, requestType: updated });
-                          }}
-                          sx={{ '& .MuiSvgIcon-root': { fontSize: 10 } }} // checkbox size if needed
-
-                        />
-                      }
-                      label={reqType}
-                    />
-                  ))}
-                </FormGroup>
-
-                {formErrors.requestType && <p style={{ color: 'red' }}>{formErrors.requestType}</p>}
-
-              </div>
-            )} */}
-            {/* {(formData.requestType?.includes("Submodule") || formData.requestType?.includes("others")) && (
-
-              <div className='ProductTexfiled'>
-                <ThemeProvider theme={TextFiledTheme}>
                 </ThemeProvider>
               </div>
-            )} */}
+            </section>
+
           </div>
-          <Button type="submit" variant="contained" color="primary"
-            fullWidth
-            style={{ marginTop: '20px' }}
-          >
-            {isEdit ? "Edit Account" : "Create Account"}
-          </Button>
-          {isEdit && (
-            <Button
-              variant="contained"
-              color="secondary"
-              style={{ marginTop: "20px" }}
-              onClick={() => navigate("/userDetail")}
+
+          <div className="form-actions">
+            <Button type="submit" variant="contained" color="primary"
+              fullWidth
+              className="form-submit-btn"
             >
-              Cancel
+              {isEdit ? "Edit Account" : "Create Account"}
             </Button>
-          )}
+            {isEdit && (
+              <Button
+                variant="contained"
+                color="secondary"
+                className="form-cancel-btn"
+                onClick={() => navigate("/userDetail")}
+              >
+                Cancel
+              </Button>
+            )}
 
-
-          <div style={{ marginTop: '10px' }}>
-            {!isEdit  &&
-            <Link to="/" style={{ textDecoration: 'none', color: 'blue' }}>
-              Already have an account? Sign in
-            </Link>  }
+            <div className="form-footer-link">
+              {!isEdit &&
+                <Link to="/" style={{ textDecoration: 'none' }}>
+                  Already have an account? Sign in
+                </Link>}
+            </div>
           </div>
         </form>
       </div>

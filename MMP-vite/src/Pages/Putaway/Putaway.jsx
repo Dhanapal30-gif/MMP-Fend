@@ -46,6 +46,7 @@ const Putaway = () => {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [isPutProcess, setIsPutProcess] = useState(false)
     const [rc_DHLProcess, setRc_DHLProcess] = useState(false)
+    const [internalTransferProcess, setInternalTransferProcess] = useState(false)
     const [putawayRc_DHL, setPutawayRc_DHL] = useState([])
     const [addSearchText, setAddSearchText] = useState("");
     const [filteredAddData, setFilteredAddData] = useState([]);
@@ -177,18 +178,42 @@ const Putaway = () => {
 
 
 
+    // useEffect(() => {
+    //     const validate = async () => {
+    //         const isValid = await checkUserValid();
+    //         if (!isValid) {
+    //             setOpenMsg(true);
+    //             setTimeout(() => {
+    //                 window.location.href = "/";
+    //             }, 1000);
+    //         }
+    //     };
+    //     validate();
+    // }, []);
+
     useEffect(() => {
-        const validate = async () => {
-            const isValid = await checkUserValid();
-            if (!isValid) {
-                setOpenMsg(true);
-                setTimeout(() => {
-                    window.location.href = "/";
-                }, 1000);
-            }
-        };
-        validate();
-    }, []);
+    const validate = async () => {
+        console.log("=== checkUserValid START (this page) ===");
+        console.log("userId in localStorage:", localStorage.getItem("userId"));
+        console.log("passwordToken in localStorage:", localStorage.getItem("passwordToken"));
+
+        const isValid = await checkUserValid();
+
+        console.log("checkUserValid() returned:", isValid);
+        console.log("=== checkUserValid END ===");
+
+        if (!isValid) {
+            console.log("Session marked INVALID — showing popup & redirecting");
+            setOpenMsg(true);
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 1000);
+        } else {
+            console.log("Session marked VALID — staying on page");
+        }
+    };
+    validate();
+}, []);
 
     const useDebounce = (value, delay) => {
         const [debouncedValue, setDebouncedValue] = useState(value);
@@ -295,7 +320,7 @@ const Putaway = () => {
                             case 2: colour = "red"; break;
                             case 3: colour = "blue"; break;
                             case 4: colour = "yellow"; break;
-                            default: colour = "green";
+                            // default: colour = "green";
                         }
                         setIsUserActive(true);
                     } else {
@@ -334,10 +359,10 @@ const Putaway = () => {
                     if (uniqueUsers.length > 0) {
                         switch (uniqueUsers[0]) {
                             case 1: colour = "green"; break;
-                            case 2: colour = "blue"; break;
-                            case 3: colour = "red"; break;
+                            case 2: colour = "red"; break;
+                            case 3: colour = "blue"; break;
                             case 4: colour = "yellow"; break;
-                            default: colour = "green";
+                            // default: colour = "green";
                         }
                         setIsUserActive(true);
                     } else {
@@ -495,6 +520,7 @@ const Putaway = () => {
                 setTotalRows(withIds.length);
                 setRackLocationList(location)
                 setIsPutProcess(true);
+                setStockTransferPutProcess(true);
                 setRecevingPutProcess(false);
                 setReturningPutProcess(false);
                 setRc_DHLProcess(false);
@@ -509,7 +535,7 @@ const Putaway = () => {
                         case 2: colour = "red"; break;
                         case 3: colour = "blue"; break;
                         case 4: colour = "yellow"; break;
-                        default: colour = "green";
+                        // default: colour = "green";
                     }
                     setIsUserActive(true);
                 } else {
@@ -555,10 +581,10 @@ const Putaway = () => {
                 if (uniqueUsers.length > 0) {
                     switch (uniqueUsers[0]) {
                         case 1: colour = "green"; break;
-                        case 2: colour = "blue"; break;
-                        case 3: colour = "red"; break;
+                        case 2: colour = "red"; break;
+                        case 3: colour = "blue"; break;
                         case 4: colour = "yellow"; break;
-                        default: colour = "green";
+                        // default: colour = "green";
                     }
                     setIsUserActive(true);
                 } else {
@@ -695,6 +721,17 @@ const Putaway = () => {
                 Product_Name: row.partdescription,
                 ticketno: row.rec_ticket_no, // corrected for returning
             }));
+        }else if (stockTransferPutProcess) {
+            submitData = filteredData.flatMap((row) =>
+        row.location.map((location, index) => ({
+            Location: location,
+            Product_Code: row.Partcode,
+            Product_Name: row.Partdescription,
+            // Batch_Code: row.batchcode?.[index],
+            // Available_Qty: row.availableQty?.[index],
+            ticketno: row.transferTicketNo
+        }))
+    );
         }
         saveLEDRequest(submitData)
             .then((response) => {
