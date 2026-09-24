@@ -3,6 +3,7 @@ import {
   HomeWork,
   KeyboardArrowDown,
 } from "@mui/icons-material";
+import PartCodeInput from "./PartCodeInput";
 
 const DashboardHeader = ({
   globalPartCode,
@@ -52,23 +53,11 @@ const DashboardHeader = ({
 
           <div className="header-select">
 
-            <select
+            <PartCodeInput
               value={globalPartCode}
-              onChange={(e) =>
-                setGlobalPartCode(e.target.value)
-              }
-            >
-
-              {partCodes.map((partCode) => (
-                <option
-                  key={partCode}
-                  value={partCode}
-                >
-                  {partCode}
-                </option>
-              ))}
-
-            </select>
+              onChange={setGlobalPartCode}
+              partCodes={partCodes}
+            />
 
             <KeyboardArrowDown />
 

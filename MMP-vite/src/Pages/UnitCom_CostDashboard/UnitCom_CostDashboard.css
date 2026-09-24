@@ -251,7 +251,14 @@
   background: rgba(255, 255, 255, 0.06);
   pointer-events: none;
 }
+.ucd-metric.m7 {
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+}
 
+/* the metrics grid now has 7 cards */
+.ucd-metrics {
+  grid-template-columns: repeat(7, 1fr);
+}
 /* .m1 { background: linear-gradient(140deg, #4e0bf8 0%, #4c1d95 100%); }
 .m2 { background: linear-gradient(140deg, #064e2a 0%, #065f46 100%); }
 .m3 { background: linear-gradient(140deg, #4c0519 0%, #9f1239 100%); }

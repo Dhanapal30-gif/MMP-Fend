@@ -1,4 +1,4 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Inventory2,
@@ -13,6 +13,7 @@ const TotalStockCard = ({
   value = 0,
   loading
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="kpi-card stock-card">
 
@@ -97,13 +98,13 @@ const TotalStockCard = ({
       </div>
 
 
-      <button className="view-details">
-
-        View details
-
-        <ArrowForward />
-
-      </button>
+       <button
+    className="view-details"
+    onClick={() => navigate("/stockTransferOverview")}
+  >
+    View details
+    <ArrowForward />
+  </button>
 
     </div>
   );

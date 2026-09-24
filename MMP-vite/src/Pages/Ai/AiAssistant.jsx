@@ -36,13 +36,21 @@ const DEFAULT_QUESTIONS = [
     en: "Today’s Issued Partcode and Quantity List",
     hi: "आज जारी किए गए पार्टकोड और मात्रा की सूची",
   },
-  {
-    en: "Out-of-stock partcodes",
-    hi: "स्टॉक में उपलब्ध नहीं पार्टकोड",
-  },
+  // {
+  //   en: "Out-of-stock partcodes",
+  //   hi: "स्टॉक में उपलब्ध नहीं पार्टकोड",
+  // },
   {
     en: "Total partcode stock",
     hi: "पार्टकोड के अनुसार कुल स्टॉक",
+  },
+   {
+    en: "Available Stock by Partcode",
+    hi: "पार्टकोड के अनुसार उपलब्ध स्टॉक",
+  },
+  {
+    en: "Location by Partcode",
+    hi: "पार्टकोड के अनुसार स्थान",
   },
 ];
 
@@ -54,7 +62,7 @@ const UI = {
     title: "MMP Smart AI",
     subtitle: "Inventory Assistant",
     greeting:
-      "Good afternoon! I’m MIRA, your virtual assistant. What would you like to know?",
+      " I’m MIRA, your virtual assistant. What would you like to know?",
     placeholder: "Ask about MatManPro...",
     ready: "Ready to assist",
     listening: "Listening",
@@ -117,6 +125,8 @@ const protectTechnicalValues = (text) => {
     values,
   };
 };
+
+
 
 /* =====================================================
    RESTORE TECHNICAL VALUES
@@ -392,6 +402,11 @@ export default function AiAssistant() {
   const [speakingIndex, setSpeakingIndex] =
     useState(null);
 
+    const [waitingForStockPartcode, setWaitingForStockPartcode] =
+  useState(false);
+const [waitingForLocationPartcode, setWaitingForLocationPartcode] =
+  useState(false);
+  
   const [autoSpeak, setAutoSpeak] = useState(true);
 
   const [conversationId, setConversationId] =
@@ -681,6 +696,243 @@ export default function AiAssistant() {
    SPEAK MESSAGE
    LARGE RESPONSE SAFE VERSION
 ===================================================== */
+// const speakMessage = (
+//   text,
+//   index,
+//   languageOverride = null
+// ) => {
+//   if (
+//     !text ||
+//     !window.speechSynthesis ||
+//     !window.SpeechSynthesisUtterance
+//   ) {
+//     console.error(
+//       "Speech synthesis is not supported."
+//     );
+//     return;
+//   }
+
+//   const speechLanguage =
+//     languageOverride ||
+//     languageRef.current;
+
+//   window.speechSynthesis.cancel();
+
+//   setSpeakingIndex(null);
+
+//   const cleanText = String(text)
+//     .replace(/[*_#]/g, "")
+//     .replace(
+//       /[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]/gu,
+//       ""
+//     )
+//     .replace(/\s+/g, " ")
+//     .trim();
+
+//   if (!cleanText) {
+//     return;
+//   }
+
+//   /*
+//    * Keep speech chunks small.
+//    */
+//   const speechChunks =
+//     cleanText.match(/.{1,160}(?:\s|$)/g) || [
+//       cleanText,
+//     ];
+
+//   let currentChunk = 0;
+//   let stopped = false;
+
+//   const getVoices = () => {
+//     return window.speechSynthesis.getVoices() || [];
+//   };
+
+//   const speakNextChunk = () => {
+//     if (stopped) {
+//       return;
+//     }
+
+//     if (
+//       !autoSpeakRef.current ||
+//       languageRef.current !== speechLanguage
+//     ) {
+//       setSpeakingIndex(null);
+//       return;
+//     }
+
+//     if (
+//       currentChunk >= speechChunks.length
+//     ) {
+//       setSpeakingIndex(null);
+//       return;
+//     }
+
+//     const chunk =
+//       speechChunks[currentChunk];
+
+//     const utterance =
+//       new SpeechSynthesisUtterance(chunk);
+
+//     const voices = getVoices();
+
+//     /*
+//      * ================================
+//      * HINDI VOICE
+//      * ================================
+//      */
+//     if (speechLanguage === "hi") {
+//       const hindiVoice =
+//         voices.find(
+//           (voice) =>
+//             /^hi-IN$/i.test(voice.lang)
+//         ) ||
+//         voices.find(
+//           (voice) =>
+//             /^hi/i.test(voice.lang)
+//         ) ||
+//         voices.find(
+//           (voice) =>
+//             /hindi/i.test(voice.name)
+//         );
+
+//       if (hindiVoice) {
+//         utterance.voice =
+//           hindiVoice;
+//         utterance.lang =
+//           hindiVoice.lang || "hi-IN";
+//       } else {
+//         /*
+//          * Even if Chrome has not loaded
+//          * the Hindi voice yet, force
+//          * Hindi language.
+//          */
+//         utterance.lang = "hi-IN";
+
+//         console.warn(
+//           "Hindi voice not found. Using hi-IN fallback."
+//         );
+//       }
+//     }
+
+//     /*
+//      * ================================
+//      * ENGLISH VOICE
+//      * ================================
+//      */
+//     else {
+//       const indianFemaleVoice =
+//         voices.find(
+//           (voice) =>
+//             /en-IN/i.test(voice.lang) &&
+//             /female|veena|heera/i.test(
+//               voice.name
+//             )
+//         );
+
+//       const femaleVoice =
+//         voices.find(
+//           (voice) =>
+//             /female|zira|samantha|aria|jenny|susan|hazel/i.test(
+//               voice.name
+//             )
+//         );
+
+//       const indianEnglishVoice =
+//         voices.find(
+//           (voice) =>
+//             /en-IN/i.test(voice.lang)
+//         );
+
+//       utterance.voice =
+//         indianFemaleVoice ||
+//         femaleVoice ||
+//         indianEnglishVoice ||
+//         null;
+
+//       utterance.lang =
+//         utterance.voice?.lang ||
+//         "en-IN";
+//     }
+
+//     utterance.rate = 0.9;
+//     utterance.pitch = 1.1;
+//     utterance.volume = 1;
+
+//     utterance.onstart = () => {
+//       setSpeakingIndex(index);
+//     };
+
+//     utterance.onend = () => {
+//       if (stopped) {
+//         return;
+//       }
+
+//       currentChunk++;
+
+//       setTimeout(() => {
+//         /*
+//          * Chrome sometimes pauses speech
+//          * unexpectedly.
+//          */
+//         if (
+//           window.speechSynthesis.paused
+//         ) {
+//           window.speechSynthesis.resume();
+//         }
+
+//         speakNextChunk();
+//       }, 100);
+//     };
+
+//     utterance.onerror = (event) => {
+//       console.error(
+//         "Speech synthesis error:",
+//         event
+//       );
+
+//       currentChunk++;
+
+//       setTimeout(() => {
+//         if (
+//           !stopped &&
+//           autoSpeakRef.current &&
+//           languageRef.current ===
+//             speechLanguage
+//         ) {
+//           speakNextChunk();
+//         } else {
+//           setSpeakingIndex(null);
+//         }
+//       }, 150);
+//     };
+
+//     /*
+//      * Chrome sometimes needs resume()
+//      * before starting speech.
+//      */
+//     window.speechSynthesis.resume();
+
+//     window.speechSynthesis.speak(
+//       utterance
+//     );
+//   };
+
+//   /*
+//    * Small delay gives Chrome time to
+//    * initialize the speech engine.
+//    */
+//   setTimeout(() => {
+//     if (
+//       autoSpeakRef.current &&
+//       languageRef.current === speechLanguage
+//     ) {
+//       speakNextChunk();
+//     }
+//   }, 100);
+// };
+
+
 const speakMessage = (
   text,
   index,
@@ -702,11 +954,10 @@ const speakMessage = (
     languageRef.current;
 
   window.speechSynthesis.cancel();
-
   setSpeakingIndex(null);
 
   const cleanText = String(text)
-    .replace(/[*_#]/g, "")
+    .replace(/[\*_#]/g, "")
     .replace(
       /[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]/gu,
       ""
@@ -718,9 +969,6 @@ const speakMessage = (
     return;
   }
 
-  /*
-   * Keep speech chunks small.
-   */
   const speechChunks =
     cleanText.match(/.{1,160}(?:\s|$)/g) || [
       cleanText,
@@ -730,7 +978,86 @@ const speakMessage = (
   let stopped = false;
 
   const getVoices = () => {
-    return window.speechSynthesis.getVoices() || [];
+    return (
+      window.speechSynthesis.getVoices() || []
+    );
+  };
+
+  const findVoice = () => {
+    const voices = getVoices();
+
+    console.log(
+      "Available speech voices:",
+      voices.map((v) => ({
+        name: v.name,
+        lang: v.lang,
+      }))
+    );
+
+    if (speechLanguage === "hi") {
+      // 1. Exact Hindi India
+      const hindiIndiaVoice = voices.find(
+        (voice) =>
+          /^hi-IN$/i.test(voice.lang)
+      );
+
+      if (hindiIndiaVoice) {
+        return hindiIndiaVoice;
+      }
+
+      // 2. Any Hindi language
+      const hindiVoice = voices.find(
+        (voice) =>
+          /^hi/i.test(voice.lang)
+      );
+
+      if (hindiVoice) {
+        return hindiVoice;
+      }
+
+      // 3. Voice name contains Hindi
+      const hindiNamedVoice = voices.find(
+        (voice) =>
+          /hindi/i.test(voice.name)
+      );
+
+      if (hindiNamedVoice) {
+        return hindiNamedVoice;
+      }
+
+      return null;
+    }
+
+    // English
+    const indianFemaleVoice =
+      voices.find(
+        (voice) =>
+          /en-IN/i.test(voice.lang) &&
+          /female|veena|heera/i.test(
+            voice.name
+          )
+      );
+
+    const femaleVoice =
+      voices.find(
+        (voice) =>
+          /female|zira|samantha|aria|jenny|susan|hazel/i.test(
+            voice.name
+          )
+      );
+
+    const indianEnglishVoice =
+      voices.find(
+        (voice) =>
+          /en-IN/i.test(voice.lang)
+      );
+
+    return (
+      indianFemaleVoice ||
+      femaleVoice ||
+      indianEnglishVoice ||
+      null
+    );
   };
 
   const speakNextChunk = () => {
@@ -759,85 +1086,43 @@ const speakMessage = (
     const utterance =
       new SpeechSynthesisUtterance(chunk);
 
-    const voices = getVoices();
+    const voice = findVoice();
 
-    /*
-     * ================================
-     * HINDI VOICE
-     * ================================
-     */
+    // =========================================
+    // HINDI
+    // =========================================
     if (speechLanguage === "hi") {
-      const hindiVoice =
-        voices.find(
-          (voice) =>
-            /^hi-IN$/i.test(voice.lang)
-        ) ||
-        voices.find(
-          (voice) =>
-            /^hi/i.test(voice.lang)
-        ) ||
-        voices.find(
-          (voice) =>
-            /hindi/i.test(voice.name)
-        );
-
-      if (hindiVoice) {
-        utterance.voice =
-          hindiVoice;
+      if (voice) {
+        utterance.voice = voice;
         utterance.lang =
-          hindiVoice.lang || "hi-IN";
-      } else {
-        /*
-         * Even if Chrome has not loaded
-         * the Hindi voice yet, force
-         * Hindi language.
-         */
-        utterance.lang = "hi-IN";
+          voice.lang || "hi-IN";
 
-        console.warn(
-          "Hindi voice not found. Using hi-IN fallback."
+        console.log(
+          "Hindi voice selected:",
+          voice.name,
+          voice.lang
         );
+      } else {
+        console.warn(
+          "No Hindi voice available on this PC."
+        );
+
+        // Still tell browser this is Hindi
+        utterance.lang = "hi-IN";
       }
     }
 
-    /*
-     * ================================
-     * ENGLISH VOICE
-     * ================================
-     */
+    // =========================================
+    // ENGLISH
+    // =========================================
     else {
-      const indianFemaleVoice =
-        voices.find(
-          (voice) =>
-            /en-IN/i.test(voice.lang) &&
-            /female|veena|heera/i.test(
-              voice.name
-            )
-        );
-
-      const femaleVoice =
-        voices.find(
-          (voice) =>
-            /female|zira|samantha|aria|jenny|susan|hazel/i.test(
-              voice.name
-            )
-        );
-
-      const indianEnglishVoice =
-        voices.find(
-          (voice) =>
-            /en-IN/i.test(voice.lang)
-        );
-
-      utterance.voice =
-        indianFemaleVoice ||
-        femaleVoice ||
-        indianEnglishVoice ||
-        null;
-
-      utterance.lang =
-        utterance.voice?.lang ||
-        "en-IN";
+      if (voice) {
+        utterance.voice = voice;
+        utterance.lang =
+          voice.lang || "en-IN";
+      } else {
+        utterance.lang = "en-IN";
+      }
     }
 
     utterance.rate = 0.9;
@@ -856,10 +1141,6 @@ const speakMessage = (
       currentChunk++;
 
       setTimeout(() => {
-        /*
-         * Chrome sometimes pauses speech
-         * unexpectedly.
-         */
         if (
           window.speechSynthesis.paused
         ) {
@@ -892,10 +1173,6 @@ const speakMessage = (
       }, 150);
     };
 
-    /*
-     * Chrome sometimes needs resume()
-     * before starting speech.
-     */
     window.speechSynthesis.resume();
 
     window.speechSynthesis.speak(
@@ -903,16 +1180,65 @@ const speakMessage = (
     );
   };
 
-  /*
-   * Small delay gives Chrome time to
-   * initialize the speech engine.
-   */
+  // =========================================
+  // WAIT FOR BROWSER VOICES
+  // =========================================
+  const startSpeech = () => {
+    const voices = getVoices();
+
+    // If voices already loaded
+    if (voices.length > 0) {
+      speakNextChunk();
+      return;
+    }
+
+    // Wait for voices to load
+    let started = false;
+
+    const handleVoicesChanged = () => {
+      if (started) {
+        return;
+      }
+
+      started = true;
+
+      window.speechSynthesis.removeEventListener(
+        "voiceschanged",
+        handleVoicesChanged
+      );
+
+      speakNextChunk();
+    };
+
+    window.speechSynthesis.addEventListener(
+      "voiceschanged",
+      handleVoicesChanged
+    );
+
+    // Fallback for browsers that don't
+    // fire voiceschanged correctly
+    setTimeout(() => {
+      if (started) {
+        return;
+      }
+
+      started = true;
+
+      window.speechSynthesis.removeEventListener(
+        "voiceschanged",
+        handleVoicesChanged
+      );
+
+      speakNextChunk();
+    }, 1500);
+  };
+
   setTimeout(() => {
     if (
       autoSpeakRef.current &&
       languageRef.current === speechLanguage
     ) {
-      speakNextChunk();
+      startSpeech();
     }
   }, 100);
 };
@@ -921,29 +1247,63 @@ const speakMessage = (
      LOAD BROWSER VOICES
   ===================================================== */
 
+  // useEffect(() => {
+  //   if (!window.speechSynthesis) {
+  //     return;
+  //   }
+
+  //   const loadVoices = () => {
+  //     window.speechSynthesis.getVoices();
+  //   };
+
+  //   loadVoices();
+
+  //   window.speechSynthesis.addEventListener(
+  //     "voiceschanged",
+  //     loadVoices
+  //   );
+
+  //   return () => {
+  //     window.speechSynthesis.removeEventListener(
+  //       "voiceschanged",
+  //       loadVoices
+  //     );
+  //   };
+  // }, []);
+
   useEffect(() => {
-    if (!window.speechSynthesis) {
-      return;
-    }
+  if (!window.speechSynthesis) {
+    return;
+  }
 
-    const loadVoices = () => {
+  const loadVoices = () => {
+    const voices =
       window.speechSynthesis.getVoices();
-    };
 
-    loadVoices();
+    console.log(
+      "Loaded speech voices:",
+      voices.map((voice) => ({
+        name: voice.name,
+        lang: voice.lang,
+      }))
+    );
+  };
 
-    window.speechSynthesis.addEventListener(
+  loadVoices();
+
+  window.speechSynthesis.addEventListener(
+    "voiceschanged",
+    loadVoices
+  );
+
+  return () => {
+    window.speechSynthesis.removeEventListener(
       "voiceschanged",
       loadVoices
     );
+  };
+}, []);
 
-    return () => {
-      window.speechSynthesis.removeEventListener(
-        "voiceschanged",
-        loadVoices
-      );
-    };
-  }, []);
 
   /* =====================================================
      SEND MESSAGE
@@ -959,7 +1319,240 @@ const speakMessage = (
     if (!rawText || loading) {
       return;
     }
+    // Waiting for partcode for Available Stock by Partcode
+if (waitingForStockPartcode) {
+  const partcodeMatch =
+    rawText.match(PARTCODE_REGEX);
 
+  if (!partcodeMatch) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: rawText,
+        englishContent: rawText,
+      },
+      {
+        role: "assistant",
+        content:
+          languageRef.current === "hi"
+            ? "कृपया एक मान्य पार्टकोड बताएं।"
+            : "Kindly tell me a valid partcode.",
+        englishContent:
+          "Kindly tell me a valid partcode.",
+      },
+    ]);
+
+    setInput("");
+    return;
+  }
+
+  const enteredPartcode = partcodeMatch[0];
+
+  setWaitingForStockPartcode(false);
+
+  // Send this exact request to backend
+  const stockQuestion =
+    `Available Stock by Partcode ${enteredPartcode}`;
+
+  setInput("");
+
+  setLoading(true);
+
+  try {
+    const response = await sendAiMessage(
+      stockQuestion,
+      conversationId
+    );
+
+    const englishMessage =
+      response.message;
+const responsePartcode =
+  englishMessage.match(PARTCODE_REGEX);
+
+if (responsePartcode) {
+  setLastPartcode(responsePartcode[0]);
+}
+      
+    const currentLanguage =
+      languageRef.current;
+
+    const displayMessage =
+      currentLanguage === "hi"
+        ? await translateText(
+            englishMessage,
+            "hi"
+          )
+        : englishMessage;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: rawText,
+        englishContent: enteredPartcode,
+      },
+      {
+        role: "assistant",
+        content: displayMessage,
+        englishContent: englishMessage,
+      },
+    ]);
+
+    if (
+      autoSpeakRef.current &&
+      displayMessage
+    ) {
+      const assistantIndex =
+        messages.length + 2;
+
+      setTimeout(() => {
+        if (
+          autoSpeakRef.current &&
+          languageRef.current === currentLanguage
+        ) {
+          speakMessage(
+            displayMessage,
+            assistantIndex,
+            currentLanguage
+          );
+        }
+      }, 300);
+    }
+  } catch (error) {
+    console.error(
+      "Available stock error:",
+      error
+    );
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: t.error,
+        englishContent: UI.en.error,
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+
+  return;
+}
+
+
+if (waitingForLocationPartcode) {
+  const partcodeMatch =
+    rawText.match(PARTCODE_REGEX);
+
+  if (!partcodeMatch) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: rawText,
+        englishContent: rawText,
+      },
+      {
+        role: "assistant",
+        content:
+          languageRef.current === "hi"
+            ? "कृपया एक मान्य पार्टकोड बताएं।"
+            : "Kindly tell me a valid partcode.",
+        englishContent:
+          "Kindly tell me a valid partcode.",
+      },
+    ]);
+
+    setInput("");
+    return;
+  }
+
+  const enteredPartcode = partcodeMatch[0];
+
+  setWaitingForLocationPartcode(false);
+
+  // THIS IS THE BACKEND PAYLOAD
+  const locationQuestion =
+    `Location by Partcode ${enteredPartcode}`;
+
+  setInput("");
+  setLoading(true);
+
+  try {
+    const response = await sendAiMessage(
+      locationQuestion,
+      conversationId
+    );
+
+    const englishMessage =
+      response.message;
+
+    const currentLanguage =
+      languageRef.current;
+
+    const displayMessage =
+      currentLanguage === "hi"
+        ? await translateText(
+            englishMessage,
+            "hi"
+          )
+        : englishMessage;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: rawText,
+        englishContent: enteredPartcode,
+      },
+      {
+        role: "assistant",
+        content: displayMessage,
+        englishContent: englishMessage,
+      },
+    ]);
+
+    if (
+      autoSpeakRef.current &&
+      displayMessage
+    ) {
+      const assistantIndex =
+        messages.length + 2;
+
+      setTimeout(() => {
+        if (
+          autoSpeakRef.current &&
+          languageRef.current === currentLanguage
+        ) {
+          speakMessage(
+            displayMessage,
+            assistantIndex,
+            currentLanguage
+          );
+        }
+      }, 300);
+    }
+  } catch (error) {
+    console.error(
+      "Location by Partcode error:",
+      error
+    );
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: t.error,
+        englishContent: UI.en.error,
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+
+  return;
+}
     let textToSend = rawText;
 
     /* =================================================
@@ -1115,18 +1708,134 @@ const speakMessage = (
      DEFAULT QUESTION
   ===================================================== */
 
-  const handleQuestionClick = (
-    question
-  ) => {
-    if (!loading) {
-      sendMessage(
+  // const handleQuestionClick = (
+  //   question
+  // ) => {
+  //   if (!loading) {
+  //     sendMessage(
+  //       language === "hi"
+  //         ? question.hi
+  //         : question.en
+  //     );
+  //   }
+  // };
+
+
+  const handleQuestionClick = (question) => {
+  if (loading) {
+    return;
+  }
+
+  // Available Stock by Partcode
+  if (question.en === "Available Stock by Partcode") {
+    const promptMessage =
+      language === "hi"
+        ? "कृपया पार्टकोड बताएं।"
+        : "Kindly tell me the partcode.";
+
+    const englishPrompt =
+      "Kindly tell me the partcode.";
+
+    setWaitingForStockPartcode(true);
+
+    setMessages((prev) => {
+      const newMessages = [
+        ...prev,
+        {
+          role: "user",
+          content:
+            language === "hi"
+              ? question.hi
+              : question.en,
+          englishContent: question.en,
+        },
+        {
+          role: "assistant",
+          content: promptMessage,
+          englishContent: englishPrompt,
+        },
+      ];
+
+      // Automatically speak the prompt
+      if (autoSpeakRef.current) {
+        const assistantIndex =
+          newMessages.length - 1;
+
+        setTimeout(() => {
+          if (
+            autoSpeakRef.current &&
+            languageRef.current === language
+          ) {
+            speakMessage(
+              promptMessage,
+              assistantIndex,
+              language
+            );
+          }
+        }, 300);
+      }
+
+      return newMessages;
+    });
+
+    return;
+  }
+
+  // Location by Partcode
+if (question.en === "Location by Partcode") {
+  const promptMessage =
+    language === "hi"
+      ? "कृपया पार्टकोड बताएं।"
+      : "Kindly tell me the partcode.";
+
+  const englishPrompt =
+    "Kindly tell me the partcode.";
+
+  setWaitingForLocationPartcode(true);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "user",
+      content:
         language === "hi"
           ? question.hi
-          : question.en
-      );
-    }
-  };
+          : question.en,
+      englishContent: question.en,
+    },
+    {
+      role: "assistant",
+      content: promptMessage,
+      englishContent: englishPrompt,
+    },
+  ]);
 
+  if (autoSpeakRef.current) {
+    const assistantIndex = messages.length + 1;
+
+    setTimeout(() => {
+      if (
+        autoSpeakRef.current &&
+        languageRef.current === language
+      ) {
+        speakMessage(
+          promptMessage,
+          assistantIndex,
+          language
+        );
+      }
+    }, 300);
+  }
+
+  return;
+}
+
+  sendMessage(
+    language === "hi"
+      ? question.hi
+      : question.en
+  );
+};
   /* =====================================================
      ENTER KEY
   ===================================================== */

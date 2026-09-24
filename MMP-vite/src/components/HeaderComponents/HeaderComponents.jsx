@@ -79,17 +79,49 @@ const HeaderComponents = ({ isLoggedIn, setIsLoggedIn, setUserId, notificationCo
     handleAvatarClose();
     handleSignOut();
   };
+const callServer = async (value) => {
+    console.log("Sending to hardware:", value);
 
-  const handleSignOut = () => {
+    try {
+        const response = await fetch(
+            `http://localhost:5100/?UID=${encodeURIComponent(value)}`
+        );
+
+        const data = await response.text();
+        console.log("Server response:", data);
+    } catch (error) {
+        console.error("Server error:", error);
+    }
+};
+  // const handleSignOut = () => {
+  //   sessionStorage.clear();
+  //   localStorage.clear();
+  //   setUserId(null);       // 🔥 VERY IMPORTANT
+  //     console.log("localStorage userId:", localStorage.getItem("userId")); // null
+  // console.log("sessionStorage userId:", sessionStorage.getItem("userId")); // null
+  //   setIsLoggedIn(false); // 🔥
+  //   navigate("/");
+  // };
+
+
+  const handleSignOut = async () => {
+    // Tell hardware display to show READY
+    await callServer("READY");
+
+    // Clear login data
     sessionStorage.clear();
     localStorage.clear();
-    setUserId(null);       // 🔥 VERY IMPORTANT
-      console.log("localStorage userId:", localStorage.getItem("userId")); // null
-  console.log("sessionStorage userId:", sessionStorage.getItem("userId")); // null
-    setIsLoggedIn(false); // 🔥
-    navigate("/");
-  };
 
+    setEmpName("");
+    setUserRole([]);
+    setScreen([]);
+    setTimeLeft("");
+
+    setUserId(null);
+    setIsLoggedIn(false);
+
+    navigate("/");
+};
   const toggleServicesDropdown = () => {
     setServicesDropdown((prev) => !prev);
   };

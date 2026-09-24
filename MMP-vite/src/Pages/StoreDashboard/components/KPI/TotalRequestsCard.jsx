@@ -1,4 +1,5 @@
 import React from "react";
+import PartCodeInput from "../PartCodeInput";
 
 import {
   Assignment,
@@ -54,23 +55,11 @@ const TotalRequestsCard = ({
         {/* Part Code */}
         <div className="small-select request-partcode-select">
 
-          <select
+          <PartCodeInput
             value={requestPartCode}
-            onChange={(e) =>
-              setRequestPartCode(e.target.value)
-            }
-          >
-
-            {partCodes.map((partCode) => (
-              <option
-                key={partCode}
-                value={partCode}
-              >
-                {partCode}
-              </option>
-            ))}
-
-          </select>
+            onChange={setRequestPartCode}
+            partCodes={partCodes}
+          />
 
           <KeyboardArrowDown />
 
