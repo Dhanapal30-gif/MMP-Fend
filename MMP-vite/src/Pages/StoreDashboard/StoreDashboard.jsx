@@ -39,8 +39,29 @@ import OutOfStockItems from "./components/Stock/OutOfStockItems";
 
 import "./StoreDashboard.css";
 import { getTopCardDetail,getPendingRequestCount,getTopCardDetailRequests,
-  getPendingRequestDetails, getOutOfStockCount,getTopCardDetailReceving,getTopCardDetailStock,getTopCardDetailIssued,
+  getPendingRequestDetails, fetchPartcodeReport, getOutOfStockCount,getTopCardDetailReceving,getTopCardDetailStock,getTopCardDetailIssued,
   getTotalPartcodeCount, } from "../../Services/Services_09";
+
+// Pulls just the part code out of one entry of the "partList" API response.
+// Handles both shapes we might get from the backend:
+//   1) a plain string like "089596D.204,Some Description"
+//   2) an object like { partCode: "089596D.204", partDescription: "..." }
+const extractPartCode = (item) => {
+  if (item == null) return "";
+
+  if (typeof item === "string") {
+    // "partcode,description" -> take the part before the first comma
+    return item.split(",")[0]?.trim() ?? "";
+  }
+
+  if (typeof item === "object") {
+    const code =
+      item.partCode ?? item.partcode ?? item.PARTCODE ?? item.PartCode ?? "";
+    return code.toString().trim();
+  }
+
+  return String(item).trim();
+};
 
 const StoreDashboard = () => {
  const [stockCategory, setStockCategory] = useState("All");
@@ -93,6 +114,14 @@ const [partcodeCount, setPartcodeCount] = useState(0);
 const [pendingLoading, setPendingLoading] = useState(true);
 const [outOfStockItems, setOutOfStockItems] = useState([]);
 const [requestPartCode, setRequestPartCode] = useState("");
+
+// Raw API response, kept in case other places need the full partList
+// (e.g. description) — not used for dropdowns.
+const [partcodeList, setPartcodeList] = useState([]);
+
+// Part-code-only list, used by every part-code dropdown on this page.
+const [partCodes, setPartCodes] = useState(["All Part Codes"]);
+
 //   const [globalFromDate, setGlobalFromDate] = useState(
 //     `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01`
 //   );
@@ -106,15 +135,7 @@ const [globalToDate, setGlobalToDate] = useState("");
 //       .split("T")[0]
 //   );
 
- 
 
-  // Temporary/static part codes
-  const partCodes = [
-    "All Part Codes",
-    "089596D.204",
-    "089596D.205",
-    "089596D.206",
-  ];
 
   const monthNames = [
     "January",
@@ -153,6 +174,33 @@ useEffect(() => {
   globalFromDate,
   globalToDate,
 ]);
+
+// Fetches the part list once and derives the part-code-only dropdown
+// options from it. Runs once on mount (see the useEffect below) rather
+// than on every receive-filter change.
+const fetchPartcodeList = () => {
+  fetchPartcodeReport()
+    .then((response) => {
+      const rawList = response.data.partList ?? [];
+
+      setPartcodeList(rawList); // keep the raw list around if needed elsewhere
+
+      const codesOnly = rawList
+        .map(extractPartCode)
+        .filter((code) => code.length > 0);
+
+      const uniqueCodes = [...new Set(codesOnly)];
+
+      setPartCodes(["All Part Codes", ...uniqueCodes]);
+    })
+    .catch((error) => {
+      console.error("Failed to fetch part code list", error);
+    });
+};
+
+useEffect(() => {
+  fetchPartcodeList();
+}, []);
 
 useEffect(() => {
 
@@ -321,7 +369,7 @@ console.log("Pending Count:", pendingCount)
 
 console.log("Part Code Count:", partcodeCount)
   return (
-    
+
   <div className="store-dashboard">
 
     <DashboardHeader

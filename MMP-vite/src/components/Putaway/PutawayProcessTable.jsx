@@ -71,6 +71,16 @@ const handleOpen = (row) => {
 };
 
     const handleSave = () => {
+
+         // Check whether location is available
+    const hasLocation = activeRow?.location?.trim();
+
+    if (!hasLocation) {
+        setErrorMessage("Location is not available. Please map a location before saving.");
+        setShowErrorPopup(true);
+        return;
+    }
+    
         // check if at least one location has a qty
         const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
         if (!hasQty) {

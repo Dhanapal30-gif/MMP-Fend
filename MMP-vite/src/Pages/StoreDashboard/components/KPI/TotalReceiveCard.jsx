@@ -1,4 +1,5 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
+import PartCodeInput from "../PartCodeInput";
 
 import {
   MoveToInbox,
@@ -19,6 +20,7 @@ const TotalReceiveCard = ({
   value = 0,
   loading
 }) => {
+  const navigate = useNavigate();
   return (
     <div className="kpi-card receive-card">
 
@@ -39,27 +41,11 @@ const TotalReceiveCard = ({
 
         <div className="small-select">
 
-          <select
+          <PartCodeInput
             value={receivePartCode}
-            onChange={(e) =>
-              setReceivePartCode(
-                e.target.value
-              )
-            }
-          >
-
-            {partCodes.map(
-              (partCode) => (
-                <option
-                  key={partCode}
-                  value={partCode}
-                >
-                  {partCode}
-                </option>
-              )
-            )}
-
-          </select>
+            onChange={setReceivePartCode}
+            partCodes={partCodes}
+          />
 
           <KeyboardArrowDown />
 
@@ -132,13 +118,21 @@ const TotalReceiveCard = ({
       </div>
 
 
-      <button className="view-details">
+      {/* <button className="view-details">
 
         View details
 
         <ArrowForward />
 
-      </button>
+      </button> */}
+
+ <button
+    className="view-details"
+    onClick={() => navigate("/recevingReport")}
+  >
+    View details
+    <ArrowForward />
+  </button>
 
     </div>
   );

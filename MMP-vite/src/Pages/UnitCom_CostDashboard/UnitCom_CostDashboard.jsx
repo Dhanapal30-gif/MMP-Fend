@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect,useMemo , useRef } from 'react';
 import Chart from 'chart.js/auto';
 import { getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, getUnitcompoenentDetailFilterMMPDashboard } from '../../Services/Services_09';
 import { downloadPTLCostValidation, getProductAndPartcode } from '../../Services/Services';
@@ -28,6 +28,7 @@ const METRICS_CFG = [
   { key:"dtl",   cls:"m1", label:"Total DTL Cost",       hint:"Direct Line issuance" },
   { key:"ptl",   cls:"m2", label:"Total PTL Cost",       hint:"Parts Moving PTL"     },
   { key:"tot",   cls:"m3", label:"Total Cost",           hint:"DTL + PTL combined"   },
+   { key:"qty",   cls:"m7", label:"Repaired Qty",      hint:"Total repaired units" },   // ← new
   { key:"avg",   cls:"m4", label:"Avg Cost / Unit",      hint:"Per Repaired unit"    },
   
 ];
@@ -41,17 +42,35 @@ function periodLabel(my) {
   return MONTH_MAP[mm] || my;
 }
 
-function computeAvgOfAverages(rows) {
+// function computeAvgOfAverages(rows) {
+//   if (!rows || rows.length === 0) return 0;
+
+//   // Only count months that actually have repaired qty — a month with
+//   // totalrepairedQty = 0 (or missing) shouldn't drag the average down
+//   // just because its averageCostPerUnit defaulted to 0.
+//   const validRows = rows.filter(r => Number(r.totalrepairedQty) > 0);
+//   if (validRows.length === 0) return 0;
+
+//   const sum = validRows.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0);
+//   return sum / validRows.length;
+// }
+
+function computeAverageCost(rows) {
   if (!rows || rows.length === 0) return 0;
 
-  // Only count months that actually have repaired qty — a month with
-  // totalrepairedQty = 0 (or missing) shouldn't drag the average down
-  // just because its averageCostPerUnit defaulted to 0.
-  const validRows = rows.filter(r => Number(r.totalrepairedQty) > 0);
-  if (validRows.length === 0) return 0;
+  const totalCost = rows.reduce(
+    (sum, r) => sum + (Number(r.totalCost) || 0),
+    0
+  );
 
-  const sum = validRows.reduce((s, r) => s + (Number(r.averageCostPerUnit) || 0), 0);
-  return sum / validRows.length;
+  const totalRepairedQty = rows.reduce(
+    (sum, r) => sum + (Number(r.totalrepairedQty) || 0),
+    0
+  );
+
+  return totalRepairedQty > 0
+    ? totalCost / totalRepairedQty
+    : 0;
 }
 
 const UnitCom_CostDashboard = () => {
@@ -74,37 +93,57 @@ const UnitCom_CostDashboard = () => {
   const pieChartInst   = useRef(null);
   const dashboardDataRef   = useRef([]);
   const selectedProductRef = useRef("");
-  const [currentFilter, setCurrentFilter] = useState({ productname: "", monthYear: "" });
+  const [currentFilter, setCurrentFilter] = useState({ productname: "",productgroup: "", monthYear: "" });
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 const [productSearch, setProductSearch] = useState("");
 const productDropdownRef = useRef(null);
 
+const [selectedProductGroup, setSelectedProductGroup] = useState("");
+const [productGroupDropdownOpen, setProductGroupDropdownOpen] = useState(false);
+const [productGroupSearch, setProductGroupSearch] = useState("");
+const productGroupDropdownRef = useRef(null);
+function fmtQty(v) {
+  return Number(v || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
   useEffect(() => { dashboardDataRef.current = dashboardData; }, [dashboardData]);
   useEffect(() => { selectedProductRef.current = selectedProduct; }, [selectedProduct]);
 
-  useEffect(() => {
+//   useEffect(() => {
+//   const handleClickOutside = (event) => {
+//     if (
+//       productDropdownRef.current &&
+//       !productDropdownRef.current.contains(event.target)
+//     ) {
+//       setProductDropdownOpen(false);
+//     }
+//   };
+
+//   document.addEventListener("mousedown", handleClickOutside);
+
+//   return () => {
+//     document.removeEventListener("mousedown", handleClickOutside);
+//   };
+// }, []);
+
+useEffect(() => {
   const handleClickOutside = (event) => {
-    if (
-      productDropdownRef.current &&
-      !productDropdownRef.current.contains(event.target)
-    ) {
+    if (productDropdownRef.current && !productDropdownRef.current.contains(event.target)) {
       setProductDropdownOpen(false);
     }
+    if (productGroupDropdownRef.current && !productGroupDropdownRef.current.contains(event.target)) {
+      setProductGroupDropdownOpen(false);
+    }
   };
-
   document.addEventListener("mousedown", handleClickOutside);
-
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
+  return () => document.removeEventListener("mousedown", handleClickOutside);
 }, []);
 
-  useEffect(() => {
-    fetchPartAndProduct();
-    const currentYear = new Date().getFullYear();
-    fetchDashboard("", currentYear.toString());
-      setCurrentFilter({ productname: "", monthYear: currentYear.toString() }); // ← add
-  }, []);
+useEffect(() => {
+  fetchPartAndProduct();
+  const currentYear = new Date().getFullYear();
+  fetchDashboard("", currentYear.toString(), "");
+  setCurrentFilter({ productname: "", productgroup: "", monthYear: currentYear.toString() });
+}, []);
 
   useEffect(() => {
     if (dashboardData.length > 0) {
@@ -133,28 +172,41 @@ const productDropdownRef = useRef(null);
     }
   }, [donutLegendData]);
 
-  const fetchPartAndProduct = () => {
-    getProductAndPartcode()
-      .then(res => setProductDetail(res.data?.ProductDetail || []))
-      .catch(err => console.error("Error:", err));
-  };
+const fetchPartAndProduct = () => {
+  getProductAndPartcode()
+    .then(res => setProductDetail(res.data?.ProductDetail || []))
+    .catch(err => console.error("Error:", err));
+};
 
-  const fetchDashboard = (productname, monthYear) => {
-    setLoading(true);
-    setDrillMonth(null);
-    setDrillData(null);
-    getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
-    // getUnitcompoenentDetailFilter(0, 100, {
-      productname: productname || "",
-      monthYear:   monthYear   || "",
-      search:      null
+// ⬇️ these must live at the top level of the component, NOT inside fetchPartAndProduct
+const productGroups = useMemo(
+  () => [...new Set(productDetail.map(item => item[1]).filter(Boolean))],
+  [productDetail]
+);
+
+const filteredProductDetail = useMemo(
+  () => selectedProductGroup
+    ? productDetail.filter(item => item[1] === selectedProductGroup)
+    : productDetail,
+  [productDetail, selectedProductGroup]
+);
+
+  const fetchDashboard = (productname, monthYear, productgroup) => {
+  setLoading(true);
+  setDrillMonth(null);
+  setDrillData(null);
+  getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
+    productname: productname || "",
+    productgroup: productgroup || "",
+    monthYear: monthYear || "",
+    search: null
+  })
+    .then(res => {
+      const content = res.data?.content || [];
+      setDashboardData(content);
     })
-      .then(res => {
-        const content = res.data?.content || [];
-        setDashboardData(content);
-      })
-      .finally(() => setLoading(false));
-  };
+    .finally(() => setLoading(false));
+};
 
   // const aggregateAndSetState = (content, isDrill = false) => {
   //   if (!content || content.length === 0) {
@@ -219,7 +271,7 @@ const productDropdownRef = useRef(null);
 
 const aggregateAndSetState = (content, isDrill = false) => {
   if (!content || content.length === 0) {
-    setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0, other: 0, sub: 0 });
+    setPieLegendData({ dtl: 0, ptl: 0, total: 0, avg: 0, other: 0, sub: 0, qty: 0  });
     setDonutLegendData({});
     if (isDrill) setDrillData(null);
     return;
@@ -230,9 +282,13 @@ const aggregateAndSetState = (content, isDrill = false) => {
   const aggTotal = content.reduce((s, r) => s + (Number(r.totalCost)       || 0), 0);
   const aggOther = content.reduce((s, r) => s + (Number(r.otherCost)       || 0), 0);
   const aggSub   = content.reduce((s, r) => s + (Number(r.subModuleCost)   || 0), 0);
+ // ...existing aggDTL, aggPTL, aggTotal, aggOther, aggSub, aggAvg...
+  const aggQty = content.reduce((s, r) => s + (Number(r.totalrepairedQty) || 0), 0); // ← new
+
+  const aggAvg = computeAverageCost(content);
 
   // ✅ single source of truth for "avg cost/unit"
-  const aggAvg = computeAvgOfAverages(content);
+  // const aggAvg = computeAvgOfAverages(content);
 
   const rtbAgg = {};
   content.forEach(r => {
@@ -242,199 +298,217 @@ const aggregateAndSetState = (content, isDrill = false) => {
     });
   });
 
-  setPieLegendData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
+  setPieLegendData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub, qty: aggQty  });
   setDonutLegendData({ ...rtbAgg });
 
   if (isDrill) {
-    setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub });
+    setDrillData({ dtl: aggDTL, ptl: aggPTL, total: aggTotal, avg: aggAvg, other: aggOther, sub: aggSub, qty: aggQty });
   }
 };
 
+const buildBarChart = () => {
+  if (barChartInst.current) {
+    barChartInst.current.destroy();
+    barChartInst.current = null;
+  }
 
-  const buildBarChart = () => {
-  if (barChartInst.current) { barChartInst.current.destroy(); barChartInst.current = null; }
   if (!barRef.current) return;
 
-  // ✅ Sort ascending by monthYear so bars always appear P01 → P02 → P03…
-  // const data = [...dashboardDataRef.current].sort((a, b) =>
-  //   a.monthYear.localeCompare(b.monthYear)
-  // );
+  // GROUP ALL PRODUCTS BY MONTH
+  const monthlyMap = {};
 
-  const data = [...dashboardDataRef.current]
-  .filter(r => r.monthYear)
+  dashboardDataRef.current
+    .filter(r => r.monthYear)
+    .forEach(r => {
+      const month = r.monthYear;
+
+      if (!monthlyMap[month]) {
+        monthlyMap[month] = {
+          monthYear: month,
+          totalCost: 0,
+          totalrepairedQty: 0,
+          averageCostPerUnit: 0,
+          rowCount: 0
+        };
+      }
+
+      // monthlyMap[month].totalCost += Number(r.totalCost) || 0;
+      // monthlyMap[month].totalrepairedQty += Number(r.totalrepairedQty) || 0;
+
+      monthlyMap[month].totalCost += Number(r.totalCost) || 0;
+      monthlyMap[month].totalrepairedQty += Number(r.totalrepairedQty) || 0;
+      // Keep average based on product rows
+      if (Number(r.totalrepairedQty) > 0) {
+        monthlyMap[month].averageCostPerUnit +=
+          Number(r.averageCostPerUnit) || 0;
+
+        monthlyMap[month].rowCount++;
+      }
+    });
+
+  const data = Object.values(monthlyMap)
+  .map(r => ({
+    ...r,
+    averageCostPerUnit:
+      r.totalrepairedQty > 0
+        ? r.totalCost / r.totalrepairedQty
+        : 0
+  }))
   .sort((a, b) => a.monthYear.localeCompare(b.monthYear));
 
   const labels = data.map(r => periodLabel(r.monthYear));
 
   barChartInst.current = new Chart(barRef.current, {
     type: "bar",
+
     data: {
       labels,
-      // datasets: [{
-      //   label: "Total cost",
-      //   data:  data.map(r => r.totalCost || 0),
-      //  backgroundColor: data.map(() => "#10B981"),
-      //   borderRadius: 8,
-      //   borderSkipped: false,
-      //   hoverBackgroundColor: "#f59e0b",
-      // }]
+
+      // KEEP YOUR EXISTING 3 DATASETS
       datasets: [
-  {
-    label: "Total Cost (€)",
-    data: data.map(r => r.totalCost || 0),
-    backgroundColor: "#10B981",
-    borderRadius: 8,
-    yAxisID: "y",
-  },
-  {
-    label: "Repaired Qty",
-    data: data.map(r => r.totalrepairedQty || 0),
-    backgroundColor: "#3B82F6",
-    borderRadius: 8,
-    yAxisID: "y1",
-  },
-  {
-    label: "Average Value",
-    data: data.map(r => r.averageCostPerUnit || 0),
-    backgroundColor: "#cd0792",
-    borderRadius: 8,
-    yAxisID: "y2",
-  }
-]
-    },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend:     { display: false },
-          datalabels: { display: false },
-          // tooltip: {
-          //   backgroundColor: "#0f0720",
-          //   titleColor: "#a78bfa",
-          //   bodyColor: "#e8d8f8",
-          //   padding: 12,
-          //   cornerRadius: 10,
-          //   callbacks: {
-          //     title: ctx => `${ctx[0].label}`,
-          //     label: ctx => `  Total cost: ${fmtFull(ctx.raw)}`
-          //   }
-          // }
-          tooltip: {
-  backgroundColor: "#0f0720",
-  titleColor: "#a78bfa",
-  bodyColor: "#e8d8f8",
-  padding: 12,
-  cornerRadius: 10,
-  callbacks: {
-    title: (ctx) => ctx[0].label,
-
-    label: (ctx) => {
-      if (ctx.dataset.label === "Total Cost (€)") {
-        return `Total Cost: ${fmtFull(ctx.raw)}`;
-      }
-
-      if (ctx.dataset.label === "Repaired Qty") {
-        return `Repaired Qty: ${ctx.raw}`;
-      }
-
-      if (ctx.dataset.label === "Average Value") {
-        return `Average Value: ${fmtFull(ctx.raw)}`;
-      }
-
-      return ctx.raw;
-    }
-  }
-}
+        {
+          label: "Total Cost (€)",
+          data: data.map(r => r.totalCost || 0),
+          backgroundColor: "#10B981",
+          borderRadius: 8,
+          yAxisID: "y",
         },
-        onClick: (evt, elements) => {
-        if (elements.length > 0) {
-          const idx       = elements[0].index;
-          // ✅ Use the locally sorted `data`, not dashboardDataRef
-          const monthYear = data[idx]?.monthYear;
-          if (!monthYear) return;
+      {
+  type: "line",
+  label: "Repaired Qty",
+  data: data.map(r => r.totalrepairedQty || 0),
+  backgroundColor: "#3B82F6",
+  borderColor: "#3B82F6",
+  borderWidth: 2,
+  pointRadius: 4,
+  pointHoverRadius: 6,
+  tension: 0.3,
+  yAxisID: "y1",
+},
+        {
+          label: "Average Value",
+          data: data.map(r => r.averageCostPerUnit || 0),
+          backgroundColor: "#cd0792",
+          borderRadius: 8,
+          yAxisID: "y2",
+        }
+      ]
+    },
 
-          barChartInst.current.data.datasets[0].backgroundColor =
-            data.map((_, i) => i === idx ? "#f59e0b" : "#7c3aed");
-          barChartInst.current.update();
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
 
-          setDrillMonth(periodLabel(monthYear));
-          setDrillLoading(true);
-          setCurrentFilter({ productname: selectedProductRef.current || "", monthYear }); // ← add
+      plugins: {
+        legend: {
+          display: false
+        },
 
+        datalabels: {
+          display: false
+        },
 
-          getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
-          // getUnitcompoenentDetailFilter(0, 100, {
-            productname: selectedProductRef.current || "",
-            monthYear:   monthYear,
-            search:      null
-          })
-            .then(res => {
-              const content = res.data?.content || [];
-              aggregateAndSetState(content, true);
-            })
-            .finally(() => setDrillLoading(false));
+        tooltip: {
+          backgroundColor: "#0f0720",
+          titleColor: "#a78bfa",
+          bodyColor: "#e8d8f8",
+          padding: 12,
+          cornerRadius: 10,
+
+          callbacks: {
+            title: ctx => ctx[0].label,
+
+            label: ctx => {
+              if (ctx.dataset.label === "Total Cost (€)") {
+                return `Total Cost: ${fmtFull(ctx.raw)}`;
+              }
+
+              if (ctx.dataset.label === "Repaired Qty") {
+                return `Repaired Qty: ${ctx.raw}`;
+              }
+
+              if (ctx.dataset.label === "Average Value") {
+                return `Average Value: ${fmtFull(ctx.raw)}`;
+              }
+
+              return ctx.raw;
+            }
+          }
         }
       },
-//         scales: {
-//           x: {
-//             ticks: { autoSkip: false, maxRotation: 0, font: { size: 12 }, color: "#135bd7" },
-//             grid:  { display: false }
-//           },
-//           y: {
-//   ticks: {
-//     color: "#0a5be8",
-//     font: { size: 12 },
-//     callback: v => {
-//       if (v >= 1_000_000) return '€' + (v / 1_000_000).toFixed(1) + 'M';
-//       if (v >= 1_000)     return '€' + (v / 1_000).toFixed(0) + 'K';
-//       return '€' + v;
-//     }
-//   },
-//   grid: { color: "rgba(124,58,237,0.08)" }
-// }
-//         }
 
-scales: {
-  x: {
-    ticks: {
-      autoSkip: false,
-      maxRotation: 0,
-      color: "#135bd7"
-    }
-  },
+      // onClick: (evt, elements) => {
+      //   if (elements.length > 0) {
+      //     const idx = elements[0].index;
+      //     const monthYear = data[idx]?.monthYear;
 
-  y: {
-    position: "left",
-    beginAtZero: true,
-    ticks: {
-      callback: value => {
-        if (value >= 1000)
-          return "€" + (value / 1000).toFixed(0) + "K";
-        return "€" + value;
+      //     if (!monthYear) return;
+
+      //     setDrillMonth(periodLabel(monthYear));
+
+      //     setDrillLoading(true);
+
+      //     setCurrentFilter({
+      //       productname: selectedProductRef.current || "",
+      //       productgroup: selectedProductGroup || "",
+      //       monthYear: monthYear
+      //     });
+
+      //     getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
+      //       productname: selectedProductRef.current || "",
+      //       productgroup: selectedProductGroup || "",
+      //       monthYear: monthYear,
+      //       search: null
+      //     })
+      //       .then(res => {
+      //         const content = res.data?.content || [];
+      //         aggregateAndSetState(content, true);
+      //       })
+      //       .finally(() => setDrillLoading(false));
+      //   }
+      // },
+
+      scales: {
+        x: {
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            color: "#135bd7"
+          }
+        },
+
+        y: {
+          position: "left",
+          beginAtZero: true,
+          ticks: {
+            callback: value => {
+              if (value >= 1000)
+                return "€" + (value / 1000).toFixed(0) + "K";
+
+              return "€" + value;
+            }
+          }
+        },
+
+        y1: {
+          position: "right",
+          beginAtZero: true,
+          grid: {
+            drawOnChartArea: false
+          },
+          ticks: {
+            callback: value => value
+          }
+        },
+
+        y2: {
+          display: false,
+          beginAtZero: true
+        }
       }
     }
-  },
-
-  y1: {
-    position: "right",
-    beginAtZero: true,
-    grid: {
-      drawOnChartArea: false
-    },
-    ticks: {
-      callback: value => value
-    }
-  },
-
-  y2: {
-    display: false,
-    beginAtZero: true
-  }
-}
-      }
-    });
-  };
-
+  });
+};
   const buildDonutChart = (rtbAgg) => {
     if (!donutRef.current) return;
     const rtKeys  = Object.keys(rtbAgg);
@@ -531,13 +605,14 @@ const totalPTL   = dashboardData.reduce((s, r) => s + (r.ptlIssuanceCost || 0), 
 const totalCost  = dashboardData.reduce((s, r) => s + (r.totalCost       || 0), 0);
 const totalOther = dashboardData.reduce((s, r) => s + (r.otherCost       || 0), 0);
 const totalSub   = dashboardData.reduce((s, r) => s + (r.subModuleCost   || 0), 0);
-
+const totalQty   = dashboardData.reduce((s, r) => s + (Number(r.totalrepairedQty) || 0), 0); // ← add this
+const avgCPU = computeAverageCost(dashboardData);
 // ✅ same helper — guarantees this always matches pieLegendData.avg for the same dataset
-const avgCPU = computeAvgOfAverages(dashboardData);
+// const avgCPU = computeAvgOfAverages(dashboardData);
 
   // const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU };
 
-  const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU, other: totalOther, sub: totalSub };
+  const source = drillData || { dtl: totalDTL, ptl: totalPTL, total: totalCost, avg: avgCPU, other: totalOther, sub: totalSub, qty: totalQty };
 
   // const metricValues = {
   //   dtl: fmtFull(source.dtl),
@@ -554,6 +629,7 @@ const metricValues = {
   avg:   fmtFull(source.avg),
   other: fmtFull(source.other || 0), // ← new
   sub:   fmtFull(source.sub   || 0), // ← new
+  qty:   fmtQty(source.qty)
 };
 
   const donutLegendTotal = Object.values(donutLegendData).reduce((s, v) => s + v, 0);
@@ -572,10 +648,11 @@ const metricValues = {
   setDrillMonth(null);
   setDrillData(null);
   setSelectedProduct("");   // ← add this
+   setSelectedProductGroup("");
   setSelectedMonth("");     // ← add this
   const currentYear = new Date().getFullYear();
   fetchDashboard("", currentYear.toString()); // ← reload default data
-    setCurrentFilter({ productname: "", monthYear: currentYear.toString() }); // ← add
+    setCurrentFilter({ productname: "",productgroup: "", monthYear: currentYear.toString() }); // ← add
   if (barChartInst.current) {
     barChartInst.current.data.datasets[0].backgroundColor =
       dashboardData.map(() => "#7c3aed");
@@ -646,25 +723,100 @@ const handleDownloadPTL = (downloadType) => {
     .finally(() => setDownloadingPTL(false));
 };
 
-  // const handleApply = () => fetchDashboard(selectedProduct, selectedMonth);
-  const handleApply = () => {
-  if (!selectedProduct && !selectedMonth) {
-    alert("Please select at least one filter (Product Name or Month & Year) before applying.");
+
+const handleApply = () => {
+
+  // If both are selected, refresh/reset both filters
+  if (selectedProduct && selectedProductGroup) {
+    setSelectedProduct("");
+    setSelectedProductGroup("");
+    setSelectedMonth("");
+
+    fetchDashboard("", "", "");
+
+    setCurrentFilter({
+      productname: "",
+      productgroup: "",
+      monthYear: ""
+    });
+
     return;
   }
-  // if (!selectedProduct || !selectedMonth) {
-  //   alert("Please select both Product Name and Month & Year before applying.");
-  //   return;
-  // }
-  fetchDashboard(selectedProduct, selectedMonth);
-    setCurrentFilter({ productname: selectedProduct, monthYear: selectedMonth }); // ← add
+
+  if (!selectedProduct && !selectedMonth && !selectedProductGroup) {
+    alert(
+      "Please select at least one filter (Product Name, Product Group, or Month & Year) before applying."
+    );
+    return;
+  }
+
+  fetchDashboard(
+    selectedProduct,
+    selectedMonth,
+    selectedProductGroup
+  );
+
+  setCurrentFilter({
+    productname: selectedProduct,
+    productgroup: selectedProductGroup,
+    monthYear: selectedMonth
+  });
 };
+
+//  const handleApply = () => {
+//   if (!selectedProduct && !selectedMonth && !selectedProductGroup) {
+//     alert("Please select at least one filter (Product Name, Product Group, or Month & Year) before applying.");
+//     return;
+//   }
+//   fetchDashboard(selectedProduct, selectedMonth, selectedProductGroup);
+//   setCurrentFilter({ productname: selectedProduct, productgroup: selectedProductGroup, monthYear: selectedMonth });
+// };
+
+
+
+// const handleApply = () => {
+//   // Product Name and Product Group cannot be selected together
+//   if (selectedProduct && selectedProductGroup) {
+//     alert("Please select either Product Name or Product Group, not both.");
+//     return;
+//   }
+
+//   // Product Group requires Month & Year
+//   if (selectedProductGroup && !selectedMonth) {
+//     alert("Please select Month & Year when selecting Product Group.");
+//     return;
+//   }
+
+//   // At least one filter is required
+//   if (!selectedProduct && !selectedMonth && !selectedProductGroup) {
+//     alert(
+//       "Please select at least one filter (Product Name, Product Group, or Month & Year) before applying."
+//     );
+//     return;
+//   }
+
+//   fetchDashboard(
+//     selectedProduct,
+//     selectedMonth,
+//     selectedProductGroup
+//   );
+
+//   setCurrentFilter({
+//     productname: selectedProduct,
+//     productgroup: selectedProductGroup,
+//     monthYear: selectedMonth
+//   });
+// };
+
+
+
   
   const handleReset = () => {
-    setSelectedProduct("");
-    setSelectedMonth("");
-    fetchDashboard("", "");
-  };
+  setSelectedProduct("");
+  setSelectedProductGroup("");
+  setSelectedMonth("");
+  fetchDashboard("", "", "");
+};
 
   return (
     <div className="ucd-wrap">
@@ -693,7 +845,8 @@ const handleDownloadPTL = (downloadType) => {
           </div>
         </div> */}
         <div className="ucd-topbar-right">
-    {(drillMonth || selectedProduct || selectedMonth) && (
+    {/* {(drillMonth || selectedProduct || selectedMonth) && ( */}
+    {(drillMonth || selectedProduct || selectedProductGroup || selectedMonth) && (
       <button className="ucd-btn-clear" onClick={handleClearDrill}>&#10005; Clear</button>
     )}
     {drillLoading && <div className="ucd-spinner" />}
@@ -800,6 +953,61 @@ const handleDownloadPTL = (downloadType) => {
       </div>
     )}
 
+  </div>
+</div>
+
+<div className="ucd-filter-item product-filter">
+  <label className="ucd-filter-label">Product Group</label>
+
+  <div className="product-dropdown" ref={productGroupDropdownRef}>
+    <input
+      className="ucd-filter-input"
+      type="text"
+      placeholder="All Product Groups"
+      value={selectedProductGroup}
+      onFocus={() => {
+        setProductGroupDropdownOpen(true);
+        setProductGroupSearch("");
+      }}
+      onChange={(e) => {
+        setSelectedProductGroup(e.target.value);
+        setProductGroupSearch(e.target.value);
+        setProductGroupDropdownOpen(true);
+      }}
+    />
+
+    {productGroupDropdownOpen && (
+      <div className="product-dropdown-menu">
+        <div
+          className="product-dropdown-item"
+          onClick={() => {
+            setSelectedProductGroup("");
+            setProductGroupSearch("");
+            setProductGroupDropdownOpen(false);
+            setSelectedProduct(""); // reset product name when group cleared
+          }}
+        >
+          All Product Groups
+        </div>
+
+        {productGroups
+          .filter((g) => g?.toString().toLowerCase().includes(productGroupSearch.toLowerCase()))
+          .map((g, idx) => (
+            <div
+              key={idx}
+              className="product-dropdown-item"
+              onClick={() => {
+                setSelectedProductGroup(g);
+                setProductGroupSearch("");
+                setProductGroupDropdownOpen(false);
+                setSelectedProduct(""); // reset product name since it may not belong to this group
+              }}
+            >
+              {g}
+            </div>
+          ))}
+      </div>
+    )}
   </div>
 </div>
           <div className="ucd-filter-item">

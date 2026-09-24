@@ -1,4 +1,5 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
+import PartCodeInput from "../PartCodeInput";
 
 import {
   Outbox,
@@ -19,6 +20,7 @@ const TotalIssuedCard = ({
   value = 0,
   loading
 }) => {
+    const navigate = useNavigate();
   return (
     <div className="kpi-card issued-card">
 
@@ -39,27 +41,11 @@ const TotalIssuedCard = ({
 
         <div className="small-select">
 
-          <select
+          <PartCodeInput
             value={issuePartCode}
-            onChange={(e) =>
-              setIssuePartCode(
-                e.target.value
-              )
-            }
-          >
-
-            {partCodes.map(
-              (partCode) => (
-                <option
-                  key={partCode}
-                  value={partCode}
-                >
-                  {partCode}
-                </option>
-              )
-            )}
-
-          </select>
+            onChange={setIssuePartCode}
+            partCodes={partCodes}
+          />
 
           <KeyboardArrowDown />
 
@@ -132,13 +118,23 @@ const TotalIssuedCard = ({
       </div>
 
 
-      <button className="view-details">
+      {/* <button className="view-details">
 
         View details
 
         <ArrowForward />
 
-      </button>
+      </button> */}
+
+     
+  <button
+    className="view-details"
+    onClick={() => navigate("/issuanceReport")}
+  >
+    View details
+    <ArrowForward />
+  </button>
+
 
     </div>
   );
