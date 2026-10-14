@@ -25,7 +25,7 @@ const RequesterTextFiled = ({
         { label: "P2P Transfer Request", value: "P2P Transfer Request" },
         { label: "Scrap Request", value: "Scrap Request" },
         { label: "Material Project Request", value: "Material Project Request" },
-        { label: "Material Request Project", value: "Material Request Project" }
+        // { label: "Material Request Project", value: "Material Request Project" }
     ];
 
     console.log("userId",userId);

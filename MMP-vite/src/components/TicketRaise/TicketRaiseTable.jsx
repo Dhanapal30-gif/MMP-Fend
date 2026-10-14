@@ -227,8 +227,12 @@ const [filterScreen, setFilterScreen] = useState("");
     ];
 
 
+    const activeCount = [filterStatus, filterPriority, filterScreen].filter(Boolean).length;
+
+    // Search is only allowed when at least one filter is selected
     const handleSearch = () => {
-        onSearch && onSearch({ status: filterStatus, screen: filterScreen, priority: filterPriority  });
+        if (activeCount === 0) return;
+        onSearch && onSearch({ status: filterStatus, screen: filterScreen, priority: filterPriority });
     };
 
     const handleReset = () => {
@@ -248,8 +252,6 @@ const [filterScreen, setFilterScreen] = useState("");
             setDownloading(false);
         }
     };
-
-    const activeCount = [filterStatus, filterPriority,filterScreen].filter(Boolean).length;
 
     return (
         <>
@@ -281,8 +283,9 @@ const [filterScreen, setFilterScreen] = useState("");
 
                 /* ── Search button ── */
                 .tt-filter-search-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:none;border-radius:9px;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s,transform .12s,box-shadow .15s;box-shadow:0 3px 10px rgba(57,73,171,.35);}
-                .tt-filter-search-btn:hover{opacity:.92;box-shadow:0 5px 14px rgba(57,73,171,.45);transform:translateY(-1px);}
-                .tt-filter-search-btn:active{transform:scale(.97);}
+                .tt-filter-search-btn:hover:not(:disabled){opacity:.92;box-shadow:0 5px 14px rgba(57,73,171,.45);transform:translateY(-1px);}
+                .tt-filter-search-btn:active:not(:disabled){transform:scale(.97);}
+                .tt-filter-search-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
 
                 /* ── Download button ── */
                 .tt-download-btn{
@@ -448,7 +451,9 @@ const [filterScreen, setFilterScreen] = useState("");
                             </button>
                         )}
 
-                        <button className="tt-filter-search-btn" onClick={handleSearch}>
+                        <button className="tt-filter-search-btn" onClick={handleSearch}
+                            disabled={activeCount === 0}
+                            title={activeCount === 0 ? "Select at least one filter to search" : "Search"}>
                             <SearchBtnIcon /> Search
                             {activeCount > 0 && <span className="tt-filter-badge">{activeCount}</span>}
                         </button>

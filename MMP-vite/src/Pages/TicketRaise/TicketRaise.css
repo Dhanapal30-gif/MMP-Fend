@@ -1,182 +1,309 @@
-
-
-/* ── Layout ─────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════════ */
 .TicketRaisedContainer {
+    --tr-primary:       #1a237e;
+    --tr-primary-hover: #283593;
+    --tr-accent:        #3949ab;
+    --tr-surface:       #ffffff;
+    --tr-surface-alt:   #f6f7fc;
+    --tr-border:        #e3e6f3;
+    --tr-text:          #263238;
+    --tr-muted:         #78909c;
+    --tr-radius:        14px;
+
     display:        flex;
     flex-direction: column;
     gap:            20px;
     padding:        20px;
-    background:     white;
+    background:     #f4f6fb;
     min-height:     100vh;
     font-family:    'Segoe UI', system-ui, sans-serif;
+    color:          var(--tr-text);
 }
 
-/* ── Form card ───────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   FORM CARD
+   ═══════════════════════════════════════════════════════════════ */
 .TicketRaisedInput {
-    background:    #ffffff;
-    border-radius: 14px;
-    box-shadow:    0 4px 20px rgba(30, 40, 90, 0.08);
-    padding:       24px;
+    background:    var(--tr-surface);
+    border-radius: var(--tr-radius);
+    border:        1px solid var(--tr-border);
+    box-shadow:    0 6px 24px rgba(30, 40, 90, 0.07);
+    padding:       0;
+    overflow:      hidden;
 }
 
-.ComCssFiledName p {
-    margin:         0 0 16px;
-    font-size:      17px;
+/* ── Card header ── */
+.tr-card-header {
+    display:       flex;
+    align-items:   center;
+    gap:           14px;
+    padding:       18px 24px;
+    background:    linear-gradient(135deg, #f3f5ff 0%, #ffffff 70%);
+    border-bottom: 1px solid var(--tr-border);
+}
+.tr-card-icon {
+    width:           40px;
+    height:          40px;
+    border-radius:   12px;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    color:           #fff;
+    background:      linear-gradient(135deg, var(--tr-primary) 0%, var(--tr-accent) 100%);
+    box-shadow:      0 4px 12px rgba(26, 35, 126, 0.28);
+    flex-shrink:     0;
+}
+.tr-card-titles { flex: 1; min-width: 0; }
+.tr-card-title {
+    margin:         0;
+    font-size:      18px;
     font-weight:    700;
-    color:          #1a237e;
+    color:          var(--tr-primary);
     letter-spacing: 0.01em;
 }
+.tr-card-subtitle {
+    margin:    2px 0 0;
+    font-size: 12.5px;
+    color:     var(--tr-muted);
+}
+.tr-edit-pill {
+    padding:        4px 12px;
+    border-radius:  20px;
+    font-size:      11px;
+    font-weight:    700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color:          #ef6c00;
+    background:     #fff3e0;
+    border:         1px solid #ffe0b2;
+}
 
+/* ── Form body ── */
 .TicketRaisedTexfiled {
     display:        flex;
     flex-direction: column;
-    gap:            16px;
+    gap:            18px;
+    padding:        22px 24px 8px;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   3-COLUMN FIELD ROW
-   Desktop : 3 equal columns side by side
-   Tablet  : 2 columns
-   Mobile  : 1 column stacked
-   ══════════════════════════════════════════════════════════════ */
+/* ── Row 1: 3 selectors ── */
 .tr-field-row {
     display:               grid;
-    grid-template-columns: repeat(4, 1fr);  /* 3 equal columns */
-    gap:                   14px;
+    grid-template-columns: repeat(3, 1fr);
+    gap:                   16px;
     align-items:           flex-start;
 }
+.tr-field-col { min-width: 0; }
 
-/* Tablet — 2 columns */
 @media (max-width: 900px) {
-    .tr-field-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .tr-field-row { grid-template-columns: repeat(2, 1fr); }
 }
-
-/* Mobile — 1 column */
 @media (max-width: 560px) {
-    .tr-field-row {
-        grid-template-columns: 1fr;
-    }
+    .tr-field-row { grid-template-columns: 1fr; }
 }
 
-/* Each cell fills its grid slot */
-.tr-field-col {
-    min-width: 0;   /* prevents overflow in grid */
+/* Priority dot in dropdown */
+.tr-dot {
+    display:       inline-block;
+    width:         9px;
+    height:        9px;
+    border-radius: 50%;
+    margin-right:  10px;
+    flex-shrink:   0;
 }
 
-/* ── File upload row ────────────────────────────────────────── */
-/* .uploadSection {
+/* ── Row 2: description + guide ── */
+.tr-desc-row {
+    display:               grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap:                   18px;
+    align-items:           stretch;
+}
+.tr-desc-main { min-width: 0; }
+
+@media (max-width: 900px) {
+    .tr-desc-row { grid-template-columns: 1fr; }
+}
+
+/* ── Request-type guide ── */
+.noteSection {
+    display:        flex;
+    flex-direction: column;
+    gap:            6px;
+    padding:        12px 14px;
+    background:     var(--tr-surface-alt);
+    border:         1px solid var(--tr-border);
+    border-radius:  12px;
+    margin:         0;
+}
+.noteTitle {
+    margin:         0 0 2px;
+    font-size:      11px;
+    font-weight:    700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color:          var(--tr-accent);
+}
+.noteItem {
+    display:     flex;
+    align-items: baseline;
+    gap:         8px;
+    margin:      0;
+    font-size:   12px;
+    line-height: 1.45;
+    color:       #546e7a;
+}
+.noteKey {
+    flex-shrink:   0;
+    min-width:     82px;
+    text-align:    center;
+    padding:       1px 8px;
+    border-radius: 20px;
+    font-size:     11px;
+    font-weight:   700;
+}
+.noteKey.bug           { color: #c62828; background: #ffebee; }
+.noteKey.update        { color: #ef6c00; background: #fff3e0; }
+.noteKey.feature       { color: #2e7d32; background: #e8f5e9; }
+.noteKey.clarification { color: #1565c0; background: #e3f2fd; }
+
+/* ── Feedback banners ── */
+.tr-banner {
+    display:       flex;
+    align-items:   center;
+    gap:           8px;
+    padding:       10px 14px;
+    border-radius: 10px;
+    font-size:     13px;
+    font-weight:   500;
+}
+.tr-banner--error   { color: #b71c1c; background: #ffebee; border: 1px solid #ffcdd2; }
+.tr-banner--success { color: #1b5e20; background: #e8f5e9; border: 1px solid #c8e6c9; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACTION BAR
+   ═══════════════════════════════════════════════════════════════ */
+.TicketRaisedContainer .tr-action-bar {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    gap:             12px;
+    flex-wrap:       wrap;
+    margin-top:      18px;
+    padding:         14px 24px;
+    background:      var(--tr-surface-alt);
+    border-top:      1px solid var(--tr-border);
+}
+
+.tr-attach {
     display:     flex;
     align-items: center;
     gap:         12px;
-    flex-wrap:   wrap;
-} */
-
-
-/* Upload row — side by side */
-.uploadSection {
-    display: flex;
-    align-items: flex-start;
-    gap: 32px;
-    margin-top: 10px;
-    flex-wrap: wrap;
+    min-width:   0;
 }
-
-.uploadBtn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
+.tr-attach-btn {
+    display:        inline-flex;
+    align-items:    center;
+    gap:            6px;
+    height:         36px;
+    padding:        0 14px;
+    border-radius:  10px;
+    border:         1.5px dashed #9fa8da;
+    background:     #fff;
+    color:          var(--tr-accent);
+    font-size:      13px;
+    font-weight:    600;
+    cursor:         pointer;
+    transition:     all 0.18s;
 }
-
-/* Note block */
-.noteSection {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-top: -30px;
+.tr-attach-btn:hover {
+    background:   #e8eaf6;
+    border-color: var(--tr-accent);
 }
+.tr-attach-hint { font-size: 12px; color: var(--tr-muted); }
 
-.noteTitle {
-    font-size: 13px;
-    font-weight: 700;
-    color: #d32f2f;
-    margin: 0 0 2px 0;
+.tr-file-chip {
+    display:       inline-flex;
+    align-items:   center;
+    gap:           6px;
+    max-width:     280px;
+    padding:       4px 6px 4px 12px;
+    border-radius: 20px;
+    background:    #e8eaf6;
+    border:        1px solid #c5cae9;
 }
-
-.noteItem {
-    font-size: 12.5px;
-    color: black;
-    margin: 0;
-    line-height: 1.6;
-}
-
-.noteKey {
-    font-weight: 700;
-}
-
 .fileName {
     margin:        0;
     font-size:     12px;
-    color:         #546e7a;
-    max-width:     240px;
+    font-weight:   500;
+    color:         var(--tr-primary);
     overflow:      hidden;
     text-overflow: ellipsis;
     white-space:   nowrap;
 }
+.TicketRaisedContainer button.tr-file-remove {
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    width:           20px;
+    height:          20px;
+    border:          none;
+    border-radius:   50%;
+    background:      rgba(26, 35, 126, 0.12);
+    color:           var(--tr-primary);
+    cursor:          pointer;
+    padding:         0;
+    transition:      background 0.15s;
+}
+.TicketRaisedContainer button.tr-file-remove:hover { background: rgba(26, 35, 126, 0.25); }
 
-/* API feedback */
-.apiError {
-    margin:      0;
-    color:       #c62828;
-    font-size:   13px;
-    font-weight: 500;
-}
-.apiSuccess {
-    margin:      0;
-    color:       #2e7d32;
-    font-size:   13px;
-    font-weight: 500;
-}
+.tr-actions { display: flex; gap: 10px; }
 
-/* ── Form buttons ─────────────────────────────────────────────── */
-.ComCssButton9 {
-    display:    flex;
-    gap:        10px;
-    margin-top: 18px;
-    flex-wrap:  wrap;
-}
-.ComCssSubmitButton,
-.ComCssDeleteButton {
-    padding:       8px 24px;
+.TicketRaisedContainer .tr-btn-primary,
+.TicketRaisedContainer .tr-btn-secondary {
+    height:        36px;
+    padding:       0 24px;
     border:        none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size:     13px;
     font-weight:   600;
     cursor:        pointer;
     transition:    all 0.18s;
+    white-space:   nowrap;
+    min-width:     96px;
+    text-transform: none;
 }
-.ComCssSubmitButton {
-    background: #1a237e;
+.TicketRaisedContainer .tr-btn-primary {
+    background: linear-gradient(135deg, var(--tr-primary) 0%, var(--tr-accent) 100%);
     color:      #fff;
+    box-shadow: 0 4px 12px rgba(26, 35, 126, 0.25);
 }
-.ComCssSubmitButton:hover:not(:disabled) { background: #283593; }
-.ComCssDeleteButton {
-    background: #f5f5f5;
-    color:      #555;
-    border:     1px solid #e0e0e0;
+.TicketRaisedContainer .tr-btn-primary:hover:not(:disabled) {
+    transform:  translateY(-1px);
+    box-shadow: 0 6px 16px rgba(26, 35, 126, 0.32);
 }
-.ComCssDeleteButton:hover:not(:disabled) { background: #eeeeee; }
-.ComCssSubmitButton:disabled,
-.ComCssDeleteButton:disabled {
+.TicketRaisedContainer .tr-btn-secondary {
+    background: #fff;
+    color:      #546e7a;
+    border:     1px solid #d9dcea;
+}
+.TicketRaisedContainer .tr-btn-secondary:hover:not(:disabled) { background: #eef0f8; }
+.TicketRaisedContainer .tr-btn-primary:disabled,
+.TicketRaisedContainer .tr-btn-secondary:disabled {
     opacity: 0.55;
     cursor:  not-allowed;
 }
 
+@media (max-width: 560px) {
+    .TicketRaisedContainer .tr-action-bar { flex-direction: column; align-items: stretch; }
+    .tr-actions    { justify-content: flex-end; }
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
-   TABLE  –  all classes prefixed tt-
+   TABLE  –  all classes prefixed tt-   (unchanged)
    ═══════════════════════════════════════════════════════════════ */
 
 .tt-wrapper {
@@ -463,8 +590,8 @@
 }
 .tt-page-btn:hover:not(:disabled) { background: #e8eaf6; border-color: #c5cae9; }
 .tt-page-btn--next {
-    background:  #3949ab;
-    color:       #fff;
+    background:   #3949ab;
+    color:        #fff;
     border-color: #3949ab;
 }
 .tt-page-btn--next:hover:not(:disabled) { background: #283593; border-color: #283593; }
@@ -473,25 +600,3 @@
 /* ── Animations ─────────────────────────────────────────────── */
 @keyframes tt-fade-in  { from { opacity: 0 }                      to { opacity: 1 } }
 @keyframes tt-scale-in { from { opacity: 0; transform: scale(.9) } to { opacity: 1; transform: scale(1) } }
-
-
-
-.noteKey {
-    font-weight: bold;
-}
-
-.bug {
-    color: red;
-}
-
-.update {
-    color: orange;
-}
-
-.feature {
-    color: green;
-}
-
-.clarification {
-    color: blue;
-}

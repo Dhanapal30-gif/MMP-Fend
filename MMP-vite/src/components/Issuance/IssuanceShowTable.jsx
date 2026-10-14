@@ -94,6 +94,81 @@ row.batches.forEach(batch => {
   };
 
 
+//   const handleSave = async () => {
+//     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
+//     if (activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule") {
+
+//       const hasSerial = formData.newSerialNumber && formData.newSerialNumber.trim() !== "";
+//       if (!hasSerial) {
+//         setErrorMessage("Please enter New Serial Number!");
+//         setShowErrorPopup(true);
+//         return;
+//       }
+//     }
+//     if (!hasQty) {
+//       // alert("Please enter quantity for at least one location!");
+//       setErrorMessage("Please enter quantity for location!")
+//       setShowErrorPopup(true)
+//       return;
+//     }
+
+// const totalIssueQty = Object.values(locationQty)
+//   .reduce((sum, val) => sum + Number(val || 0), 0);
+
+// if (totalIssueQty !== Number(activeRow?.approvedQty)) {
+//   const proceed = window.confirm(
+//     `Issue Qty is not equal to Approved Qty (${activeRow?.approvedQty}). Do you want to continue?`
+//   );
+
+//   if (!proceed) return; // ❌ stop if user clicks Cancel
+// }
+   
+
+//     // Prepare payload (FIXED)
+// const payload = Object.keys(locationQty)
+//   .filter(key => Number(locationQty[key]) > 0) // send only qty > 0
+//   .map(key => {
+//     const [location, batchcode] = key.split("_"); // split correctly
+
+//     return {
+//       location: location,                 // only location
+//       batchcode: batchcode,               // only batchcode
+//       issueqty: Number(locationQty[key]),
+//       partcode: activeRow?.partcode || "",
+//       issued_comments: formData.Comments,
+//       nsn: formData.newSerialNumber,
+//       rtn: activeRow?.rec_ticket_no || "",
+//       createdby: sessionStorage.getItem("userId") || "System",
+//       updatedby: sessionStorage.getItem("userId") || "System"
+//     };
+//   });
+
+//     console.log("Payload to send:", payload);
+//     setLoading(true); // start loader
+
+//     try {
+//       await saveIssueBatchcodeQty(payload); // API call
+//       // alert("Submitted successfully!");
+//       setSuccessMessage("Submitted successfully!")
+//       setShowSuccessPopup(true)
+
+//       await fetchPickTicketDetail(activeRow?.rec_ticket_no);
+
+//       //    fetchPickTicketDetail(ticketNo);
+//       // fetchPickTicketDetail(activeRow?.rec_ticket_no);
+//       setOpen(false);
+//     } catch (error) {
+//       console.error("Error submitting payload:", error);
+//       alert("Failed to submit. Please try again.");
+//     } finally {
+//       setLoading(false); // stop loader
+//     }
+
+
+//   };
+
+
+
   const handleSave = async () => {
     const hasQty = Object.values(locationQty).some(val => val && Number(val) > 0);
     if (activeRow?.requestertype?.toLowerCase().replace(/\s+/g, "") === "submodule") {
@@ -122,19 +197,7 @@ if (totalIssueQty !== Number(activeRow?.approvedQty)) {
 
   if (!proceed) return; // ❌ stop if user clicks Cancel
 }
-    // Prepare payload
-    // const payload = Object.keys(locationQty).map(loc => ({
-    //   location: loc,
-    //   issueqty: Number(locationQty[loc] || 0),
-    //   batchcode: activeRow?.batches?.find(b => b.location === loc)?.batchCode || "",
-    //   partcode: activeRow?.partcode || "",
-    //   issued_comments: formData.Comments,
-    //   nsn: formData.newSerialNumber,
-    //   rtn: activeRow?.rec_ticket_no || "", // <-- added here
-    //   createdby: sessionStorage.getItem("userId") || "System",
-    //   updatedby: sessionStorage.getItem("userId") || "System"
-
-    // }));
+   
 
     // Prepare payload (FIXED)
 const payload = Object.keys(locationQty)
@@ -159,7 +222,16 @@ const payload = Object.keys(locationQty)
     setLoading(true); // start loader
 
     try {
-      await saveIssueBatchcodeQty(payload); // API call
+      const res = await saveIssueBatchcodeQty(payload); // API call
+
+      // server returned success:false (e.g. ticket already issued) -> show its message
+      if (res && res.success === false) {
+        const msg = (res.message || "Failed to submit.").replace(/^Internal server error:\s*/i, "");
+        setErrorMessage(msg);
+        setShowErrorPopup(true);
+        return;
+      }
+
       // alert("Submitted successfully!");
       setSuccessMessage("Submitted successfully!")
       setShowSuccessPopup(true)
@@ -171,15 +243,21 @@ const payload = Object.keys(locationQty)
       setOpen(false);
     } catch (error) {
       console.error("Error submitting payload:", error);
-      alert("Failed to submit. Please try again.");
+
+      // show the server message if present, else the generic one
+      const serverMsg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to submit. Please try again.";
+
+      setErrorMessage(serverMsg.replace(/^Internal server error:\s*/i, ""));
+      setShowErrorPopup(true);
     } finally {
       setLoading(false); // stop loader
     }
 
 
   };
-
-
 
   const normalizedData = useMemo(() => {
     return data.map((row) => ({
