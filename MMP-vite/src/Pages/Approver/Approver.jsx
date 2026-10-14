@@ -565,6 +565,7 @@ useEffect(() => {
 
     return (
         <div className='ComCssContainer'>
+            <LoadingOverlay loading={loading} /> 
             <div className='ComCssInput'>
                 <div className='ComCssFiledName'>
                     <p>Approver</p>
@@ -588,7 +589,7 @@ useEffect(() => {
             {showTable && (
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Approval List</h5>
-                    <LoadingOverlay loading={loading} />
+                    {/* <LoadingOverlay loading={loading} /> */}
 
                     <ApproverTable
                         data={approveTicketDetail}

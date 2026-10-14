@@ -1,6 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { Autocomplete, TextField, Button } from "@mui/material";
+import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react';
+import { Autocomplete, TextField } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { ThemeProvider } from '@mui/material/styles';
 import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import "./TicketRaise.css";
@@ -9,14 +13,51 @@ import { downloadTicketRaiseExport, fetchScreenName, fetchTicketRaiseDetail, fet
 import { updateTicketDetail } from '../../Services/Services_09';
 
 const priorityOptions = [
-    { label: "Low",      value: "LOW"      },
-    { label: "Medium",   value: "MEDIUM"   },
-    { label: "High",     value: "HIGH"      },
-    { label: "Critical", value: "CRITICAL"  },
+    { label: "Low",      value: "LOW",      color: "#2e7d32" },
+    { label: "Medium",   value: "MEDIUM",   color: "#f9a825" },
+    { label: "High",     value: "HIGH",     color: "#ef6c00" },
+    { label: "Critical", value: "CRITICAL", color: "#c62828" },
 ];
 
-const INIT_FORM   = { priority: null,screen:"", escalatedBy: null, description: "", file: null};
-const INIT_ERRORS = { priority: "", screen:"", escalatedBy: "", description: "" };
+const requestTypes = [
+    { key: "Bug",           cls: "bug",           text: "Issue in the existing process" },
+    { key: "Update",        cls: "update",        text: "Improvement in the existing process" },
+    { key: "New Feature",   cls: "feature",       text: "Addition of a new functionality" },
+    { key: "Clarification", cls: "clarification", text: "Need clarification on the existing process" },
+];
+
+// "payment SCREEN" -> "Payment Screen"
+const toTitleCase = (str) =>
+    String(str || "")
+        .trim()
+        .toLowerCase()
+        .replace(/(^|[\s\-_/(])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase());
+
+// Unique, A-Z sorted, Title Case labels (value stays as the original string)
+const buildSortedOptions = (items) =>
+    [...new Set((items || []).filter(Boolean))]
+        .map(item => ({ label: toTitleCase(item), value: item }))
+        .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
+
+const MAX_FILE_MB    = 10;
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+
+// Turn an axios error into a message that explains what actually went wrong
+const getErrorMessage = (err, fallback) => {
+    console.error(fallback, err);
+    const res = err?.response;
+    if (!res) return "Cannot reach the server. Check your connection and try again.";
+    if (res.status === 413)
+        return `File is too large for the server (limit is lower than ${MAX_FILE_MB} MB). Ask the backend team to raise the upload limit.`;
+    const data = res.data;
+    const serverMsg =
+        (typeof data === "string" && data.length < 200 ? data : "") ||
+        data?.message || data?.error || "";
+    return `${serverMsg || fallback} (error ${res.status})`;
+};
+
+const INIT_FORM   = { priority: null, screen: null, escalatedBy: [], description: "", file: null };
+const INIT_ERRORS = { priority: "", screen: "", escalatedBy: "", description: "" };
 
 // ── DescriptionField — isolated, no parent re-render on typing ─────────────────
 const DescriptionField = memo(({ initialValue, error, descRef }) => {
@@ -33,9 +74,11 @@ const DescriptionField = memo(({ initialValue, error, descRef }) => {
     };
     return (
         <TextField
-            label="Description" multiline rows={2} fullWidth
+            label="Describe the issue" multiline rows={3} fullWidth
+            placeholder="Start with a type (Bug / Update / New Feature / Clarification), then explain what you need…"
             value={text} onChange={handleChange}
             error={Boolean(error)} helperText={error || `${text.length}/200`}
+            FormHelperTextProps={{ sx: { textAlign: error ? "left" : "right", marginRight: 0 } }}
         />
     );
 });
@@ -52,22 +95,26 @@ const TicketRaise = () => {
     const [errors,   setErrors]   = useState(INIT_ERRORS);
     const [loading,  setLoading]  = useState(false);
     const [apiError, setApiError] = useState("");
-    const [success,  setSuccess]  = useState(false);
+    const [success,  setSuccess]  = useState("");
 
     const [editMode,         setEditMode]         = useState(false);
     const [editTicketnumber, setEditTicketnumber] = useState(null);
 
-    const descRef            = useRef("");
-    const [descSeed, setDescSeed]       = useState("");
-    const [userDetails, setUserDetails] = useState([]);
+    const descRef    = useRef("");
+    const filtersRef = useRef({ status: "", priority: "", screen: "" });   // filters currently applied to the table
+    const fileRef   = useRef(null);
+    const [descSeed, setDescSeed]           = useState("");
+    const [descKey,  setDescKey]            = useState(0);   // bump to force the description box to remount/clear
+    const [userDetails, setUserDetails]     = useState([]);
     const [screenDetails, setScreenDetails] = useState([]);
 
     useEffect(() => { fetchTickets(); }, [page]);
     useEffect(() => { FetchUserName(); }, []);
     useEffect(() => { FetchScreen(); }, []);
 
-    const escalatedByOptions = userDetails.map(item => ({ label: item, value: item }));
-    const screenOptions = screenDetails.map(item => ({ label: item, value: item }));
+    const escalatedByOptions = useMemo(() => buildSortedOptions(userDetails),   [userDetails]);
+    const screenOptions      = useMemo(() => buildSortedOptions(screenDetails), [screenDetails]);
+
     const FetchUserName = async () => {
         try {
             const response = await fetchUserName();
@@ -96,8 +143,22 @@ const TicketRaise = () => {
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        if (file.size > 2 * 1024 * 1024) { alert("File size should be less than 2 MB"); return; }
+        if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+            alert("Only image or video files are allowed");
+            e.target.value = "";
+            return;
+        }
+        if (file.size > MAX_FILE_BYTES) {
+            alert(`File size should not exceed ${MAX_FILE_MB} MB`);
+            e.target.value = "";
+            return;
+        }
         handleChange("file", file);
+    };
+
+    const removeFile = () => {
+        handleChange("file", null);
+        if (fileRef.current) fileRef.current.value = "";
     };
 
     const validate = () => {
@@ -115,34 +176,45 @@ const TicketRaise = () => {
     const handleEditClick = useCallback((row) => {
         const matchedPriority    = priorityOptions.find(o => o.value === row.priority) || null;
         const matchedEscalatedBy = escalatedByOptions.find(o => o.value === row.escalatedBy) || null;
-        const matchedScreen =
-        screenOptions.find(o => o.value === row.screen) || null;
+        const matchedScreen      = screenOptions.find(o => o.value === row.screen) || null;
         descRef.current = row.description || "";
         setDescSeed(row.description || "");
-        setFormData({ priority: matchedPriority, screen: matchedScreen, escalatedBy: matchedEscalatedBy ? [matchedEscalatedBy] : [], file: null});
+        setDescKey(k => k + 1);
+        setFormData({
+            priority: matchedPriority,
+            screen: matchedScreen,
+            escalatedBy: matchedEscalatedBy ? [matchedEscalatedBy] : [],
+            file: null,
+        });
         setErrors(INIT_ERRORS);
         setApiError("");
-        setSuccess(false);
+        setSuccess("");
         setEditMode(true);
         setEditTicketnumber(row.ticketnumber);
         window.scrollTo({ top: 0, behavior: "smooth" });
-    }, [escalatedByOptions , screenOptions]);
+    }, [escalatedByOptions, screenOptions]);
 
-    const fetchTickets = useCallback(async (status = "", priority = "",screen = "" , currentPage = page) => {
+    const fetchTickets = useCallback(async (
+        status   = filtersRef.current.status,
+        priority = filtersRef.current.priority,
+        screen   = filtersRef.current.screen,
+        currentPage = page
+    ) => {
         try {
-            const response = await fetchTicketRaiseDetail(status, priority,  screen, currentPage, 10);
+            const response = await fetchTicketRaiseDetail(status, priority, screen, currentPage, 10);
             setTableData(response.data.content      || []);
             setTotalPages(response.data.totalPages  || 0);
             setTotalElements(response.data.totalElements || 0);
         } catch (err) { console.error(err); }
     }, [page]);
 
-    const handleSearch = useCallback(({ status = "", priority = "" , screen = "" } = {}) => {
-        setPage(0);
-        fetchTickets(status, priority, screen, 0);
-    }, [fetchTickets]);
+    const handleSearch = useCallback(({ status = "", priority = "", screen = "" } = {}) => {
+        filtersRef.current = { status, priority, screen };
+        if (page === 0) fetchTickets(status, priority, screen, 0);
+        else            setPage(0);          // the [page] effect fetches page 0 with the new filters
+    }, [fetchTickets, page]);
 
-    const handleDownload = useCallback(async ({ status = "", priority = "" , screen = "" } = {}) => {
+    const handleDownload = useCallback(async ({ status = "", priority = "", screen = "" } = {}) => {
         try {
             const response = await downloadTicketRaiseExport(status, priority, screen);
             const blob = new Blob([response.data], {
@@ -171,8 +243,7 @@ const TicketRaise = () => {
         payload.append("priority",    formData.priority?.value || "");
         payload.append("escalatedBy", formData.escalatedBy?.map(i => i.value).join(",") || "");
         payload.append("description", descRef.current.trim());
-        // payload.append("createddate", formData.createddate || "");
-        payload.append("screen", formData.screen?.value || "");
+        payload.append("screen",      formData.screen?.value || "");
 
         if (!isEdit) payload.append("createdby", localStorage.getItem("userName"));
         else         payload.append("updatedby", localStorage.getItem("userName"));
@@ -181,46 +252,48 @@ const TicketRaise = () => {
     };
 
     const handleSubmit = async () => {
-        setApiError(""); setSuccess(false);
+        setApiError(""); setSuccess("");
         const userName = localStorage.getItem("userName");
         if (!userName) { alert("Please re-login"); return; }
         if (!validate()) return;
         try {
             setLoading(true);
             await saveTicketRaise(buildPayload(false));
-            setSuccess(true);
             resetForm();
+            setSuccess("Ticket raised successfully!");
             fetchTickets();
         } catch (err) {
-            setApiError(err?.response?.data?.message || "Failed to raise ticket");
+            setApiError(getErrorMessage(err, "Failed to raise ticket"));
         } finally { setLoading(false); }
     };
 
     const handleEditSubmit = async () => {
-        setApiError(""); setSuccess(false);
+        setApiError(""); setSuccess("");
         const userName = localStorage.getItem("userName");
         if (!userName) { alert("Please re-login"); return; }
         if (!validate()) return;
         try {
             setLoading(true);
             await updateTicketDetail(editTicketnumber, buildPayload(true));
-            setSuccess(true);
             resetForm();
+            setSuccess("Ticket updated successfully!");
             fetchTickets();
         } catch (err) {
-            setApiError(err?.response?.data?.message || "Failed to update ticket");
+            setApiError(getErrorMessage(err, "Failed to update ticket"));
         } finally { setLoading(false); }
     };
 
     const resetForm = () => {
         descRef.current = "";
         setDescSeed("");
+        setDescKey(k => k + 1);
         setFormData(INIT_FORM);
         setErrors(INIT_ERRORS);
         setApiError("");
-        setSuccess(false);
+        setSuccess("");
         setEditMode(false);
         setEditTicketnumber(null);
+        if (fileRef.current) fileRef.current.value = "";
     };
 
     const userName = localStorage.getItem("userName");
@@ -230,23 +303,33 @@ const TicketRaise = () => {
         <div className="TicketRaisedContainer">
             <div className="TicketRaisedInput">
 
-                {/* ── Title ── */}
-                <div className="ComCssFiledName">
-                    <p>{editMode ? `Edit Ticket — #${editTicketnumber}` : "Service Desk"}</p>
+                {/* ── Card header ── */}
+                <div className="tr-card-header">
+                    <div className="tr-card-icon"><SupportAgentIcon fontSize="small" /></div>
+                    <div className="tr-card-titles">
+                        <h2 className="tr-card-title">
+                            {editMode ? `Edit Ticket #${editTicketnumber}` : "Service Desk"}
+                        </h2>
+                        <p className="tr-card-subtitle">
+                            {editMode
+                                ? "Update the details below and save your changes."
+                                : "Raise a new ticket and our team will pick it up."}
+                        </p>
+                    </div>
+                    {editMode && <span className="tr-edit-pill">Editing</span>}
                 </div>
 
                 <div className="TicketRaisedTexfiled">
                     <ThemeProvider theme={TextFiledTheme}>
 
-                        {/* ══ ROW 1 — 3 fields side by side ══ */}
+                        {/* ══ ROW 1 — three selectors ══ */}
                         <div className="tr-field-row">
-
-                            {/* Priority */}
                             <div className="tr-field-col">
                                 <Autocomplete
                                     options={screenOptions}
                                     value={formData.screen}
                                     getOptionLabel={o => o.label || ""}
+                                    isOptionEqualToValue={(o, v) => o.value === v.value}
                                     onChange={(_, v) => handleChange("screen", v)}
                                     renderInput={params => (
                                         <TextField {...params} label="Screen" size="small" fullWidth
@@ -254,12 +337,20 @@ const TicketRaise = () => {
                                     )}
                                 />
                             </div>
+
                             <div className="tr-field-col">
                                 <Autocomplete
                                     options={priorityOptions}
                                     value={formData.priority}
                                     getOptionLabel={o => o.label || ""}
+                                    isOptionEqualToValue={(o, v) => o.value === v.value}
                                     onChange={(_, v) => handleChange("priority", v)}
+                                    renderOption={(props, option) => (
+                                        <li {...props} key={option.value}>
+                                            <span className="tr-dot" style={{ background: option.color }} />
+                                            {option.label}
+                                        </li>
+                                    )}
                                     renderInput={params => (
                                         <TextField {...params} label="Priority" size="small" fullWidth
                                             error={Boolean(errors.priority)} helperText={errors.priority} />
@@ -267,10 +358,10 @@ const TicketRaise = () => {
                                 />
                             </div>
 
-                            {/* Escalated By */}
                             <div className="tr-field-col">
                                 <Autocomplete
                                     multiple filterSelectedOptions
+                                    limitTags={2}
                                     options={escalatedByOptions}
                                     value={formData.escalatedBy || []}
                                     getOptionLabel={o => o.label || ""}
@@ -282,105 +373,82 @@ const TicketRaise = () => {
                                     )}
                                 />
                             </div>
-
-                            {/* Created Date */}
-                            {/* <div className="tr-field-col">
-                                <TextField
-                                    label="Created Date" type="datetime-local"
-                                    size="small" fullWidth
-                                    value={formData.createddate}
-                                    onChange={e => handleChange("createddate", e.target.value)}
-                                    InputLabelProps={{ shrink: true }}
-                                />
-                            </div> */}
                         </div>
 
-                        {/* ══ ROW 2 — Description (full width, unchanged) ══ */}
-                        <DescriptionField
-                            initialValue={descSeed}
-                            error={errors.description}
-                            descRef={descRef}
-                        />
+                        {/* ══ ROW 2 — description + request-type guide ══ */}
+                        <div className="tr-desc-row">
+                            <div className="tr-desc-main">
+                                <DescriptionField
+                                    key={descKey}
+                                    initialValue={descSeed}
+                                    error={errors.description}
+                                    descRef={descRef}
+                                />
+                            </div>
 
-                        {/* ══ ROW 3 — File upload ══ */}
-                        {/* <div className="uploadSection">
-                            <Button
-                                variant="contained" component="label" size="small"
-                                startIcon={<UploadFileIcon />}
-                                sx={{ textTransform:"none", borderRadius:"8px",
-                                      height:"38px", minWidth:"170px", boxShadow:"none" }}>
-                                Upload File
-                                <input type="file" hidden accept="image/*,video/*" onChange={handleFileUpload} />
-                            </Button>
-                            {formData.file && <p className="fileName">{formData.file.name}</p>}
-                        </div> */}
-                        {/* ══ ROW 3 — File upload + Notes ══ */}
-<div className="uploadSection">
-    <div className="uploadBtn">
-        {/* <Button
-            variant="contained" component="label" size="small"
-            startIcon={<UploadFileIcon />}
-            sx={{ textTransform:"none", borderRadius:"8px",
-                  height:"38px", minWidth:"170px", boxShadow:"none" }}>
-            Upload File
-            <input type="file" hidden accept="image/*,video/*" onChange={handleFileUpload} />
-        </Button>
-        {formData.file && <p className="fileName">{formData.file.name}</p>} */}
-    </div>
+                            <aside className="noteSection">
+                                <p className="noteTitle">Request types</p>
+                                {requestTypes.map(t => (
+                                    <p className="noteItem" key={t.key}>
+                                        <span className={`noteKey ${t.cls}`}>{t.key}</span>
+                                        <span className="noteText">{t.text}</span>
+                                    </p>
+                                ))}
+                            </aside>
+                        </div>
 
-  <div className="noteSection">
-    <p className="noteTitle">Note:</p>
-
-    <p className="noteItem">
-        <span className="noteKey bug">Bug</span> → Issue in the existing process
-    </p>
-
-    <p className="noteItem">
-        <span className="noteKey update">Update</span> → Improvement in the existing process
-    </p>
-
-    <p className="noteItem">
-        <span className="noteKey feature">New Feature</span> → Addition of a new functionality
-    </p>
-
-    <p className="noteItem">
-        <span className="noteKey clarification">Clarification</span> → Need clarification on the existing process
-    </p>
-</div>
-</div>
-
-                        {apiError && <p className="apiError">{apiError}</p>}
-                        {success  && (
-                            <p className="apiSuccess">
-                                {editMode ? "Ticket updated successfully!" : "Ticket raised successfully!"}
-                            </p>
+                        {/* ── Feedback banners ── */}
+                        {apiError && (
+                            <div className="tr-banner tr-banner--error" role="alert">
+                                <ErrorOutlineIcon fontSize="small" /> <span>{apiError}</span>
+                            </div>
+                        )}
+                        {success && (
+                            <div className="tr-banner tr-banner--success" role="status">
+                                <CheckCircleOutlineIcon fontSize="small" />
+                                <span>{success}</span>
+                            </div>
                         )}
 
                     </ThemeProvider>
                 </div>
 
-                {/* ── Buttons ── */}
-                <div className="ComCssButton9">
-                    <Button
-            variant="contained" component="label" size="small"
-            startIcon={<UploadFileIcon />}
-            sx={{ textTransform:"none", borderRadius:"8px",
-                  height:"31px", minWidth:"130px",marginTop:"9px", boxShadow:"none" }}>
-            Upload File
-            <input type="file" hidden accept="image/*,video/*" onChange={handleFileUpload} />
-        </Button>
-        {formData.file && <p className="fileName">{formData.file.name}</p>}
-                    <button className="ComCssSubmitButton"
-                        onClick={editMode ? handleEditSubmit : handleSubmit}
-                        disabled={loading}>
-                        {loading
-                            ? (editMode ? "Updating…" : "Submitting…")
-                            : (editMode ? "Edit"       : "Submit")}
-                    </button>
-                    <button className="ComCssDeleteButton" onClick={resetForm} disabled={loading}>
-                        Cancel
-                    </button>
-                    
+                {/* ── Action bar ── */}
+                <div className="tr-action-bar">
+                    <div className="tr-attach">
+                        <label className="tr-attach-btn">
+                            <UploadFileIcon fontSize="small" />
+                            <span>Attach file</span>
+                            <input
+                                ref={fileRef} type="file" hidden
+                                accept="image/*,video/*" onChange={handleFileUpload}
+                            />
+                        </label>
+                        {formData.file ? (
+                            <span className="tr-file-chip" title={formData.file.name}>
+                                <span className="fileName">{formData.file.name}</span>
+                                <button type="button" className="tr-file-remove"
+                                    onClick={removeFile} aria-label="Remove file">
+                                    <CloseIcon style={{ fontSize: 14 }} />
+                                </button>
+                            </span>
+                        ) : (
+                            <span className="tr-attach-hint">Image or video · max {MAX_FILE_MB} MB</span>
+                        )}
+                    </div>
+
+                    <div className="tr-actions">
+                        <button className="tr-btn-secondary" onClick={resetForm} disabled={loading}>
+                            Cancel
+                        </button>
+                        <button className="tr-btn-primary"
+                            onClick={editMode ? handleEditSubmit : handleSubmit}
+                            disabled={loading}>
+                            {loading
+                                ? (editMode ? "Saving…"     : "Submitting…")
+                                : (editMode ? "Save changes" : "Submit Ticket")}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -397,7 +465,6 @@ const TicketRaise = () => {
                 userName={userName}
                 userId={userId}
                 screenDetails={screenDetails}
-                
             />
         </div>
     );

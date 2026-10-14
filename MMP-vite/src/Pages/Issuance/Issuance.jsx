@@ -420,10 +420,10 @@ const Issuance = () => {
 
         const submitData = pickTicketData.flatMap(row => {
             if (row.batchesQty && row.batchesQty.length > 0) {
-                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no, productName: row.productname }));
+                return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no, productName: row.productname,partcode: row.partcode }));
             }
             ticketno = row.rec_ticket_no;
-            return [{ recTicketNo: row.rec_ticket_no }];
+            return [{ recTicketNo: row.rec_ticket_no ,  partcode: row.partcode}];
         });
 
         ticketno = pickTicketData[0]?.rec_ticket_no;
@@ -773,8 +773,13 @@ const Issuance = () => {
 
         const ticketno = pickTicketData[0]?.rec_ticket_no;
 
+// const ticketno = pickTicketData[0]?.rec_ticket_no;
 
-        rejectedIssuanceTicket(ticketno, formData1.rejectedComment)
+    const issuanceTicket = {
+        recTicketNo: ticketno,
+        partcode: pickTicketData.map(row => row.partcode)
+    };
+        rejectedIssuanceTicket(issuanceTicket, formData1.rejectedComment)
             .then(() => {
                 setSuccessMessage("Rejected Successfully");
                 setShowSuccessPopup(true);
@@ -790,7 +795,14 @@ const Issuance = () => {
                 setShowTable(false);
                 // fetchData();
             })
-            .catch(err => console.error(err));
+             .catch(err => {
+            const message =
+                err.response?.data ||
+                "Failed to reject ticket";
+
+            setErrorMessage(message);
+            setShowErrorPopup(true);
+        });
     };
 
 
