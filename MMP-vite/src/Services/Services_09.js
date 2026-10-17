@@ -758,3 +758,11 @@ const Get_TopCardDetailRequests = `${url}/storeDashboard/TopCardDetailRequests`;
 export const getTopCardDetailRequests = (params) => {
   return axios.get(Get_TopCardDetailRequests, { params });
 };
+
+const Post_DownloadUnitComponentMMP = `${url}/unitcomponent/downloadunitcomponentReportSeprateMMP`;
+
+export const downloadUnitComponentMMP = (formData, config = {}) =>
+  axios.post(Post_DownloadUnitComponentMMP, formData, {
+    responseType: "blob",      // ✅ MUST
+    ...config,                 // ✅ onDownloadProgress etc.
+  });

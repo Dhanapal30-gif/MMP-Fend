@@ -5,7 +5,7 @@ import ReworkerTextFiled7 from "../../components/Reworker/ReworkerTextFiled7";
 import { FaFileExcel } from "react-icons/fa";
 import CustomDialog from "../../components/Com_Component/CustomDialog";
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
-import { downloadStockOverviewReportFilter, fetchPartcodeReport, fetchTransferLocation, getStockReportDetailFilter, getStockReportOverViewFilter, getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, } from '../../Services/Services_09';
+import { downloadStockOverviewReportFilter, downloadUnitComponentMMP, fetchPartcodeReport, fetchTransferLocation, getStockReportDetailFilter, getStockReportOverViewFilter, getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, } from '../../Services/Services_09';
 import { getProductAndPartcode } from '../../Services/Services';
 
 const UnitConsumptionCostReport = () => {
@@ -165,6 +165,56 @@ const UnitConsumptionCostReport = () => {
         setShowTable(false);
 
     }
+
+
+const exportToExcel = () => {
+      const hasMonthYear = formData.monthYear && String(formData.monthYear).trim() !== "";
+    const hasProduct = formData.productname && String(formData.productname).trim() !== "";
+
+    if (!hasMonthYear) {
+        alert("Please select Month-Year to download");
+        return;
+    }
+    if (hasProduct) {
+        alert("Download is allowed only for Month-Year. Please clear the Product Name");
+        return;
+    }
+    setLoading(true);
+    setDownloadDone(false);
+    setDownloadProgress(null);
+
+    downloadUnitComponentMMP(formData, {
+        onDownloadProgress: (e) => {
+            if (e.total) setDownloadProgress(Math.round((e.loaded * 100) / e.total));
+        },
+    })
+        .then((response) => {
+            const blob = new Blob([response.data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "UnitComponentReport.xlsx");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            setDownloadDone(true);
+        })
+        .catch(async (error) => {
+    const text = await error.response?.data?.text?.();
+    console.error("Download failed:", text || error);
+    alert("Download failed");
+})
+        .finally(() => {
+            setLoading(false);
+            setDownloadProgress(null);
+        });
+};
+
+
+
     return (
         <div className='ComCssContainer'>
             <div className='ComCssInput'>
@@ -190,6 +240,17 @@ const UnitConsumptionCostReport = () => {
             {showTable &&
                 <div className='ComCssTable'>
                     <h5 className='ComCssTableName'>Report Detail</h5>
+                    <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
+    <button className="btn btn-success" onClick={exportToExcel} disabled={loading}>
+        {loading
+            ? downloadProgress !== null
+                ? `Downloading... ${downloadProgress}%`
+                : "Downloading..."
+            : downloadDone
+                ? "✅ Done"
+                : (<><FaFileExcel /> Export</>)}
+    </button>
+</div>
                     {/* <div className="d-flex justify-content-between align-items-center mb-3" style={{ marginTop: '9px' }}>
                                     <button className="btn btn-success" onClick={() => exportToExcel(searchText)} disabled={loading}>
                                         {loading
