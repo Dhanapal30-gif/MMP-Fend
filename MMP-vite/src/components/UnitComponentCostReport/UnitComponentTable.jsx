@@ -23,6 +23,7 @@ const fields = [
 
     "subModuleCost",
         "otherCost",
+        "dtlIssuanceCost",
     "ptlIssuanceCost",
     "totalCost",
     "averageCostPerUnit",
@@ -37,7 +38,8 @@ const customConfig = {
     dateyear: { label: "Month_year" },
     totalrepairedQty: { label: "Total Repaired Qty" },
     subModuleCost: { label: "Sub Module Cost €" },
-    otherCost:{label:"DTL Issuance Cost €"},
+    dtlIssuanceCost:{label:"DTL Issuance Cost €"},
+    otherCost:{label:"Other Cost €"},
     ptlIssuanceCost:{label:"PTL Issuance Cost €"},
     totalCost:{label:"Total Cost €"},
     averageCostPerUnit:{label:"Average Cost Per_Unit €"},
