@@ -468,43 +468,60 @@ const Issuance = () => {
         }
     };
 
+
     // const handleIssue = (e) => {
     //     e.preventDefault();
+    //     setLoading(true);
     //     let recTicketNo;
     //     const submitData = pickTicketData.flatMap(row => {
     //         if (row.batchesQty && row.batchesQty.length > 0) {
-    //             return row.batchesQty.map(bq => ({ recTicketNo: row.rec_ticket_no }));
+    //             return row.batchesQty.map(bq => ({
+    //                 recTicketNo: row.rec_ticket_no,
+    //                 partcode: row.partcode,
+    //                 batchCode: bq.batchCode,
+    //                 issue_qty: bq.savedQty,
+    //                 location: bq.location
+    //             }));
     //         }
     //         recTicketNo = row.rec_ticket_no;
-    //         return [{ recTicketNo: row.rec_ticket_no }];
+    //         return [{
+    //             recTicketNo: row.rec_ticket_no,
+    //             partcode: row.partcode
+    //         }];
     //     });
 
+    //     recTicketNo = pickTicketData[0]?.rec_ticket_no;
+
+    //     // console.log("recTicketNo", recTicketNo);
+    //     // console.log("recTicketNo", recTicketNo);
     //     if (recTicketNo && recTicketNo.startsWith("PTL")) {
     //         savePtlIssue(submitData)
     //             .then((response) => {
-    //                 // alert(response.data.message);
     //                 setSuccessMessage(response.data.message);
-    //                 setShowSuccessPopup(true)
+    //                 setShowSuccessPopup(true);
     //                 fetchRequestedTickets("PTL");
     //                 setHideDeliverButton(false);
     //                 setHidePutButton(false);
     //                 setHideIssueButton(true);
     //                 setPickTicketData([]);
     //                 setShowTable(false);
-
+    //                 fetchData();
     //             })
     //             .catch((error) => {
     //                 alert(error.response?.data?.message || "Something went wrong!");
-    //             });
+    //             })
+    //             .finally(() => {
+    //             setLoading(false);   // ← added, was missing entirely
+    //         });
     //     } else {
     //         const submitDataWithExtras = submitData.map(item => ({
     //             ...item,
     //             nsn: formData.newSerialNumber,
-    //             issued_comments: formData.Comments
+    //             issued_comments: formData.Comments,
+    //             // receiverName:formData.receiverName
     //         }));
     //         saveIssue(submitDataWithExtras)
     //             .then((response) => {
-    //                 // alert(response.data.message);
     //                 setSuccessMessage(response.data.message);
     //                 setShowSuccessPopup(true);
     //                 fetchRequestedTickets("DTL");
@@ -513,86 +530,106 @@ const Issuance = () => {
     //                 setHideIssueButton(true);
     //                 setPickTicketData([]);
     //                 setShowTable(false);
-    //                 w
+    //                 fetchData();
     //             })
     //             .catch((error) => {
     //                 alert(error.response?.data?.message || "Something went wrong!");
+    //              setLoading(false);
+    //             }).finally(() => {
+    //                 setLoading(false); // <-- fixed .finally usage
     //             });
     //     }
     // };
 
 
     const handleIssue = (e) => {
-        e.preventDefault();
-        setLoading(true);
-        let recTicketNo;
-        const submitData = pickTicketData.flatMap(row => {
-            if (row.batchesQty && row.batchesQty.length > 0) {
-                return row.batchesQty.map(bq => ({
-                    recTicketNo: row.rec_ticket_no,
-                    partcode: row.partcode,
-                    batchCode: bq.batchCode,
-                    issue_qty: bq.savedQty,
-                    location: bq.location
-                }));
-            }
-            recTicketNo = row.rec_ticket_no;
-            return [{
+    e.preventDefault();
+    setLoading(true);
+    let recTicketNo;
+    const submitData = pickTicketData.flatMap(row => {
+        if (row.batchesQty && row.batchesQty.length > 0) {
+            return row.batchesQty.map(bq => ({
                 recTicketNo: row.rec_ticket_no,
-                partcode: row.partcode
-            }];
-        });
-
-        recTicketNo = pickTicketData[0]?.rec_ticket_no;
-
-        // console.log("recTicketNo", recTicketNo);
-        // console.log("recTicketNo", recTicketNo);
-        if (recTicketNo && recTicketNo.startsWith("PTL")) {
-            savePtlIssue(submitData)
-                .then((response) => {
-                    setSuccessMessage(response.data.message);
-                    setShowSuccessPopup(true);
-                    fetchRequestedTickets("PTL");
-                    setHideDeliverButton(false);
-                    setHidePutButton(false);
-                    setHideIssueButton(true);
-                    setPickTicketData([]);
-                    setShowTable(false);
-                    fetchData();
-                })
-                .catch((error) => {
-                    alert(error.response?.data?.message || "Something went wrong!");
-                })
-                .finally(() => {
-                setLoading(false);   // ← added, was missing entirely
-            });
-        } else {
-            const submitDataWithExtras = submitData.map(item => ({
-                ...item,
-                nsn: formData.newSerialNumber,
-                issued_comments: formData.Comments,
-                // receiverName:formData.receiverName
+                partcode: row.partcode,
+                batchcode: bq.batchCode,                 // ✅ lowercase key (backend reads "batchcode")
+                issue_qty: String(bq.savedQty ?? ""),     // ✅ always a string
+                location: bq.location
             }));
-            saveIssue(submitDataWithExtras)
-                .then((response) => {
+        }
+        recTicketNo = row.rec_ticket_no;
+        return [{
+            recTicketNo: row.rec_ticket_no,
+            partcode: row.partcode
+            // no batch → backend validates using saved issuance history
+        }];
+    });
+
+    recTicketNo = pickTicketData[0]?.rec_ticket_no;
+
+    // console.log("Issue payload", submitData);              // ✅ check batchcode is filled
+
+    if (recTicketNo && recTicketNo.startsWith("PTL")) {
+        savePtlIssue(submitData)
+            .then((response) => {
+                if (response.data.success === false) {      // ✅ show real result
+                    // alert(response.data.message);
+                       setErrorMessage(response.data.message);
+                    setShowErrorPopup(true);
+                    return;
+                } else {
                     setSuccessMessage(response.data.message);
                     setShowSuccessPopup(true);
-                    fetchRequestedTickets("DTL");
-                    setHideDeliverButton(false);
-                    setHidePutButton(false);
-                    setHideIssueButton(true);
-                    setPickTicketData([]);
-                    setShowTable(false);
-                    fetchData();
-                })
-                .catch((error) => {
-                    alert(error.response?.data?.message || "Something went wrong!");
-                 setLoading(false);
-                }).finally(() => {
-                    setLoading(false); // <-- fixed .finally usage
-                });
-        }
-    };
+                }
+                fetchRequestedTickets("PTL");
+                setHideDeliverButton(false);
+                setHidePutButton(false);
+                setHideIssueButton(true);
+                setPickTicketData([]);
+                setShowTable(false);
+                fetchData();
+            })
+            .catch((error) => {
+                // alert(error.response?.data?.message || "Something went wrong!");
+                 setErrorMessage(error.response?.data?.message || "Something went wrong!");
+    setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    } else {
+        const submitDataWithExtras = submitData.map(item => ({
+            ...item,
+            nsn: formData.newSerialNumber,
+            issued_comments: formData.Comments,
+        }));
+        saveIssue(submitDataWithExtras)
+            .then((response) => {
+                if (response.data.success === false) {      // ✅ show real result
+                    // alert(response.data.message);
+                            setErrorMessage(response.data.message || "Issue failed");
+                    setShowErrorPopup(true);
+                } else {
+                    setSuccessMessage(response.data.message);
+                    setShowSuccessPopup(true);
+                }
+                fetchRequestedTickets("DTL");
+                setHideDeliverButton(false);
+                setHidePutButton(false);
+                setHideIssueButton(true);
+                setPickTicketData([]);
+                setShowTable(false);
+                fetchData();
+            })
+            .catch((error) => {
+                // alert(error.response?.data?.message || "Something went wrong!");
+                 setErrorMessage(error.response?.data?.message || "Something went wrong!");
+    setShowErrorPopup(true);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+};
 
 
     // const useDebounce = (value, delay) => {
