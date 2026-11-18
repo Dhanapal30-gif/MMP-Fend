@@ -1,4 +1,4 @@
- export const url = 'http://localhost:8089';
+//  export const url = 'http://localhost:8089';
 
 //  export const responseSecret = 'MMPResponseSecret2026@SecureKey123456';
 
@@ -6,7 +6,7 @@
 
 //Nokia
 
-// export const url = 'http://10.134.135.179:8089';
+export const url = 'http://10.134.135.179:8089';
 
 
 
