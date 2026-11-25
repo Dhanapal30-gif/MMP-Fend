@@ -105,18 +105,18 @@ export const fetchRequestDetail = (page, userId, size) => {
 
 // Services-Rc.js — add status and priority params
 const fetchTicketRaise = `${url}/ticketRaiseCon/fetchTicketDetails`;
-export const fetchTicketRaiseDetail = (status, priority,  screen, page, size) => {
+export const fetchTicketRaiseDetail = (status, priority,  screen, page, size, ticketNo = "", clientStatus = "") => {
     return axios.get(fetchTicketRaise, {
-        params: { status, priority,  screen, page, size },
+        params: { status, priority,  screen, page, size, ticketNo, clientStatus },
     });
 };
 
 
 // Calls backend export endpoint — returns Excel/CSV as a blob
 const Get_DownloadTicketRaise = `${url}/ticketRaiseCon/exportRequesterTable-excel`;
-export const downloadTicketRaiseExport = (status = "", priority = "", screen = "") =>
+export const downloadTicketRaiseExport = (status = "", priority = "", screen = "", ticketNo = "", clientStatus = "") =>
     axios.get(Get_DownloadTicketRaise, {
-        params: { status, priority, screen },   
+        params: { status, priority, screen, ticketNo, clientStatus },
         responseType: "blob",          
     });
 
