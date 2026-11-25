@@ -117,7 +117,7 @@
 /* ── Row 2: description + guide ── */
 .tr-desc-row {
     display:               grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr);
     gap:                   18px;
     align-items:           stretch;
 }

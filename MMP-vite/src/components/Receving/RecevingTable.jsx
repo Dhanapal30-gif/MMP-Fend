@@ -84,6 +84,25 @@ export const RecevingTable = ({ formData, filteredAddData, handleFieldChange, se
     //     updatedData.forEach((row, idx) => handleFieldChange(idx, "expiryAutoSet", row.expiryAutoSet));
     // }, [filteredAddData]);
 
+    // Auto-calculate Total Value = Unit Price × Receiving Qty (user can still override it in the Total Value field).
+    // Total Value € is derived with the same formula used by the Total Value field (total / ccf).
+    const applyAutoTotalValue = (key, row, qtyValue) => {
+        const unitPrice = parseFloat(row.unitprice);
+        if (isNaN(unitPrice)) return; // no unit price (e.g. edit mode) -> keep existing behaviour
+
+        const qty = parseFloat(qtyValue);
+        if (isNaN(qty)) {
+            handleFieldChange(key, 'totalValue', '');
+            handleFieldChange(key, 'totalValueEuro', '');
+            return;
+        }
+
+        const total = Number((qty * unitPrice).toFixed(2));
+        handleFieldChange(key, 'totalValue', String(total));
+        const ccf = parseFloat(row.ccf) || 1;
+        handleFieldChange(key, 'totalValueEuro', (total / ccf).toFixed(2));
+    };
+
     const formatDate = (date) => {
     const d = new Date(date);
     const month = String(d.getMonth() + 1).padStart(2, '0'); // months 0-11
@@ -269,7 +288,12 @@ const key = `${row.ponumber}-${row.partcode}`;
     setErrorMessage(`Receiving Qty cannot be more than ${qtyType}`);
     setShowErrorPopup(true);
     handleFieldChange(key, "recevingQty", "");
+    applyAutoTotalValue(key, row, "");
     return;
+  }
+
+  if (/^\d*\.?\d*$/.test(value) || value === "") {
+    applyAutoTotalValue(key, row, value);
   }
 
   if (formErrors[`recevingQty-${key}`] && Number(value) > 0) {

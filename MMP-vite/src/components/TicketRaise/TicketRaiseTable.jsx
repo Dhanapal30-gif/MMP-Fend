@@ -30,14 +30,26 @@ const STATUS_STYLES = {
     PENDING: { bg: "#fff3e0", color: "#e65100", dot: "#fb8c00" },
     HOLD:        { bg: "#f3e5f5", color: "#6a1b9a", dot: "#ab47bc" },
 };
+const CLIENT_STATUS_STYLES = {
+    OPEN:       { bg: "#e3f2fd", color: "#1565c0", dot: "#1e88e5", label: "Open" },
+    CLOSED:     { bg: "#e8f5e9", color: "#2e7d32", dot: "#43a047", label: "Closed" },
+    UNRESOLVED: { bg: "#fdecec", color: "#c62828", dot: "#e53935", label: "Unresolved" },
+};
 const PRIORITY_STYLES = {
     LOW: { bg: "#e3f2fd", color: "#1565c0" },
     MEDIUM: { bg: "#fff3e0", color: "#e65100" },
     HIGH: { bg: "#fbe9e7", color: "#bf360c" },
     CRITICAL: { bg: "#f3e5f5", color: "#6a1b9a" },
 };
+// Client Status filter — OPEN = client_status NULL / blank (handled in backend)
+const CLIENT_STATUS_FILTER_OPTIONS = [
+    { label: "Client Status", value: "" },
+    { label: "Open",          value: "OPEN" },
+    { label: "Closed",        value: "CLOSED" },
+    { label: "Unresolved",    value: "UNRESOLVED" },
+];
 const STATUS_OPTIONS = [
-    { label: "All Status", value: "" },
+    { label: "Orka Status", value: "" },
     { label: "Open", value: "OPEN" },
     { label: "In Progress", value: "In Progress" },
     { label: "Completed", value: "COMPLETED" },
@@ -53,10 +65,12 @@ const PRIORITY_OPTIONS = [
     { label: "Critical", value: "CRITICAL" },
 ];
 const CATEGORIES = [
-    { value: "Bug", label: "Bug", icon: "🐛" },
-    { value: "New Feature", label: "New Feature", icon: "📈" },
-    { value: "Update", label: "Update", icon: "🔄" },
-    { value: "Clarification", label: "Clarification", icon: "❓" },
+    { value: "Bug",           label: "Bug",           icon: "🐛", hint: "Something broke",    color: "#e53935", tint: "#fdecec" },
+    { value: "New Feature",   label: "New Feature",   icon: "✨", hint: "New functionality",  color: "#7b1fa2", tint: "#f5e9fb" },
+    { value: "Update",        label: "Update",        icon: "🔄", hint: "Improve existing",   color: "#1e88e5", tint: "#e8f2fd" },
+    { value: "Clarification", label: "Clarification", icon: "❓", hint: "Needs explanation",  color: "#f59e0b", tint: "#fef5e4" },
+    { value: "Repeated",      label: "Repeated",      icon: "🔁", hint: "Issue came back",    color: "#00897b", tint: "#e3f5f3" },
+    { value: "Support",       label: "Support",       icon: "🎧", hint: "Client end mistake", color: "#ef6c00", tint: "#fff1e6" },
 ];
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -108,7 +122,17 @@ const ResponsePopup = ({ ticket, onClose, onSubmit, userName, userId }) => {
    const [Hold, setHold] = useState(ticket.status === "HOLD");
     const [errors, setErrors] = useState({});
 
-    const handleClear = () => { setSelectedCat(ticket.issueCategory || null); setCommitDate(normalizeDate(ticket.commitmentDate)); setRemarks(ticket.remarks || ""); setCompleted(ticket.status === "CLOSED"); setHold(ticket.status === "Hold"); setErrors({}); };
+    // Earliest allowed commitment date = ticket creation date (YYYY-MM-DD)
+    const minCommitDate = (typeof ticket.createddate === "string" && /^\d{4}-\d{2}-\d{2}/.test(ticket.createddate))
+        ? ticket.createddate.slice(0, 10)
+        : normalizeDate(ticket.createddate);
+    const fmtDMY = (iso) => iso ? iso.split("-").reverse().join("-") : "";
+    const validateCommitDate = (val) =>
+        val && minCommitDate && val < minCommitDate
+            ? `Commitment date cannot be before the ticket creation date (${fmtDMY(minCommitDate)})`
+            : null;
+
+    const handleClear = () => { setSelectedCat(ticket.issueCategory || null); setCommitDate(normalizeDate(ticket.commitmentDate)); setRemarks(ticket.remarks || ""); setCompleted(ticket.status === "CLOSED"); setHold(ticket.status === "HOLD"); setErrors({}); };
     // const handleSubmit = async () => {
     //     const newErrors = {};
     //     if (!selectedCat) newErrors.cat = "Please select a category";
@@ -127,6 +151,7 @@ const ResponsePopup = ({ ticket, onClose, onSubmit, userName, userId }) => {
     const newErrors = {};
     if (!selectedCat) newErrors.cat = "Please select a category";
         if (!Hold && !commitDate) newErrors.date = "Please select a commitment date"; // ← only required if NOT Hold
+        else if (validateCommitDate(commitDate)) newErrors.date = validateCommitDate(commitDate);
     // if (!commitDate) newErrors.date = "Please select a commitment date";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
 
@@ -148,39 +173,229 @@ const ResponsePopup = ({ ticket, onClose, onSubmit, userName, userId }) => {
     onClose();
 };
 
-    return (
-        <div className="rp-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
-            <div className="rp-card">
-                <div className="rp-header"><div className="rp-header-left"><div className="rp-icon-wrap">💬</div><div><p className="rp-title">Ticket Response</p><span className="rp-tkt-id"># {ticket.ticketnumber}</span></div></div><button className="rp-close" onClick={onClose}><CloseIcon /></button></div>
-                <div className="rp-body">
-                    <div className="rp-field"><label className="rp-label rp-required">Issue Category</label><div className={`rp-cat-grid${errors.cat ? " err" : ""}`}>{CATEGORIES.map(cat => (<div key={cat.value} className={`rp-cat-chip${selectedCat === cat.value ? " selected" : ""}`} onClick={() => { setSelectedCat(cat.value); setErrors(e => ({ ...e, cat: null })); }}><span className="rp-cat-icon">{cat.icon}</span>{cat.label}</div>))}</div>{errors.cat && <p className="rp-err-msg">{errors.cat}</p>}</div>
-                    <div className="rp-field"><label className="rp-label rp-required">Commitment Date</label><input type="date" className={`rp-input${errors.date ? " err" : ""}`} value={commitDate} onChange={e => { setCommitDate(e.target.value); setErrors(er => ({ ...er, date: null })); }} />{errors.date && <p className="rp-err-msg">{errors.date}</p>}</div>
-                    <div className="rp-field" style={{ marginBottom: 0, marginTop: 14 }}><label className="rp-label">Mark as Completed</label><label style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", border: `1.5px solid ${completed ? "#3949ab" : "#e0e0e0"}`, borderRadius: 8, background: completed ? "#e8eaff" : "#fafafa", cursor: "pointer", transition: "all 0.16s", userSelect: "none", width: "fit-content" }}><input
-    type="checkbox"
-    checked={completed}
-    onChange={e => {
-        setCompleted(e.target.checked);
-        if (e.target.checked) setHold(false); // ← uncheck Hold
-    }}
-    style={{ width: 16, height: 16, accentColor: "#3949ab", cursor: "pointer" }}
-/><span style={{ fontSize: 13, fontWeight: completed ? 600 : 400, color: completed ? "#3949ab" : "#424242" }}>{completed ? "✅ Marked as Completed" : "Mark this ticket as completed"}</span></label></div>
-                    <div className="rp-field" style={{ marginBottom: 0, marginTop: 14 }}><label className="rp-label">Mark as Hold</label><label style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", border: `1.5px solid ${Hold ? "#3949ab" : "#e0e0e0"}`, borderRadius: 8, background: Hold ? "#e8eaff" : "#fafafa", cursor: "pointer", transition: "all 0.16s", userSelect: "none", width: "fit-content" }}><input
-    type="checkbox"
-    checked={Hold}
-    onChange={e => {
-        setHold(e.target.checked);
-        if (e.target.checked) setCompleted(false); // ← uncheck Completed
-    }}
-    style={{ width: 16, height: 16, accentColor: "#3949ab", cursor: "pointer" }}
-/><span style={{ fontSize: 13, fontWeight: Hold ? 600 : 400, color: Hold ? "#3949ab" : "#424242" }}>{Hold ? "✅ Marked as Hold" : "Mark this ticket as hold"}</span></label></div>
+    const statusToggles = [
+        { key: "completed", on: completed, icon: "✅", title: "Completed", sub: "Close this ticket", tone: "green",
+          set: v => { setCompleted(v); if (v) setHold(false); } },
+        { key: "hold", on: Hold, icon: "⏸️", title: "On Hold", sub: "Pause for now", tone: "amber",
+          set: v => { setHold(v); if (v) setCompleted(false); } },
+    ];
 
-                    <div className="rp-field" style={{ marginBottom: 0 }}><label className="rp-label">Remarks</label><textarea className="rp-textarea" placeholder="Add remarks or additional context…" value={remarks} onChange={e => setRemarks(e.target.value)} rows={4} /></div>
+    return (
+        <div className="rp-backdrop">
+            <div className="rp-card">
+                {/* ── Header ── */}
+                <div className="rp-header">
+                    <div className="rp-header-left">
+                        <div className="rp-icon-wrap">💬</div>
+                        <div>
+                            <p className="rp-title">Ticket Response</p>
+                            <span className="rp-tkt-id"># {ticket.ticketnumber}</span>
+                        </div>
+                    </div>
+                    <button className="rp-close" onClick={onClose} aria-label="Close"><CloseIcon /></button>
                 </div>
-                <div className="rp-footer"><button className="rp-btn-clear" onClick={handleClear}>🗑 Clear</button><button className="rp-btn-submit" onClick={handleSubmit}>✈ Submit</button></div>
+
+                <div className="rp-body">
+                    {/* ── Category ── */}
+                    <div className="rp-field">
+                        <label className="rp-label rp-required">Issue Category</label>
+                        <div className={`rp-cat-grid${errors.cat ? " err" : ""}`}>
+                            {CATEGORIES.map(cat => {
+                                const active = selectedCat === cat.value;
+                                return (
+                                    <button
+                                        type="button"
+                                        key={cat.value}
+                                        className={`rp-cat-chip${active ? " selected" : ""}`}
+                                        style={{ "--c": cat.color, "--t": cat.tint }}
+                                        onClick={() => { setSelectedCat(cat.value); setErrors(e => ({ ...e, cat: null })); }}
+                                    >
+                                        {active && <span className="rp-cat-check">✓</span>}
+                                        <span className="rp-cat-icon">{cat.icon}</span>
+                                        <span className="rp-cat-label">{cat.label}</span>
+                                        <span className="rp-cat-hint">{cat.hint}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        {errors.cat && <p className="rp-err-msg">{errors.cat}</p>}
+                    </div>
+
+                    {/* ── Commitment date ── */}
+                    <div className="rp-field">
+                        <label className={`rp-label${Hold ? "" : " rp-required"}`}>Commitment Date</label>
+                        <div className="rp-date-wrap">
+                            <span className="rp-date-icon">📅</span>
+                            <input
+                                type="date"
+                                className={`rp-input rp-date${errors.date ? " err" : ""}`}
+                                value={commitDate}
+                                min={minCommitDate || undefined}
+                                onChange={e => { const v = e.target.value; setCommitDate(v); setErrors(er => ({ ...er, date: validateCommitDate(v) })); }}
+                            />
+                        </div>
+                        {errors.date && <p className="rp-err-msg">{errors.date}</p>}
+                    </div>
+
+                    {/* ── Status toggles ── */}
+                    <div className="rp-field">
+                        <label className="rp-label">Ticket Status</label>
+                        <div className="rp-status-grid">
+                            {statusToggles.map(s => (
+                                <label key={s.key} className={`rp-status-card rp-${s.tone}${s.on ? " on" : ""}`}>
+                                    <input type="checkbox" checked={s.on} onChange={e => s.set(e.target.checked)} />
+                                    <span className="rp-status-icon">{s.icon}</span>
+                                    <span className="rp-status-text">
+                                        <span className="rp-status-title">{s.title}</span>
+                                        <span className="rp-status-sub">{s.on ? "Selected" : s.sub}</span>
+                                    </span>
+                                    <span className="rp-switch"><span className="rp-switch-knob" /></span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* ── Remarks ── */}
+                    <div className="rp-field" style={{ marginBottom: 0 }}>
+                        <label className="rp-label">Remarks</label>
+                        <textarea
+                            className="rp-textarea"
+                            placeholder="Add remarks or additional context…"
+                            value={remarks}
+                            onChange={e => setRemarks(e.target.value)}
+                            rows={3}
+                        />
+                    </div>
+                </div>
+
+                {/* ── Footer ── */}
+                <div className="rp-footer">
+                    <button className="rp-btn-clear" onClick={handleClear}>↺ Reset</button>
+                    <button className="rp-btn-submit" onClick={handleSubmit}>Submit Response <span className="rp-arrow">→</span></button>
+                </div>
             </div>
         </div>
     );
 };
+// ── Client Status Popup (shown for COMPLETED tickets) ─────────────────────────
+const CLIENT_STATUS_OPTIONS = [
+    { value: "CLOSED",     label: "Closed",     icon: "✅", hint: "Issue is resolved",   tone: "green" },
+    { value: "UNRESOLVED", label: "Unresolved", icon: "⚠️", hint: "Issue still exists", tone: "red" },
+];
+
+const ClientStatusPopup = ({ ticket, onClose, onSubmit }) => {
+    const [clientStatus, setClientStatus] = useState("");
+    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [remarks, setRemarks] = useState("");
+    const [remarksError, setRemarksError] = useState("");
+
+    // Remarks already saved for this ticket are kept as-is (backend never overwrites them)
+    const existingRemarks = String(ticket.unresolvedRemarks ?? "").trim();
+    const isUnresolved = clientStatus === "UNRESOLVED";
+    const remarksRequired = isUnresolved && !existingRemarks;
+
+    const handleReset = () => { setClientStatus(""); setError(""); setRemarks(""); setRemarksError(""); };
+
+    const handleSubmit = async () => {
+        if (!clientStatus) { setError("Please select a ticket status"); return; }
+        if (remarksRequired && !remarks.trim()) { setRemarksError("Unresolved Remarks is required"); return; }
+        setSubmitting(true);
+        try {
+            if (onSubmit) await onSubmit({
+                ticketnumber: ticket.ticketnumber,
+                clientStatus,
+                unresolvedRemarks: remarksRequired ? remarks.trim() : "",
+            });
+            onClose();
+        } catch (e) {
+            // Show the backend message (e.g. "You do not have permission to update this ticket")
+            setError(e?.response?.data?.message || "Failed to submit. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="rp-backdrop">
+            <div className="rp-card cs-card">
+                <div className="rp-header">
+                    <div className="rp-header-left">
+                        <div className="rp-icon-wrap">📝</div>
+                        <div>
+                            <p className="rp-title">Client Status</p>
+                            <span className="rp-tkt-id">Confirm ticket outcome</span>
+                        </div>
+                    </div>
+                    <button className="rp-close" onClick={onClose} aria-label="Close"><CloseIcon /></button>
+                </div>
+
+                <div className="rp-body">
+                    <div className="rp-field">
+                        <label className="rp-label">Ticket No</label>
+                        <div className="cs-ticket-no"># {ticket.ticketnumber}</div>
+                    </div>
+
+                    <div className="rp-field" style={{ marginBottom: 0 }}>
+                        <label className="rp-label rp-required">Ticket Status</label>
+                        <div className={`cs-opt-grid${error && !clientStatus ? " err" : ""}`}>
+                            {CLIENT_STATUS_OPTIONS.map(o => (
+                                <button
+                                    type="button"
+                                    key={o.value}
+                                    className={`cs-opt cs-${o.tone}${clientStatus === o.value ? " on" : ""}`}
+                                    onClick={() => { setClientStatus(o.value); setError(""); setRemarksError(""); }}
+                                >
+                                    <span className="cs-opt-icon">{o.icon}</span>
+                                    <span className="cs-opt-label">{o.label}</span>
+                                    <span className="cs-opt-hint">{o.hint}</span>
+                                    {clientStatus === o.value && <span className="cs-opt-check">✓</span>}
+                                </button>
+                            ))}
+                        </div>
+                        {error && <p className="rp-err-msg">{error}</p>}
+                    </div>
+
+                    {/* Unresolved Remarks — shown only for UNRESOLVED */}
+                    {isUnresolved && (
+                        <div className="rp-field cs-remarks" style={{ marginTop: 18, marginBottom: 0 }}>
+                            <label className={`rp-label${remarksRequired ? " rp-required" : ""}`}>Unresolved Remarks</label>
+                            {existingRemarks ? (
+                                <>
+                                    <div className="cs-remarks-existing">{existingRemarks}</div>
+                                    <p className="cs-remarks-note">Remarks already recorded for this ticket and cannot be changed.</p>
+                                </>
+                            ) : (
+                                <>
+                                    <textarea
+                                        className={`rp-textarea${remarksError ? " err" : ""}`}
+                                        placeholder="Why is the issue still unresolved?"
+                                        value={remarks}
+                                        maxLength={50}
+                                        rows={2}
+                                        onChange={e => { setRemarks(e.target.value); if (e.target.value.trim()) setRemarksError(""); }}
+                                    />
+                                    <div className="cs-remarks-foot">
+                                        {remarksError ? <p className="rp-err-msg" style={{ margin: 0 }}>{remarksError}</p> : <span />}
+                                        <span className="cs-remarks-count">{remarks.length} / 50</span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="rp-footer">
+                    <button className="rp-btn-clear" onClick={handleReset} disabled={submitting}>↺ Reset</button>
+                    <button className="rp-btn-submit" onClick={handleSubmit} disabled={submitting}>
+                        {submitting ? "Submitting…" : <>Submit <span className="rp-arrow">→</span></>}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const normalizeDate = (val) => {
     if (!val) return "";
     if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
@@ -199,47 +414,73 @@ const TicketRaiseTable = ({
     onSearch,       // ({ status, priority }) => void
     onDownload,     // ({ status, priority }) => void  ← new
     onPrev, onNext, onEdit, userName, userId, onRespond,  screenDetails = [] ,
+    onClientRespond, // ({ ticketnumber, clientStatus: "CLOSED" | "UNRESOLVED" }) => Promise|void
 }) => {
     const [popupRow, setPopupRow] = useState(null);
+    const [clientRow, setClientRow] = useState(null);
     const [filterStatus, setFilterStatus] = useState("");
     const [filterPriority, setFilterPriority] = useState("");
     const [downloading, setDownloading] = useState(false);
 const [filterScreen, setFilterScreen] = useState("");
+    const [filterTicketNo, setFilterTicketNo] = useState("");
+    const [filterClientStatus, setFilterClientStatus] = useState("");
+    const [ticketNoError, setTicketNoError] = useState("");
+
+    // Ticket No must start with "TKT" (e.g. TKT10077)
+    const validateTicketNo = (val) =>
+        val && !val.startsWith("TKT") ? "Ticket No must start with TKT (e.g., TKT10077)" : "";
 
     const COLUMNS = [
         { key: "ticketnumber", label: "TKT-NO", width: "120px" },
         { key: "screen", label: "Screen", width: "160px" },
         { key: "priority", label: "Priority", width: "120px" },
         { key: "issueCategory", label: "Issue Category", width: "150px" },
-        { key: "status", label: "Status", width: "130px" },
         { key: "escalatedBy", label: "Escalated By", width: "130px" },
         { key: "description", label: "Description", width: "220px" },
         { key: "createdby", label: "Created By", width: "130px" },
         { key: "createddate", label: "Created Date", width: "133px" },
         { key: "commitmentDate", label: "Commitment Date", width: "133px" },
         { key: "closedDate", label: "Closed Date", width: "133px" },
+        { key: "status", label: "Orka Status", width: "130px" },
+        { key: "clientStatusValue", label: "Client Status", width: "120px" },
         { key: "file_data", label: "Attachment", width: "90px" },
         { key: "action", label: "Edit", width: "60px" },
         // { key: "response", label: "Response", width: "110px" },
         ...(userId === "876040319"
-            ? [{ key: "response", label: "Response", width: "110px" }]
-            : [])
+            ? [{ key: "response", label: "Orka Response", width: "130px" }]
+            : []),
+        { key: "clientStatus", label: "Client Respond", width: "120px" },
+        { key: "unresolvedRemarks", label: "Client Remarks", width: "200px" },
+        { key: "orkaRemarks", label: "Orka Remarks", width: "200px" },
     ];
 
+    // Client Response allowed only for COMPLETED tickets whose client status is
+    // empty or UNRESOLVED — once CLOSED, the ticket can't be responded to again.
+    const canClientRespond = (row) => {
+        if (String(row.status || "").toUpperCase() !== "COMPLETED") return false;
+        const cs = String(row.clientStatus ?? "").trim().toUpperCase();
+        return cs === "" || cs === "UNRESOLVED";
+    };
 
-    const activeCount = [filterStatus, filterPriority, filterScreen].filter(Boolean).length;
+
+    const activeCount = [filterStatus, filterPriority, filterScreen, filterTicketNo, filterClientStatus].filter(Boolean).length;
 
     // Search is only allowed when at least one filter is selected
     const handleSearch = () => {
         if (activeCount === 0) return;
-        onSearch && onSearch({ status: filterStatus, screen: filterScreen, priority: filterPriority });
+        const err = validateTicketNo(filterTicketNo);
+        if (err) { setTicketNoError(err); return; }
+        onSearch && onSearch({ status: filterStatus, screen: filterScreen, priority: filterPriority, ticketNo: filterTicketNo, clientStatus: filterClientStatus });
     };
 
     const handleReset = () => {
         setFilterStatus("");
         setFilterPriority("");
          setFilterScreen("");
-        onSearch && onSearch({ status: "", screen: "", priority: "" });
+        setFilterTicketNo("");
+        setFilterClientStatus("");
+        setTicketNoError("");
+        onSearch && onSearch({ status: "", screen: "", priority: "", ticketNo: "", clientStatus: "" });
     };
 
     // ── Download: pass active filters (or empty = all data) ──────────────────
@@ -247,7 +488,8 @@ const [filterScreen, setFilterScreen] = useState("");
         if (!onDownload) return;
         setDownloading(true);
         try {
-            await onDownload({ status: filterStatus, priority: filterPriority , screen: filterScreen });
+            await onDownload({ status: filterStatus, priority: filterPriority , screen: filterScreen,
+                ticketNo: validateTicketNo(filterTicketNo) ? "" : filterTicketNo, clientStatus: filterClientStatus });
         } finally {
             setDownloading(false);
         }
@@ -279,6 +521,14 @@ const [filterScreen, setFilterScreen] = useState("");
                 .tt-select:focus{border-color:#3949ab;box-shadow:0 0 0 3px rgba(57,73,171,.1);}
                 .tt-select:hover{border-color:#94a3b8;background:#f8faff;}
                 .tt-select--active{border-color:#3949ab;background:#eef0ff;color:#3949ab;font-weight:600;}
+                .tt-ticket-wrap{position:relative;display:inline-flex;align-items:center;}
+                .tt-ticket-icon{position:absolute;left:10px;color:#94a3b8;display:flex;pointer-events:none;}
+                .tt-ticket-input{border:1.5px solid #e2e8f0;border-radius:9px;padding:7px 12px 7px 30px;font-size:13px;font-weight:500;color:#374151;background:#fff;outline:none;width:170px;font-family:inherit;letter-spacing:.03em;transition:border-color .15s,box-shadow .15s,background .15s;}
+                .tt-ticket-input::placeholder{color:#94a3b8;font-weight:400;letter-spacing:0;}
+                .tt-ticket-input:hover{border-color:#94a3b8;}
+                .tt-ticket-input:focus{border-color:#3949ab;box-shadow:0 0 0 3px rgba(57,73,171,.1);}
+                .tt-ticket-input--err,.tt-ticket-input--err:focus{border-color:#e53935;background:#fff8f8;color:#c62828;box-shadow:0 0 0 3px rgba(229,57,53,.1);}
+                .tt-ticket-err{position:absolute;top:calc(100% + 3px);left:2px;font-size:10.5px;font-weight:500;color:#e53935;white-space:nowrap;}
                 .tt-select-chevron{position:absolute;right:10px;pointer-events:none;color:#94a3b8;display:flex;align-items:center;}
 
                 /* ── Search button ── */
@@ -314,14 +564,15 @@ const [filterScreen, setFilterScreen] = useState("");
 
                 .tt-filter-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#e53935;color:#fff;font-size:10px;font-weight:700;margin-left:2px;}
 
-                .tt-info-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid #eeeeee;background:#1a237e;}
-                .tt-title{font-size:15px;font-weight:600;color:white;}
-                .tt-subtitle{font-size:12px;color:white;}
+                .tt-info-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #eeeeee;background:#fff;border-left:4px solid #0b7e57;}
+                .tt-title{font-size:15px;font-weight:700;color:#1a1a2e;margin:0;}
+                .tt-subtitle{font-size:12px;color:#5c6280;margin:2px 0 0;}
 
 .tt-scroll{overflow-x:auto;overflow-y:auto;max-height:480px;-webkit-overflow-scrolling:touch;}
                 .tt-table{width:100%;border-collapse:collapse;min-width:700px;}
-                .tt-thead-row th{position:sticky;top:0;z-index:2;}
-.tt-th{padding:10px 12px;font-size:11px;font-weight:600;color:#1a237e;text-align:left;white-space:nowrap;background:#fafafa;border-bottom:1px solid #eeeeee;letter-spacing:.05em;text-transform:uppercase;position:sticky;top:0;z-index:3;}
+                .tt-table thead{position:sticky;top:0;z-index:3;}
+                .tt-thead-row{background:linear-gradient(to right,#0b7e57,#c51073);}
+.tt-th{padding:12px 12px;font-size:11px;font-weight:700;color:#fff;text-align:left;white-space:nowrap;background:transparent;border-bottom:none;letter-spacing:.05em;text-transform:uppercase;}
                 .tt-td{padding:10px 12px;font-size:13px;color:black;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
                 .tt-row:last-child .tt-td{border-bottom:none;}
                 .tt-row--alt{background:#fafafa;}
@@ -364,35 +615,91 @@ const [filterScreen, setFilterScreen] = useState("");
                 .tt-page-btn:disabled{opacity:.4;cursor:not-allowed;}
 
                 /* ── Response popup ── */
-                .rp-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;animation:rp-fade 0.18s ease;}
-                .rp-card{background:#fff;border-radius:16px;border:1px solid #e0e0e0;width:100%;max-width:460px;box-shadow:0 8px 40px rgba(0,0,0,.18);animation:rp-slide .22s ease;overflow:hidden;}
-                .rp-header{padding:18px 20px 14px;border-bottom:1px solid #eeeeee;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#f0f2ff 0%,#fafbff 100%);}
-                .rp-header-left{display:flex;align-items:center;gap:12px;}
-                .rp-icon-wrap{width:42px;height:42px;border-radius:10px;background:#e8eaff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-                .rp-title{font-size:15px;font-weight:600;color:#1a1a2e;margin:0;}
-                .rp-tkt-id{display:inline-block;font-size:11px;font-weight:500;color:#3949ab;background:#e8eaff;padding:2px 9px;border-radius:20px;margin-top:4px;}
-                .rp-close{width:28px;height:28px;border-radius:6px;background:#f5f5f5;border:1px solid #e0e0e0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#757575;flex-shrink:0;}
-                .rp-close:hover{background:#eee;}
-                .rp-body{padding:20px;}
-                .rp-field{margin-bottom:18px;}
-                .rp-label{display:block;font-size:11px;font-weight:600;color:#757575;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+                .rp-backdrop{position:fixed;inset:0;background:rgba(15,18,40,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;animation:rp-fade .2s ease;}
+                .rp-card{background:#fff;border-radius:20px;width:100%;max-width:540px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(26,35,126,.28),0 2px 8px rgba(0,0,0,.08);animation:rp-slide .26s cubic-bezier(.2,.9,.3,1.2);overflow:hidden;}
+                .rp-header{position:relative;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#283593 0%,#3949ab 55%,#5c6bc0 100%);overflow:hidden;}
+                .rp-header::before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08);top:-90px;right:-40px;}
+                .rp-header::after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.06);bottom:-60px;right:90px;}
+                .rp-header-left{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+                .rp-icon-wrap{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+                .rp-title{font-size:17px;font-weight:700;color:#fff;margin:0;letter-spacing:.01em;}
+                .rp-tkt-id{display:inline-block;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;margin-top:5px;letter-spacing:.04em;}
+                .rp-close{position:relative;z-index:1;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;transition:background .15s,transform .2s;}
+                .rp-close:hover{background:rgba(255,255,255,.28);transform:rotate(90deg);}
+                .rp-body{padding:22px;overflow-y:auto;}
+                .rp-field{margin-bottom:20px;}
+                .rp-label{display:block;font-size:11px;font-weight:700;color:#5c6280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
                 .rp-required::after{content:" *";color:#e53935;}
-                .rp-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-                .rp-cat-chip{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:8px;border:1.5px solid #e0e0e0;cursor:pointer;font-size:13px;color:#424242;background:#fafafa;transition:all .16s;user-select:none;}
-                .rp-cat-chip:hover{border-color:#b3c0f7;background:#f0f2ff;}
-                .rp-cat-chip.selected{border-color:#3949ab;background:#e8eaff;color:#3949ab;font-weight:600;}
-                .rp-cat-icon{font-size:18px;}
-                .rp-input,.rp-textarea{width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:9px 13px;font-size:13px;font-family:inherit;background:#fafafa;color:#1a1a2e;outline:none;transition:border-color .15s;box-sizing:border-box;}
-                .rp-input:focus,.rp-textarea:focus{border-color:#3949ab;background:#fff;box-shadow:0 0 0 3px rgba(57,73,171,.1);}
-                .rp-input.err{border-color:#e53935;}
-                .rp-textarea{resize:vertical;min-height:80px;line-height:1.5;}
-                .rp-err-msg{font-size:11px;color:#e53935;margin-top:5px;}
-                .rp-footer{padding:14px 20px;border-top:1px solid #eeeeee;display:flex;gap:10px;justify-content:flex-end;background:#fafafa;}
-                .rp-btn-clear{padding:8px 18px;border:1.5px solid #e0e0e0;border-radius:8px;background:#fff;color:#757575;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s;}
-                .rp-btn-clear:hover{background:#f5f5f5;border-color:#bdbdbd;}
-                .rp-btn-submit{padding:8px 22px;border:none;border-radius:8px;background:#3949ab;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .18s,transform .1s;}
-                .rp-btn-submit:hover{background:#303f9f;}
-                .rp-btn-submit:active{transform:scale(0.97);}
+                .rp-card:not(.cs-card) .rp-label{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,#1a1a2e 0%,#2c3154 100%);color:#fff;letter-spacing:.08em;box-shadow:0 2px 6px rgba(26,26,46,.18);}
+                .rp-card:not(.cs-card) .rp-label::before{content:"";width:4px;height:12px;border-radius:2px;background:#7986cb;}
+                .rp-card:not(.cs-card) .rp-required::after{color:#ff8a80;margin-left:-4px;}
+                .rp-cat-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:2px;border-radius:14px;}
+                .rp-cat-grid.err{outline:1.5px dashed #e53935;outline-offset:4px;}
+                .rp-cat-chip{--c:#3949ab;--t:#e8eaff;position:relative;flex:0 0 calc((100% - 20px)/3);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 8px 12px;border-radius:14px;border:1.5px solid #e6e8f0;cursor:pointer;background:#fff;font-family:inherit;transition:all .18s ease;user-select:none;}
+                .rp-cat-chip:hover{border-color:var(--c);background:var(--t);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.07);}
+                .rp-cat-chip.selected{border-color:var(--c);background:var(--t);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent),0 6px 16px rgba(0,0,0,.06);}
+                .rp-cat-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--t);margin-bottom:4px;transition:transform .2s;}
+                .rp-cat-chip.selected .rp-cat-icon{background:#fff;transform:scale(1.08);}
+                .rp-cat-label{font-size:13px;font-weight:600;color:#2a2e45;}
+                .rp-cat-chip.selected .rp-cat-label{color:var(--c);}
+                .rp-cat-hint{font-size:10.5px;color:#9097b0;}
+                .rp-cat-check{position:absolute;top:7px;right:7px;width:18px;height:18px;border-radius:50%;background:var(--c);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;animation:rp-pop .2s ease;}
+                .rp-date-wrap{position:relative;}
+                .rp-date-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+                .rp-input,.rp-textarea{width:100%;border:1.5px solid #e6e8f0;border-radius:12px;padding:11px 14px;font-size:13.5px;font-family:inherit;background:#f8f9fc;color:#1a1a2e;outline:none;transition:all .15s;box-sizing:border-box;}
+                .rp-date{padding-left:38px;}
+                .rp-input:focus,.rp-textarea:focus{border-color:#3949ab;background:#fff;box-shadow:0 0 0 4px rgba(57,73,171,.12);}
+                .rp-input.err{border-color:#e53935;background:#fff8f8;}
+                .rp-textarea{resize:vertical;min-height:84px;line-height:1.55;}
+                .rp-err-msg{font-size:11.5px;color:#e53935;margin:6px 0 0;font-weight:500;}
+                .rp-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+                .rp-status-card{--c:#43a047;--t:#e9f6ea;display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;border:1.5px solid #e6e8f0;background:#fff;cursor:pointer;user-select:none;transition:all .18s;}
+                .rp-status-card.rp-amber{--c:#f59e0b;--t:#fef5e4;}
+                .rp-status-card input{position:absolute;opacity:0;pointer-events:none;}
+                .rp-status-card:hover{border-color:var(--c);}
+                .rp-status-card.on{border-color:var(--c);background:var(--t);}
+                .rp-status-card:focus-within{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent);}
+                .rp-status-icon{width:34px;height:34px;border-radius:10px;background:var(--t);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+                .rp-status-card.on .rp-status-icon{background:#fff;}
+                .rp-status-text{display:flex;flex-direction:column;flex:1;min-width:0;}
+                .rp-status-title{font-size:13px;font-weight:600;color:#2a2e45;}
+                .rp-status-card.on .rp-status-title{color:var(--c);}
+                .rp-status-sub{font-size:11px;color:#9097b0;}
+                .rp-switch{width:34px;height:20px;border-radius:20px;background:#d5d8e3;position:relative;flex-shrink:0;transition:background .2s;}
+                .rp-switch-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s cubic-bezier(.3,1.4,.5,1);}
+                .rp-status-card.on .rp-switch{background:var(--c);}
+                .rp-status-card.on .rp-switch-knob{transform:translateX(14px);}
+                .rp-footer{padding:14px 22px;border-top:1px solid #eef0f6;display:flex;gap:10px;justify-content:flex-end;background:#f8f9fc;}
+                .rp-btn-clear{padding:10px 18px;border:1.5px solid #e0e3ee;border-radius:12px;background:#fff;color:#5c6280;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
+                .rp-btn-clear:hover{background:#f0f1f6;border-color:#c5c9d8;color:#2a2e45;}
+                .rp-btn-submit{padding:10px 22px;border:none;border-radius:12px;background:linear-gradient(135deg,#3949ab,#5c6bc0);color:#fff;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 6px 16px rgba(57,73,171,.35);transition:box-shadow .18s,transform .12s;}
+                .rp-btn-submit:hover{box-shadow:0 8px 22px rgba(57,73,171,.45);transform:translateY(-1px);}
+                .rp-btn-submit:hover .rp-arrow{transform:translateX(3px);}
+                .rp-arrow{display:inline-block;transition:transform .18s;}
+                .rp-btn-submit:active{transform:scale(.97);}
+                @keyframes rp-pop{from{transform:scale(0)}to{transform:scale(1)}}
+                .cs-card{max-width:440px;}
+                .cs-remarks{animation:rp-fade .2s ease;}
+                .rp-textarea.err{border-color:#e53935;background:#fff8f8;}
+                .cs-remarks-foot{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+                .cs-remarks-count{font-size:11px;color:#9097b0;}
+                .cs-remarks-existing{padding:10px 14px;border-radius:12px;background:#fdecec;border:1.5px solid #f8c9c9;color:#8e1c1c;font-size:13px;line-height:1.5;}
+                .cs-remarks-note{font-size:11px;color:#9097b0;margin:5px 0 0;}
+                .cs-ticket-no{display:inline-flex;align-items:center;padding:10px 16px;border-radius:12px;background:#eef0fb;border:1.5px solid #dfe3f7;color:#283593;font-size:15px;font-weight:700;letter-spacing:.04em;}
+                .cs-opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-radius:14px;}
+                .cs-opt-grid.err{outline:1.5px dashed #e53935;outline-offset:4px;}
+                .cs-opt{--c:#43a047;--t:#e9f6ea;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 10px 14px;border-radius:14px;border:1.5px solid #e6e8f0;background:#fff;cursor:pointer;font-family:inherit;transition:all .18s ease;}
+                .cs-opt.cs-red{--c:#e53935;--t:#fdecec;}
+                .cs-opt:hover{border-color:var(--c);background:var(--t);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.07);}
+                .cs-opt.on{border-color:var(--c);background:var(--t);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent);}
+                .cs-opt-icon{width:44px;height:44px;border-radius:14px;background:var(--t);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:4px;}
+                .cs-opt.on .cs-opt-icon{background:#fff;}
+                .cs-opt-label{font-size:14px;font-weight:700;color:#2a2e45;}
+                .cs-opt.on .cs-opt-label{color:var(--c);}
+                .cs-opt-hint{font-size:11px;color:#9097b0;}
+                .cs-opt-check{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--c);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;animation:rp-pop .2s ease;}
+                .rp-btn-submit:disabled,.rp-btn-clear:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+                @media (max-width:520px){.rp-cat-chip{flex-basis:calc((100% - 10px)/2);}.rp-status-grid{grid-template-columns:1fr;}}
             `}</style>
 
             {popupRow && (
@@ -400,17 +707,60 @@ const [filterScreen, setFilterScreen] = useState("");
                     onSubmit={payload => onRespond && onRespond(payload)} userName={userName} />
             )}
 
+            {clientRow && (
+                <ClientStatusPopup ticket={clientRow} onClose={() => setClientRow(null)}
+                    onSubmit={onClientRespond} />
+            )}
+
             <div className="tt-wrapper">
+
+                {/* ══ INFO BAR ══ */}
+                <div className="tt-info-bar">
+                    <div>
+                        <h5 className="tt-title">Ticket Details</h5>
+                        <p className="tt-subtitle">
+                            {totalElements} Ticket{totalElements !== 1 ? "s" : ""} Total
+                            {filterStatus && <> · Status: <strong>{filterStatus.replace("_", " ")}</strong></>}
+                            {filterPriority && <> · Priority: <strong>{filterPriority}</strong></>}
+                        </p>
+                    </div>
+                </div>
 
                 {/* ══ FILTER BAR ══ */}
                 <div className="tt-filter-bar">
                     <div className="tt-filter-left">
                         <span className="tt-filter-label">Filter by</span>
 
+                        <div className="tt-ticket-wrap">
+                            <span className="tt-ticket-icon"><SearchBtnIcon /></span>
+                            <input
+                                type="text"
+                                className={`tt-ticket-input${filterTicketNo ? " tt-select--active" : ""}${ticketNoError ? " tt-ticket-input--err" : ""}`}
+                                placeholder="Ticket No (TKT…)"
+                                value={filterTicketNo}
+                                maxLength={20}
+                                onChange={e => {
+                                    const v = e.target.value.toUpperCase().replace(/\s/g, "");
+                                    setFilterTicketNo(v);
+                                    setTicketNoError(validateTicketNo(v));
+                                }}
+                                onKeyDown={e => { if (e.key === "Enter") handleSearch(); }}
+                            />
+                            {ticketNoError && <span className="tt-ticket-err">{ticketNoError}</span>}
+                        </div>
+
                         <div className="tt-select-wrap">
                             <select className={`tt-select${filterStatus ? " tt-select--active" : ""}`}
                                 value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
                                 {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                            </select>
+                            <span className="tt-select-chevron"><ChevronIcon /></span>
+                        </div>
+
+                        <div className="tt-select-wrap">
+                            <select className={`tt-select${filterClientStatus ? " tt-select--active" : ""}`}
+                                value={filterClientStatus} onChange={e => setFilterClientStatus(e.target.value)}>
+                                {CLIENT_STATUS_FILTER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                             <span className="tt-select-chevron"><ChevronIcon /></span>
                         </div>
@@ -476,18 +826,6 @@ const [filterScreen, setFilterScreen] = useState("");
                     </div>
                 </div>
 
-                {/* ══ INFO BAR ══ */}
-                <div className="tt-info-bar">
-                    <div>
-                        <h5 className="tt-title">Ticket Details</h5>
-                        <p className="tt-subtitle">
-                            {totalElements} Ticket{totalElements !== 1 ? "s" : ""} Total
-                            {filterStatus && <> · Status: <strong>{filterStatus.replace("_", " ")}</strong></>}
-                            {filterPriority && <> · Priority: <strong>{filterPriority}</strong></>}
-                        </p>
-                    </div>
-                </div>
-
                 {/* ══ TABLE ══ */}
                 <div className="tt-scroll">
                     <table className="tt-table">
@@ -510,7 +848,6 @@ const [filterScreen, setFilterScreen] = useState("");
                                      <td className="tt-td">{row.screen || "—"}</td>
                                     <td className="tt-td">{row.priority ? <PriorityBadge priority={row.priority} /> : <span style={{ color: "#aaa" }}>—</span>}</td>
                                     <td className="tt-td">{row.issueCategory || "—"}</td>
-                                    <td className="tt-td">{row.status ? <StatusBadge status={row.status} /> : <span style={{ color: "#aaa" }}>—</span>}</td>
                                     <td className="tt-td">{row.escalatedBy || "—"}</td>
                                     <td className="tt-td tt-td--desc" title={row.description}>{row.description || "—"}</td>
                                    
@@ -540,6 +877,21 @@ const [filterScreen, setFilterScreen] = useState("");
                                                 : new Date(row.closedDate).toLocaleDateString()
                                             : "—"}
                                             </td>
+                                    {/* Orka Status */}
+                                    <td className="tt-td">{row.status ? <StatusBadge status={row.status} /> : <span style={{ color: "#aaa" }}>—</span>}</td>
+                                    {/* Client Status */}
+                                    <td className="tt-td" style={{ textAlign: "center" }}>
+                                        {(() => {
+                                            // Display only: NULL / blank → OPEN (backend value untouched)
+                                            const key = String(row.clientStatus ?? "").trim().toUpperCase() || "OPEN";
+                                            const cs = CLIENT_STATUS_STYLES[key] || { bg: "#f5f5f5", color: "#555", dot: "#999", label: row.clientStatus };
+                                            return (
+                                                <span className="tt-badge" style={{ background: cs.bg, color: cs.color }}>
+                                                    <span className="tt-badge-dot" style={{ background: cs.dot }} />{cs.label}
+                                                </span>
+                                            );
+                                        })()}
+                                    </td>
                                     <td className="tt-td"><MediaCell fileData={row.file_data} /></td>
                                     {/* <td className="tt-td" style={{textAlign:"center"}}>
                                         <button className="tt-edit-btn" onClick={()=>onEdit&&onEdit(row)}><EditSvgIcon/></button>
@@ -575,6 +927,26 @@ const [filterScreen, setFilterScreen] = useState("");
                                             </button>
                                         </td>
                                     )}
+
+                                    <td className="tt-td" style={{ textAlign: "center" }}>
+                                        {canClientRespond(row) ? (
+                                            <button className="tt-resp-btn" onClick={() => setClientRow(row)}>
+                                                <MessagePlusIcon /> Respond
+                                            </button>
+                                        ) : (
+                                            <span style={{ color: "#aaa" }}>—</span>
+                                        )}
+                                    </td>
+
+                                    {/* Client Remarks (unresolvedRemarks) */}
+                                    <td className="tt-td tt-td--desc" title={row.unresolvedRemarks || ""}>
+                                        {String(row.unresolvedRemarks ?? "").trim() || <span style={{ color: "#aaa" }}>-</span>}
+                                    </td>
+
+                                    {/* Orka Remarks (ticket_raise.remarks) */}
+                                    <td className="tt-td tt-td--desc" title={row.orkaRemarks || ""}>
+                                        {String(row.orkaRemarks ?? "").trim() || <span style={{ color: "#aaa" }}>-</span>}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

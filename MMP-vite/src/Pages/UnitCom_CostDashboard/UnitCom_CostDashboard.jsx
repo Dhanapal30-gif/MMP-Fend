@@ -1,9 +1,46 @@
 import React, { useState, useEffect,useMemo , useRef } from 'react';
 import Chart from 'chart.js/auto';
-import { getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, getUnitcompoenentDetailFilterMMPDashboard } from '../../Services/Services_09';
+import { getUnitcompoenentDetailFilter, getUnitcompoenentDetailFilterMMP, getUnitcompoenentDetailFilterMMPDashboard, fetchUnitComponentReportSeprateProductMMPDashboard } from '../../Services/Services_09';
 import { downloadPTLCostValidation, getProductAndPartcode } from '../../Services/Services';
 import './UnitCom_CostDashboard.css';
 import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
+import { Box, LayoutGrid, FileText, Truck, CreditCard, Wrench, ChartColumn } from 'lucide-react';
+import MultiSelectDropdown from './MultiSelectDropdown';
+
+// normalise "" / "x" / ["x","y"] → string[]
+const toList = (v) => (Array.isArray(v) ? v : v ? [v] : []).filter(Boolean);
+
+// Builds the dashboard filter payload.
+// Products / groups are sent ONLY as lists — one selection = 1-item list,
+// several selections = multi-item list, none = [].
+const buildFilterPayload = (productnames, monthYear, productgroups) => ({
+  productnames:  toList(productnames),
+  productgroups: toList(productgroups),
+  monthYear:     monthYear || "",
+  search:        null
+});
+
+// Product-wise Total Value report (fetchUnitComponentReportSeprateProductMMPDashboard).
+// Disabled for now — set to true to call the API and show the report card again.
+const ENABLE_PRODUCT_TOTALS_REPORT = false;
+
+// ── Monthly chart view controls ──
+// dataset index: 0 = Total Cost, 1 = Average Cost, 2 = Repaired Qty
+const CHART_MODES = [
+  { value: "ALL",     label: "SELECT ALL"   },
+  { value: "TOT_AVG", label: "TOT vs AVG"   },
+  { value: "TOTAL",   label: "TOTAL COST"   },
+  { value: "AVG",     label: "AVERAGE COST" },
+];
+const isTotalVisible = mode => mode === "ALL" || mode === "TOT_AVG" || mode === "TOTAL";
+const isAvgVisible   = mode => mode === "ALL" || mode === "TOT_AVG" || mode === "AVG";
+// chart title per dropdown option (ALL / TOT_AVG / TOTAL keep the default title)
+// const chartTitleFor  = mode => (mode === "AVG" ? "Monthly Average Cost" : "Monthly Total Cost");
+const chartTitleFor = mode => mode === "AVG" ? "Monthly Average Cost" : mode === "TOT_AVG"
+      ? "Monthly Total vs Average"  : "Monthly Total Cost";
+// how many months fit in the chart viewport before horizontal scrolling kicks in
+const BAR_AXIS_PAD = 120;   // room for the left (€) + right (qty) axes
+const visibleMonthsFor = (w) => (w >= 1000 ? 8 : w >= 760 ? 6 : w >= 520 ? 4 : 3);
 
 const MONTH_MAP = {
   "01":"P01 Jan","02":"P02 Feb","03":"P03 Mar","04":"P04 Apr",
@@ -23,14 +60,13 @@ const PIE_LABELS   = ["DTL cost","PTL cost","Total cost","Avg cost/unit"];
 // ];
 
 const METRICS_CFG = [
-  { key:"other", cls:"m5", label:"DTL Issuance Cost",    hint:"Requester Type: Others" },
-  { key:"sub",   cls:"m6", label:"Sub Module Cost",      hint:"Requester Type: Submodule" },
-  { key:"dtl",   cls:"m1", label:"Total DTL Cost",       hint:"Direct Line issuance" },
-  { key:"ptl",   cls:"m2", label:"Total PTL Cost",       hint:"Parts Moving PTL"     },
-  { key:"tot",   cls:"m3", label:"Total Cost",           hint:"DTL + PTL combined"   },
-   { key:"qty",   cls:"m7", label:"Repaired Qty",      hint:"Total repaired units" },   // ← new
-  { key:"avg",   cls:"m4", label:"Avg Cost / Unit",      hint:"Per Repaired unit"    },
-  
+  { key:"other", cls:"m5", label:"DTL Issuance Cost", hint:"Requester: Others",    icon:<Box size={20} strokeWidth={2} /> },
+  { key:"sub",   cls:"m6", label:"Sub Module Cost",   hint:"Requester: Submodule", icon:<LayoutGrid size={20} strokeWidth={2} /> },
+  { key:"dtl",   cls:"m1", label:"Total DTL Cost",    hint:"Direct line issuance", icon:<FileText size={20} strokeWidth={2} /> },
+  { key:"ptl",   cls:"m2", label:"Total PTL Cost",    hint:"Parts moving PTL",     icon:<Truck size={20} strokeWidth={2} /> },
+  { key:"tot",   cls:"m3", label:"Total Cost",        hint:"DTL + PTL combined",   icon:<CreditCard size={20} strokeWidth={2} /> },
+  { key:"qty",   cls:"m7", label:"Repaired Qty",      hint:"Total repaired units", icon:<Wrench size={20} strokeWidth={2} /> },
+  { key:"avg",   cls:"m4", label:"Avg Cost / Unit",   hint:"Per repaired unit",    icon:<ChartColumn size={20} strokeWidth={2} /> },
 ];
 
 function fmtFull(v) {
@@ -78,12 +114,20 @@ const UnitCom_CostDashboard = () => {
   const [productDetail,   setProductDetail]   = useState([]);
   const [loading,         setLoading]         = useState(false);
   const [drillLoading,    setDrillLoading]    = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState([]);   // multi-select
   const [selectedMonth,   setSelectedMonth]   = useState("");
   const [drillMonth,      setDrillMonth]      = useState(null);
   const [pieLegendData,   setPieLegendData]   = useState(null);
   const [donutLegendData, setDonutLegendData] = useState({});
   const [drillData,       setDrillData]       = useState(null);
+
+  // Monthly chart: series visibility + responsive scroll width
+  const [chartMode,     setChartMode]     = useState("ALL");   // Select All by default
+  const [showQty,       setShowQty]       = useState(true);
+  const [barViewportW,  setBarViewportW]  = useState(0);
+  const chartModeRef = useRef("ALL");
+  const showQtyRef   = useRef(true);
+  const barScrollRef = useRef(null);
 
   const barRef         = useRef(null);
   const donutRef       = useRef(null);
@@ -92,21 +136,15 @@ const UnitCom_CostDashboard = () => {
   const donutChartInst = useRef(null);
   const pieChartInst   = useRef(null);
   const dashboardDataRef   = useRef([]);
-  const selectedProductRef = useRef("");
-  const [currentFilter, setCurrentFilter] = useState({ productname: "",productgroup: "", monthYear: "" });
-  const [productDropdownOpen, setProductDropdownOpen] = useState(false);
-const [productSearch, setProductSearch] = useState("");
-const productDropdownRef = useRef(null);
+  const selectedProductRef = useRef([]);
+  const [currentFilter, setCurrentFilter] = useState(buildFilterPayload([], "", []));
 
-const [selectedProductGroup, setSelectedProductGroup] = useState("");
-const [productGroupDropdownOpen, setProductGroupDropdownOpen] = useState(false);
-const [productGroupSearch, setProductGroupSearch] = useState("");
-const productGroupDropdownRef = useRef(null);
+const [selectedProductGroups, setSelectedProductGroups] = useState([]);   // multi-select
 function fmtQty(v) {
   return Number(v || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
   useEffect(() => { dashboardDataRef.current = dashboardData; }, [dashboardData]);
-  useEffect(() => { selectedProductRef.current = selectedProduct; }, [selectedProduct]);
+  useEffect(() => { selectedProductRef.current = selectedProducts; }, [selectedProducts]);
 
 //   useEffect(() => {
 //   const handleClickOutside = (event) => {
@@ -125,24 +163,13 @@ function fmtQty(v) {
 //   };
 // }, []);
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (productDropdownRef.current && !productDropdownRef.current.contains(event.target)) {
-      setProductDropdownOpen(false);
-    }
-    if (productGroupDropdownRef.current && !productGroupDropdownRef.current.contains(event.target)) {
-      setProductGroupDropdownOpen(false);
-    }
-  };
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
+// (click-outside handling now lives inside MultiSelectDropdown)
 
 useEffect(() => {
   fetchPartAndProduct();
   const currentYear = new Date().getFullYear();
-  fetchDashboard("", currentYear.toString(), "");
-  setCurrentFilter({ productname: "", productgroup: "", monthYear: currentYear.toString() });
+  fetchDashboard([], currentYear.toString(), []);
+  setCurrentFilter(buildFilterPayload([], currentYear.toString(), []));
 }, []);
 
   useEffect(() => {
@@ -157,6 +184,29 @@ useEffect(() => {
       if (barChartInst.current) { barChartInst.current.destroy(); barChartInst.current = null; }
     };
   }, [dashboardData]);
+
+  // Apply chart view selection to the live chart (no rebuild, no refetch)
+  useEffect(() => {
+    chartModeRef.current = chartMode;
+    showQtyRef.current   = showQty;
+    const ch = barChartInst.current;
+    if (!ch) return;
+    ch.setDatasetVisibility(0, isTotalVisible(chartMode));
+    ch.setDatasetVisibility(1, isAvgVisible(chartMode));
+    ch.setDatasetVisibility(2, showQty);
+    ch.update();
+  }, [chartMode, showQty]);
+
+  // Track the chart viewport width → decides months-per-view and scroll width
+  useEffect(() => {
+    const el = barScrollRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(entries => {
+      setBarViewportW(Math.floor(entries[0].contentRect.width));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [loading, dashboardData.length]);   // scroll box is re-mounted after loading / empty states
 
   useEffect(() => {
     if (pieChartInst.current) { pieChartInst.current.destroy(); pieChartInst.current = null; }
@@ -185,22 +235,53 @@ const productGroups = useMemo(
 );
 
 const filteredProductDetail = useMemo(
-  () => selectedProductGroup
-    ? productDetail.filter(item => item[1] === selectedProductGroup)
+  () => selectedProductGroups.length
+    ? productDetail.filter(item => selectedProductGroups.includes(item[1]))
     : productDetail,
-  [productDetail, selectedProductGroup]
+  [productDetail, selectedProductGroups]
 );
+
+// unique product names for the multi-select (same source list as before)
+const productNames = useMemo(
+  () => [...new Set(productDetail.map(item => item[0]).filter(Boolean))],
+  [productDetail]
+);
+
+// ── ProductName-wise SUM(Value) report (separate, reusable) ──
+const [productTotals,        setProductTotals]        = useState([]);
+const [productTotalsLoading, setProductTotalsLoading] = useState(false);
+const productTotalsReqId = useRef(0);
+
+const fetchProductTotals = (filters) => {
+  const reqId = ++productTotalsReqId.current;   // ignore stale responses if filters change quickly
+  setProductTotalsLoading(true);
+  fetchUnitComponentReportSeprateProductMMPDashboard(filters)
+    .then(res => {
+      if (reqId !== productTotalsReqId.current) return;
+      setProductTotals(Array.isArray(res.data) ? res.data : []);
+    })
+    .catch(err => {
+      if (reqId !== productTotalsReqId.current) return;
+      console.error("Product-wise total value fetch failed:", err);
+      setProductTotals([]);
+    })
+    .finally(() => {
+      if (reqId === productTotalsReqId.current) setProductTotalsLoading(false);
+    });
+};
 
   const fetchDashboard = (productname, monthYear, productgroup) => {
   setLoading(true);
   setDrillMonth(null);
   setDrillData(null);
-  getUnitcompoenentDetailFilterMMPDashboard(0, 100, {
-    productname: productname || "",
-    productgroup: productgroup || "",
-    monthYear: monthYear || "",
-    search: null
-  })
+
+  // identical filter criteria for both APIs (accepts single values or arrays)
+  const filters = buildFilterPayload(productname, monthYear, productgroup);
+
+  // new API — runs alongside, independent of the existing call
+  if (ENABLE_PRODUCT_TOTALS_REPORT) fetchProductTotals(filters);
+
+  getUnitcompoenentDetailFilterMMPDashboard(0, 100, filters)
     .then(res => {
       const content = res.data?.content || [];
       setDashboardData(content);
@@ -358,50 +439,130 @@ const buildBarChart = () => {
 
   const labels = data.map(r => periodLabel(r.monthYear));
 
+  const COST_COLOR = "#10B981";
+  const AVG_COLOR  = "#cd0792";
+  const QTY_COLOR  = "#3B82F6";
+
+  const fmtAvg = v => "€" + Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const shortCost = v => {
+    const n = Number(v) || 0;
+    if (n >= 1_000_000) return "€" + (n / 1_000_000).toFixed(1) + "M";
+    if (n >= 1000)      return "€" + (n / 1000).toFixed(1) + "K";
+    return "€" + n.toFixed(0);
+  };
+
+  // Draws the value above each bar (no external plugin dependency).
+  // Font size follows the space each bar gets; hidden only when there's no room.
+  const barValueLabels = {
+    id: "ucdBarValueLabels",
+    afterDatasetsDraw(chart) {
+      const months = chart.data.labels.length || 1;
+      const visibleSets = chart.data.datasets.filter((_, i) => chart.isDatasetVisible(i)).length || 1;
+      const slot = (chart.chartArea.width / months) / visibleSets;   // px per bar
+      if (slot < 22) return;
+      const size = slot >= 45 ? 12 : slot >= 32 ? 11 : 10;
+      const { ctx } = chart;
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.font = `700 ${size}px "Segoe UI", sans-serif`;
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        if (meta.hidden) return;
+        ctx.fillStyle = ds.backgroundColor;
+        meta.data.forEach((bar, i) => {
+          const raw = ds.data[i];
+          if (!raw) return;
+          const text = ds.valueFormat ? ds.valueFormat(raw) : raw;
+          ctx.fillText(text, bar.x, bar.y - 3);
+        });
+      });
+      ctx.restore();
+    }
+  };
+
+  const tickFont = c => ({ size: c.chart.width < 500 ? 9 : 11, family: "Segoe UI, sans-serif" });
+
   barChartInst.current = new Chart(barRef.current, {
     type: "bar",
 
     data: {
       labels,
 
-      // KEEP YOUR EXISTING 3 DATASETS
       datasets: [
+        // LEFT bar — existing DTL + PTL total cost (unchanged calculation)
         {
           label: "Total Cost (€)",
           data: data.map(r => r.totalCost || 0),
-          backgroundColor: "#10B981",
-          borderRadius: 8,
+          backgroundColor: COST_COLOR,
+          hoverBackgroundColor: "#059669",
+          borderRadius: 6,
+          borderSkipped: false,
+          categoryPercentage: 0.78,
+          barPercentage: 0.9,
+          maxBarThickness: 28,
           yAxisID: "y",
+          valueFormat: shortCost,
+          hidden: !isTotalVisible(chartModeRef.current),
         },
-      {
-  type: "line",
-  label: "Repaired Qty",
-  data: data.map(r => r.totalrepairedQty || 0),
-  backgroundColor: "#3B82F6",
-  borderColor: "#3B82F6",
-  borderWidth: 2,
-  pointRadius: 4,
-  pointHoverRadius: 6,
-  tension: 0.3,
-  yAxisID: "y1",
-},
+        // MIDDLE bar — existing month-wise average cost / unit (left € axis)
         {
-          label: "Average Value",
+          label: "Average Cost / Unit (€)",
           data: data.map(r => r.averageCostPerUnit || 0),
-          backgroundColor: "#cd0792",
-          borderRadius: 8,
-          yAxisID: "y2",
+          backgroundColor: AVG_COLOR,
+          hoverBackgroundColor: "#a3056f",
+          borderRadius: 6,
+          borderSkipped: false,
+          categoryPercentage: 0.78,
+          barPercentage: 0.9,
+          maxBarThickness: 28,
+          yAxisID: "y",
+          valueFormat: fmtAvg,
+          hidden: !isAvgVisible(chartModeRef.current),
+        },
+        // RIGHT bar — monthly repaired qty (right quantity axis)
+        {
+          label: "Repaired Qty",
+          data: data.map(r => r.totalrepairedQty || 0),
+          backgroundColor: QTY_COLOR,
+          hoverBackgroundColor: "#2563EB",
+          borderRadius: 6,
+          borderSkipped: false,
+          categoryPercentage: 0.78,
+          barPercentage: 0.9,
+          maxBarThickness: 28,
+          yAxisID: "y1",
+          valueFormat: fmtQty,
+          hidden: !showQtyRef.current,
         }
       ]
     },
 
+    plugins: [barValueLabels],
+
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 18 } },
+      interaction: { mode: "index", intersect: false },
 
       plugins: {
         legend: {
-          display: false
+          display: true,
+          position: "top",
+          align: "end",
+          // visibility is driven by the view selector / Repaired Qty toggle above the chart
+          onClick: () => {},
+          labels: {
+            usePointStyle: true,
+            pointStyle: "rectRounded",
+            boxWidth: 10,
+            boxHeight: 10,
+            padding: 14,
+            color: "#475569",
+            font: { size: 11, weight: "600", family: "Segoe UI, sans-serif" }
+          }
         },
 
         datalabels: {
@@ -412,8 +573,10 @@ const buildBarChart = () => {
           backgroundColor: "#0f0720",
           titleColor: "#a78bfa",
           bodyColor: "#e8d8f8",
+          footerColor: "#f9a8d4",
           padding: 12,
           cornerRadius: 10,
+          usePointStyle: true,
 
           callbacks: {
             title: ctx => ctx[0].label,
@@ -423,12 +586,12 @@ const buildBarChart = () => {
                 return `Total Cost: ${fmtFull(ctx.raw)}`;
               }
 
-              if (ctx.dataset.label === "Repaired Qty") {
-                return `Repaired Qty: ${ctx.raw}`;
+              if (ctx.dataset.label === "Average Cost / Unit (€)") {
+                return `Avg Cost / Unit: ${fmtFull(ctx.raw)}`;
               }
 
-              if (ctx.dataset.label === "Average Value") {
-                return `Average Value: ${fmtFull(ctx.raw)}`;
+              if (ctx.dataset.label === "Repaired Qty") {
+                return `Repaired Qty: ${fmtQty(ctx.raw)}`;
               }
 
               return ctx.raw;
@@ -470,17 +633,29 @@ const buildBarChart = () => {
 
       scales: {
         x: {
+          grid: { display: false },
+          border: { color: "#E2E8F0" },
           ticks: {
             autoSkip: false,
-            maxRotation: 0,
-            color: "#135bd7"
+            maxRotation: 45,
+            minRotation: 0,
+            color: "#135bd7",
+            font: tickFont
           }
         },
 
         y: {
+          display: "auto",   // hides itself when no cost series is visible
           position: "left",
           beginAtZero: true,
+          grace: "8%",
+          border: { display: false, dash: [4, 4] },
+          grid: { color: "rgba(148,163,184,0.25)", drawTicks: false },
+          title: { display: true, text: "Cost (€)", color: COST_COLOR, font: { size: 10, weight: "600" } },
           ticks: {
+            color: "#64748B",
+            padding: 6,
+            font: tickFont,
             callback: value => {
               if (value >= 1000)
                 return "€" + (value / 1000).toFixed(0) + "K";
@@ -491,19 +666,20 @@ const buildBarChart = () => {
         },
 
         y1: {
+          display: "auto",   // hides itself when Repaired Qty is switched off
           position: "right",
           beginAtZero: true,
-          grid: {
-            drawOnChartArea: false
-          },
+          grace: "8%",
+          border: { display: false },
+          grid: { drawOnChartArea: false, drawTicks: false },
+          title: { display: true, text: "Repaired Qty", color: QTY_COLOR, font: { size: 10, weight: "600" } },
           ticks: {
-            callback: value => value
+            color: "#64748B",
+            padding: 6,
+            precision: 0,
+            font: tickFont,
+            callback: value => fmtQty(value)
           }
-        },
-
-        y2: {
-          display: false,
-          beginAtZero: true
         }
       }
     }
@@ -647,12 +823,12 @@ const metricValues = {
   const handleClearDrill = () => {
   setDrillMonth(null);
   setDrillData(null);
-  setSelectedProduct("");   // ← add this
-   setSelectedProductGroup("");
-  setSelectedMonth("");     // ← add this
+  setSelectedProducts([]);
+  setSelectedProductGroups([]);
+  setSelectedMonth("");
   const currentYear = new Date().getFullYear();
-  fetchDashboard("", currentYear.toString()); // ← reload default data
-    setCurrentFilter({ productname: "",productgroup: "", monthYear: currentYear.toString() }); // ← add
+  fetchDashboard([], currentYear.toString(), []); // ← reload default data
+  setCurrentFilter(buildFilterPayload([], currentYear.toString(), []));
   if (barChartInst.current) {
     barChartInst.current.data.datasets[0].backgroundColor =
       dashboardData.map(() => "#7c3aed");
@@ -680,16 +856,27 @@ const getDateRangeFromFilter = (monthYear) => {
 };
 
 const [downloadingPTL, setDownloadingPTL] = useState(false);
+// which card's download is in progress (for the ⏳ indicator)
+const [downloadingKey, setDownloadingKey] = useState(null);
+
+// Cards that show a download icon → downloadType sent to download-ptlCostValidation
+const CARD_DOWNLOADS = {
+  other: { type: "DTL", requesterType: "Others",     title: "Download DTL issuance cost details" },
+  sub:   { type: "DTL", requesterType: "Sub module", title: "Download sub module cost details" },
+  ptl:   { type: "PTL", title: "Download PTL cost validation details" },
+};
 
 
-const handleDownloadPTL = (downloadType) => {
+const handleDownloadPTL = (downloadType, requesterType) => {
    console.log("downloadType",downloadType); // PTL
-  const { productname, monthYear } = currentFilter;
+  const { monthYear } = currentFilter;
+  // download API (unchanged) still takes a single productname → only when exactly one is selected
+  const productname = currentFilter.productnames?.length === 1 ? currentFilter.productnames[0] : "";
 
-    if (!productname || !monthYear) {
-        alert("Please select Product Name and Month & Year before downloading PTL.");
-        return;
-    }
+    // if (!productname || !monthYear) {
+    //     alert("Please select Product Name and Month & Year before downloading PTL.");
+    //     return;
+    // }
 
   setDownloadingPTL(true);
 
@@ -697,7 +884,9 @@ const handleDownloadPTL = (downloadType) => {
     productname: productname || "",
     monthYear: monthYear || "",
     search: null,
-    downloadType:downloadType
+    downloadType:downloadType,
+    // only DTL card downloads send requesterType; PTL payload stays unchanged
+    ...(requesterType ? { requesterType } : {})
   })
     .then(res => {
       const blob = new Blob([res.data], {
@@ -708,8 +897,9 @@ const handleDownloadPTL = (downloadType) => {
       const link = document.createElement("a");
 
       const label = `${productname || "AllProducts"}_${monthYear || "AllTime"}`;
+      const prefix = (downloadType || "PTL").toLowerCase();
       link.href = url;
-      link.download = `ptlCostValidation_${label}.xlsx`;
+      link.download = `${prefix}CostValidation_${label}.xlsx`;
 
       document.body.appendChild(link);
       link.click();
@@ -718,32 +908,31 @@ const handleDownloadPTL = (downloadType) => {
     })
     .catch(err => {
       console.error("Download failed:", err);
-      alert("Failed to download PTL cost validation report.");
+      alert(`Failed to download ${downloadType || "PTL"} cost validation report.`);
     })
-    .finally(() => setDownloadingPTL(false));
+    .finally(() => { setDownloadingPTL(false); setDownloadingKey(null); });
 };
 
 
 const handleApply = () => {
 
-  // If both are selected, refresh/reset both filters
-  if (selectedProduct && selectedProductGroup) {
-    setSelectedProduct("");
-    setSelectedProductGroup("");
+  const hasProducts = selectedProducts.length > 0;
+  const hasGroups   = selectedProductGroups.length > 0;
+
+  // If both are selected, refresh/reset both filters (existing condition)
+  if (hasProducts && hasGroups) {
+    setSelectedProducts([]);
+    setSelectedProductGroups([]);
     setSelectedMonth("");
 
-    fetchDashboard("", "", "");
+    fetchDashboard([], "", []);
 
-    setCurrentFilter({
-      productname: "",
-      productgroup: "",
-      monthYear: ""
-    });
+    setCurrentFilter(buildFilterPayload([], "", []));
 
     return;
   }
 
-  if (!selectedProduct && !selectedMonth && !selectedProductGroup) {
+  if (!hasProducts && !selectedMonth && !hasGroups) {
     alert(
       "Please select at least one filter (Product Name, Product Group, or Month & Year) before applying."
     );
@@ -751,16 +940,12 @@ const handleApply = () => {
   }
 
   fetchDashboard(
-    selectedProduct,
+    selectedProducts,
     selectedMonth,
-    selectedProductGroup
+    selectedProductGroups
   );
 
-  setCurrentFilter({
-    productname: selectedProduct,
-    productgroup: selectedProductGroup,
-    monthYear: selectedMonth
-  });
+  setCurrentFilter(buildFilterPayload(selectedProducts, selectedMonth, selectedProductGroups));
 };
 
 //  const handleApply = () => {
@@ -812,10 +997,10 @@ const handleApply = () => {
 
   
   const handleReset = () => {
-  setSelectedProduct("");
-  setSelectedProductGroup("");
+  setSelectedProducts([]);
+  setSelectedProductGroups([]);
   setSelectedMonth("");
-  fetchDashboard("", "", "");
+  fetchDashboard([], "", []);
 };
 
   return (
@@ -846,7 +1031,7 @@ const handleApply = () => {
         </div> */}
         <div className="ucd-topbar-right">
     {/* {(drillMonth || selectedProduct || selectedMonth) && ( */}
-    {(drillMonth || selectedProduct || selectedProductGroup || selectedMonth) && (
+    {(drillMonth || selectedProducts.length > 0 || selectedProductGroups.length > 0 || selectedMonth) && (
       <button className="ucd-btn-clear" onClick={handleClearDrill}>&#10005; Clear</button>
     )}
     {drillLoading && <div className="ucd-spinner" />}
@@ -897,118 +1082,26 @@ const handleApply = () => {
 <div className="ucd-filter-item product-filter">
   <label className="ucd-filter-label">Product Name</label>
 
-  <div className="product-dropdown" ref={productDropdownRef}>
-
-    <input
-      className="ucd-filter-input"
-      type="text"
-      placeholder="All Products"
-      value={selectedProduct}
-      onFocus={() => {
-        setProductDropdownOpen(true);
-        setProductSearch("");
-      }}
-      onChange={(e) => {
-        setSelectedProduct(e.target.value);
-        setProductSearch(e.target.value);
-        setProductDropdownOpen(true);
-      }}
-    />
-
-    {productDropdownOpen && (
-      <div className="product-dropdown-menu">
-
-        <div
-          className="product-dropdown-item"
-          onClick={() => {
-            setSelectedProduct("");
-            setProductSearch("");
-            setProductDropdownOpen(false);
-          }}
-        >
-          All Products
-        </div>
-
-        {productDetail
-          .filter((item) =>
-            item[0]
-              ?.toString()
-              .toLowerCase()
-              .includes(productSearch.toLowerCase())
-          )
-          .map((item, idx) => (
-            <div
-              key={idx}
-              className="product-dropdown-item"
-              onClick={() => {
-                setSelectedProduct(item[0]);
-                setProductSearch("");
-                setProductDropdownOpen(false);
-              }}
-            >
-              {item[0]}
-            </div>
-          ))}
-
-      </div>
-    )}
-
-  </div>
+  <MultiSelectDropdown
+    options={productNames}
+    selected={selectedProducts}
+    onChange={setSelectedProducts}
+    allLabel="All Products"
+  />
 </div>
 
 <div className="ucd-filter-item product-filter">
   <label className="ucd-filter-label">Product Group</label>
 
-  <div className="product-dropdown" ref={productGroupDropdownRef}>
-    <input
-      className="ucd-filter-input"
-      type="text"
-      placeholder="All Product Groups"
-      value={selectedProductGroup}
-      onFocus={() => {
-        setProductGroupDropdownOpen(true);
-        setProductGroupSearch("");
-      }}
-      onChange={(e) => {
-        setSelectedProductGroup(e.target.value);
-        setProductGroupSearch(e.target.value);
-        setProductGroupDropdownOpen(true);
-      }}
-    />
-
-    {productGroupDropdownOpen && (
-      <div className="product-dropdown-menu">
-        <div
-          className="product-dropdown-item"
-          onClick={() => {
-            setSelectedProductGroup("");
-            setProductGroupSearch("");
-            setProductGroupDropdownOpen(false);
-            setSelectedProduct(""); // reset product name when group cleared
-          }}
-        >
-          All Product Groups
-        </div>
-
-        {productGroups
-          .filter((g) => g?.toString().toLowerCase().includes(productGroupSearch.toLowerCase()))
-          .map((g, idx) => (
-            <div
-              key={idx}
-              className="product-dropdown-item"
-              onClick={() => {
-                setSelectedProductGroup(g);
-                setProductGroupSearch("");
-                setProductGroupDropdownOpen(false);
-                setSelectedProduct(""); // reset product name since it may not belong to this group
-              }}
-            >
-              {g}
-            </div>
-          ))}
-      </div>
-    )}
-  </div>
+  <MultiSelectDropdown
+    options={productGroups}
+    selected={selectedProductGroups}
+    onChange={(groups) => {
+      setSelectedProductGroups(groups);
+      setSelectedProducts([]); // existing rule: changing group resets product names
+    }}
+    allLabel="All Product Groups"
+  />
 </div>
           <div className="ucd-filter-item">
             <label className="ucd-filter-label">Month &amp; Year</label>
@@ -1047,12 +1140,11 @@ const handleApply = () => {
       <div className="ucd-metric-glow" />
       <div className="ucd-metric-icon">{icon}</div>
 
-      {key === "ptl" && (
+      {CARD_DOWNLOADS[key] && (
         <button
-          // onClick={handleDownloadPTL}
-              onClick={() => handleDownloadPTL("PTL")}
+          onClick={() => { setDownloadingKey(key); handleDownloadPTL(CARD_DOWNLOADS[key].type, CARD_DOWNLOADS[key].requesterType); }}
           disabled={downloadingPTL}
-          title="Download PTL cost validation details"
+          title={CARD_DOWNLOADS[key].title}
           style={{
             position: "absolute",
             top: 8,
@@ -1064,7 +1156,7 @@ const handleApply = () => {
             opacity: downloadingPTL ? 0.5 : 0.85
           }}
         >
-          {downloadingPTL ? "⏳" : "⬇️"}
+          {downloadingPTL && downloadingKey === key ? "⏳" : "⬇️"}
         </button>
       )}
 
@@ -1084,10 +1176,36 @@ const handleApply = () => {
         <div className="ucd-card ucd-card-bar">
           <div className="ucd-card-head">
             <div>
-              <div className="ucd-card-title">Monthly Total Cost</div>
+              <div className="ucd-card-title">{chartTitleFor(chartMode)}</div>
               <div className="ucd-card-sub">Click a bar to drill into that month</div>
             </div>
-            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+            <div className="ucd-bar-controls">
+              <div className="ucd-view-select-wrap">
+                <select
+                  className="ucd-view-select"
+                  value={chartMode}
+                  onChange={e => {
+                    const mode = e.target.value;
+                    setChartMode(mode);
+                    if (mode === "ALL") setShowQty(true);   // Select All → all three bars
+                  }}
+                  aria-label="Chart view"
+                >
+                  {CHART_MODES.map(m => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                className={`ucd-qty-toggle${showQty ? " on" : ""}`}
+                onClick={() => setShowQty(v => !v)}
+                aria-pressed={showQty}
+                title={showQty ? "Hide Repaired Qty bars" : "Show Repaired Qty bars"}
+              >
+                <span className="ucd-qty-dot" />
+                REPAIRED QTY
+              </button>
               <span className="ucd-pill">{dashboardData.length} months</span>
             </div>
           </div>
@@ -1095,9 +1213,22 @@ const handleApply = () => {
             ? <div className="ucd-chart-empty">Loading data…</div>
             : dashboardData.length === 0
               ? <div className="ucd-chart-empty">No data available</div>
-              : <div className="ucd-canvas-bar">
-                  <canvas ref={barRef} style={{ cursor: "pointer" }} />
-                </div>
+              : (() => {
+                  // months shown per view: 8 desktop → fewer on tablet / mobile; rest via scrollbar
+                  const months   = new Set(dashboardData.filter(r => r.monthYear).map(r => r.monthYear)).size || 1;
+                  const perView  = visibleMonthsFor(barViewportW);
+                  const perMonth = barViewportW > 0 ? (barViewportW - BAR_AXIS_PAD) / perView : 0;
+                  const innerW   = months > perView && perMonth > 0
+                    ? Math.ceil(BAR_AXIS_PAD + months * perMonth)
+                    : null;   // fits → 100%
+                  return (
+                    <div className="ucd-bar-scroll" ref={barScrollRef}>
+                      <div className="ucd-canvas-bar" style={innerW ? { width: innerW } : undefined}>
+                        <canvas ref={barRef} style={{ cursor: "pointer" }} />
+                      </div>
+                    </div>
+                  );
+                })()
           }
         </div>
 
@@ -1173,6 +1304,49 @@ const handleApply = () => {
         </div>
 
       </div>
+
+      {/* Product-wise Total Value (fetchUnitComponentReportSeprateProductMMPDashboard) */}
+      {ENABLE_PRODUCT_TOTALS_REPORT && (
+      <div className="ucd-card ucd-card-ptv">
+        <div className="ucd-card-head">
+          <div>
+            <div className="ucd-card-title">Product-wise Total Value</div>
+            <div className="ucd-card-sub">SUM(Value) by product name for the selected filters</div>
+          </div>
+          <span className="ucd-pill">{productTotals.length} products</span>
+        </div>
+        {productTotalsLoading
+          ? <div className="ucd-chart-empty">Loading data…</div>
+          : productTotals.length === 0
+            ? <div className="ucd-chart-empty">No data available</div>
+            : <div className="ucd-ptv-scroll">
+                <table className="ucd-ptv-table">
+                  <thead>
+                    <tr><th>#</th><th>Product Name</th><th className="num">Total Value (€)</th></tr>
+                  </thead>
+                  <tbody>
+                    {productTotals.map((r, i) => (
+                      <tr key={`${r.productName}-${i}`}>
+                        <td>{i + 1}</td>
+                        <td>{r.productName || "—"}</td>
+                        <td className="num">{fmtFull(r.totalValue || 0)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td />
+                      <td>Total</td>
+                      <td className="num">
+                        {fmtFull(productTotals.reduce((s, r) => s + (Number(r.totalValue) || 0), 0))}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+        }
+      </div>
+      )}
     </div>
   );
 };

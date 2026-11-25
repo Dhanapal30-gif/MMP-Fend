@@ -214,93 +214,105 @@
   margin-bottom: 18px;
 }
 
-/* Others Cost card */
-.ucd-metric.m5 {
-  /* background: linear-gradient(135deg, #4b69f0 0%, #a2b3ef 100%); */
-   background: linear-gradient(135deg, #3B82F6, #2563EB);
+/* 7 cards on desktop */
+.ucd-metrics {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
-/* Sub Module Cost card */
-.ucd-metric.m6 {
-  /* background: linear-gradient(135deg, #b45309 0%, #78350f 100%); */
-  background: linear-gradient(135deg, #2DD4BF, #14B8A6);
-}
-
+/* Card base — soft pastel tile, circular icon, label / value / hint */
 .ucd-metric {
+  --ucd-card-bg: #F1F5F9;
+  --ucd-icon-bg: #64748B;
+  background: var(--ucd-card-bg);
   border-radius: 16px;
-    padding: 1px 16px 1px;
+  padding: 18px 18px 16px;
   position: relative;
   overflow: hidden;
-  transform: perspective(700px) rotateX(3deg);
-  /* box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5),
-              0 2px 0 rgba(255, 255, 255, 0.06) inset; */
-  transition: transform 0.25s;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 .ucd-metric:hover {
-  transform: perspective(700px) rotateX(0deg) translateY(-3px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
-/* Glow overlay */
-.ucd-metric-glow {
-  position: absolute;
-  top: -40%;
-  left: -10%;
-  width: 65%;
-  height: 80%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  pointer-events: none;
-}
-.ucd-metric.m7 {
-  background: linear-gradient(135deg, #0ea5e9, #0369a1);
-}
+/* Glow overlay no longer used in the pastel design */
+.ucd-metric-glow { display: none; }
 
-/* the metrics grid now has 7 cards */
-.ucd-metrics {
-  grid-template-columns: repeat(7, 1fr);
-}
-/* .m1 { background: linear-gradient(140deg, #4e0bf8 0%, #4c1d95 100%); }
-.m2 { background: linear-gradient(140deg, #064e2a 0%, #065f46 100%); }
-.m3 { background: linear-gradient(140deg, #4c0519 0%, #9f1239 100%); }
-.m4 { background: linear-gradient(140deg, #159191 0%, #066268 100%); } */
-.m1{ background: linear-gradient(135deg, #FBBF24, #F59E0B);}
-.m2{background: linear-gradient(135deg, #8B5CF6, #7C3AED);}
-.m3{background: linear-gradient(135deg, #f441c7, #ad0a8f);}
-.m4{background: linear-gradient(135deg, #10B981, #059669);}
+/* Per-card palette (card tint + icon circle) */
+.ucd-metric.m5 { --ucd-card-bg: #EEEAFD; --ucd-icon-bg: #8B5CF6; } /* DTL Issuance (Others) */
+.ucd-metric.m6 { --ucd-card-bg: #FDE7EB; --ucd-icon-bg: #F0566E; } /* Sub Module */
+.ucd-metric.m1 { --ucd-card-bg: #E3F6EC; --ucd-icon-bg: #22A55B; } /* Total DTL */
+.ucd-metric.m2 { --ucd-card-bg: #FDF0E1; --ucd-icon-bg: #F28A2E; } /* Total PTL */
+.ucd-metric.m3 { --ucd-card-bg: #E3EEFD; --ucd-icon-bg: #3B82F6; } /* Total Cost */
+.ucd-metric.m7 { --ucd-card-bg: #FDF7DD; --ucd-icon-bg: #D4A00F; } /* Repaired Qty */
+.ucd-metric.m4 { --ucd-card-bg: #E0F5F2; --ucd-icon-bg: #14998A; } /* Avg Cost / Unit */
 
 .ucd-metric-icon {
-  font-size: 18px;
-  margin-bottom: 8px;
-  opacity: 0.7;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--ucd-icon-bg);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 26px;
 }
 
 .ucd-metric-lbl {
-  font-size: 10px;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ucd-metric-val {
-  font-size: 14px;
+  font-size: 24px;
   font-weight: 700;
-  color: #fff;
+  color: #0F172A;
   letter-spacing: -0.3px;
+  line-height: 1.2;
   margin-bottom: 6px;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ucd-metric-loading {
   font-size: 13px;
-  opacity: 0.5;
+  color: #64748B;
   font-weight: 400;
 }
 
 .ucd-metric-hint {
-  font-size: 10px;
-  color: white;
+  font-size: 13px;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Value size steps down as the 7-column row gets tighter */
+@media (max-width: 1600px) {
+  .ucd-metric      { padding: 16px 14px 14px; }
+  .ucd-metric-icon { width: 44px; height: 44px; margin-bottom: 18px; }
+  .ucd-metric-lbl  { font-size: 12.5px; }
+  .ucd-metric-val  { font-size: 20px; }
+  .ucd-metric-hint { font-size: 12px; }
+}
+@media (max-width: 1450px) {
+  .ucd-metrics     { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ucd-metric-val  { font-size: 22px; }
 }
 
 /* ---------- Chart area ---------- */
@@ -360,8 +372,14 @@
 /* Canvas containers */
 .ucd-canvas-bar {
   position: relative;
-  height: 210px;
+  height: 280px;
   width: 100%;
+}
+@media (max-width: 720px) {
+  .ucd-canvas-bar { height: 260px; }
+}
+@media (max-width: 480px) {
+  .ucd-canvas-bar { height: 240px; }
 }
 .ucd-canvas-bar canvas { cursor: pointer; }
 
@@ -535,8 +553,9 @@
     width: 100%;
   }
   .ucd-metric-val {
-    font-size: 14px;
+    font-size: 20px;
   }
+  .ucd-metric-icon { width: 40px; height: 40px; margin-bottom: 14px; }
 }
 
 @media (max-width: 480px) {
@@ -626,3 +645,162 @@
 
 
 
+
+/* ---------- Product-wise Total Value report ---------- */
+.ucd-card-ptv { margin-top: 14px; }
+.ucd-ptv-scroll {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+}
+.ucd-ptv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+  color: #334155;
+}
+.ucd-ptv-table th,
+.ucd-ptv-table td { padding: 8px 12px; text-align: left; white-space: nowrap; }
+.ucd-ptv-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.ucd-ptv-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #F1F5F9; color: #475569; font-weight: 600;
+  border-bottom: 1px solid #E2E8F0;
+}
+.ucd-ptv-table tbody tr:nth-child(even) { background: #F8FAFC; }
+.ucd-ptv-table tbody tr:hover { background: #EEF2FF; }
+.ucd-ptv-table tfoot td {
+  position: sticky; bottom: 0;
+  background: #fff; font-weight: 700; color: #0F172A;
+  border-top: 1px solid #E2E8F0;
+}
+
+/* ---------- Multi-select dropdown (Product Name / Product Group) ---------- */
+.product-dropdown .ucd-filter-input.ms-has-value { padding-right: 34px; }
+.product-dropdown .ucd-filter-input.ms-has-value::placeholder { color: #1e293b; opacity: 1; }
+.product-dropdown .ms-count {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #2563EB;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+.product-dropdown-item.ms-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.product-dropdown-item.ms-item span { overflow: hidden; text-overflow: ellipsis; }
+.product-dropdown-item.ms-item input[type="checkbox"] {
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: #2563EB;
+  pointer-events: none;
+}
+.product-dropdown-item.ms-active { background: #f1f6ff; font-weight: 600; }
+.product-dropdown-item.ms-empty { color: #94a3b8; cursor: default; }
+.product-dropdown-item.ms-empty:hover { background: transparent; }
+
+@media (max-width: 720px) {
+  .product-dropdown { width: 100%; }
+}
+
+/* ---------- Monthly chart: view controls ---------- */
+.ucd-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.ucd-view-select-wrap { position: relative; }
+.ucd-view-select-wrap::after {          /* chevron */
+  content: "";
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #2563EB;
+  border-bottom: 2px solid #2563EB;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.ucd-view-select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 30px;
+  padding: 0 30px 0 12px;
+  border: 1.5px solid #93C5FD;
+  border-radius: 8px;
+  background: #EFF6FF;
+  color: #1D4ED8;
+  font: 700 12px 'Segoe UI', sans-serif;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  outline: none;
+}
+.ucd-view-select:hover  { border-color: #60A5FA; }
+.ucd-view-select:focus  { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+.ucd-view-select option { color: #1e293b; background: #fff; font-weight: 600; }
+
+.ucd-qty-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748B;
+  font: 700 12px 'Segoe UI', sans-serif;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+}
+.ucd-qty-toggle .ucd-qty-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #CBD5E1;
+}
+.ucd-qty-toggle.on { border-color: #93C5FD; background: #EFF6FF; color: #1D4ED8; }
+.ucd-qty-toggle.on .ucd-qty-dot { background: #3B82F6; }
+
+/* ---------- Monthly chart: horizontal scroll ---------- */
+.ucd-bar-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+.ucd-bar-scroll::-webkit-scrollbar { height: 8px; }
+.ucd-bar-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+.ucd-bar-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+.ucd-bar-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+.ucd-bar-scroll .ucd-canvas-bar { min-width: 100%; }
+
+@media (max-width: 720px) {
+  .ucd-card-bar .ucd-card-head { flex-wrap: wrap; gap: 8px; }
+  .ucd-bar-controls { justify-content: flex-start; }
+}
+/* keep the wide (scrolling) chart from stretching its grid column */
+.ucd-charts > .ucd-card { min-width: 0; }
+.ucd-card-bar { min-width: 0; overflow: hidden; }

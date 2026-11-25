@@ -123,6 +123,13 @@ export const updateTicketDetailDev = (id, formData) =>
   axios.post(`${updateTicketRaiseDev}/${id}`, formData);
 
 
+// ── Ticket Raise: Client Response (Closed / Unresolved) ──────────────────────
+// Payload: { ticketNo: "TKT10077", status: "CLOSED", username: "John" }
+const updateClientStatusUrl = `${url}/ticketRaiseCon/updateClientStatus`;
+export const updateClientStatus = (payload) =>
+  axios.put(updateClientStatusUrl, payload);
+
+
 
 const Get_RecTick = `${url}/Putaway/getRecTicketNo`;
 export const fetchPutTicket = () => axios.get(Get_RecTick);
@@ -382,10 +389,17 @@ export const getUnitcompoenentDetailFilterMMP = (page = 0, size = 10, formData) 
 
 
 
-const Get_UnitcomponenetReportDetailFilterMMPDashboard = `${url}/unitcomponent/fetchunitcomponentReportSeprateMMPDashboard`;
+const Get_UnitcomponenetReportDetailFilterMMPDashboard = `${url}/unitcomponent/fetchunitcomponentReportSeprateProductandGroupMMPDashboard`;
 export const getUnitcompoenentDetailFilterMMPDashboard = (page = 0, size = 10, formData) => {
   return axios.post(`${Get_UnitcomponenetReportDetailFilterMMPDashboard}?page=${page}&size=${size}`, formData);
 };
+
+// ProductName-wise SUM(Value) for the Unit Component Cost Dashboard.
+// Body: { productname, productgroup, monthYear } — same filter criteria as the dashboard API.
+// Returns: [{ productName, totalValue }]
+const Post_UnitComponentReportSeprateProductMMPDashboard = `${url}/unitcomponent/fetchUnitComponentReportSeprateProductMMPDashboard`;
+export const fetchUnitComponentReportSeprateProductMMPDashboard = (formData) =>
+  axios.post(Post_UnitComponentReportSeprateProductMMPDashboard, formData);
 
 const Get_PTLPutawayTicket = `${url}/localPutawayCon/fetchPTLStorePutawayTicket`;
 export const fetchPTLPutawayTicket = () => axios.get(Get_PTLPutawayTicket);

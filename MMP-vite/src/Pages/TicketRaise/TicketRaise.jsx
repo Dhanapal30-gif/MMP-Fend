@@ -10,20 +10,14 @@ import TextFiledTheme from '../../components/Com_Component/TextFiledTheme';
 import "./TicketRaise.css";
 import TicketRaiseTable from "../../components/TicketRaise/TicketRaiseTable";
 import { downloadTicketRaiseExport, fetchScreenName, fetchTicketRaiseDetail, fetchUserName, saveTicketRaise } from "../../Services/Services-Rc";
-import { updateTicketDetail } from '../../Services/Services_09';
+import { updateTicketDetail, updateClientStatus } from '../../Services/Services_09';
+import LoadingOverlay from "../../components/Com_Component/LoadingOverlay";
 
 const priorityOptions = [
     { label: "Low",      value: "LOW",      color: "#2e7d32" },
     { label: "Medium",   value: "MEDIUM",   color: "#f9a825" },
     { label: "High",     value: "HIGH",     color: "#ef6c00" },
     { label: "Critical", value: "CRITICAL", color: "#c62828" },
-];
-
-const requestTypes = [
-    { key: "Bug",           cls: "bug",           text: "Issue in the existing process" },
-    { key: "Update",        cls: "update",        text: "Improvement in the existing process" },
-    { key: "New Feature",   cls: "feature",       text: "Addition of a new functionality" },
-    { key: "Clarification", cls: "clarification", text: "Need clarification on the existing process" },
 ];
 
 // "payment SCREEN" -> "Payment Screen"
@@ -94,6 +88,8 @@ const TicketRaise = () => {
     const [formData, setFormData] = useState(INIT_FORM);
     const [errors,   setErrors]   = useState(INIT_ERRORS);
     const [loading,  setLoading]  = useState(false);
+    const [searching, setSearching] = useState(false);   // loader for Search
+    const pendingSearchRef = useRef(false);               // search waiting on the [page] effect
     const [apiError, setApiError] = useState("");
     const [success,  setSuccess]  = useState("");
 
@@ -101,14 +97,21 @@ const TicketRaise = () => {
     const [editTicketnumber, setEditTicketnumber] = useState(null);
 
     const descRef    = useRef("");
-    const filtersRef = useRef({ status: "", priority: "", screen: "" });   // filters currently applied to the table
+    const filtersRef = useRef({ status: "", priority: "", screen: "", ticketNo: "", clientStatus: "" });   // filters currently applied to the table
     const fileRef   = useRef(null);
     const [descSeed, setDescSeed]           = useState("");
     const [descKey,  setDescKey]            = useState(0);   // bump to force the description box to remount/clear
     const [userDetails, setUserDetails]     = useState([]);
     const [screenDetails, setScreenDetails] = useState([]);
 
-    useEffect(() => { fetchTickets(); }, [page]);
+    useEffect(() => {
+        if (pendingSearchRef.current) {
+            pendingSearchRef.current = false;
+            fetchTickets().finally(() => setSearching(false));
+        } else {
+            fetchTickets();
+        }
+    }, [page]);
     useEffect(() => { FetchUserName(); }, []);
     useEffect(() => { FetchScreen(); }, []);
 
@@ -198,25 +201,32 @@ const TicketRaise = () => {
         status   = filtersRef.current.status,
         priority = filtersRef.current.priority,
         screen   = filtersRef.current.screen,
-        currentPage = page
+        currentPage = page,
+        ticketNo = filtersRef.current.ticketNo,
+        clientStatus = filtersRef.current.clientStatus
     ) => {
         try {
-            const response = await fetchTicketRaiseDetail(status, priority, screen, currentPage, 10);
+            const response = await fetchTicketRaiseDetail(status, priority, screen, currentPage, 10, ticketNo, clientStatus);
             setTableData(response.data.content      || []);
             setTotalPages(response.data.totalPages  || 0);
             setTotalElements(response.data.totalElements || 0);
         } catch (err) { console.error(err); }
     }, [page]);
 
-    const handleSearch = useCallback(({ status = "", priority = "", screen = "" } = {}) => {
-        filtersRef.current = { status, priority, screen };
-        if (page === 0) fetchTickets(status, priority, screen, 0);
-        else            setPage(0);          // the [page] effect fetches page 0 with the new filters
+    const handleSearch = useCallback(({ status = "", priority = "", screen = "", ticketNo = "", clientStatus = "" } = {}) => {
+        filtersRef.current = { status, priority, screen, ticketNo, clientStatus };
+        setSearching(true);
+        if (page === 0) {
+            fetchTickets(status, priority, screen, 0, ticketNo, clientStatus).finally(() => setSearching(false));
+        } else {
+            pendingSearchRef.current = true;  // the [page] effect fetches page 0 and clears the loader
+            setPage(0);
+        }
     }, [fetchTickets, page]);
 
-    const handleDownload = useCallback(async ({ status = "", priority = "", screen = "" } = {}) => {
+    const handleDownload = useCallback(async ({ status = "", priority = "", screen = "", ticketNo = "", clientStatus = "" } = {}) => {
         try {
-            const response = await downloadTicketRaiseExport(status, priority, screen);
+            const response = await downloadTicketRaiseExport(status, priority, screen, ticketNo, clientStatus);
             const blob = new Blob([response.data], {
                 type: response.headers["content-type"] || "application/octet-stream",
             });
@@ -283,6 +293,19 @@ const TicketRaise = () => {
         } finally { setLoading(false); }
     };
 
+    // Client Status popup submit — errors are re-thrown so the popup shows them
+    const handleClientRespond = async ({ ticketnumber, clientStatus, unresolvedRemarks = "" }) => {
+        const payload = {
+            ticketNo: ticketnumber,
+            status:   clientStatus,
+            username: localStorage.getItem("userName") || "",
+            unresolvedRemarks: clientStatus === "UNRESOLVED" ? unresolvedRemarks : "",
+        };
+        const response = await updateClientStatus(payload);
+        setSuccess(response?.data?.message || `Client status updated for ${ticketnumber}`);
+        fetchTickets();
+    };
+
     const resetForm = () => {
         descRef.current = "";
         setDescSeed("");
@@ -301,6 +324,7 @@ const TicketRaise = () => {
 
     return (
         <div className="TicketRaisedContainer">
+            <LoadingOverlay loading={loading || searching} />
             <div className="TicketRaisedInput">
 
                 {/* ── Card header ── */}
@@ -375,7 +399,7 @@ const TicketRaise = () => {
                             </div>
                         </div>
 
-                        {/* ══ ROW 2 — description + request-type guide ══ */}
+                        {/* ══ ROW 2 — description ══ */}
                         <div className="tr-desc-row">
                             <div className="tr-desc-main">
                                 <DescriptionField
@@ -385,16 +409,6 @@ const TicketRaise = () => {
                                     descRef={descRef}
                                 />
                             </div>
-
-                            <aside className="noteSection">
-                                <p className="noteTitle">Request types</p>
-                                {requestTypes.map(t => (
-                                    <p className="noteItem" key={t.key}>
-                                        <span className={`noteKey ${t.cls}`}>{t.key}</span>
-                                        <span className="noteText">{t.text}</span>
-                                    </p>
-                                ))}
-                            </aside>
                         </div>
 
                         {/* ── Feedback banners ── */}
@@ -462,6 +476,7 @@ const TicketRaise = () => {
                 onPrev={handlePrevPage}
                 onNext={handleNextPage}
                 onEdit={handleEditClick}
+                onClientRespond={handleClientRespond}
                 userName={userName}
                 userId={userId}
                 screenDetails={screenDetails}
